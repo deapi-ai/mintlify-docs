@@ -38,46 +38,7 @@
       "github": "https://github.com/deapi-ai",
       "twitter": "https://x.com/deAPI_",
       "discord": "https://discord.com/invite/UFfK5YRBsr"
-    },
-    "links": [
-      {
-        "title": "Product",
-        "items": [
-          {
-            "label": "Pricing",
-            "href": "https://deapi.ai/pricing"
-          },
-          {
-            "label": "Dashboard",
-            "href": "https://deapi.ai/dashboard"
-          },
-          {
-            "label": "Status",
-            "href": "https://status.deapi.ai/"
-          }
-        ]
-      },
-      {
-        "title": "Resources",
-        "items": [
-          {
-            "label": "API Reference",
-            "href": "/api-reference/text-to-image"
-          },
-          {
-            "label": "Quickstart",
-            "href": "/quickstart"
-          },
-          {
-            "label": "FAQ",
-            "href": "/resources/faq"
-          }
-        ]
-      }
-    ]
-  },
-  "seo": {
-    "indexHiddenPages": false
+    }
   },
   "search": {
     "prompt": "Search deAPI docs..."
@@ -86,111 +47,57 @@
     "thumbsRating": true,
     "suggestEdit": true
   },
-  "api": {
-    "baseUrl": "https://api.deapi.ai",
-    "playground": {
-      "mode": "simple"
-    }
-  },
   "navigation": {
     "groups": [
       {
-        "group": "Get Started",
+        "group": "Get started",
         "pages": [
           "introduction",
           "quickstart",
           "models",
-          "pricing"
+          "pricing",
+          "architecture-and-security",
+          "limits-and-quotas"
         ]
       },
       {
-        "group": "Platform",
+        "group": "Execution Modes & Integrations",
         "pages": [
-          "platform/architecture-security",
-          "platform/limits-quotas",
-          {
-            "group": "Execution Modes",
-            "icon": "bolt",
-            "pages": [
-              "platform/execution-modes/http-queue",
-              "platform/execution-modes/mcp-server"
-            ]
-          }
+          "execution-modes-and-integrations/execution-modes-and-http-queue",
+          "execution-modes-and-integrations/mcp-server-soon"
         ]
       },
       {
-        "group": "API Reference",
-        "icon": "code",
+        "group": "API",
         "pages": [
-          {
-            "group": "Image Generation",
-            "icon": "image",
-            "pages": [
-              "api-reference/text-to-image",
-              "api-reference/image-to-image",
-              "api-reference/image-background-removal"
-            ]
-          },
-          {
-            "group": "Video Generation",
-            "icon": "video",
-            "pages": [
-              "api-reference/text-to-video",
-              "api-reference/image-to-video"
-            ]
-          },
-          {
-            "group": "Audio & Speech",
-            "icon": "microphone",
-            "pages": [
-              "api-reference/text-to-speech",
-              "api-reference/upload-audio-file"
-            ]
-          },
-          {
-            "group": "Vision & OCR",
-            "icon": "eye",
-            "pages": [
-              "api-reference/image-to-text",
-              "api-reference/video-to-text",
-              "api-reference/upload-video-file"
-            ]
-          },
-          {
-            "group": "Embeddings",
-            "icon": "brain",
-            "pages": [
-              "api-reference/text-to-embedding"
-            ]
-          },
-          {
-            "group": "Account & Results",
-            "icon": "user",
-            "pages": [
-              "api-reference/check-balance",
-              "api-reference/get-results",
-              "api-reference/model-selection"
-            ]
-          }
+          "api/text-to-image",
+          "api/text-to-speech-tts",
+          "api/image-to-text-ocr",
+          "api/image-to-image",
+          "api/image-background-removal",
+          "api/video-to-text-transcription",
+          "api/upload-video-file-video-to-text",
+          "api/upload-audio-file-audio-to-text",
+          "api/image-to-video",
+          "api/text-to-video",
+          "api/text-to-embedding",
+          "api/check-balance",
+          "api/get-results",
+          "api/model-selection"
         ]
       },
       {
-        "group": "Resources",
+        "group": "Other",
         "pages": [
-          "resources/sdks-integrations",
-          "resources/payment-methods",
-          "resources/faq",
-          "resources/support"
+          "other/sdks-and-integrations-coming-soon",
+          "other/payment-methods",
+          "other/faq-frequently-asked-questions",
+          "other/support-and-contact"
         ]
       }
     ]
   },
   "anchors": [
-    {
-      "anchor": "API Reference",
-      "icon": "code",
-      "href": "/api-reference/text-to-image"
-    },
     {
       "anchor": "Status",
       "icon": "signal",
@@ -201,8 +108,5 @@
       "icon": "discord",
       "href": "https://discord.com/invite/UFfK5YRBsr"
     }
-  ],
-  "mcp": {
-    "enabled": true
-  }
+  ]
 }
