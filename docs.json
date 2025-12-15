@@ -2,7 +2,7 @@
   "$schema": "https://mintlify.com/docs.json",
   "theme": "mint",
   "name": "deAPI",
-  "openapi": "openapi.json",
+  "openapi": ["/openapi.json"],
   "logo": {
     "light": "/logo/deapi-light.svg",
     "dark": "/logo/deapi-dark.svg"
@@ -71,20 +71,61 @@
       {
         "group": "API",
         "pages": [
-          "api/text-to-image",
-          "api/text-to-speech-tts",
-          "api/image-to-text-ocr",
-          "api/image-to-image",
-          "api/image-background-removal",
-          "api/video-to-text-transcription",
-          "api/upload-video-file-video-to-text",
-          "api/upload-audio-file-audio-to-text",
-          "api/image-to-video",
-          "api/text-to-video",
-          "api/text-to-embedding",
-          "api/check-balance",
-          "api/get-results",
-          "api/model-selection"
+          {
+            "group": "Image Generation",
+            "pages": [
+              "api/text-to-image",
+              "api/text-to-image-price",
+              "api/image-to-image",
+              "api/image-to-image-price",
+              "api/image-background-removal",
+              "api/image-background-removal-price"
+            ]
+          },
+          {
+            "group": "Video Generation",
+            "pages": [
+              "api/text-to-video",
+              "api/text-to-video-price",
+              "api/image-to-video",
+              "api/image-to-video-price"
+            ]
+          },
+          {
+            "group": "Audio & Speech",
+            "pages": [
+              "api/text-to-speech-tts",
+              "api/text-to-speech-tts-price",
+              "api/upload-audio-file-audio-to-text",
+              "api/upload-audio-file-audio-to-text-price"
+            ]
+          },
+          {
+            "group": "Transcription",
+            "pages": [
+              "api/video-to-text-transcription",
+              "api/video-to-text-transcription-price",
+              "api/upload-video-file-video-to-text",
+              "api/upload-video-file-video-to-text-price"
+            ]
+          },
+          {
+            "group": "OCR & Embeddings",
+            "pages": [
+              "api/image-to-text-ocr",
+              "api/image-to-text-ocr-price",
+              "api/text-to-embedding",
+              "api/text-to-embedding-price"
+            ]
+          },
+          {
+            "group": "Utility",
+            "pages": [
+              "api/check-balance",
+              "api/get-results",
+              "api/model-selection"
+            ]
+          }
         ]
       },
       {

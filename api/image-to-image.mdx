@@ -1,17 +1,6 @@
 ---
 title: "Image-to-Image"
+openapi: "/openapi.json POST /api/v1/client/img2img"
 ---
 
 **Prerequisite:** To ensure a successful request, you must first consult the [Model Selection](/api/model-selection) endpoint to identify a valid model `slug`, check specific **limits** and **features**, and verify **LoRA** availability. Please **omit** the LoRA parameter by default during initial testing.
-
----
-
-## Transform Image
-
-<OpenAPI path="/api/v1/client/img2img" method="post" />
-
----
-
-## Calculate Price
-
-<OpenAPI path="/api/v1/client/img2img/price-calculation" method="post" />

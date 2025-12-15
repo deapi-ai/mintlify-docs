@@ -1,19 +1,6 @@
 ---
 title: "Text-to-Speech (TTS)"
+openapi: "/openapi.json POST /api/v1/client/txt2audio"
 ---
 
 **Prerequisite:** To ensure a successful request, you must first consult the [Model Selection](/api/model-selection) endpoint to identify a valid model `slug`, check specific **limits** and **features**, and verify **LoRA** availability.
-
----
-
-## Generate Audio
-
-<OpenAPI path="/api/v1/client/txt2aud" method="post" />
-
----
-
-## Calculate Price
-
-Endpoint for calculating price for text2audio inference. Either text or count_text must be provided.
-
-<OpenAPI path="/api/v1/client/txt2aud/price-calculation" method="post" />
