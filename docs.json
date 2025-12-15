@@ -71,61 +71,31 @@
         "group": "API",
         "openapi": "openapi.json",
         "pages": [
-          {
-            "group": "Image Generation",
-            "pages": [
-              "POST /api/v1/client/txt2img",
-              "POST /api/v1/client/txt2img/price-calculation",
-              "POST /api/v1/client/img2img",
-              "POST /api/v1/client/img2img/price-calculation",
-              "POST /api/v1/client/img-rmbg",
-              "POST /api/v1/client/img-rmbg/price-calculation"
-            ]
-          },
-          {
-            "group": "Video Generation",
-            "pages": [
-              "POST /api/v1/client/txt2video",
-              "POST /api/v1/client/txt2video/price-calculation",
-              "POST /api/v1/client/img2video",
-              "POST /api/v1/client/img2video/price-calculation"
-            ]
-          },
-          {
-            "group": "Audio & Speech",
-            "pages": [
-              "POST /api/v1/client/txt2audio",
-              "POST /api/v1/client/txt2audio/price-calculation",
-              "POST /api/v1/client/audiofile2txt",
-              "POST /api/v1/client/audiofile2txt/price-calculation"
-            ]
-          },
-          {
-            "group": "Transcription",
-            "pages": [
-              "POST /api/v1/client/vid2txt",
-              "POST /api/v1/client/vid2txt/price-calculation",
-              "POST /api/v1/client/videofile2txt",
-              "POST /api/v1/client/videofile2txt/price-calculation"
-            ]
-          },
-          {
-            "group": "OCR & Embeddings",
-            "pages": [
-              "POST /api/v1/client/img2txt",
-              "POST /api/v1/client/img2txt/price-calculation",
-              "POST /api/v1/client/txt2embedding",
-              "POST /api/v1/client/txt2embedding/price-calculation"
-            ]
-          },
-          {
-            "group": "Utility",
-            "pages": [
-              "GET /api/v1/client/balance",
-              "GET /api/v1/client/request-status/{job_request}",
-              "GET /api/v1/client/models"
-            ]
-          }
+          "GET /api/v1/client/balance",
+          "GET /api/v1/client/models",
+          "GET /api/v1/client/request-status/{job_request}",
+          "POST /api/v1/client/txt2img",
+          "POST /api/v1/client/txt2img/price-calculation",
+          "POST /api/v1/client/img2img",
+          "POST /api/v1/client/img2img/price-calculation",
+          "POST /api/v1/client/img-rmbg",
+          "POST /api/v1/client/img-rmbg/price-calculation",
+          "POST /api/v1/client/txt2video",
+          "POST /api/v1/client/txt2video/price-calculation",
+          "POST /api/v1/client/img2video",
+          "POST /api/v1/client/img2video/price-calculation",
+          "POST /api/v1/client/txt2audio",
+          "POST /api/v1/client/txt2audio/price-calculation",
+          "POST /api/v1/client/audiofile2txt",
+          "POST /api/v1/client/audiofile2txt/price-calculation",
+          "POST /api/v1/client/vid2txt",
+          "POST /api/v1/client/vid2txt/price-calculation",
+          "POST /api/v1/client/videofile2txt",
+          "POST /api/v1/client/videofile2txt/price-calculation",
+          "POST /api/v1/client/img2txt",
+          "POST /api/v1/client/img2txt/price-calculation",
+          "POST /api/v1/client/txt2embedding",
+          "POST /api/v1/client/txt2embedding/price-calculation"
         ]
       },
       {
