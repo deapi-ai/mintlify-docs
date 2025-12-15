@@ -1,6 +1,14 @@
 ---
 title: "Check Balance"
-openapi: "openapi.json GET /api/v1/client/balance"
+api: "GET https://api.deapi.ai/api/v1/client/balance"
 ---
 
 Check your current deAPI account balance.
+
+<ParamField header="Authorization" type="string" required>
+  Bearer token for authentication. Format: `Bearer YOUR_API_KEY`
+</ParamField>
+
+<ParamField header="Accept" type="string" default="application/json">
+  Response format
+</ParamField>
