@@ -1,0 +1,50 @@
+---
+title: "Execution Modes & HTTP Queue"
+---
+
+All deAPI model endpoints follow the same execution pattern.
+Requests are sent as **asynchronous jobs** to a queue, and you fetch their status and results via a dedicated endpoint.
+
+---
+
+### Default queued execution model
+
+Every model endpoint (Text-to-Image, Text-to-Speech, Image-to-Text, Image-to-Image, Video-to-Text, Image-to-Video, Text-to-Video, Text-to-Embedding, etc.) works the same way:
+
+1. You send a request to:
+
+   `POST /api/v1/client/{task}`
+2. The response returns a **`request_id`**
+3. You check progress and fetch the result via:
+
+   `GET /api/v1/client/request-status/{job_request}`
+
+The `request-status` response includes:
+
+- current job **status** (e.g. pending, running, completed, failed),
+- optional **progress** information,
+- **result URLs** and/or inline output data,
+- optional **error** details when a job fails.
+
+This queued model is the **default** in deAPI because it:
+
+- keeps long-running jobs (image/video generation, transcription) off the critical HTTP path,
+- avoids common HTTP timeout issues,
+- lets deAPI schedule work efficiently across a distributed GPU network,
+- gives you one consistent pattern across all model endpoints.
+
+For low-level details, see:
+
+- [**Get Results**](/api/get-results) – `GET /api/v1/client/request-status/{job_request}`
+- individual API pages under **API** (Text-to-Image, Text-to-Speech, etc.).
+
+---
+
+### Future extensions: webhooks and synchronous HTTP
+
+On top of the queue model described above, we plan to add:
+
+- **Webhooks for queued jobs** – instead of polling `request-status`, you will be able to provide a webhook URL that deAPI will call when the job finishes.
+- **Additional HTTP modes (e.g. synchronous requests)** – for small, low-latency jobs where returning the result in a single HTTP response makes sense.
+
+Until these features are available, the **queued execution model** described on this page is the recommended way to run all model requests over HTTP.

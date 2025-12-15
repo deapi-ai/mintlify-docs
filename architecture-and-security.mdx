@@ -1,0 +1,60 @@
+---
+title: "Architecture & Security"
+---
+
+Understanding data processing protocols is critical for ensuring security and privacy. The deAPI architecture utilizes a decentralized network of verified Workers, maintaining a balance between high-performance inference and robust data protection.
+
+### 1. Under the Hood: Security Architecture
+
+The following section outlines the data flow for a standard inference job (using Image-to-Image as the reference model).
+
+**Data Flow**
+
+1. Client → deAPI Server (HTTPS Encrypted)
+   Requests are initiated via the API. All data transmission is encrypted in transit using HTTPS protocols.
+2. Server → Worker
+   The central server designates an appropriate Worker node and transmits the model, parameters, and task specifications.
+3. Worker (Processing)
+   The Worker node receives the payload (image, prompt, settings). Data is processed by a local, isolated Python server.
+4. Result → Client
+   The generated or modified asset returns to the client via the same encrypted return path.
+
+**Security Mechanisms**
+
+Multi-layer security measures are implemented to guarantee network integrity and data protection:
+
+- **HTTPS Everywhere:** Encryption is enforced at every stage of communication.
+- **Request Hashing:** Checksums are utilized to prevent Worker spoofing or the submission of fraudulent results.
+- **Binary Verification:** The Worker application automatically validates checksums for the Python server and models prior to execution, ensuring code integrity.
+- **Injection Protection:** The execution environment is strictly isolated to prevent code injection that could compromise Worker infrastructure.
+
+### 2. Privacy Model & Worker Reliability
+
+Security in the distributed environment is maintained through a reputation system and strict technical data access controls.
+
+**Data Visibility**
+
+- deAPI Server: Accesses prompts and metadata required for job coordination. No long-term storage of sensitive payload data occurs.
+- Worker: Receives the full payload (e.g., input image), but data resides exclusively in RAM. No disk writes occur, and there is no exposure via a UI. Data extraction would require advanced, real-time reverse engineering.
+
+**Additional Safeguards**
+
+- Worker Scoring: An automated reputation system identifies and excludes unreliable nodes that fail to complete tasks.
+- Dual Verification (Optional): For sensitive workloads, task verification by two independent Workers is available (incurring 2x cost, while remaining significantly below standard cloud pricing).
+
+### 3. Use Cases: Decentralized vs. Enterprise
+
+The decentralized model is classified as a "Perfect Fit" for:
+✓ Public content transcription (YouTube, X, TikTok)
+✓ Image and video generation applications
+✓ AI workloads devoid of critical data (PII, trade secrets)
+
+For these scenarios, Community Workers provide an optimal price-to-performance ratio (estimated 5-10x cost reduction compared to centralized cloud), without unnecessary expenditure on Enterprise-grade infrastructure.
+
+*Secure Worker Tier For Enterprise clients handling sensitive data (internal documentation, prototypes), a Premium tier is being introduced featuring:
+
+- Dedicated GPU farms (RTX 4090, H100, RTX 6000 PRO) located in secure Data Centers.
+- Full infrastructure isolation, audited operators, NDAs, and legal accountability.
+- Certified privacy standards (at a higher price point)
+
+*Additional request - contact support for more information: support@deapi.ai
