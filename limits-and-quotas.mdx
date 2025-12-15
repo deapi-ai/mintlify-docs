@@ -1,0 +1,49 @@
+---
+title: "Limits & Quotas"
+---
+
+deAPI is engineered for High Throughput capability upon deployment. Unlike traditional providers, API scalability is not restricted by complex access tiers during the initial integration phase.
+
+### Rate Limits
+
+The default rate limit for all standard accounts is: 300 jobs / minute (applicable to all task types: video, audio, image).
+
+#### Comparison: deAPI vs. Traditional Providers
+
+Many AI infrastructure providers enforce restrictive initial limits (RPM - Requests Per Minute), necessitating complex queue management systems for developers.
+
+**Availability**
+
+- Traditional Providers (e.g., OpenAI Tier 1): Often restricted to low RPM values (approx. 3 RPM) upon account creation.
+- deAPI: 300 RPM available immediately upon registration.
+
+**Scaling**
+
+- Traditional Providers: Typically require specific monetary spend thresholds and time delays to advance to higher Tiers.
+- deAPI: High throughput limits are provisioned instantly without a waiting period.
+
+**Complexity**
+
+- Traditional Providers: Often utilize separate quotas for tokens (TPM), requests (RPM), and daily limits (RPD).
+- deAPI: Unified limit structure: 300 jobs per minute.
+
+Limits within deAPI are dynamic. Higher quotas may be provisioned based on platform utilization (credit usage). For High Volume Production requirements, please contact support via: support@deapi.ai
+
+### File Uploads
+
+The majority of endpoints (Video-to-Text, Audio-to-Text, Image-to-Image) support direct binary file uploads or URL-based inputs. The global limits for file uploads are specified below.
+
+1. Video (Video-to-Text, Image-to-Video)
+
+- Max size: 100 MB
+- Supported Formats: mp4, avi, mov, mkv, webm
+
+2. Audio (Audio-to-Text)
+
+- Max size: 50 MB (recommended), up to 100 MB
+- Supported Formats: mp3, wav, m4a, flac, ogg
+
+3. Images (Image-to-Image, OCR)
+
+- Max size: 10 MB
+- Supported Formats: jpg, png, webp

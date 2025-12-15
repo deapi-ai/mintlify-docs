@@ -1,122 +1,113 @@
 {
   "$schema": "https://mintlify.com/docs.json",
   "theme": "mint",
-  "name": "Mint Starter Kit",
-  "colors": {
-    "primary": "#16A34A",
-    "light": "#07C983",
-    "dark": "#15803D"
-  },
-  "favicon": "/favicon.svg",
-  "navigation": {
-    "tabs": [
-      {
-        "tab": "Guides",
-        "groups": [
-          {
-            "group": "Getting started",
-            "pages": [
-              "index",
-              "quickstart",
-              "development"
-            ]
-          },
-          {
-            "group": "Customization",
-            "pages": [
-              "essentials/settings",
-              "essentials/navigation"
-            ]
-          },
-          {
-            "group": "Writing content",
-            "pages": [
-              "essentials/markdown",
-              "essentials/code",
-              "essentials/images",
-              "essentials/reusable-snippets"
-            ]
-          },
-          {
-            "group": "AI tools",
-            "pages": [
-              "ai-tools/cursor",
-              "ai-tools/claude-code",
-              "ai-tools/windsurf"
-            ]
-          }
-        ]
-      },
-      {
-        "tab": "API reference",
-        "groups": [
-          {
-            "group": "API documentation",
-            "pages": [
-              "api-reference/introduction"
-            ]
-          },
-          {
-            "group": "Endpoint examples",
-            "pages": [
-              "api-reference/endpoint/get",
-              "api-reference/endpoint/create",
-              "api-reference/endpoint/delete",
-              "api-reference/endpoint/webhook"
-            ]
-          }
-        ]
-      }
-    ],
-    "global": {
-      "anchors": [
-        {
-          "anchor": "Documentation",
-          "href": "https://mintlify.com/docs",
-          "icon": "book-open-cover"
-        },
-        {
-          "anchor": "Blog",
-          "href": "https://mintlify.com/blog",
-          "icon": "newspaper"
-        }
-      ]
-    }
-  },
+  "name": "deAPI",
+  "openapi": "openapi.json",
   "logo": {
-    "light": "/logo/light.svg",
-    "dark": "/logo/dark.svg"
+    "light": "/logo/deapi-light.svg",
+    "dark": "/logo/deapi-dark.svg"
+  },
+  "favicon": "/favicon.png",
+  "colors": {
+    "primary": "#6366F1",
+    "light": "#818CF8",
+    "dark": "#4F46E5"
   },
   "navbar": {
     "links": [
       {
-        "label": "Support",
-        "href": "mailto:hi@mintlify.com"
+        "label": "Dashboard",
+        "href": "https://deapi.ai/dashboard"
+      },
+      {
+        "label": "Status",
+        "href": "https://status.deapi.ai/"
+      },
+      {
+        "label": "GitHub",
+        "href": "https://github.com/deapi-ai"
       }
     ],
     "primary": {
       "type": "button",
-      "label": "Dashboard",
-      "href": "https://dashboard.mintlify.com"
+      "label": "Get API Key",
+      "href": "https://deapi.ai/dashboard"
     }
-  },
-  "contextual": {
-    "options": [
-     "copy",
-     "view",
-     "chatgpt",
-     "claude",
-     "perplexity",
-     "mcp",
-     "cursor",
-     "vscode"
-   ]
   },
   "footer": {
     "socials": {
-      "x": "https://x.com/mintlify",
-      "github": "https://github.com/mintlify",
-      "linkedin": "https://linkedin.com/company/mintlify"
+      "github": "https://github.com/deapi-ai",
+      "twitter": "https://x.com/deAPI_",
+      "discord": "https://discord.com/invite/UFfK5YRBsr"
     }
-  }
+  },
+  "search": {
+    "prompt": "Search deAPI docs..."
+  },
+  "feedback": {
+    "thumbsRating": true,
+    "suggestEdit": true
+  },
+  "navigation": {
+    "groups": [
+      {
+        "group": "Get started",
+        "pages": [
+          "introduction",
+          "quickstart",
+          "models",
+          "pricing",
+          "architecture-and-security",
+          "limits-and-quotas"
+        ]
+      },
+      {
+        "group": "Execution Modes & Integrations",
+        "pages": [
+          "execution-modes-and-integrations/execution-modes-and-http-queue",
+          "execution-modes-and-integrations/mcp-server"
+        ]
+      },
+      {
+        "group": "API",
+        "pages": [
+          "api/text-to-image",
+          "api/text-to-speech-tts",
+          "api/image-to-text-ocr",
+          "api/image-to-image",
+          "api/image-background-removal",
+          "api/video-to-text-transcription",
+          "api/upload-video-file-video-to-text",
+          "api/upload-audio-file-audio-to-text",
+          "api/image-to-video",
+          "api/text-to-video",
+          "api/text-to-embedding",
+          "api/check-balance",
+          "api/get-results",
+          "api/model-selection"
+        ]
+      },
+      {
+        "group": "Other",
+        "pages": [
+          "other/sdks-and-integrations-coming-soon",
+          "other/payment-methods",
+          "other/faq-frequently-asked-questions",
+          "other/support-and-contact"
+        ]
+      }
+    ]
+  },
+  "anchors": [
+    {
+      "anchor": "Status",
+      "icon": "signal",
+      "href": "https://status.deapi.ai/"
+    },
+    {
+      "anchor": "Discord",
+      "icon": "discord",
+      "href": "https://discord.com/invite/UFfK5YRBsr"
+    }
+  ]
 }

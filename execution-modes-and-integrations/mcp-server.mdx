@@ -1,0 +1,271 @@
+---
+title: "MCP Server"
+---
+
+<Warning>
+**Alpha Release** — The MCP server is currently in alpha. You may encounter occasional issues or unexpected behavior as we continue to refine the service. We actively welcome feedback and bug reports — join the conversation on [Discord](https://discord.com/invite/UFfK5YRBsr).
+</Warning>
+
+In addition to the HTTP API, deAPI exposes an **MCP (Model Context Protocol) server**. This allows AI assistants, IDE extensions, and MCP-aware tools to call deAPI capabilities as structured tools instead of manually constructing HTTP requests.
+
+---
+
+### What is MCP?
+
+The **Model Context Protocol (MCP)** is an open standard that enables AI models and agents to interact with external tools and services in a structured way. Instead of crafting raw HTTP requests, your AI assistant discovers available tools and calls them using a standardized protocol.
+
+With deAPI's MCP server, Claude, Cursor, and other MCP-compatible clients can:
+
+- Generate images, videos, and audio directly within conversations
+- Transcribe YouTube videos or audio files
+- Check pricing before running expensive operations
+- Access all deAPI capabilities through natural language
+
+New tools and capabilities will be added as the MCP server evolves. Follow our [Discord](https://discord.com/invite/UFfK5YRBsr) for updates and to share feature requests.
+
+---
+
+### Server Details
+
+| Property                | Value                      |
+| ----------------------- | -------------------------- |
+| **MCP Server URL**      | `https://mcp.deapi.ai/mcp` |
+| **OAuth Client ID**     | `deapi-mcp`                |
+| **OAuth Client Secret** | Your deAPI API key         |
+| **Transport**           | Streamed HTTP              |
+
+---
+
+### Available Tools
+
+The deAPI MCP server exposes the following tools:
+
+#### Image Generation & Manipulation
+
+| Tool                   | Description                                                                       |
+| ---------------------- | --------------------------------------------------------------------------------- |
+| `text_to_image`        | Generate images from text prompts using AI diffusion models (Flux, Z-Image-Turbo) |
+| `image_to_image`       | Transform existing images using text prompts (style transfer, editing)            |
+| `image_to_text`        | Extract text from images using OCR                                                |
+| `text_to_image_price`  | Calculate price for text-to-image generation                                      |
+| `image_to_image_price` | Calculate price for image transformation                                          |
+| `image_to_text_price`  | Calculate price for OCR extraction                                                |
+
+#### Video Generation & Processing
+
+| Tool                             | Description                                   |
+| -------------------------------- | --------------------------------------------- |
+| `text_to_video`                  | Generate videos from text prompts             |
+| `image_to_video`                 | Animate static images into videos             |
+| `video_file_transcription`       | Transcribe uploaded video files to text       |
+| `video_url_transcription`        | Transcribe videos from URLs (YouTube, etc.)   |
+| `text_to_video_price`            | Calculate price for text-to-video generation  |
+| `image_to_video_price`           | Calculate price for image-to-video generation |
+| `video_file_transcription_price` | Calculate price for video file transcription  |
+| `video_url_transcription_price`  | Calculate price for video URL transcription   |
+
+#### Audio & Speech
+
+| Tool                        | Description                                   |
+| --------------------------- | --------------------------------------------- |
+| `text_to_audio`             | Convert text to natural-sounding speech (TTS) |
+| `audio_transcription`       | Transcribe audio files to text using Whisper  |
+| `audio_transcription_price` | Calculate price for audio transcription       |
+
+#### Prompt Enhancement
+
+| Tool                    | Description                                       |
+| ----------------------- | ------------------------------------------------- |
+| `enhance_image_prompt`  | Optimize text prompts for better image generation |
+| `enhance_video_prompt`  | Optimize prompts for video generation             |
+| `enhance_speech_prompt` | Optimize text for speech synthesis                |
+
+#### Utility
+
+| Tool                   | Description                                      |
+| ---------------------- | ------------------------------------------------ |
+| `get_available_models` | List all available AI models with specifications |
+| `get_balance`          | Check your deAPI account balance                 |
+| `check_job_status`     | Check status of submitted jobs                   |
+
+---
+
+### How to Connect
+
+#### Claude (claude.ai)
+
+To use deAPI MCP tools directly in Claude conversations:
+
+**Step 1.** Get your API key from the [deAPI Dashboard](https://deapi.ai/dashboard)
+
+**Step 2.** Add the MCP connector in Claude settings:
+
+- Go to **Settings** → **Connectors**
+- Click **Add Connector** or **Add MCP Server**
+- Select **New OAuth Connector**
+- Enter the following credentials:
+
+| Field                   | Value                      |
+| ----------------------- | -------------------------- |
+| **OAuth Client ID**     | `deapi-mcp`                |
+| **OAuth Client Secret** | Your deAPI API key         |
+| **Server URL**          | `https://mcp.deapi.ai/mcp` |
+
+**Step 3.** Grant permissions — After adding the connector, Claude will ask you to authorize the connection. Click **Allow** to enable deAPI MCP tools in your conversations.
+
+**Step 4.** Start using deAPI MCP by asking Claude to generate images, transcribe videos, or use any other capability. Make sure to mention "deAPI MCP" in your prompt so Claude knows to use the MCP tools.
+
+**Example prompts:**
+
+- *"Using deAPI MCP, generate an image of a futuristic city at sunset"*
+- *"With deAPI MCP, transcribe this YouTube video: [URL]"*
+- *"Check my deAPI MCP balance"*
+- *"Using deAPI MCP, create a video of waves crashing on a beach"*
+
+---
+
+#### Cursor IDE
+
+To integrate deAPI MCP into Cursor for AI-assisted development:
+
+**Step 1.** Get your API key from the [deAPI Dashboard](https://deapi.ai/dashboard)
+
+**Step 2.** Open Cursor Settings:
+
+- Press `Cmd/Ctrl + Shift + P`
+- Search for **"Cursor Settings"** or navigate to **Settings** → **Cursor Settings**
+
+**Step 3.** Add MCP Configuration:
+
+- Find the **MCP** or **Model Context Protocol** section
+- Add a custom MCP server configuration
+- Paste the following JSON (replace `YOUR_API_KEY` with your actual key):
+
+```json
+{
+  "mcpServers": {
+    "deapi": {
+      "name": "DEAPI MCP",
+      "url": "https://mcp.deapi.ai/mcp",
+      "headers": {
+        "Authorization": "Bearer YOUR_API_KEY"
+      }
+    }
+  }
+}
+```
+
+**Step 4.** Restart Cursor to apply the configuration.
+
+**Step 5.** Invoke deAPI MCP in chat by using phrases like:
+
+- *"Using deAPI MCP, generate an image of..."*
+- *"With deAPI MCP, transcribe this audio..."*
+- *"Via deAPI MCP, check my balance"*
+
+<Info>
+**Tip:** Cursor recognizes deAPI MCP tools when you mention keywords like "using deAPI MCP", "with deAPI MCP", or "via MCP" in your prompts.
+</Info>
+
+---
+
+### Supported Models
+
+The MCP server provides access to all deAPI models:
+
+#### Text-to-Image
+
+- **Flux.1 schnell** — Fast, high-quality image generation
+- **Z-Image-Turbo INT8** — Optimized turbo model for quick and realistic generations
+
+#### Text-to-Speech
+
+- **Kokoro** — Natural TTS with multiple voices and languages
+
+#### Video Generation
+
+- **LTX-Video-0.9.8 13B** — Text-to-video and image-to-video generation
+
+#### Image Processing
+
+- **QwenImageEditPlus4Bit** — Advanced image-to-image transformation
+- **Ben2** — Background removal
+
+#### Transcription
+
+- **Whisper Large V3** — State-of-the-art speech recognition
+
+#### OCR
+
+- **Nanonets Ocr S** — Text extraction from images
+
+#### Embeddings
+
+- **BGE M3** — Text embeddings
+
+Use `get_available_models` tool to retrieve the full list with current specifications and limits.
+
+---
+
+### Usage Examples
+
+#### Generate an Image
+
+Ask your AI assistant:
+
+> "Using deAPI MCP, generate an image of an astronaut riding a horse on Mars, photorealistic style"
+
+The assistant will call `text_to_image` with appropriate parameters and return the generated image URL.
+
+#### Transcribe a YouTube Video
+
+> "With deAPI MCP, transcribe this YouTube video with timestamps: https://www.youtube.com/watch?v=7qaiNfoMRts"
+
+The assistant calls `video_url_transcription` and returns the full transcript.
+
+#### Convert Text to Speech
+
+> "Using deAPI MCP, convert this text to speech with a British female voice: 'Welcome to our platform'"
+
+The assistant calls `text_to_audio` with the Kokoro model and appropriate voice settings.
+
+---
+
+### When to Use MCP vs HTTP API
+
+| Use Case                           | Recommended    |
+| ---------------------------------- | -------------- |
+| AI assistants & chatbots           | **MCP Server** |
+| IDE integrations (Cursor, VS Code) | **MCP Server** |
+| Backend services & workers         | **HTTP API**   |
+| Batch processing                   | **HTTP API**   |
+| Direct programmatic control        | **HTTP API**   |
+| Agent-driven workflows             | **MCP Server** |
+
+Use the **MCP server** when you want an AI agent to decide which tools to call, with which parameters, and in what order.
+
+Use the **HTTP API + queue** for typical backend integrations where you directly manage requests and results.
+
+---
+
+### Troubleshooting
+
+#### Connection Issues
+
+- **Verify your API key** is valid and has sufficient balance
+- **Check the server URL** is exactly `https://mcp.deapi.ai/mcp`
+- **For Claude:** Ensure OAuth Client ID is `deapi-mcp` and Secret is your API key
+- **For Cursor:** Ensure Bearer token format — the Authorization header should be `Bearer YOUR_API_KEY`
+
+#### Tools Not Appearing
+
+- Restart your MCP client (Claude, Cursor) after configuration changes
+- **In Claude:** Make sure you clicked **Allow** when prompted to grant permissions
+- Verify JSON syntax in configuration files (Cursor)
+- Check that your API key has the necessary permissions
+
+#### Jobs Stuck in Processing
+
+- Use `check_job_status` tool with the job ID to monitor progress
+- Large video generation or transcription jobs may take several minutes
+- Check [status.deapi.ai](https://status.deapi.ai/) for system status

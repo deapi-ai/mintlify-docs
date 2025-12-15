@@ -1,0 +1,66 @@
+---
+title: "FAQ – Frequently Asked Questions"
+---
+
+#### 1. **How do I get access to the deAPI panel?**
+
+Register or log in (also via Google OAuth) and after authentication you will automatically gain access to the Control Panel, where you can directly create an API key and get access the full capabilities of the platform.
+
+---
+
+#### 2. **How can I get my API key?**
+
+Simply sign up or log in, then navigate to your Dashboard → Settings → API Keys and click "Create new secret key" to instantly generate your API key.
+
+---
+
+#### 3. **Do I need to fund my account before using the API?**
+
+No. Upon first registration, you receive a $20 bonus to get started. After you use this bonus, you can top up your balance directly from the dashboard via Stripe, using one-off payments or automatic top-ups.
+
+---
+
+#### 4. **How is authentication handled?**
+
+Every API request requires an `Authorization` header with your personal token:
+
+```
+Authorization: Bearer YOUR_API_KEY
+```
+
+---
+
+#### 5. **How do I retrieve the results of my tasks?**
+
+After submitting a task, you'll receive a `task_id`. Use this ID in the **Get Results** endpoint to fetch your generated image, audio, or transcription.
+
+---
+
+#### 6. **Are there any rate limits?**
+
+Yes, request limits may apply based on your usage plan and credit balance. If you exceed the limit, you'll receive a `429 Too Many Requests` response.
+
+---
+
+#### 7. **Can I choose between different AI models?**
+
+Yes. Visit the **Model Selection** endpoint to browse available models. You can specify the desired model when making API requests or visit **Models** when all the models all listed.
+
+---
+
+#### 8. **What file types are supported for Video-to-Text?**
+
+For now formats like `.wav` are supported. You can provide either a direct file upload or a valid file URL, depending on your integration.
+
+---
+
+#### 9. **Is deAPI ready for production use?**
+
+Yes. deAPI is built to support production-grade workloads. All models and services are optimized for speed, reliability, and scalability.
+
+---
+
+#### 10. **What should I do if I get an error?**
+
+Check the error code (e.g., `401`, `403`, `500`) and make sure: Your API key is valid - Your account has enough credits - Your request parameters are correct.
+If the issue persists, contact our support team for help.
