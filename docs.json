@@ -2,7 +2,6 @@
   "$schema": "https://mintlify.com/docs.json",
   "theme": "mint",
   "name": "deAPI",
-  "openapi": ["openapi.json"],
   "logo": {
     "light": "/logo/deapi-light.svg",
     "dark": "/logo/deapi-dark.svg"
@@ -12,6 +11,12 @@
     "primary": "#6366F1",
     "light": "#818CF8",
     "dark": "#4F46E5"
+  },
+  "api": {
+    "baseUrl": "https://api.deapi.ai",
+    "auth": {
+      "method": "bearer"
+    }
   },
   "navbar": {
     "links": [
@@ -71,20 +76,20 @@
       {
         "group": "API",
         "pages": [
-          "GET /api/v1/client/balance",
-          "GET /api/v1/client/models",
-          "GET /api/v1/client/request-status/{job_request}",
-          "POST /api/v1/client/txt2img",
-          "POST /api/v1/client/img2img",
-          "POST /api/v1/client/img-rmbg",
-          "POST /api/v1/client/txt2video",
-          "POST /api/v1/client/img2video",
-          "POST /api/v1/client/txt2audio",
-          "POST /api/v1/client/audiofile2txt",
-          "POST /api/v1/client/vid2txt",
-          "POST /api/v1/client/videofile2txt",
-          "POST /api/v1/client/img2txt",
-          "POST /api/v1/client/txt2embedding"
+          "api/text-to-image",
+          "api/text-to-speech-tts",
+          "api/image-to-text-ocr",
+          "api/image-to-image",
+          "api/image-background-removal",
+          "api/video-to-text-transcription",
+          "api/upload-video-file-video-to-text",
+          "api/upload-audio-file-audio-to-text",
+          "api/image-to-video",
+          "api/text-to-video",
+          "api/text-to-embedding",
+          "api/check-balance",
+          "api/get-results",
+          "api/model-selection"
         ]
       },
       {

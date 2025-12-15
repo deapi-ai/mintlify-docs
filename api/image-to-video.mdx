@@ -1,0 +1,45 @@
+---
+title: "Image-to-Video"
+api: "POST https://api.deapi.ai/api/v1/client/img2video"
+---
+
+Transform static images into motion clips.
+
+**Prerequisite:** Consult the [Model Selection](/api/model-selection) endpoint to identify a valid model `slug`.
+
+<ParamField header="Authorization" type="string" required>
+  Bearer token. Format: `Bearer YOUR_API_KEY`
+</ParamField>
+
+<ParamField body="model" type="string" required>
+  Model slug from Model Selection endpoint.
+</ParamField>
+
+<ParamField body="image" type="string" required>
+  Base64 encoded image or URL.
+</ParamField>
+
+<ParamField body="prompt" type="string">
+  Motion guidance prompt.
+</ParamField>
+
+<ParamField body="duration" type="integer" default="2">
+  Video duration in seconds (2-5).
+</ParamField>
+
+---
+
+## Calculate Price
+
+**Endpoint:** `POST https://api.deapi.ai/api/v1/client/img2video/price-calculation`
+
+```bash
+curl --request POST \
+  --url https://api.deapi.ai/api/v1/client/img2video/price-calculation \
+  --header 'Authorization: Bearer YOUR_API_KEY' \
+  --header 'Content-Type: application/json' \
+  --data '{
+    "model": "img2video-model",
+    "duration": 2
+  }'
+```

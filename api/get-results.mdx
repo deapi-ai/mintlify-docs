@@ -1,0 +1,14 @@
+---
+title: "Get Results"
+api: "GET https://api.deapi.ai/api/v1/client/request-status/{job_request}"
+---
+
+Check the status and retrieve results of a submitted job.
+
+<ParamField header="Authorization" type="string" required>
+  Bearer token. Format: `Bearer YOUR_API_KEY`
+</ParamField>
+
+<ParamField path="job_request" type="string" required>
+  The unique job request ID returned when you submitted the task.
+</ParamField>

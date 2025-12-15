@@ -1,0 +1,38 @@
+---
+title: "Upload Audio File (Audio-to-Text)"
+api: "POST https://api.deapi.ai/api/v1/client/audiofile2txt"
+---
+
+Transcribe uploaded audio files.
+
+**Prerequisite:** Consult the [Model Selection](/api/model-selection) endpoint to identify a valid model `slug`.
+
+<ParamField header="Authorization" type="string" required>
+  Bearer token. Format: `Bearer YOUR_API_KEY`
+</ParamField>
+
+<ParamField body="model" type="string" required>
+  Model slug from Model Selection endpoint.
+</ParamField>
+
+<ParamField body="audio" type="file" required>
+  Audio file (AAC, MP3, OGG, WAV, WebM, FLAC). Max 10MB.
+</ParamField>
+
+<ParamField body="include_ts" type="boolean" default="false">
+  Include timestamps in transcription.
+</ParamField>
+
+---
+
+## Calculate Price
+
+**Endpoint:** `POST https://api.deapi.ai/api/v1/client/audiofile2txt/price-calculation`
+
+```bash
+curl --request POST \
+  --url https://api.deapi.ai/api/v1/client/audiofile2txt/price-calculation \
+  --header 'Authorization: Bearer YOUR_API_KEY' \
+  --header 'Content-Type: multipart/form-data' \
+  --form 'model=transcription-model'
+```

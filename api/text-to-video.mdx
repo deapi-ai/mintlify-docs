@@ -1,0 +1,51 @@
+---
+title: "Text-to-Video"
+api: "POST https://api.deapi.ai/api/v1/client/txt2video"
+---
+
+Generate videos from text prompts.
+
+**Prerequisite:** Consult the [Model Selection](/api/model-selection) endpoint to identify a valid model `slug`.
+
+<ParamField header="Authorization" type="string" required>
+  Bearer token. Format: `Bearer YOUR_API_KEY`
+</ParamField>
+
+<ParamField body="model" type="string" required>
+  Model slug from Model Selection endpoint.
+</ParamField>
+
+<ParamField body="prompt" type="string" required>
+  Text description of the video to generate.
+</ParamField>
+
+<ParamField body="duration" type="integer" default="2">
+  Video duration in seconds (2-5).
+</ParamField>
+
+<ParamField body="width" type="integer" default="256">
+  Video width in pixels.
+</ParamField>
+
+<ParamField body="height" type="integer" default="256">
+  Video height in pixels.
+</ParamField>
+
+---
+
+## Calculate Price
+
+**Endpoint:** `POST https://api.deapi.ai/api/v1/client/txt2video/price-calculation`
+
+```bash
+curl --request POST \
+  --url https://api.deapi.ai/api/v1/client/txt2video/price-calculation \
+  --header 'Authorization: Bearer YOUR_API_KEY' \
+  --header 'Content-Type: application/json' \
+  --data '{
+    "model": "txt2video-model",
+    "duration": 2,
+    "width": 256,
+    "height": 256
+  }'
+```
