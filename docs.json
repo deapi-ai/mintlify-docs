@@ -3,6 +3,12 @@
   "theme": "mint",
   "name": "deAPI",
   "openapi": ["openapi.json"],
+  "api": {
+    "baseUrl": "https://api.deapi.ai",
+    "auth": {
+      "method": "bearer"
+    }
+  },
   "logo": {
     "light": "/logo/deapi-light.svg",
     "dark": "/logo/deapi-dark.svg"
