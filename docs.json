@@ -2,13 +2,6 @@
   "$schema": "https://mintlify.com/docs.json",
   "theme": "mint",
   "name": "deAPI",
-  "openapi": ["openapi.json"],
-  "api": {
-    "baseUrl": "https://api.deapi.ai",
-    "auth": {
-      "method": "bearer"
-    }
-  },
   "logo": {
     "light": "/logo/deapi-light.svg",
     "dark": "/logo/deapi-dark.svg"
@@ -76,60 +69,61 @@
       },
       {
         "group": "API",
+        "openapi": "openapi.json",
         "pages": [
           {
             "group": "Image Generation",
             "pages": [
-              "api/text-to-image",
-              "api/text-to-image-price",
-              "api/image-to-image",
-              "api/image-to-image-price",
-              "api/image-background-removal",
-              "api/image-background-removal-price"
+              "POST /api/v1/client/txt2img",
+              "POST /api/v1/client/txt2img/price-calculation",
+              "POST /api/v1/client/img2img",
+              "POST /api/v1/client/img2img/price-calculation",
+              "POST /api/v1/client/img-rmbg",
+              "POST /api/v1/client/img-rmbg/price-calculation"
             ]
           },
           {
             "group": "Video Generation",
             "pages": [
-              "api/text-to-video",
-              "api/text-to-video-price",
-              "api/image-to-video",
-              "api/image-to-video-price"
+              "POST /api/v1/client/txt2video",
+              "POST /api/v1/client/txt2video/price-calculation",
+              "POST /api/v1/client/img2video",
+              "POST /api/v1/client/img2video/price-calculation"
             ]
           },
           {
             "group": "Audio & Speech",
             "pages": [
-              "api/text-to-speech-tts",
-              "api/text-to-speech-tts-price",
-              "api/upload-audio-file-audio-to-text",
-              "api/upload-audio-file-audio-to-text-price"
+              "POST /api/v1/client/txt2audio",
+              "POST /api/v1/client/txt2audio/price-calculation",
+              "POST /api/v1/client/audiofile2txt",
+              "POST /api/v1/client/audiofile2txt/price-calculation"
             ]
           },
           {
             "group": "Transcription",
             "pages": [
-              "api/video-to-text-transcription",
-              "api/video-to-text-transcription-price",
-              "api/upload-video-file-video-to-text",
-              "api/upload-video-file-video-to-text-price"
+              "POST /api/v1/client/vid2txt",
+              "POST /api/v1/client/vid2txt/price-calculation",
+              "POST /api/v1/client/videofile2txt",
+              "POST /api/v1/client/videofile2txt/price-calculation"
             ]
           },
           {
             "group": "OCR & Embeddings",
             "pages": [
-              "api/image-to-text-ocr",
-              "api/image-to-text-ocr-price",
-              "api/text-to-embedding",
-              "api/text-to-embedding-price"
+              "POST /api/v1/client/img2txt",
+              "POST /api/v1/client/img2txt/price-calculation",
+              "POST /api/v1/client/txt2embedding",
+              "POST /api/v1/client/txt2embedding/price-calculation"
             ]
           },
           {
             "group": "Utility",
             "pages": [
-              "api/check-balance",
-              "api/get-results",
-              "api/model-selection"
+              "GET /api/v1/client/balance",
+              "GET /api/v1/client/request-status/{job_request}",
+              "GET /api/v1/client/models"
             ]
           }
         ]
