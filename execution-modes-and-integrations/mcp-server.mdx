@@ -2,6 +2,8 @@
 title: "MCP Server"
 ---
 
+Describes the deAPI MCP server, its available tools, and how to connect agents or IDE integrations to use deAPI as a structured toolbox.
+
 <Warning>
 **Alpha Release** — The MCP server is currently in alpha. You may encounter occasional issues or unexpected behavior as we continue to refine the service. We actively welcome feedback and bug reports — join the conversation on [Discord](https://discord.com/invite/UFfK5YRBsr).
 </Warning>
@@ -18,6 +20,7 @@ With deAPI's MCP server, Claude, Cursor, and other MCP-compatible clients can:
 
 - Generate images, videos, and audio directly within conversations
 - Transcribe YouTube videos or audio files
+- Remove backgrounds and upscale images
 - Check pricing before running expensive operations
 - Access all deAPI capabilities through natural language
 
@@ -27,12 +30,12 @@ New tools and capabilities will be added as the MCP server evolves. Follow our [
 
 ### Server Details
 
-| Property                | Value                      |
-| ----------------------- | -------------------------- |
-| **MCP Server URL**      | `https://mcp.deapi.ai/mcp` |
-| **OAuth Client ID**     | `deapi-mcp`                |
-| **OAuth Client Secret** | Your deAPI API key         |
-| **Transport**           | Streamed HTTP              |
+| Property | Value |
+| -------- | ----- |
+| **MCP Server URL** | `https://mcp.deapi.ai/mcp` |
+| **OAuth Client ID** | `deapi-mcp` |
+| **OAuth Client Secret** | Your deAPI API key |
+| **Transport** | Streamed HTTP |
 
 ---
 
@@ -42,51 +45,47 @@ The deAPI MCP server exposes the following tools:
 
 #### Image Generation & Manipulation
 
-| Tool                   | Description                                                                       |
-| ---------------------- | --------------------------------------------------------------------------------- |
-| `text_to_image`        | Generate images from text prompts using AI diffusion models (Flux, Z-Image-Turbo) |
-| `image_to_image`       | Transform existing images using text prompts (style transfer, editing)            |
-| `image_to_text`        | Extract text from images using OCR                                                |
-| `text_to_image_price`  | Calculate price for text-to-image generation                                      |
-| `image_to_image_price` | Calculate price for image transformation                                          |
-| `image_to_text_price`  | Calculate price for OCR extraction                                                |
+| Tool | Description |
+| ---- | ----------- |
+| `text_to_image` | Generate images from text prompts using AI diffusion models (Flux, Z-Image-Turbo) |
+| `image_to_image` | Transform existing images using text prompts (style transfer, editing) |
+| `image_to_text` | Extract text from images using OCR |
+| `image_remove_background` | Remove background from images (transparent PNG output) |
+| `image_upscale` | Upscale images to higher resolution |
+| `text_to_image_price` | Calculate price for text-to-image generation |
+| `image_to_image_price` | Calculate price for image transformation |
+| `image_to_text_price` | Calculate price for OCR extraction |
+| `image_remove_background_price` | Calculate price for background removal |
+| `image_upscale_price` | Calculate price for image upscaling |
 
 #### Video Generation & Processing
 
-| Tool                             | Description                                   |
-| -------------------------------- | --------------------------------------------- |
-| `text_to_video`                  | Generate videos from text prompts             |
-| `image_to_video`                 | Animate static images into videos             |
-| `video_file_transcription`       | Transcribe uploaded video files to text       |
-| `video_url_transcription`        | Transcribe videos from URLs (YouTube, etc.)   |
-| `text_to_video_price`            | Calculate price for text-to-video generation  |
-| `image_to_video_price`           | Calculate price for image-to-video generation |
-| `video_file_transcription_price` | Calculate price for video file transcription  |
-| `video_url_transcription_price`  | Calculate price for video URL transcription   |
+| Tool | Description |
+| ---- | ----------- |
+| `text_to_video` | Generate videos from text prompts |
+| `image_to_video` | Animate static images into videos |
+| `video_file_transcription` | Transcribe uploaded video files to text |
+| `video_url_transcription` | Transcribe videos from URLs (YouTube, X/Twitter) |
+| `video_file_transcription_price` | Calculate price for video file transcription |
+| `video_url_transcription_price` | Calculate price for video URL transcription |
 
 #### Audio & Speech
 
-| Tool                        | Description                                   |
-| --------------------------- | --------------------------------------------- |
-| `text_to_audio`             | Convert text to natural-sounding speech (TTS) |
-| `audio_transcription`       | Transcribe audio files to text using Whisper  |
-| `audio_transcription_price` | Calculate price for audio transcription       |
-
-#### Prompt Enhancement
-
-| Tool                    | Description                                       |
-| ----------------------- | ------------------------------------------------- |
-| `enhance_image_prompt`  | Optimize text prompts for better image generation |
-| `enhance_video_prompt`  | Optimize prompts for video generation             |
-| `enhance_speech_prompt` | Optimize text for speech synthesis                |
+| Tool | Description |
+| ---- | ----------- |
+| `text_to_audio` | Convert text to natural-sounding speech (TTS) |
+| `audio_transcription` | Transcribe uploaded audio files to text using Whisper |
+| `audio_url_transcription` | Transcribe audio from URLs (X/Twitter Spaces) |
+| `audio_transcription_price` | Calculate price for audio file transcription |
+| `audio_url_transcription_price` | Calculate price for audio URL transcription |
 
 #### Utility
 
-| Tool                   | Description                                      |
-| ---------------------- | ------------------------------------------------ |
+| Tool | Description |
+| ---- | ----------- |
 | `get_available_models` | List all available AI models with specifications |
-| `get_balance`          | Check your deAPI account balance                 |
-| `check_job_status`     | Check status of submitted jobs                   |
+| `get_balance` | Check your deAPI account balance |
+| `check_job_status` | Check status of submitted jobs |
 
 ---
 
@@ -105,11 +104,11 @@ To use deAPI MCP tools directly in Claude conversations:
 - Select **New OAuth Connector**
 - Enter the following credentials:
 
-| Field                   | Value                      |
-| ----------------------- | -------------------------- |
-| **OAuth Client ID**     | `deapi-mcp`                |
-| **OAuth Client Secret** | Your deAPI API key         |
-| **Server URL**          | `https://mcp.deapi.ai/mcp` |
+| Field | Value |
+| ----- | ----- |
+| **OAuth Client ID** | `deapi-mcp` |
+| **OAuth Client Secret** | Your deAPI API key |
+| **Server URL** | `https://mcp.deapi.ai/mcp` |
 
 **Step 3.** Grant permissions — After adding the connector, Claude will ask you to authorize the connection. Click **Allow** to enable deAPI MCP tools in your conversations.
 
@@ -118,9 +117,11 @@ To use deAPI MCP tools directly in Claude conversations:
 **Example prompts:**
 
 - *"Using deAPI MCP, generate an image of a futuristic city at sunset"*
-- *"With deAPI MCP, transcribe this YouTube video: [URL]"*
+- *"With deAPI MCP, transcribe this YouTube video: \[URL\]"*
 - *"Check my deAPI MCP balance"*
 - *"Using deAPI MCP, create a video of waves crashing on a beach"*
+- *"Using deAPI MCP, remove the background from this image"*
+- *"With deAPI MCP, upscale this image to higher resolution"*
 
 ---
 
@@ -159,13 +160,11 @@ To integrate deAPI MCP into Cursor for AI-assisted development:
 
 **Step 5.** Invoke deAPI MCP in chat by using phrases like:
 
-- *"Using deAPI MCP, generate an image of..."*
-- *"With deAPI MCP, transcribe this audio..."*
+- *"Using deAPI MCP, generate an image of…"*
+- *"With deAPI MCP, transcribe this audio…"*
 - *"Via deAPI MCP, check my balance"*
 
-<Info>
 **Tip:** Cursor recognizes deAPI MCP tools when you mention keywords like "using deAPI MCP", "with deAPI MCP", or "via MCP" in your prompts.
-</Info>
 
 ---
 
@@ -229,18 +228,30 @@ The assistant calls `video_url_transcription` and returns the full transcript.
 
 The assistant calls `text_to_audio` with the Kokoro model and appropriate voice settings.
 
+#### Remove Background from Image
+
+> "Using deAPI MCP, remove the background from this product photo"
+
+The assistant calls `image_remove_background` and returns a transparent PNG.
+
+#### Transcribe X/Twitter Spaces
+
+> "With deAPI MCP, transcribe this Twitter Space: https://twitter.com/i/spaces/..."
+
+The assistant calls `audio_url_transcription` and returns the full transcript.
+
 ---
 
 ### When to Use MCP vs HTTP API
 
-| Use Case                           | Recommended    |
-| ---------------------------------- | -------------- |
-| AI assistants & chatbots           | **MCP Server** |
+| Use Case | Recommended |
+| -------- | ----------- |
+| AI assistants & chatbots | **MCP Server** |
 | IDE integrations (Cursor, VS Code) | **MCP Server** |
-| Backend services & workers         | **HTTP API**   |
-| Batch processing                   | **HTTP API**   |
-| Direct programmatic control        | **HTTP API**   |
-| Agent-driven workflows             | **MCP Server** |
+| Backend services & workers | **HTTP API** |
+| Batch processing | **HTTP API** |
+| Direct programmatic control | **HTTP API** |
+| Agent-driven workflows | **MCP Server** |
 
 Use the **MCP server** when you want an AI agent to decide which tools to call, with which parameters, and in what order.
 

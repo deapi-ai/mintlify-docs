@@ -2,6 +2,8 @@
 title: "Execution Modes & HTTP Queue"
 ---
 
+Explains how deAPI executes model requests over HTTP using a default queued job model (POST → request_id → GET /request-status), and outlines planned extensions like webhooks and synchronous modes.
+
 All deAPI model endpoints follow the same execution pattern.
 Requests are sent as **asynchronous jobs** to a queue, and you fetch their status and results via a dedicated endpoint.
 
@@ -12,11 +14,9 @@ Requests are sent as **asynchronous jobs** to a queue, and you fetch their statu
 Every model endpoint (Text-to-Image, Text-to-Speech, Image-to-Text, Image-to-Image, Video-to-Text, Image-to-Video, Text-to-Video, Text-to-Embedding, etc.) works the same way:
 
 1. You send a request to:
-
    `POST /api/v1/client/{task}`
-2. The response returns a **`request_id`**
+2. The response returns a `request_id`
 3. You check progress and fetch the result via:
-
    `GET /api/v1/client/request-status/{job_request}`
 
 The `request-status` response includes:
