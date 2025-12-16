@@ -1,0 +1,10 @@
+---
+title: "Text-to-Image"
+openapi: "/openapi.json POST /api/v1/client/txt2img"
+---
+
+Text-to-Image generates images from text prompts. The endpoint returns a ready-to-use image URL and a task ID to track processing status. Ideal for apps needing automated image creation.
+
+<Note>
+**Prerequisite:** To ensure a successful request, you must first consult the [Model Selection](/api/utilities/model-selection) endpoint to identify a valid model `slug`, check specific **limits** and **features**, and verify **LoRA** availability. Please **omit** the LoRA parameter by default during initial testing.
+</Note>

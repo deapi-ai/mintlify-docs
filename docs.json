@@ -74,9 +74,16 @@
         ]
       },
       {
-        "group": "API",
+        "group": "Generation",
         "pages": [
-          "api/get-results"
+          "api/generation/text-to-image",
+          "api/generation/text-to-image-price"
+        ]
+      },
+      {
+        "group": "Utilities",
+        "pages": [
+          "api/utilities/get-results"
         ]
       },
       {
