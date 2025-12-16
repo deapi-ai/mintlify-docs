@@ -76,6 +76,7 @@
       {
         "group": "API",
         "pages": [
+          "api/errors",
           {
             "group": "Generation",
             "expanded": false,

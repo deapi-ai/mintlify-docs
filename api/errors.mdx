@@ -1,0 +1,235 @@
+---
+title: "Errors"
+description: "HTTP status codes and error responses returned by deAPI"
+---
+
+deAPI uses conventional HTTP response codes to indicate the success or failure of an API request. Codes in the `2xx` range indicate success. Codes in the `4xx` range indicate an error from the provided information (e.g., missing required parameter, unauthorized access). Codes in the `5xx` range indicate an error with deAPI servers.
+
+## HTTP Status Codes
+
+| Code | Status | Description |
+|------|--------|-------------|
+| `200` | OK | Request succeeded. Response contains requested data. |
+| `401` | Unauthorized | Invalid or missing API key. |
+| `404` | Not Found | The requested resource (job, model) does not exist. |
+| `422` | Unprocessable Entity | Request validation failed. Check the `errors` array for details. |
+| `500` | Internal Server Error | Something went wrong on our end. Try again later. |
+
+## Error Response Format
+
+All error responses follow a consistent JSON structure:
+
+```json
+{
+  "data": null,
+  "message": "Error general message",
+  "errors": [],
+  "statusCode": 401
+}
+```
+
+<ResponseField name="data" type="object | null">
+  Always `null` for error responses.
+</ResponseField>
+
+<ResponseField name="message" type="string">
+  Human-readable error description.
+</ResponseField>
+
+<ResponseField name="errors" type="array">
+  Additional error details. For validation errors (422), contains field-specific messages.
+</ResponseField>
+
+<ResponseField name="statusCode" type="integer">
+  HTTP status code (matches the response status).
+</ResponseField>
+
+## Error Types
+
+### 401 Unauthorized
+
+Returned when authentication fails.
+
+**Common causes:**
+- Missing `Authorization` header
+- Invalid API key
+- Expired API key
+
+```json
+{
+  "data": null,
+  "message": "Unauthorized user.",
+  "errors": [],
+  "statusCode": 401
+}
+```
+
+**Solution:** Verify your API key is correct and included in the `Authorization: Bearer <API_KEY>` header.
+
+---
+
+### 404 Not Found
+
+Returned when the requested resource doesn't exist.
+
+**Common causes:**
+- Invalid `request_id` when polling results
+- Model name doesn't exist
+- Request ID not found
+
+```json
+{
+  "data": null,
+  "message": "Request not found.",
+  "errors": [],
+  "statusCode": 404
+}
+```
+
+**Solution:** Verify the resource identifier (`request_id`, model name) is correct. Use the [Model Selection](/api/utilities/model-selection) endpoint to get valid model names.
+
+---
+
+### 422 Unprocessable Entity
+
+Returned when request validation fails. The `errors` array contains field-specific details.
+
+**Common causes:**
+- Missing required parameters
+- Invalid parameter values (out of range, wrong type)
+- Invalid image/video URL or format
+
+```json
+{
+  "data": null,
+  "message": "Validation failed",
+  "errors": [
+    {
+      "field": "width",
+      "messages": ["The width must be between 64 and 2048."]
+    },
+    {
+      "field": "model",
+      "messages": ["The selected model does not exist."]
+    }
+  ],
+  "statusCode": 422
+}
+```
+
+**Solution:** Check the `errors` array to identify which fields failed validation and correct them according to the API documentation.
+
+---
+
+### 500 Internal Server Error
+
+Returned when an unexpected error occurs on our servers.
+
+```json
+{
+  "data": null,
+  "message": "Internal server error",
+  "errors": [],
+  "statusCode": 500
+}
+```
+
+**Solution:** Wait a moment and retry your request. If the problem persists, check [status.deapi.ai](https://status.deapi.ai/) or contact support on [Discord](https://discord.com/invite/UFfK5YRBsr).
+
+## Best Practices
+
+<CardGroup cols={2}>
+  <Card title="Handle all error codes" icon="shield-check">
+    Implement error handling for all possible status codes in your application.
+  </Card>
+  <Card title="Parse the errors array" icon="list-check">
+    For 422 responses, iterate through the `errors` array to display field-specific messages to users.
+  </Card>
+  <Card title="Implement retry logic" icon="rotate">
+    For 500 errors, implement exponential backoff retry (e.g., 1s, 2s, 4s delays).
+  </Card>
+  <Card title="Log error responses" icon="file-lines">
+    Log full error responses for debugging. Include `request_id` if available.
+  </Card>
+</CardGroup>
+
+## Example Error Handling
+
+<CodeGroup>
+```python Python
+import requests
+
+response = requests.post(
+    "https://api.deapi.ai/api/v1/client/txt2img",
+    headers={
+        "Authorization": "Bearer YOUR_API_KEY",
+        "Accept": "application/json"
+    },
+    json={
+        "prompt": "a cat",
+        "model": "Flux1schnell",
+        "width": 512,
+        "height": 512,
+        "steps": 4,
+        "guidance": 0,
+        "seed": -1,
+        "loras": []
+    }
+)
+
+if response.status_code == 200:
+    data = response.json()
+    request_id = data["data"]["request_id"]
+    print(f"Job started: {request_id}")
+elif response.status_code == 401:
+    print("Authentication failed. Check your API key.")
+elif response.status_code == 422:
+    error_data = response.json()
+    print(f"Validation error: {error_data['message']}")
+    for error in error_data.get("errors", []):
+        print(f"  Field '{error['field']}': {error['messages']}")
+elif response.status_code == 500:
+    print("Server error. Retrying...")
+else:
+    print(f"Unexpected error: {response.status_code}")
+```
+
+```javascript JavaScript
+const response = await fetch("https://api.deapi.ai/api/v1/client/txt2img", {
+  method: "POST",
+  headers: {
+    "Authorization": "Bearer YOUR_API_KEY",
+    "Content-Type": "application/json",
+    "Accept": "application/json"
+  },
+  body: JSON.stringify({
+    prompt: "a cat",
+    model: "Flux1schnell",
+    width: 512,
+    height: 512,
+    steps: 4,
+    guidance: 0,
+    seed: -1,
+    loras: []
+  })
+});
+
+if (response.ok) {
+  const data = await response.json();
+  const requestId = data.data.request_id;
+  console.log(`Job started: ${requestId}`);
+} else if (response.status === 401) {
+  console.error("Authentication failed. Check your API key.");
+} else if (response.status === 422) {
+  const errorData = await response.json();
+  console.error(`Validation error: ${errorData.message}`);
+  errorData.errors?.forEach(err => {
+    console.error(`  Field '${err.field}': ${err.messages.join(", ")}`);
+  });
+} else if (response.status === 500) {
+  console.error("Server error. Retrying...");
+} else {
+  console.error(`Unexpected error: ${response.status}`);
+}
+```
+</CodeGroup>
