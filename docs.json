@@ -18,7 +18,6 @@
       "method": "bearer"
     }
   },
-  "openapi": "/openapi.json",
   "navbar": {
     "links": [
       {
@@ -76,11 +75,10 @@
       },
       {
         "group": "API",
-        "pages": [
-          "api/authentication",
-          "api/errors",
-          "api/get-results"
-        ]
+        "openapi": {
+          "source": "/openapi.json",
+          "directory": "api"
+        }
       },
       {
         "group": "Other",
