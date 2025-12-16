@@ -74,122 +74,59 @@
         ]
       },
       {
-        "group": "Generation",
+        "group": "API",
         "pages": [
           {
-            "group": "Text-to-Image",
+            "group": "Generation",
             "expanded": false,
             "pages": [
               "api/generation/text-to-image",
-              "api/generation/text-to-image-price"
-            ]
-          },
-          {
-            "group": "Text-to-Video",
-            "expanded": false,
-            "pages": [
+              "api/generation/text-to-image-price",
               "api/generation/text-to-video",
-              "api/generation/text-to-video-price"
-            ]
-          },
-          {
-            "group": "Image-to-Video",
-            "expanded": false,
-            "pages": [
+              "api/generation/text-to-video-price",
               "api/generation/image-to-video",
-              "api/generation/image-to-video-price"
-            ]
-          },
-          {
-            "group": "Text-to-Speech",
-            "expanded": false,
-            "pages": [
+              "api/generation/image-to-video-price",
               "api/generation/text-to-speech",
-              "api/generation/text-to-speech-price"
-            ]
-          },
-          {
-            "group": "Text-to-Embedding",
-            "expanded": false,
-            "pages": [
+              "api/generation/text-to-speech-price",
               "api/generation/text-to-embedding",
               "api/generation/text-to-embedding-price"
             ]
-          }
-        ]
-      },
-      {
-        "group": "Analysis",
-        "pages": [
+          },
           {
-            "group": "Image-to-Text (OCR)",
+            "group": "Analysis",
             "expanded": false,
             "pages": [
               "api/analysis/image-to-text",
-              "api/analysis/image-to-text-price"
-            ]
-          },
-          {
-            "group": "Video-to-Text",
-            "expanded": false,
-            "pages": [
+              "api/analysis/image-to-text-price",
               "api/analysis/video-to-text",
-              "api/analysis/video-to-text-price"
-            ]
-          },
-          {
-            "group": "Audio-to-Text (X Spaces)",
-            "expanded": false,
-            "pages": [
+              "api/analysis/video-to-text-price",
               "api/analysis/audio-to-text-spaces",
-              "api/analysis/audio-to-text-spaces-price"
-            ]
-          },
-          {
-            "group": "Upload Video File",
-            "expanded": false,
-            "pages": [
+              "api/analysis/audio-to-text-spaces-price",
               "api/analysis/upload-video-file",
-              "api/analysis/upload-video-file-price"
-            ]
-          },
-          {
-            "group": "Upload Audio File",
-            "expanded": false,
-            "pages": [
+              "api/analysis/upload-video-file-price",
               "api/analysis/upload-audio-file",
               "api/analysis/upload-audio-file-price"
             ]
-          }
-        ]
-      },
-      {
-        "group": "Transformation",
-        "pages": [
+          },
           {
-            "group": "Image-to-Image",
+            "group": "Transformation",
             "expanded": false,
             "pages": [
               "api/transformation/image-to-image",
-              "api/transformation/image-to-image-price"
-            ]
-          },
-          {
-            "group": "Background Removal",
-            "expanded": false,
-            "pages": [
+              "api/transformation/image-to-image-price",
               "api/transformation/background-removal",
               "api/transformation/background-removal-price"
             ]
+          },
+          {
+            "group": "Utilities",
+            "expanded": false,
+            "pages": [
+              "api/utilities/check-balance",
+              "api/utilities/get-results",
+              "api/utilities/model-selection"
+            ]
           }
-        ]
-      },
-      {
-        "group": "Utilities",
-        "pages": [
-          "api/utilities/check-balance",
-          "api/utilities/get-results",
-          "api/utilities/model-selection"
         ]
       },
       {
