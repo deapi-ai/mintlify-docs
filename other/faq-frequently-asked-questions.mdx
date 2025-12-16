@@ -16,7 +16,7 @@ Simply sign up or log in, then navigate to your Dashboard → Settings → API K
 
 #### 3. **Do I need to fund my account before using the API?**
 
-No. Upon first registration, you receive a $20 bonus to get started. After you use this bonus, you can top up your balance directly from the dashboard via Stripe, using one-off payments or automatic top-ups.
+No. Upon first registration, you receive a **20 USD bonus** to get started. After you use this bonus, you can top up your balance directly from the dashboard via Stripe, using one-off payments or automatic top-ups.
 
 ---
 
@@ -32,35 +32,73 @@ Authorization: Bearer YOUR_API_KEY
 
 #### 5. **How do I retrieve the results of my tasks?**
 
-After submitting a task, you'll receive a `task_id`. Use this ID in the **Get Results** endpoint to fetch your generated image, audio, or transcription.
+After submitting a task, you'll receive a `request_id`. Use this ID with the **Get Results** endpoint (`GET /api/v1/client/request-status/{request_id}`) to fetch your generated image, video, audio, or transcription.
 
 ---
 
 #### 6. **Are there any rate limits?**
 
-Yes, request limits may apply based on your usage plan and credit balance. If you exceed the limit, you'll receive a `429 Too Many Requests` response.
+Yes. The default rate limit for all standard accounts is **300 jobs per minute** (applicable to all task types: video, audio, image). If you exceed the limit, you'll receive a `429 Too Many Requests` response. Higher quotas may be provisioned based on platform utilization — contact support for High Volume Production requirements.
 
 ---
 
 #### 7. **Can I choose between different AI models?**
 
-Yes. Visit the **Model Selection** endpoint to browse available models. You can specify the desired model when making API requests or visit **Models** when all the models all listed.
+Yes. Visit the **Model Selection** endpoint to browse available models, or check the **Models** page for a complete list. You can specify the desired model using the `model` parameter when making API requests.
 
 ---
 
-#### 8. **What file types are supported for Video-to-Text?**
+#### 8. **What file types are supported?**
 
-For now formats like `.wav` are supported. You can provide either a direct file upload or a valid file URL, depending on your integration.
+**Video** (Video-to-Text, Image-to-Video):
+- Max size: 100 MB
+- Supported formats: mp4, avi, mov, mkv, webm
+
+**Audio** (Audio-to-Text):
+- Max size: 50 MB (recommended), up to 100 MB
+- Supported formats: mp3, wav, m4a, flac, ogg
+
+**Images** (Image-to-Image, OCR, Background Removal):
+- Max size: 10 MB
+- Supported formats: jpg, png, webp
 
 ---
 
-#### 9. **Is deAPI ready for production use?**
+#### 9. **What services does deAPI offer?**
 
-Yes. deAPI is built to support production-grade workloads. All models and services are optimized for speed, reliability, and scalability.
+deAPI provides the following AI-powered services:
+
+- **Text-to-Image** – Generate images from text prompts (Flux, Z-Image-Turbo)
+- **Image-to-Image** – Transform and edit existing images
+- **Image Background Removal** – Remove backgrounds for transparent PNGs
+- **Text-to-Video** – Generate videos from text descriptions
+- **Image-to-Video** – Animate static images into videos
+- **Text-to-Speech (TTS)** – Convert text to natural-sounding audio
+- **Video-to-Text** – Transcribe videos (YouTube, X/Twitter, file uploads)
+- **Audio-to-Text** – Transcribe audio files and X/Twitter Spaces
+- **Image-to-Text (OCR)** – Extract text from images
+- **Text-to-Embedding** – Generate vector embeddings for semantic search
 
 ---
 
-#### 10. **What should I do if I get an error?**
+#### 10. **Can I use deAPI with AI assistants like Claude or Cursor?**
 
-Check the error code (e.g., `401`, `403`, `500`) and make sure: Your API key is valid - Your account has enough credits - Your request parameters are correct.
-If the issue persists, contact our support team for help.
+Yes! deAPI offers an **MCP (Model Context Protocol) server** that allows AI assistants and IDE extensions to call deAPI capabilities as structured tools. You can connect Claude, Cursor, and other MCP-compatible clients to generate images, transcribe videos, and more directly within conversations. See the **MCP Server** documentation for setup instructions.
+
+---
+
+#### 11. **Is deAPI ready for production use?**
+
+Yes. deAPI is built to support production-grade workloads. All models and services are optimized for speed, reliability, and scalability. The platform offers 300 RPM immediately upon registration — no waiting periods or tier upgrades required.
+
+---
+
+#### 12. **What should I do if I get an error?**
+
+Check the error code and make sure:
+- `401` — Your API key is valid
+- `403` — Your account has sufficient permissions
+- `429` — You haven't exceeded rate limits
+- `500` — Server error (check [status.deapi.ai](https://status.deapi.ai/))
+
+Also verify your request parameters are correct. If the issue persists, contact our support team at **support@deapi.ai** or join our [Discord](https://discord.com/invite/UFfK5YRBsr) for help.
