@@ -1,14 +1,132 @@
 ---
 title: "Get Results"
-api: "GET https://api.deapi.ai/api/v1/client/request-status/{job_request}"
+description: "Check the status of your inference job and retrieve results when complete."
+openapi: "GET /api/v1/client/request-status/{job_request}"
 ---
 
-Check the status and retrieve results of a submitted job.
+Use this endpoint to poll the status of any inference job. After submitting a request to any generation endpoint, you receive a `request_id` — use it here to track progress and retrieve your results.
 
-<ParamField header="Authorization" type="string" required>
-  Bearer token. Format: `Bearer YOUR_API_KEY`
-</ParamField>
+## Status Values
 
-<ParamField path="job_request" type="string" required>
-  The unique job request ID returned when you submitted the task.
-</ParamField>
+| Status | Description | Action |
+|--------|-------------|--------|
+| `pending` | Job is queued, waiting for a worker | Continue polling |
+| `processing` | Job is actively running | Continue polling |
+| `done` | Job completed successfully | Retrieve `result_url` or `result` |
+| `failed` | Job encountered an error | Check error details, retry if needed |
+
+## Response Fields
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `status` | string | Current job status (see above) |
+| `progress` | float | Completion percentage (0.0 to 100.0) |
+| `result_url` | string | URL to download generated file (images, videos, audio) |
+| `result` | string | Direct text result (transcriptions, OCR) |
+| `preview` | string | Preview URL if available during processing |
+
+<Info>
+**result_url vs result**: Generation tasks (images, videos, audio) return `result_url` with a download link. Analysis tasks (transcription, OCR) return `result` with the text directly.
+</Info>
+
+## Polling Best Practices
+
+Use exponential backoff to avoid rate limits:
+
+```python
+import time
+import requests
+
+def poll_for_result(request_id, api_key, max_wait=300):
+    url = f"https://api.deapi.ai/api/v1/client/request-status/{request_id}"
+    headers = {
+        "Authorization": f"Bearer {api_key}",
+        "Accept": "application/json"
+    }
+    
+    start_time = time.time()
+    wait_time = 1  # Start with 1 second
+    
+    while time.time() - start_time < max_wait:
+        response = requests.get(url, headers=headers)
+        data = response.json()["data"]
+        
+        print(f"Status: {data['status']}, Progress: {data.get('progress', 0)}%")
+        
+        if data["status"] == "done":
+            return data.get("result_url") or data.get("result")
+        elif data["status"] == "failed":
+            raise Exception("Job failed")
+        
+        time.sleep(wait_time)
+        wait_time = min(wait_time * 1.5, 10)  # Max 10 seconds between polls
+    
+    raise TimeoutError("Job did not complete in time")
+
+# Usage
+result = poll_for_result("c08a339c-73e5-4d67-a4d5-231302fbff9a", "your_api_key")
+print(f"Result: {result}")
+```
+
+## Example Responses
+
+<Tabs>
+  <Tab title="Image Generation (done)">
+    ```json
+    {
+      "data": {
+        "status": "done",
+        "progress": 100.0,
+        "result_url": "https://cdn.deapi.ai/results/abc123.png",
+        "result": null,
+        "preview": null
+      }
+    }
+    ```
+  </Tab>
+  <Tab title="Transcription (done)">
+    ```json
+    {
+      "data": {
+        "status": "done",
+        "progress": 100.0,
+        "result_url": null,
+        "result": "Welcome to our podcast. Today we discuss AI trends...",
+        "preview": null
+      }
+    }
+    ```
+  </Tab>
+  <Tab title="Processing">
+    ```json
+    {
+      "data": {
+        "status": "processing",
+        "progress": 45.5,
+        "result_url": null,
+        "result": null,
+        "preview": "https://cdn.deapi.ai/preview/abc123-preview.jpg"
+      }
+    }
+    ```
+  </Tab>
+  <Tab title="Failed">
+    ```json
+    {
+      "data": {
+        "status": "failed",
+        "progress": 0,
+        "result_url": null,
+        "result": null,
+        "preview": null
+      }
+    }
+    ```
+  </Tab>
+</Tabs>
+
+## Notes
+
+- Results are available for **24 hours** after job completion
+- The `preview` field may contain a low-resolution preview during processing (not all models support this)
+- For failed jobs, submit a new request — jobs cannot be retried

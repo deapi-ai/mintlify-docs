@@ -1,0 +1,229 @@
+---
+title: "Authentication"
+description: "How to authenticate with the deAPI REST API using Bearer tokens."
+---
+
+All deAPI endpoints require authentication via Bearer tokens. This page covers how to obtain, use, and manage your API keys.
+
+## Getting Your API Key
+
+<Steps>
+  <Step title="Create an Account">
+    Register at [deapi.ai](https://deapi.ai) using email or Google OAuth.
+  </Step>
+  <Step title="Access Dashboard">
+    Navigate to **Dashboard → Settings → API Keys**.
+  </Step>
+  <Step title="Generate Key">
+    Click **"Create new secret key"** to generate your API key.
+  </Step>
+  <Step title="Copy & Store Securely">
+    Copy your key immediately — it won't be shown again. Store it securely.
+  </Step>
+</Steps>
+
+<Warning>
+Your API key grants full access to your account. Never share it publicly, commit it to version control, or expose it in client-side code.
+</Warning>
+
+## Using Your API Key
+
+### Authorization Header
+
+Include your API key in the `Authorization` header with the `Bearer` prefix:
+
+```
+Authorization: Bearer YOUR_API_KEY
+```
+
+### Request Example
+
+<CodeGroup>
+
+```bash cURL
+curl -X POST "https://api.deapi.ai/api/v1/client/txt2img" \
+  -H "Authorization: Bearer sk_live_abc123..." \
+  -H "Accept: application/json" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "prompt": "A beautiful sunset over mountains",
+    "model": "flux-schnell",
+    "width": 1024,
+    "height": 1024
+  }'
+```
+
+```python Python
+import requests
+
+API_KEY = "sk_live_abc123..."
+BASE_URL = "https://api.deapi.ai/api/v1/client"
+
+headers = {
+    "Authorization": f"Bearer {API_KEY}",
+    "Accept": "application/json",
+    "Content-Type": "application/json"
+}
+
+response = requests.post(
+    f"{BASE_URL}/txt2img",
+    headers=headers,
+    json={
+        "prompt": "A beautiful sunset over mountains",
+        "model": "flux-schnell",
+        "width": 1024,
+        "height": 1024
+    }
+)
+
+print(response.json())
+```
+
+```javascript Node.js
+const API_KEY = "sk_live_abc123...";
+const BASE_URL = "https://api.deapi.ai/api/v1/client";
+
+const response = await fetch(`${BASE_URL}/txt2img`, {
+  method: "POST",
+  headers: {
+    "Authorization": `Bearer ${API_KEY}`,
+    "Accept": "application/json",
+    "Content-Type": "application/json"
+  },
+  body: JSON.stringify({
+    prompt: "A beautiful sunset over mountains",
+    model: "flux-schnell",
+    width: 1024,
+    height: 1024
+  })
+});
+
+const data = await response.json();
+console.log(data);
+```
+
+```php PHP
+<?php
+$apiKey = "sk_live_abc123...";
+$baseUrl = "https://api.deapi.ai/api/v1/client";
+
+$ch = curl_init();
+curl_setopt_array($ch, [
+    CURLOPT_URL => "$baseUrl/txt2img",
+    CURLOPT_RETURNTRANSFER => true,
+    CURLOPT_POST => true,
+    CURLOPT_HTTPHEADER => [
+        "Authorization: Bearer $apiKey",
+        "Accept: application/json",
+        "Content-Type: application/json"
+    ],
+    CURLOPT_POSTFIELDS => json_encode([
+        "prompt" => "A beautiful sunset over mountains",
+        "model" => "flux-schnell",
+        "width" => 1024,
+        "height" => 1024
+    ])
+]);
+
+$response = curl_exec($ch);
+curl_close($ch);
+
+print_r(json_decode($response, true));
+```
+
+</CodeGroup>
+
+## Required Headers
+
+| Header | Value | Required | Description |
+|--------|-------|----------|-------------|
+| `Authorization` | `Bearer YOUR_API_KEY` | Yes | Your API key with Bearer prefix |
+| `Accept` | `application/json` | Yes | Response format (always JSON) |
+| `Content-Type` | `application/json` or `multipart/form-data` | For POST | Request body format |
+
+<Info>
+Use `Content-Type: multipart/form-data` when uploading files (images, videos, audio).
+Use `Content-Type: application/json` for all other requests.
+</Info>
+
+## Authentication Errors
+
+| Status Code | Error | Description |
+|-------------|-------|-------------|
+| `401` | Unauthorized | Invalid or missing API key |
+| `403` | Forbidden | API key lacks required permissions |
+
+### Error Response Example
+
+```json
+{
+  "error": {
+    "code": "unauthorized",
+    "message": "Invalid API key provided"
+  }
+}
+```
+
+## Security Best Practices
+
+<AccordionGroup>
+  <Accordion title="Use Environment Variables">
+    Never hardcode API keys in your source code:
+    
+    ```bash
+    # .env file
+    DEAPI_KEY=sk_live_abc123...
+    ```
+    
+    ```python
+    import os
+    api_key = os.environ.get("DEAPI_KEY")
+    ```
+  </Accordion>
+  
+  <Accordion title="Server-Side Only">
+    Always make API calls from your backend server, never from client-side JavaScript in browsers. This prevents key exposure.
+  </Accordion>
+  
+  <Accordion title="Rotate Keys Regularly">
+    Generate new API keys periodically. You can create multiple keys and rotate them without downtime.
+  </Accordion>
+  
+  <Accordion title="Revoke Compromised Keys">
+    If you suspect a key has been compromised, revoke it immediately in the Dashboard and generate a new one.
+  </Accordion>
+  
+  <Accordion title="Monitor Usage">
+    Check your Dashboard regularly for unexpected usage patterns that might indicate unauthorized access.
+  </Accordion>
+</AccordionGroup>
+
+## Managing API Keys
+
+In your [Dashboard](https://deapi.ai/dashboard), you can:
+
+- **Create** new API keys (you can have multiple active keys)
+- **View** existing keys (only the last 4 characters are shown)
+- **Revoke** keys that are no longer needed or may be compromised
+- **Monitor** usage and costs per key
+
+## Welcome Bonus
+
+Upon registration, you receive a **20 USD bonus** to start using the API immediately. No credit card required for initial testing.
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Quickstart" icon="rocket" href="/quickstart">
+    Make your first API call in minutes
+  </Card>
+  <Card title="API Overview" icon="code" href="/api/overview">
+    Explore all available endpoints
+  </Card>
+  <Card title="Errors" icon="triangle-exclamation" href="/errors">
+    Learn how to handle errors
+  </Card>
+  <Card title="Pricing" icon="credit-card" href="/pricing">
+    Understand pricing and costs
+  </Card>
+</CardGroup>

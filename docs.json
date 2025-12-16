@@ -18,6 +18,7 @@
       "method": "bearer"
     }
   },
+  "openapi": "/openapi.json",
   "navbar": {
     "links": [
       {
@@ -76,20 +77,9 @@
       {
         "group": "API",
         "pages": [
-          "api/text-to-image",
-          "api/text-to-speech-tts",
-          "api/image-to-text-ocr",
-          "api/image-to-image",
-          "api/image-background-removal",
-          "api/video-to-text-transcription",
-          "api/upload-video-file-video-to-text",
-          "api/upload-audio-file-audio-to-text",
-          "api/image-to-video",
-          "api/text-to-video",
-          "api/text-to-embedding",
-          "api/check-balance",
-          "api/get-results",
-          "api/model-selection"
+          "api/authentication",
+          "api/errors",
+          "api/get-results"
         ]
       },
       {
