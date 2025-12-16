@@ -75,7 +75,6 @@
       },
       {
         "group": "API",
-        "openapi": "/openapi.json",
         "pages": [
           "api/get-results"
         ]
