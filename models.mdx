@@ -2,20 +2,18 @@
 title: "Models"
 ---
 
-**deAPI** gives you a unified API across multiple open-source models running on a decentralized GPU cloud. Models evolve frequently; always rely on the **live list** (endpoint at the bottom) for the current availability and IDs.
-
----
+**deAPI** gives you a unified API across multiple open-source models running on a decentralized GPU cloud. Models evolve frequently; always rely on the **live list** (endpoint at the bottom) for the current availability and slugs.
 
 ### How model selection works
 
 - **Every task requires a `model` parameter.**
   Example: `model: "Flux1schnell"` for Text-to-Image or `model: "WhisperLargeV3"` for speech/video transcription.
-- **Display names vs. API IDs.**
-  In tables and UI we show human-friendly names (e.g., "FLUX.1-schnell"). The API accepts stable IDs (lowercase, hyphen/period separated). Use the Models endpoint to fetch the exact `id` strings.
+- **Display names vs. API slugs.**
+  In tables and UI we show human-friendly names (e.g., "FLUX.1-schnell"). The API accepts stable slugs. Use the Models endpoint to fetch the exact `slug` strings.
 - **Quality ↔ Speed trade-off.**
   Larger models often yield higher quality but cost more and take longer. Use our Price Calculator on the homepage to estimate cost before running large jobs.
 - **Versioning & lifecycle.**
-  Models may be updated, superseded, or deprecated. Your application should resolve the model ID at runtime (from the live list) or pin to a specific version string if reproducibility is critical.
+  Models may be updated, superseded, or deprecated. Your application should resolve the model slug at runtime (from the live list) or pin to a specific version string if reproducibility is critical.
 - **Safety & acceptable use.**
   Follow the Terms of Service. Some content types may be blocked or filtered. See the Safety section in each task's docs.
 
@@ -26,18 +24,21 @@ title: "Models"
 The table below lists the core, production-ready models available today. For the authoritative list (including experimental or newly added ones), use the Models endpoint.
 
 | Service (Task) | Short Summary | What it's for | Display Name | API Model Slug | Task key(s) |
-|----------------|---------------|---------------|--------------|----------------|-------------|
+| -------------- | ------------- | ------------- | ------------ | -------------- | ----------- |
 | Text-to-Image | Generate images from text | Concept art, prototyping, creative exploration | FLUX.1-schnell | `Flux1schnell` | `txt2img` |
 | Text-to-Image | Generate images from text | Generate stunningly photorealistic visuals with exceptional clarity and high-fidelity details. | Z-Image-Turbo INT8 | `ZImageTurbo_INT8` | `txt2img` |
 | Text-to-Speech | Turn text into natural voice | Narration, accessibility, product voices in multiple languages and tones | Kokoro-82M | `Kokoro` | `txt2audio` |
 | Video-to-Text | Transcribe video into text | Subtitles, captions, indexing, SEO, datasets (with optional timestamps) | Whisper large-v3 | `WhisperLargeV3` | `video2txt` |
-| Image/Text-to-Video | Generate short AI videos | Cinematic motion, transitions, stylization | LTX-Video-0.9.8 13B | `Ltxv_13B_0_9_8_Distilled_FP8` | `img2video` `txt2video` |
-| Image-to-Text | Extract meaning from images | Descriptions, OCR, accessibility, moderation | Nanonets Ocr S-F16 | `Nanonets_Ocr_S_F16` | `img2txt` |
+| Image/Text-to-Video | Generate short AI videos | Cinematic motion, transitions, stylization | LTX Video-0.9.8 13B | `Ltxv_13B_0_9_8_Distilled_FP8` | `img2video`, `txt2video` |
+| Image-to-Text | Extract meaning from images | Descriptions, OCR, accessibility, moderation | Nanonets Ocr S F16 | `Nanonets_Ocr_S_F16` | `img2txt` |
 | Audio-to-Text | Convert audio into text | Subtitles, notes, search, accessibility (multi-language) | Whisper large-v3 | `WhisperLargeV3` | `video2txt` |
 | Text-to-Embedding | Create vector embeddings | Search, RAG, semantic similarity, clustering | BGE M3 | `Bge_M3_FP16` | `txt2embedding` |
 | Image-to-Image | Transform existing images | Style transfer, edits, in/outpainting | QwenImageEdit-Plus (NF4) | `QwenImageEdit_Plus_NF4` | `img2img` |
+| Image Background Removal | Remove background from images | Product photos, portraits, cutouts, compositing, e-commerce assets | Ben2 | `Ben2` | `img-rmbg` |
 
-> **Note:** Display names and example IDs above are provided for clarity; always fetch the live model list for the exact `id` strings currently enabled on the network.
+<Info>
+Display names and example slugs above are provided for clarity; always fetch the live model list for the exact `slug` strings currently enabled on the network.
+</Info>
 
 ---
 
@@ -50,21 +51,23 @@ The table below lists the core, production-ready models available today. For the
 - **Text Transcription (Video/Audio-to-Text):**
   `WhisperLargeV3` is a strong general-purpose baseline with robust multilingual support. For long videos, enable timestamps and chunking.
 - **Text Recognition (Image-to-Text):**
-  `Nanonets-Ocr-S-F16` targets clear captions and text extraction. For complex layouts, consider multiple passes or post-processing.
+  `Nanonets_Ocr_S_F16` targets clear captions and text extraction. For complex layouts, consider multiple passes or post-processing.
 - **Video Generation (Image-to-Video / Text-to-Video):**
   `Ltxv_13B_0_9_8_Distilled_FP8` is suited for short clips and stylized motion. Start with low duration/frames to validate aesthetics, then scale up.
 - **Embedding (Text-to-Embedding):**
   `Bge_M3_FP16` provides dense vector embeddings for semantic search, clustering, and retrieval-augmented generation (RAG). Use for similarity queries or knowledge base indexing.
 - **Image Transformation (Image-to-Image):**
   For edits and style transfer, start with `QwenImageEdit_Plus_NF4`. Use fewer steps for quick drafts and increase steps for higher fidelity; combine with masks or control prompts for targeted changes.
+- **Background Removal (Image Background Removal):**
+  `Ben2` provides fast, high-quality background removal for images up to 2048×2048px. Ideal for product photos, portraits, and generating transparent PNGs for downstream compositing or design work.
 
-For a deeper discussion of strengths/limits and typical parameter sets per task, see [**Model Selection**](/api/model-selection).
+For a deeper discussion of strengths/limits and typical parameter sets per task, see **Model Selection**.
 
 ---
 
 ### API usage examples
 
-**1) List models (fetch IDs at runtime)**
+**1) List models (fetch slugs at runtime)**
 
 ```bash
 curl -X GET "https://api.deapi.ai/api/v1/client/models" \
@@ -101,13 +104,15 @@ curl -X POST "https://api.deapi.ai/api/v1/client/vid2txt" \
   }'
 ```
 
-> Jobs return a `request_id`. Poll results with `GET /api/v1/client/request-status/{request_id}`.
+<Info>
+Jobs return a `request_id`. Poll results with `GET /api/v1/client/request-status/{request_id}`.
+</Info>
 
 ---
 
 ### Best practices
 
-- **Resolve the model list dynamically.** Don't hardcode IDs—fetch once at startup or periodically.
+- **Resolve the model list dynamically.** Don't hardcode slugs—fetch once at startup or periodically.
 - **Pin versions for reproducibility.** If you need bit-for-bit repeats (e.g., in T2I), pin model version + set seed.
 - **Budget before scaling.** Larger models and higher resolution/steps cost more—use the calculator on the homepage.
 - **Handle deprecation.** Implement a fallback path if a model becomes unavailable (e.g., switch to a recommended successor).
@@ -116,17 +121,17 @@ curl -X POST "https://api.deapi.ai/api/v1/client/vid2txt" \
 
 ### Related docs
 
-- [**Model Selection**](/api/model-selection): how to choose the best model per task and budget.
-- **Endpoints:** [Text-to-Image](/api/text-to-image), [Text-to-Speech](/api/text-to-speech-tts), [Image-to-Text (OCR)](/api/image-to-text-ocr), [Image-to-Image](/api/image-to-image), [Video-to-Text](/api/video-to-text-transcription), [Image-to-Video](/api/image-to-video), [Text-to-Embedding](/api/text-to-embedding), [Get Results](/api/get-results), [Check Balance](/api/check-balance), [Model Selection](/api/model-selection).
+- **Model Selection**: how to choose the best model per task and budget.
+- **Endpoints:** Text-to-Image, Text-to-Speech, Image-to-Text (OCR), Image Background Removal, Image-to-Image, Video-to-Text, Audio-to-Text, Image-to-Video, Text-to-Video, Upload Video File, Upload Audio File, Text-to-Embedding, Get Results, Check Balance.
 
 ---
 
 ### Live models (API)
 
-Use the endpoint below to retrieve the current, authoritative list of models (with `id` strings to use in requests):
+Use the endpoint below to retrieve the current, authoritative list of models (with `slug` strings to use in requests):
 
 ```
 GET https://api.deapi.ai/api/v1/client/models
 ```
 
-*(The response includes stable `id` values to pass as the `model` parameter in any task endpoint.)*
+The response includes stable `slug` values to pass as the `model` parameter in any task endpoint.
