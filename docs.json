@@ -78,6 +78,10 @@
         "pages": [
           "api/generation/text-to-image",
           "api/generation/text-to-image-price",
+          "api/generation/text-to-video",
+          "api/generation/text-to-video-price",
+          "api/generation/image-to-video",
+          "api/generation/image-to-video-price",
           "api/generation/text-to-speech",
           "api/generation/text-to-speech-price"
         ]
@@ -109,7 +113,11 @@
       {
         "group": "Utilities",
         "pages": [
-          "api/utilities/get-results"
+          "api/utilities/text-to-embedding",
+          "api/utilities/text-to-embedding-price",
+          "api/utilities/check-balance",
+          "api/utilities/get-results",
+          "api/utilities/model-selection"
         ]
       },
       {
