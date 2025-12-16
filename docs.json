@@ -75,10 +75,10 @@
       },
       {
         "group": "API",
-        "openapi": {
-          "source": "openapi.json",
-          "directory": "api"
-        }
+        "openapi": "/openapi.json",
+        "pages": [
+          "api/get-results"
+        ]
       },
       {
         "group": "Other",
