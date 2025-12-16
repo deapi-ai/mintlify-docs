@@ -76,7 +76,7 @@
       {
         "group": "API",
         "openapi": {
-          "source": "/openapi.json",
+          "source": "openapi.json",
           "directory": "api"
         }
       },
