@@ -86,14 +86,24 @@
         "group": "Analysis",
         "pages": [
           "api/analysis/image-to-text",
-          "api/analysis/image-to-text-price"
+          "api/analysis/image-to-text-price",
+          "api/analysis/video-to-text",
+          "api/analysis/video-to-text-price",
+          "api/analysis/audio-to-text-spaces",
+          "api/analysis/audio-to-text-spaces-price",
+          "api/analysis/upload-video-file",
+          "api/analysis/upload-video-file-price",
+          "api/analysis/upload-audio-file",
+          "api/analysis/upload-audio-file-price"
         ]
       },
       {
         "group": "Transformation",
         "pages": [
           "api/transformation/image-to-image",
-          "api/transformation/image-to-image-price"
+          "api/transformation/image-to-image-price",
+          "api/transformation/background-removal",
+          "api/transformation/background-removal-price"
         ]
       },
       {

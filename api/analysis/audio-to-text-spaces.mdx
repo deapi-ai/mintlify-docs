@@ -1,0 +1,25 @@
+---
+title: "Audio-to-Text (X Spaces Transcription)"
+openapi: "/openapi.json POST /api/v1/client/aud2txt"
+---
+
+<Note>
+**Prerequisite:** To ensure a successful request, you must first consult the [Model Selection](/api/utilities/model-selection) endpoint to identify a valid model `slug`, check specific **limits** and **features**, and verify **LoRA** availability.
+</Note>
+
+## Technical Notes & Constraints
+
+### Spaces Support
+
+- **Completed Spaces Only**: The API does not support live (ongoing) X Spaces. If a URL for an active Space is provided, the API will return a validation error. Please ensure the Space has ended before submission.
+- **Max Duration**: 90 minutes
+
+### Progress Tracking (URL/Spaces)
+
+- **Download Phase:** Due to external stream handling, the task progress will remain at 0% for the entire duration of the audio download.
+- **Transcription Phase**: Once the download is complete, the progress status will jump to 50% and update incrementally until finished.
+- A prolonged 0% status is normal behavior for long X Spaces.
+
+<Info>
+Transcription for standard video posts on X is handled via the [Video-to-Text](/api/analysis/video-to-text) endpoint.
+</Info>
