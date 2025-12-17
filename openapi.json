@@ -4817,7 +4817,7 @@
                                     "pending",
                                     "processing",
                                     "done",
-                                    "failed"
+                                    "error"
                                 ]
                             },
                             "preview": {
