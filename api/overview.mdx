@@ -82,7 +82,7 @@ Typical API usage follows this pattern:
     Response contains `request_id`.
   </Step>
   <Step title="Poll for results">
-    Call `GET /api/v1/client/request-status/{job_request}` until `status` is `done` or `failed`.
+    Call `GET /api/v1/client/request-status/{job_request}` until `status` is `done` or `error`.
     Use the `request_id` from step 3 as the `job_request` path parameter.
   </Step>
   <Step title="Download result">
