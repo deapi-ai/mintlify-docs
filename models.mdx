@@ -80,16 +80,22 @@ curl -X GET "https://api.deapi.ai/api/v1/client/models" \
 curl -X POST "https://api.deapi.ai/api/v1/client/txt2img" \
   -H "Authorization: Bearer $DEAPI_API_KEY" \
   -H "Content-Type: application/json" \
+  -H "Accept: application/json" \
   -d '{
     "prompt": "isometric cozy cabin at dusk, soft rim light, artstation trending",
     "model": "Flux1schnell",
     "width": 768,
     "height": 768,
-    "steps": 25,
-    "guidance": 3.5,
-    "seed": 12345
+    "steps": 4,
+    "guidance": 0,
+    "seed": 12345,
+    "loras": []
   }'
 ```
+
+<Note>
+`Flux1schnell` has `max_steps: 10` and does not support guidance (`guidance` must be `0`). Always check model limits via the Models endpoint.
+</Note>
 
 **3) Use a model in Video-to-Text (YouTube)**
 
@@ -97,15 +103,16 @@ curl -X POST "https://api.deapi.ai/api/v1/client/txt2img" \
 curl -X POST "https://api.deapi.ai/api/v1/client/vid2txt" \
   -H "Authorization: Bearer $DEAPI_API_KEY" \
   -H "Content-Type: application/json" \
+  -H "Accept: application/json" \
   -d '{
-    "youtube_url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+    "video_url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
     "include_ts": true,
     "model": "WhisperLargeV3"
   }'
 ```
 
 <Info>
-Jobs return a `request_id`. Poll results with `GET /api/v1/client/request-status/{request_id}`.
+Jobs return a `request_id`. Poll results with `GET /api/v1/client/request-status/{job_request}` using the `request_id` value.
 </Info>
 
 ---
