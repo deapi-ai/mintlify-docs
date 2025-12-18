@@ -478,7 +478,6 @@
                                     "image",
                                     "prompt",
                                     "model",
-                                    "loras",
                                     "guidance",
                                     "steps",
                                     "seed"
@@ -610,7 +609,6 @@
                                 "required": [
                                     "prompt",
                                     "model",
-                                    "loras",
                                     "guidance",
                                     "steps",
                                     "seed"
@@ -1650,7 +1648,6 @@
                                 "required": [
                                     "prompt",
                                     "model",
-                                    "loras",
                                     "width",
                                     "height",
                                     "guidance",
@@ -1945,7 +1942,6 @@
                                 "required": [
                                     "prompt",
                                     "model",
-                                    "loras",
                                     "width",
                                     "height",
                                     "guidance",
