@@ -40,6 +40,20 @@ The table below lists the core, production-ready models available today. For the
 Display names and example slugs above are provided for clarity; always fetch the live model list for the exact `slug` strings currently enabled on the network.
 </Info>
 
+### Resolution requirements
+
+Models that generate images or video require dimensions (`width`, `height`) divisible by a specific step value. If you provide dimensions that don't match, the API will automatically round them **up** to the nearest valid value.
+
+| Model | Task | Resolution Step | Example valid sizes |
+|-------|------|-----------------|---------------------|
+| `Flux1schnell` | txt2img | 128 | 512, 640, 768, 896, 1024 |
+| `ZImageTurbo_INT8` | txt2img | 16 | 512, 528, 544, 768, 1024 |
+| `Ltxv_13B_0_9_8_Distilled_FP8` | txt2video, img2video | 16 | 256, 512, 768 |
+
+<Info>
+For example, if you request `width: 500` with `Flux1schnell`, the output will be `512px` wide (rounded up to nearest multiple of 128).
+</Info>
+
 ---
 
 ### Picking the right model

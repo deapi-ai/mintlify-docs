@@ -9,20 +9,20 @@ Example pricing is shown below for reference; exact, up-to-date rates are always
 ### Pricing Overview
 
 <Info>
-Up to date prices are always available via endpoint /price-calculation for the selected model
+  Up to date prices are always available via endpoint /price-calculation for the selected model
 </Info>
 
-| Task Type                             | Pricing Metric                      | Example Rate                                           | Notes                                                                               |
-| ------------------------------------- | ----------------------------------- | ------------------------------------------------------ | ----------------------------------------------------------------------------------- |
-| Text-to-Image (Flux.1 schnell)        | resolution × steps                  | 0.00136 USD for 512x512, 4 steps                       | Uses Flux Schnell as baseline in sample calculator                                  |
-| Text-to-Image (Z-Image-Turbo INT8)    | resolution × steps                  | 0.00405 USD for 512x512, 4 steps                       | Generates very realistic images                                                     |
-| Image-to-Image                        | steps (style transfer)              | ~0.0132 USD for 512x512, 20 steps                      | Cost scales with steps and GPU time                                                 |
-| Text-to-Speech (TTS)                  | number of characters                | 0.77 USD per 1 M characters                            | Adjustable speed multipliers (fast = 0.5× cost, slow = 2× cost)                     |
-| Text-to-Video                         | video duration + resolution         | 0.001737 USD for 2s, 256×256                           | 2–5 second clips; higher res or steps increase cost                                 |
-| Image-to-Video                        | source image + motion interpolation | 0.001737 USD for 2s, 256×256                           | 2–5 second output, smooth motion                                                    |
-| Video-to-Text (X, YouTube Transcription) | video length                     | from 0.021 USD per hour                                     | Supports timestamps, multilingual                                                   |
-| Image-to-Text (OCR)                   | output characters                   | 0.00928 USD per 1,000 output chars (for 1024×1024 images) | Also includes object detection, scene understanding                              |
-| Text-to-Embedding                     | number of tokens processed          | 0.000068 USD per 1,000 tokens                          | Supports large-scale semantic search and RAG; cost scales linearly with token count |
+| Task Type                                         | Pricing Metric                      | Example Rate                                              | Notes                                                                               |
+| ------------------------------------------------- | ----------------------------------- | --------------------------------------------------------- | ----------------------------------------------------------------------------------- |
+| Text-to-Image (Flux.1 schnell)                    | resolution × steps                  | 0.00136 USD for 512x512, 4 steps                          | Uses Flux Schnell as baseline in sample calculator                                  |
+| Text-to-Image (Z-Image-Turbo INT8)                | resolution × steps                  | 0.00405 USD for 512x512, 4 steps                          | Generates very realistic images                                                     |
+| Image-to-Image                                    | steps (style transfer)              | ~0.0132 USD for 512x512, 20 steps                         | Cost scales with steps and GPU time                                                 |
+| Text-to-Speech (TTS)                              | number of characters                | 0.77 USD per 1 M characters                               | Adjustable speed multipliers (fast = 0.5× cost, slow = 2× cost)                     |
+| Text-to-Video                                     | video duration + resolution         | 0.001737 USD for 2s, 256×256                              | 2–5 second clips; higher res or steps increase cost                                 |
+| Image-to-Video                                    | source image + motion interpolation | 0.001737 USD for 2s, 256×256                              | 2–5 second output, smooth motion                                                    |
+| Video-to-Text (X, Twitch, Kick, YT Transcription) | video length                        | from 0.021 USD per hour                                   | Supports timestamps, multilingual                                                   |
+| Image-to-Text (OCR)                               | output characters                   | 0.00928 USD per 1,000 output chars (for 1024×1024 images) | Also includes object detection, scene understanding                                 |
+| Text-to-Embedding                                 | number of tokens processed          | 0.000068 USD per 1,000 tokens                             | Supports large-scale semantic search and RAG; cost scales linearly with token count |
 
 ---
 
@@ -101,5 +101,4 @@ Up to date prices are always available via endpoint /price-calculation for the s
 
 ---
 
-**Link to live pricing page for reference:**
-https://deapi.ai/#pricing
+**Link to live pricing page for reference:** https://deapi.ai/#pricing
