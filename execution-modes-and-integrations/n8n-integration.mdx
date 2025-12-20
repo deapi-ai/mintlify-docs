@@ -92,16 +92,16 @@ Add a **Manual Trigger** (or any trigger like Webhook, Schedule) to start the wo
 
 Add an **HTTP Request** node with the following configuration:
 
-| Setting | Value |
-|---------|-------|
-| **Method** | `POST` |
-| **URL** | `https://api.deapi.ai/api/v1/client/txt2img` |
-| **Authentication** | Generic Credential Type |
-| **Generic Auth Type** | Bearer Auth |
-| **Bearer Auth** | Select your deAPI credential |
-| **Send Body** | Enabled (toggle ON) |
-| **Body Content Type** | JSON |
-| **Specify Body** | Using JSON |
+| Setting               | Value                                        |
+| --------------------- | -------------------------------------------- |
+| **Method**            | `POST`                                       |
+| **URL**               | `https://api.deapi.ai/api/v1/client/txt2img` |
+| **Authentication**    | Generic Credential Type                      |
+| **Generic Auth Type** | Bearer Auth                                  |
+| **Bearer Auth**       | Select your deAPI credential                 |
+| **Send Body**         | Enabled (toggle ON)                          |
+| **Body Content Type** | JSON                                         |
+| **Specify Body**      | Using JSON                                   |
 
 **JSON Body:**
 
@@ -135,16 +135,16 @@ The response will contain a `request_id`:
 
 Add a second **HTTP Request** node to check the job status:
 
-| Setting | Value |
-|---------|-------|
-| **Method** | `GET` |
-| **URL** | `https://api.deapi.ai/api/v1/client/request-status/{{ $node["HTTP Request"].json.data.request_id }}` |
-| **Authentication** | Generic Credential Type |
-| **Generic Auth Type** | Bearer Auth |
-| **Bearer Auth** | Select your deAPI credential |
+| Setting               | Value                                                                                                |
+| --------------------- | ---------------------------------------------------------------------------------------------------- |
+| **Method**            | `GET`                                                                                                |
+| **URL**               | `https://api.deapi.ai/api/v1/client/request-status/{{ $node["HTTP Request"].json.data.request_id }}` |
+| **Authentication**    | Generic Credential Type                                                                              |
+| **Generic Auth Type** | Bearer Auth                                                                                          |
+| **Bearer Auth**       | Select your deAPI credential                                                                         |
 
 <Note>
-The URL uses n8n expression syntax to reference the `request_id` from the previous node.
+  The URL uses n8n expression syntax to reference the `request_id` from the previous node.
 </Note>
 
 The response includes job status:
@@ -165,13 +165,14 @@ The response includes job status:
 
 Add an **If** node to check whether the job has completed:
 
-| Setting | Value |
-|---------|-------|
-| **Conditions** | |
-| **Value 1** | `{{ $json.data.result_url }}` |
-| **Operation** | `exists` |
+| Setting        | Value                         |
+| -------------- | ----------------------------- |
+| **Conditions** |                               |
+| **Value 1**    | `{{ $json.data.result_url }}` |
+| **Operation**  | `exists`                      |
 
 Connect the outputs:
+
 - **True** → HTTP Request2 (download result)
 - **False** → Wait node (retry loop)
 
@@ -181,14 +182,14 @@ Connect the outputs:
 
 Add a **Wait** node for the **False** branch:
 
-| Setting | Value |
-|---------|-------|
-| **Resume** | After Time Interval |
-| **Wait Amount** | `3` |
-| **Wait Unit** | Seconds |
+| Setting         | Value               |
+| --------------- | ------------------- |
+| **Resume**      | After Time Interval |
+| **Wait Amount** | `3`                 |
+| **Wait Unit**   | Seconds             |
 
 <Warning>
-Connect the Wait node output back to **HTTP Request1** to create the polling loop.
+  Connect the Wait node output back to **HTTP Request1** to create the polling loop.
 </Warning>
 
 ---
@@ -197,13 +198,13 @@ Connect the Wait node output back to **HTTP Request1** to create the polling loo
 
 Add a final **HTTP Request** node for the **True** branch:
 
-| Setting | Value |
-|---------|-------|
-| **Method** | `GET` |
-| **URL** | `{{ $json.data.result_url }}` |
-| **Authentication** | None |
-| **Options → Response → Response Format** | File |
-| **Options → Response → Put Output in Field** | `data` |
+| Setting                                      | Value                         |
+| -------------------------------------------- | ----------------------------- |
+| **Method**                                   | `GET`                         |
+| **URL**                                      | `{{ $json.data.result_url }}` |
+| **Authentication**                           | None                          |
+| **Options → Response → Response Format**     | File                          |
+| **Options → Response → Put Output in Field** | `data`                        |
 
 The generated image is now available in your workflow for further processing (save to disk, upload to cloud storage, send via email, etc.).
 
@@ -215,13 +216,13 @@ The generated image is now available in your workflow for further processing (sa
 
 Adjust the Wait node timing based on task type:
 
-| Task Type | Recommended Wait |
-|-----------|-----------------|
-| Text-to-Image | 2–5 seconds |
-| Image-to-Image | 2–5 seconds |
-| Text-to-Video | 10–30 seconds |
-| Video Transcription | 5–15 seconds |
-| Audio Transcription | 3–10 seconds |
+| Task Type           | Recommended Wait |
+| ------------------- | ---------------- |
+| Text-to-Image       | 2–5 seconds      |
+| Image-to-Image      | 10–15 seconds    |
+| Text-to-Video       | 5–10 seconds     |
+| Video Transcription | 5–15 seconds     |
+| Audio Transcription | 3–10 seconds     |
 
 #### Error Handling
 
@@ -241,20 +242,20 @@ Create a single Bearer Auth credential named "deAPI" and reuse it across all HTT
 
 Use the same polling pattern for all deAPI endpoints:
 
-| Service | POST Endpoint |
-|---------|--------------|
-| Text-to-Image | `/api/v1/client/txt2img` |
-| Image-to-Image | `/api/v1/client/img2img` |
-| Text-to-Video | `/api/v1/client/txt2video` |
-| Image-to-Video | `/api/v1/client/img2video` |
-| Text-to-Speech | `/api/v1/client/txt2audio` |
-| Video-to-Text (URL) | `/api/v1/client/vid2txt` |
-| Video-to-Text (File) | `/api/v1/client/videofile2txt` |
-| Audio-to-Text (File) | `/api/v1/client/audiofile2txt` |
-| Audio-to-Text (X Spaces) | `/api/v1/client/aud2txt` |
-| Background Removal | `/api/v1/client/img-rmbg` |
-| OCR (Image-to-Text) | `/api/v1/client/img2txt` |
-| Text-to-Embedding | `/api/v1/client/txt2embedding` |
+| Service                  | POST Endpoint                  |
+| ------------------------ | ------------------------------ |
+| Text-to-Image            | `/api/v1/client/txt2img`       |
+| Image-to-Image           | `/api/v1/client/img2img`       |
+| Text-to-Video            | `/api/v1/client/txt2video`     |
+| Image-to-Video           | `/api/v1/client/img2video`     |
+| Text-to-Speech           | `/api/v1/client/txt2audio`     |
+| Video-to-Text (URL)      | `/api/v1/client/vid2txt`       |
+| Video-to-Text (File)     | `/api/v1/client/videofile2txt` |
+| Audio-to-Text (File)     | `/api/v1/client/audiofile2txt` |
+| Audio-to-Text (X Spaces) | `/api/v1/client/aud2txt`       |
+| Background Removal       | `/api/v1/client/img-rmbg`      |
+| OCR (Image-to-Text)      | `/api/v1/client/img2txt`       |
+| Text-to-Embedding        | `/api/v1/client/txt2embedding` |
 
 All endpoints follow the same pattern:
 
