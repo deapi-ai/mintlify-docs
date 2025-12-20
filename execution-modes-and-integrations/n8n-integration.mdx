@@ -46,38 +46,38 @@ The workflow follows deAPI's [queued execution model](/execution-modes-and-integ
 4. **Download result** — Fetch the generated image
 
 ```
-┌─────────────────────┐
-│  Manual Trigger     │
-└──────────┬──────────┘
-           │
-           ▼
-┌─────────────────────┐
-│  HTTP Request       │  POST /api/v1/client/txt2img
-│  (Submit Job)       │
-└──────────┬──────────┘
-           │
-           ▼
-┌─────────────────────┐
-│  HTTP Request1      │◄────────────────────┐
-│  (Check Status)     │                     │
-└──────────┬──────────┘                     │
-           │                                │
-           ▼                                │
-┌─────────────────────┐                     │
-│  If                 │                     │
-│  (result_url exists)│                     │
-└──────────┬──────────┘                     │
-           │                                │
-     ┌─────┴─────┐                          │
-     │           │                          │
-   True        False                        │
-     │           │                          │
-     ▼           ▼                          │
-┌─────────┐ ┌─────────┐                     │
-│ HTTP    │ │  Wait   │─────────────────────┘
-│Request2 │ │ (3 sec) │
-│(Download)│ └─────────┘
-└─────────┘
++---------------------+
+|   Manual Trigger    |
++----------+----------+
+           |
+           v
++---------------------+
+|    HTTP Request     |  POST /api/v1/client/txt2img
+|    (Submit Job)     |
++----------+----------+
+           |
+           v
++---------------------+
+|   HTTP Request1     |<-----------+
+|   (Check Status)    |            |
++----------+----------+            |
+           |                       |
+           v                       |
++---------------------+            |
+|         If          |            |
+| (result_url exists) |            |
++----------+----------+            |
+           |                       |
+     +-----+-----+                 |
+     |           |                 |
+   True        False               |
+     |           |                 |
+     v           v                 |
++----------+ +----------+          |
+|   HTTP   | |   Wait   |----------+
+| Request2 | | (3 sec)  |
+|(Download)| +----------+
++----------+
 ```
 
 ---
