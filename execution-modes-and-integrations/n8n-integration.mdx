@@ -1,0 +1,272 @@
+---
+title: "n8n Integration"
+---
+
+This guide explains how to integrate deAPI with n8n to automate AI-powered workflows such as image generation, video transcription, and more.
+
+---
+
+### What is n8n?
+
+**n8n** is an open-source workflow automation tool that allows you to connect different services and APIs together. With deAPI's HTTP API, you can build powerful automation workflows that generate images, transcribe videos, create speech, and more — all without writing code.
+
+---
+
+### Prerequisites
+
+Before you begin, ensure you have:
+
+- An **n8n instance** (self-hosted or [n8n Cloud](https://n8n.io/))
+- A **deAPI API key** from the [deAPI Dashboard](https://deapi.ai/dashboard)
+- Basic understanding of n8n workflows
+
+---
+
+### Authentication Setup
+
+All deAPI endpoints require Bearer token authentication. In n8n, configure this once and reuse it across your workflow:
+
+1. In your HTTP Request node, set **Authentication** to `Generic Credential Type`
+2. Set **Generic Auth Type** to `Bearer Auth`
+3. Create a new credential with your deAPI API key as the token
+
+---
+
+### Example Workflow: Text-to-Image Generation
+
+This example demonstrates a complete workflow that generates an image from a text prompt using deAPI's asynchronous job model.
+
+#### Workflow Overview
+
+The workflow follows deAPI's [queued execution model](/execution-modes-and-integrations/execution-modes-and-http-queue):
+
+1. **Submit job** — POST request to start image generation
+2. **Poll status** — Check job status in a loop
+3. **Check completion** — Verify if `result_url` exists
+4. **Download result** — Fetch the generated image
+
+```
+┌─────────────────────┐
+│  Manual Trigger     │
+└──────────┬──────────┘
+           │
+           ▼
+┌─────────────────────┐
+│  HTTP Request       │  POST /api/v1/client/txt2img
+│  (Submit Job)       │
+└──────────┬──────────┘
+           │
+           ▼
+┌─────────────────────┐
+│  HTTP Request1      │◄────────────────────┐
+│  (Check Status)     │                     │
+└──────────┬──────────┘                     │
+           │                                │
+           ▼                                │
+┌─────────────────────┐                     │
+│  If                 │                     │
+│  (result_url exists)│                     │
+└──────────┬──────────┘                     │
+           │                                │
+     ┌─────┴─────┐                          │
+     │           │                          │
+   True        False                        │
+     │           │                          │
+     ▼           ▼                          │
+┌─────────┐ ┌─────────┐                     │
+│ HTTP    │ │  Wait   │─────────────────────┘
+│Request2 │ │ (3 sec) │
+│(Download)│ └─────────┘
+└─────────┘
+```
+
+---
+
+#### Step 1: Trigger Node
+
+Add a **Manual Trigger** (or any trigger like Webhook, Schedule) to start the workflow.
+
+---
+
+#### Step 2: Submit Generation Request (HTTP Request)
+
+Add an **HTTP Request** node with the following configuration:
+
+| Setting | Value |
+|---------|-------|
+| **Method** | `POST` |
+| **URL** | `https://api.deapi.ai/api/v1/client/txt2img` |
+| **Authentication** | Generic Credential Type |
+| **Generic Auth Type** | Bearer Auth |
+| **Bearer Auth** | Select your deAPI credential |
+| **Send Body** | Enabled (toggle ON) |
+| **Body Content Type** | JSON |
+| **Specify Body** | Using JSON |
+
+**JSON Body:**
+
+```json
+{
+  "seed": 1312321313,
+  "loras": [],
+  "model": "ZImageTurbo_INT8",
+  "steps": 8,
+  "width": 1024,
+  "height": 1024,
+  "prompt": "Red Bull F1 car from 2025",
+  "guidance": 3.5,
+  "negative_prompt": null
+}
+```
+
+The response will contain a `request_id`:
+
+```json
+{
+  "data": {
+    "request_id": "c08a339c-73e5-4d67-a4d5-231302fbff9a"
+  }
+}
+```
+
+---
+
+#### Step 3: Poll Job Status (HTTP Request1)
+
+Add a second **HTTP Request** node to check the job status:
+
+| Setting | Value |
+|---------|-------|
+| **Method** | `GET` |
+| **URL** | `https://api.deapi.ai/api/v1/client/request-status/{{ $node["HTTP Request"].json.data.request_id }}` |
+| **Authentication** | Generic Credential Type |
+| **Generic Auth Type** | Bearer Auth |
+| **Bearer Auth** | Select your deAPI credential |
+
+<Note>
+The URL uses n8n expression syntax to reference the `request_id` from the previous node.
+</Note>
+
+The response includes job status:
+
+```json
+{
+  "data": {
+    "status": "done",
+    "progress": 100,
+    "result_url": "https://depinprod.s3.pl-waw.scw.cloud/depin-result/..."
+  }
+}
+```
+
+---
+
+#### Step 4: Check if Result is Ready (If Node)
+
+Add an **If** node to check whether the job has completed:
+
+| Setting | Value |
+|---------|-------|
+| **Conditions** | |
+| **Value 1** | `{{ $json.data.result_url }}` |
+| **Operation** | `exists` |
+
+Connect the outputs:
+- **True** → HTTP Request2 (download result)
+- **False** → Wait node (retry loop)
+
+---
+
+#### Step 5: Wait Before Retry (Wait Node)
+
+Add a **Wait** node for the **False** branch:
+
+| Setting | Value |
+|---------|-------|
+| **Resume** | After Time Interval |
+| **Wait Amount** | `3` |
+| **Wait Unit** | Seconds |
+
+<Warning>
+Connect the Wait node output back to **HTTP Request1** to create the polling loop.
+</Warning>
+
+---
+
+#### Step 6: Download Result (HTTP Request2)
+
+Add a final **HTTP Request** node for the **True** branch:
+
+| Setting | Value |
+|---------|-------|
+| **Method** | `GET` |
+| **URL** | `{{ $json.data.result_url }}` |
+| **Authentication** | None |
+| **Options → Response → Response Format** | File |
+| **Options → Response → Put Output in Field** | `data` |
+
+The generated image is now available in your workflow for further processing (save to disk, upload to cloud storage, send via email, etc.).
+
+---
+
+### Tips & Best Practices
+
+#### Polling Interval
+
+Adjust the Wait node timing based on task type:
+
+| Task Type | Recommended Wait |
+|-----------|-----------------|
+| Text-to-Image | 2–5 seconds |
+| Image-to-Image | 2–5 seconds |
+| Text-to-Video | 10–30 seconds |
+| Video Transcription | 5–15 seconds |
+| Audio Transcription | 3–10 seconds |
+
+#### Error Handling
+
+Add error handling to your workflow:
+
+- Check for `status: "error"` in the polling response
+- Set a maximum number of loop iterations to avoid infinite loops (use a counter with Set node)
+- Use n8n's built-in **Error Trigger** node for workflow-level error handling
+
+#### Reusable Credentials
+
+Create a single Bearer Auth credential named "deAPI" and reuse it across all HTTP Request nodes.
+
+---
+
+### Other Endpoints
+
+Use the same polling pattern for all deAPI endpoints:
+
+| Service | POST Endpoint |
+|---------|--------------|
+| Text-to-Image | `/api/v1/client/txt2img` |
+| Image-to-Image | `/api/v1/client/img2img` |
+| Text-to-Video | `/api/v1/client/txt2video` |
+| Image-to-Video | `/api/v1/client/img2video` |
+| Text-to-Speech | `/api/v1/client/txt2audio` |
+| Video-to-Text (URL) | `/api/v1/client/vid2txt` |
+| Video-to-Text (File) | `/api/v1/client/videofile2txt` |
+| Audio-to-Text (File) | `/api/v1/client/audiofile2txt` |
+| Audio-to-Text (X Spaces) | `/api/v1/client/aud2txt` |
+| Background Removal | `/api/v1/client/img-rmbg` |
+| OCR (Image-to-Text) | `/api/v1/client/img2txt` |
+| Text-to-Embedding | `/api/v1/client/txt2embedding` |
+
+All endpoints follow the same pattern:
+
+1. `POST` to submit the job → receive `request_id`
+2. `GET /api/v1/client/request-status/{request_id}` → poll status
+3. When `status: "done"` → use `result_url` or `result`
+
+---
+
+### Resources
+
+- [n8n Documentation](https://docs.n8n.io/)
+- [deAPI API Reference](/api/overview)
+- [Execution Modes & HTTP Queue](/execution-modes-and-integrations/execution-modes-and-http-queue)
+- [Model Selection](/api/utilities/model-selection)

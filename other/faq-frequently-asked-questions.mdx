@@ -1,5 +1,5 @@
 ---
-title: "FAQ – Frequently Asked Questions"
+title: "FAQ — Frequently Asked Questions"
 ---
 
 #### 1. **How do I get access to the deAPI panel?**
@@ -68,16 +68,16 @@ Yes. Visit the **Model Selection** endpoint to browse available models, or check
 
 deAPI provides the following AI-powered services:
 
-- **Text-to-Image** – Generate images from text prompts (Flux, Z-Image-Turbo)
-- **Image-to-Image** – Transform and edit existing images
-- **Image Background Removal** – Remove backgrounds for transparent PNGs
-- **Text-to-Video** – Generate videos from text descriptions
-- **Image-to-Video** – Animate static images into videos
-- **Text-to-Speech (TTS)** – Convert text to natural-sounding audio
-- **Video-to-Text** – Transcribe videos (YouTube, X/Twitter, file uploads)
-- **Audio-to-Text** – Transcribe audio files and X/Twitter Spaces
-- **Image-to-Text (OCR)** – Extract text from images
-- **Text-to-Embedding** – Generate vector embeddings for semantic search
+- **Text-to-Image** — Generate images from text prompts (Flux, Z-Image-Turbo)
+- **Image-to-Image** — Transform and edit existing images
+- **Image Background Removal** — Remove backgrounds for transparent PNGs
+- **Text-to-Video** — Generate videos from text descriptions
+- **Image-to-Video** — Animate static images into videos
+- **Text-to-Speech (TTS)** — Convert text to natural-sounding audio
+- **Video-to-Text** — Transcribe videos (YouTube, X/Twitter, file uploads)
+- **Audio-to-Text** — Transcribe audio files and X/Twitter Spaces
+- **Image-to-Text (OCR)** — Extract text from images
+- **Text-to-Embedding** — Generate vector embeddings for semantic search
 
 ---
 
@@ -87,13 +87,19 @@ Yes! deAPI offers an **MCP (Model Context Protocol) server** that allows AI assi
 
 ---
 
-#### 11. **Is deAPI ready for production use?**
+#### 11. **Can I use deAPI with n8n or other automation tools?**
+
+Yes! deAPI works seamlessly with **n8n** and other workflow automation platforms. You can build automated workflows that generate images, transcribe videos, create speech, and more using deAPI's HTTP API. The integration uses standard HTTP Request nodes with Bearer token authentication. See the **n8n Integration** documentation for a complete step-by-step guide with example workflows.
+
+---
+
+#### 12. **Is deAPI ready for production use?**
 
 Yes. deAPI is built to support production-grade workloads. All models and services are optimized for speed, reliability, and scalability. The platform offers 300 RPM immediately upon registration — no waiting periods or tier upgrades required.
 
 ---
 
-#### 12. **What should I do if I get an error?**
+#### 13. **What should I do if I get an error?**
 
 Check the error code and make sure:
 - `401` — Your API key is valid
