@@ -6,16 +6,11 @@ title: "Models"
 
 ### How model selection works
 
-- **Every task requires a `model` parameter.**
-  Example: `model: "Flux1schnell"` for Text-to-Image or `model: "WhisperLargeV3"` for speech/video transcription.
-- **Display names vs. API slugs.**
-  In tables and UI we show human-friendly names (e.g., "FLUX.1-schnell"). The API accepts stable slugs. Use the Models endpoint to fetch the exact `slug` strings.
-- **Quality ↔ Speed trade-off.**
-  Larger models often yield higher quality but cost more and take longer. Use our Price Calculator on the homepage to estimate cost before running large jobs.
-- **Versioning & lifecycle.**
-  Models may be updated, superseded, or deprecated. Your application should resolve the model slug at runtime (from the live list) or pin to a specific version string if reproducibility is critical.
-- **Safety & acceptable use.**
-  Follow the Terms of Service. Some content types may be blocked or filtered. See the Safety section in each task's docs.
+- **`Every task requires a model parameter.`** Example: `model: "Flux1schnell"` for Text-to-Image or `model: "WhisperLargeV3"` for speech/video transcription.
+- **Display names vs. API slugs.** In tables and UI we show human-friendly names (e.g., "FLUX.1-schnell"). The API accepts stable slugs. Use the Models endpoint to fetch the exact `slug` strings.
+- **Quality ↔ Speed trade-off.** Larger models often yield higher quality but cost more and take longer. Use our Price Calculator on the homepage to estimate cost before running large jobs.
+- **Versioning & lifecycle.** Models may be updated, superseded, or deprecated. Your application should resolve the model slug at runtime (from the live list) or pin to a specific version string if reproducibility is critical.
+- **Safety & acceptable use.** Follow the Terms of Service. Some content types may be blocked or filtered. See the Safety section in each task's docs.
 
 ---
 
@@ -23,57 +18,49 @@ title: "Models"
 
 The table below lists the core, production-ready models available today. For the authoritative list (including experimental or newly added ones), use the Models endpoint.
 
-| Service (Task) | Short Summary | What it's for | Display Name | API Model Slug | Task key(s) |
-| -------------- | ------------- | ------------- | ------------ | -------------- | ----------- |
-| Text-to-Image | Generate images from text | Concept art, prototyping, creative exploration | FLUX.1-schnell | `Flux1schnell` | `txt2img` |
-| Text-to-Image | Generate images from text | Generate stunningly photorealistic visuals with exceptional clarity and high-fidelity details. | Z-Image-Turbo INT8 | `ZImageTurbo_INT8` | `txt2img` |
-| Text-to-Speech | Turn text into natural voice | Narration, accessibility, product voices in multiple languages and tones | Kokoro-82M | `Kokoro` | `txt2audio` |
-| Video-to-Text | Transcribe video into text | Subtitles, captions, indexing, SEO, datasets (with optional timestamps) | Whisper large-v3 | `WhisperLargeV3` | `video2txt` |
-| Image/Text-to-Video | Generate short AI videos | Cinematic motion, transitions, stylization | LTX Video-0.9.8 13B | `Ltxv_13B_0_9_8_Distilled_FP8` | `img2video`, `txt2video` |
-| Image-to-Text | Extract meaning from images | Descriptions, OCR, accessibility, moderation | Nanonets Ocr S F16 | `Nanonets_Ocr_S_F16` | `img2txt` |
-| Audio-to-Text | Convert audio into text | Subtitles, notes, search, accessibility (multi-language) | Whisper large-v3 | `WhisperLargeV3` | `video2txt` |
-| Text-to-Embedding | Create vector embeddings | Search, RAG, semantic similarity, clustering | BGE M3 | `Bge_M3_FP16` | `txt2embedding` |
-| Image-to-Image | Transform existing images | Style transfer, edits, in/outpainting | QwenImageEdit-Plus (NF4) | `QwenImageEdit_Plus_NF4` | `img2img` |
-| Image Background Removal | Remove background from images | Product photos, portraits, cutouts, compositing, e-commerce assets | Ben2 | `Ben2` | `img-rmbg` |
+| Service (Task)           | Short Summary                 | What it's for                                                                                  | Display Name             | API Model Slug                 | Task key(s)              |
+| ------------------------ | ----------------------------- | ---------------------------------------------------------------------------------------------- | ------------------------ | ------------------------------ | ------------------------ |
+| Text-to-Image            | Generate images from text     | Concept art, prototyping, creative exploration                                                 | FLUX.1-schnell           | `Flux1schnell`                 | `txt2img`                |
+| Text-to-Image            | Generate images from text     | Generate stunningly photorealistic visuals with exceptional clarity and high-fidelity details. | Z-Image-Turbo INT8       | `ZImageTurbo_INT8`             | `txt2img`                |
+| Text-to-Speech           | Turn text into natural voice  | Narration, accessibility, product voices in multiple languages and tones                       | Kokoro-82M               | `Kokoro`                       | `txt2audio`              |
+| Video-to-Text            | Transcribe video into text    | Transcribe YouTube, Twitch VODs, Kick streams, X/Twitter videos — subtitles, captions, SEO     | Whisper large-v3         | `WhisperLargeV3`               | `video2txt`              |
+| Image/Text-to-Video      | Generate short AI videos      | Cinematic motion, transitions, stylization                                                     | LTX Video-0.9.8 13B      | `Ltxv_13B_0_9_8_Distilled_FP8` | `img2video`, `txt2video` |
+| Image-to-Text            | Extract meaning from images   | Descriptions, OCR, accessibility, moderation                                                   | Nanonets Ocr S F16       | `Nanonets_Ocr_S_F16`           | `img2txt`                |
+| Audio-to-Text            | Convert audio into text       | Subtitles, notes, search, accessibility (multi-language)                                       | Whisper large-v3         | `WhisperLargeV3`               | `video2txt`              |
+| Text-to-Embedding        | Create vector embeddings      | Search, RAG, semantic similarity, clustering                                                   | BGE M3                   | `Bge_M3_FP16`                  | `txt2embedding`          |
+| Image-to-Image           | Transform existing images     | Style transfer, edits, in/outpainting                                                          | QwenImageEdit-Plus (NF4) | `QwenImageEdit_Plus_NF4`       | `img2img`                |
+| Image Background Removal | Remove background from images | Product photos, portraits, cutouts, compositing, e-commerce assets                             | Ben2                     | `Ben2`                         | `img-rmbg`               |
 
 <Info>
-Display names and example slugs above are provided for clarity; always fetch the live model list for the exact `slug` strings currently enabled on the network.
+  Display names and example slugs above are provided for clarity; always fetch the live model list for the exact `slug` strings currently enabled on the network.
 </Info>
 
 ### Resolution requirements
 
 Models that generate images or video require dimensions (`width`, `height`) divisible by a specific step value. If you provide dimensions that don't match, the API will automatically round them **up** to the nearest valid value.
 
-| Model | Task | Resolution Step | Example valid sizes |
-|-------|------|-----------------|---------------------|
-| `Flux1schnell` | txt2img | 128 | 512, 640, 768, 896, 1024 |
-| `ZImageTurbo_INT8` | txt2img | 16 | 512, 528, 544, 768, 1024 |
-| `Ltxv_13B_0_9_8_Distilled_FP8` | txt2video, img2video | 16 | 256, 512, 768 |
+| Model                          | Task                 | Resolution Step | Example valid sizes      |
+| ------------------------------ | -------------------- | --------------- | ------------------------ |
+| `Flux1schnell`                 | txt2img              | 128             | 512, 640, 768, 896, 1024 |
+| `ZImageTurbo_INT8`             | txt2img              | 16              | 512, 528, 544, 768, 1024 |
+| `Ltxv_13B_0_9_8_Distilled_FP8` | txt2video, img2video | 16              | 256, 512, 768            |
 
 <Info>
-For example, if you request `width: 500` with `Flux1schnell`, the output will be `512px` wide (rounded up to nearest multiple of 128).
+  For example, if you request `width: 500` with `Flux1schnell`, the output will be `512px` wide (rounded up to nearest multiple of 128).
 </Info>
 
 ---
 
 ### Picking the right model
 
-- **Image Generation (Text-to-Image):**
-  Start with `Flux1schnell` or `ZImageTurbo_INT8` for fast iteration. Increase steps/resolution for quality; control style via prompt and (optionally) LoRAs.
-- **Speech Generation (TTS):**
-  `Kokoro` offers natural prosody across multiple languages/voices. Choose voices/language in the payload; test speed vs. quality for your use case.
-- **Text Transcription (Video/Audio-to-Text):**
-  `WhisperLargeV3` is a strong general-purpose baseline with robust multilingual support. For long videos, enable timestamps and chunking.
-- **Text Recognition (Image-to-Text):**
-  `Nanonets_Ocr_S_F16` targets clear captions and text extraction. For complex layouts, consider multiple passes or post-processing.
-- **Video Generation (Image-to-Video / Text-to-Video):**
-  `Ltxv_13B_0_9_8_Distilled_FP8` is suited for short clips and stylized motion. Start with low duration/frames to validate aesthetics, then scale up.
-- **Embedding (Text-to-Embedding):**
-  `Bge_M3_FP16` provides dense vector embeddings for semantic search, clustering, and retrieval-augmented generation (RAG). Use for similarity queries or knowledge base indexing.
-- **Image Transformation (Image-to-Image):**
-  For edits and style transfer, start with `QwenImageEdit_Plus_NF4`. Use fewer steps for quick drafts and increase steps for higher fidelity; combine with masks or control prompts for targeted changes.
-- **Background Removal (Image Background Removal):**
-  `Ben2` provides fast, high-quality background removal for images up to 2048×2048px. Ideal for product photos, portraits, and generating transparent PNGs for downstream compositing or design work.
+- **Image Generation (Text-to-Image):** Start with `Flux1schnell` or `ZImageTurbo_INT8` for fast iteration. Increase steps/resolution for quality; control style via prompt and (optionally) LoRAs.
+- **Speech Generation (TTS):** `Kokoro` offers natural prosody across multiple languages/voices. Choose voices/language in the payload; test speed vs. quality for your use case.
+- **Text Transcription (Video/Audio-to-Text):** `WhisperLargeV3` is a strong general-purpose baseline with robust multilingual support. Supports direct URL transcription from YouTube, Twitch, Kick, and X/Twitter — including VODs and finished stream recordings. For long videos, enable timestamps and chunking.
+- **Text Recognition (Image-to-Text):** `Nanonets_Ocr_S_F16` targets clear captions and text extraction. For complex layouts, consider multiple passes or post-processing.
+- **Video Generation (Image-to-Video / Text-to-Video):** `Ltxv_13B_0_9_8_Distilled_FP8` is suited for short clips and stylized motion. Start with low duration/frames to validate aesthetics, then scale up.
+- **Embedding (Text-to-Embedding):** `Bge_M3_FP16` provides dense vector embeddings for semantic search, clustering, and retrieval-augmented generation (RAG). Use for similarity queries or knowledge base indexing.
+- **Image Transformation (Image-to-Image):** For edits and style transfer, start with `QwenImageEdit_Plus_NF4`. Use fewer steps for quick drafts and increase steps for higher fidelity; combine with masks or control prompts for targeted changes.
+- **Background Removal (Image Background Removal):** `Ben2` provides fast, high-quality background removal for images up to 2048×2048px. Ideal for product photos, portraits, and generating transparent PNGs for downstream compositing or design work.
 
 For a deeper discussion of strengths/limits and typical parameter sets per task, see **Model Selection**.
 
@@ -108,7 +95,7 @@ curl -X POST "https://api.deapi.ai/api/v1/client/txt2img" \
 ```
 
 <Note>
-`Flux1schnell` has `max_steps: 10` and does not support guidance (`guidance` must be `0`). Always check model limits via the Models endpoint.
+  `Flux1schnell` has `max_steps: 10` and does not support guidance (`guidance` must be `0`). Always check model limits via the Models endpoint.
 </Note>
 
 **3) Use a model in Video-to-Text (YouTube)**
@@ -126,7 +113,7 @@ curl -X POST "https://api.deapi.ai/api/v1/client/vid2txt" \
 ```
 
 <Info>
-Jobs return a `request_id`. Poll results with `GET /api/v1/client/request-status/{job_request}` using the `request_id` value.
+  Jobs return a `request_id`. Poll results with `GET /api/v1/client/request-status/{job_request}` using the `request_id` value.
 </Info>
 
 ---

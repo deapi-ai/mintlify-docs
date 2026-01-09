@@ -1774,15 +1774,7 @@
                 "operationId": "requestStatus",
                 "parameters": [
                     {
-                        "name": "Accept",
-                        "in": "header",
-                        "required": true,
-                        "schema": {
-                            "type": "string",
-                            "enum": [
-                                "application/json"
-                            ]
-                        }
+                        "$ref": "#/components/parameters/AcceptHeader"
                     },
                     {
                         "name": "job_request",
