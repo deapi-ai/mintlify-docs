@@ -163,13 +163,13 @@ The response includes job status:
 
 #### Step 4: Check if Result is Ready (If Node)
 
-Add an **If** node to check whether the job has completed:
+Add an **If** node to check whether the job has completed.\
+The following condition:
 
-| Setting        | Value                         |
-| -------------- | ----------------------------- |
-| **Conditions** |                               |
-| **Value 1**    | `{{ $json.data.result_url }}` |
-| **Operation**  | `exists`                      |
+| Setting       | Value                         |
+| ------------- | ----------------------------- |
+| **Value 1**   | `{{ $json.data.result_url }}` |
+| **Operation** | `exists`                      |
 
 Connect the outputs:
 
