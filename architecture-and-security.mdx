@@ -12,14 +12,10 @@ The following section outlines the data flow for a standard inference job (using
 
 **Data Flow**
 
-1. Client → deAPI Server (HTTPS Encrypted)
-   Requests are initiated via the API. All data transmission is encrypted in transit using HTTPS protocols.
-2. Server → Worker
-   The central server designates an appropriate Worker node and transmits the model, parameters, and task specifications.
-3. Worker (Processing)
-   The Worker node receives the payload (image, prompt, settings). Data is processed by a local, isolated Python server.
-4. Result → Client
-   The generated or modified asset returns to the client via the same encrypted return path.
+1. Client → deAPI Server (HTTPS Encrypted) Requests are initiated via the API. All data transmission is encrypted in transit using HTTPS protocols.
+2. Server → Worker The central server designates an appropriate Worker node and transmits the model, parameters, and task specifications.
+3. Worker (Processing) The Worker node receives the payload (image, prompt, settings). Data is processed by a local, isolated Python server.
+4. Result → Client The generated or modified asset returns to the client via the same encrypted return path.
 
 **Security Mechanisms**
 
@@ -48,7 +44,7 @@ Security in the distributed environment is maintained through a reputation syste
 
 The decentralized model is classified as a "Perfect Fit" for:
 
-- ✓ Public content transcription (YouTube, X, TikTok)
+- ✓ Public content transcription (YouTube, X, TikTok, Twitch, Kick)
 - ✓ Image and video generation applications
 - ✓ AI workloads devoid of critical data (PII, trade secrets)
 
@@ -62,4 +58,4 @@ For Enterprise clients handling sensitive data (internal documentation, prototyp
 - Full infrastructure isolation, audited operators, NDAs, and legal accountability.
 - Certified privacy standards (at a higher price point)
 
-**Additional request** - contact support for more information: support@deapi.ai
+**Additional request** - contact support for more information: [support@deapi.ai](mailto:support@deapi.ai)

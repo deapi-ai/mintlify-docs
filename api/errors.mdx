@@ -7,13 +7,14 @@ deAPI uses conventional HTTP response codes to indicate the success or failure o
 
 ## HTTP Status Codes
 
-| Code | Status | Description |
-|------|--------|-------------|
-| `200` | OK | Request succeeded. Response contains requested data. |
-| `401` | Unauthorized | Invalid or missing API key. |
-| `404` | Not Found | The requested resource (job, model) does not exist. |
-| `422` | Unprocessable Entity | Request validation failed. Check the `errors` array for details. |
-| `500` | Internal Server Error | Something went wrong on our end. Try again later. |
+| Code  | Status                | Description                                                      |
+| ----- | --------------------- | ---------------------------------------------------------------- |
+| `200` | OK                    | Request succeeded. Response contains requested data.             |
+| `401` | Unauthorized          | Invalid or missing API key.                                      |
+| `404` | Not Found             | The requested resource (job, model) does not exist.              |
+| `422` | Unprocessable Entity  | Request validation failed. Check the `errors` array for details. |
+| `429` | Too Many Request      | Rate limit exceeded.                                             |
+| `500` | Internal Server Error | Something went wrong on our end. Try again later.                |
 
 ## Error Response Format
 
@@ -51,6 +52,7 @@ All error responses follow a consistent JSON structure:
 Returned when authentication fails.
 
 **Common causes:**
+
 - Missing `Authorization` header
 - Invalid API key
 - Expired API key
@@ -73,6 +75,7 @@ Returned when authentication fails.
 Returned when the requested resource doesn't exist.
 
 **Common causes:**
+
 - Invalid `request_id` when polling results
 - Model name doesn't exist
 - Request ID not found
@@ -95,6 +98,7 @@ Returned when the requested resource doesn't exist.
 Returned when request validation fails. The `errors` array contains field-specific details.
 
 **Common causes:**
+
 - Missing required parameters
 - Invalid parameter values (out of range, wrong type)
 - Invalid image/video URL or format
@@ -156,6 +160,7 @@ Returned when an unexpected error occurs on our servers.
 ## Example Error Handling
 
 <CodeGroup>
+
 ```python Python
 import requests
 
@@ -193,6 +198,7 @@ elif response.status_code == 500:
 else:
     print(f"Unexpected error: {response.status_code}")
 ```
+
 
 ```javascript JavaScript
 const response = await fetch("https://api.deapi.ai/api/v1/client/txt2img", {
@@ -232,4 +238,5 @@ if (response.ok) {
   console.error(`Unexpected error: ${response.status}`);
 }
 ```
+
 </CodeGroup>

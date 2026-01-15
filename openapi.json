@@ -97,6 +97,9 @@
                                 }
                             }
                         }
+                    },
+                    "429": {
+                        "$ref": "#/components/responses/RateLimitExceeded"
                     }
                 },
                 "security": [
@@ -206,6 +209,9 @@
                                 }
                             }
                         }
+                    },
+                    "429": {
+                        "$ref": "#/components/responses/RateLimitExceeded"
                     }
                 },
                 "security": [
@@ -296,6 +302,9 @@
                                 }
                             }
                         }
+                    },
+                    "429": {
+                        "$ref": "#/components/responses/RateLimitExceeded"
                     }
                 },
                 "security": [
@@ -396,6 +405,9 @@
                                 }
                             }
                         }
+                    },
+                    "429": {
+                        "$ref": "#/components/responses/RateLimitExceeded"
                     }
                 },
                 "security": [
@@ -447,6 +459,9 @@
                                 }
                             }
                         }
+                    },
+                    "429": {
+                        "$ref": "#/components/responses/RateLimitExceeded"
                     }
                 },
                 "security": [
@@ -579,6 +594,9 @@
                                 }
                             }
                         }
+                    },
+                    "429": {
+                        "$ref": "#/components/responses/RateLimitExceeded"
                     }
                 },
                 "security": [
@@ -718,6 +736,9 @@
                                 }
                             }
                         }
+                    },
+                    "429": {
+                        "$ref": "#/components/responses/RateLimitExceeded"
                     }
                 },
                 "security": [
@@ -819,6 +840,9 @@
                                 }
                             }
                         }
+                    },
+                    "429": {
+                        "$ref": "#/components/responses/RateLimitExceeded"
                     }
                 },
                 "security": [
@@ -971,6 +995,9 @@
                                 }
                             }
                         }
+                    },
+                    "429": {
+                        "$ref": "#/components/responses/RateLimitExceeded"
                     }
                 },
                 "security": [
@@ -1108,6 +1135,9 @@
                                 }
                             }
                         }
+                    },
+                    "429": {
+                        "$ref": "#/components/responses/RateLimitExceeded"
                     }
                 },
                 "security": [
@@ -1222,6 +1252,9 @@
                                 }
                             }
                         }
+                    },
+                    "429": {
+                        "$ref": "#/components/responses/RateLimitExceeded"
                     }
                 },
                 "security": [
@@ -1300,6 +1333,9 @@
                                 }
                             }
                         }
+                    },
+                    "429": {
+                        "$ref": "#/components/responses/RateLimitExceeded"
                     }
                 },
                 "security": [
@@ -1420,6 +1456,9 @@
                                 }
                             }
                         }
+                    },
+                    "429": {
+                        "$ref": "#/components/responses/RateLimitExceeded"
                     }
                 },
                 "security": [
@@ -1498,6 +1537,9 @@
                                 }
                             }
                         }
+                    },
+                    "429": {
+                        "$ref": "#/components/responses/RateLimitExceeded"
                     }
                 },
                 "security": [
@@ -1618,6 +1660,9 @@
                                 }
                             }
                         }
+                    },
+                    "429": {
+                        "$ref": "#/components/responses/RateLimitExceeded"
                     }
                 },
                 "security": [
@@ -1756,6 +1801,9 @@
                                 }
                             }
                         }
+                    },
+                    "429": {
+                        "$ref": "#/components/responses/RateLimitExceeded"
                     }
                 },
                 "security": [
@@ -1765,7 +1813,7 @@
                 ]
             }
         },
-        "/api/v1/client/request-status/{job_request}": {
+        "/api/v1/client/request-status/{request_id}": {
             "get": {
                 "tags": [
                     "Client API"
@@ -1777,7 +1825,7 @@
                         "$ref": "#/components/parameters/AcceptHeader"
                     },
                     {
-                        "name": "job_request",
+                        "name": "request_id",
                         "in": "path",
                         "required": true,
                         "schema": {
@@ -1816,6 +1864,9 @@
                                 }
                             }
                         }
+                    },
+                    "429": {
+                        "$ref": "#/components/responses/RateLimitExceeded"
                     }
                 },
                 "security": [
@@ -1904,6 +1955,9 @@
                                 }
                             }
                         }
+                    },
+                    "429": {
+                        "$ref": "#/components/responses/RateLimitExceeded"
                     }
                 },
                 "security": [
@@ -2055,6 +2109,9 @@
                                 }
                             }
                         }
+                    },
+                    "429": {
+                        "$ref": "#/components/responses/RateLimitExceeded"
                     }
                 },
                 "security": [
@@ -2123,6 +2180,9 @@
                                 }
                             }
                         }
+                    },
+                    "429": {
+                        "$ref": "#/components/responses/RateLimitExceeded"
                     }
                 },
                 "security": [
@@ -2927,6 +2987,9 @@
                                 }
                             }
                         }
+                    },
+                    "429": {
+                        "$ref": "#/components/responses/RateLimitExceeded"
                     }
                 },
                 "security": [
@@ -3054,6 +3117,9 @@
                                 }
                             }
                         }
+                    },
+                    "429": {
+                        "$ref": "#/components/responses/RateLimitExceeded"
                     }
                 },
                 "security": [
@@ -3154,6 +3220,9 @@
                                 }
                             }
                         }
+                    },
+                    "429": {
+                        "$ref": "#/components/responses/RateLimitExceeded"
                     }
                 },
                 "security": [
@@ -3259,6 +3328,9 @@
                                 }
                             }
                         }
+                    },
+                    "429": {
+                        "$ref": "#/components/responses/RateLimitExceeded"
                     }
                 },
                 "security": [
@@ -3384,6 +3456,9 @@
                                 }
                             }
                         }
+                    },
+                    "429": {
+                        "$ref": "#/components/responses/RateLimitExceeded"
                     }
                 },
                 "security": [
@@ -3498,6 +3573,9 @@
                                 }
                             }
                         }
+                    },
+                    "429": {
+                        "$ref": "#/components/responses/RateLimitExceeded"
                     }
                 },
                 "security": [
@@ -3587,6 +3665,9 @@
                                 }
                             }
                         }
+                    },
+                    "429": {
+                        "$ref": "#/components/responses/RateLimitExceeded"
                     }
                 },
                 "security": [
@@ -3709,6 +3790,9 @@
                                 }
                             }
                         }
+                    },
+                    "429": {
+                        "$ref": "#/components/responses/RateLimitExceeded"
                     }
                 },
                 "security": [
@@ -3787,6 +3871,9 @@
                                 }
                             }
                         }
+                    },
+                    "429": {
+                        "$ref": "#/components/responses/RateLimitExceeded"
                     }
                 },
                 "security": [
@@ -3907,6 +3994,9 @@
                                 }
                             }
                         }
+                    },
+                    "429": {
+                        "$ref": "#/components/responses/RateLimitExceeded"
                     }
                 },
                 "security": [
@@ -3996,6 +4086,9 @@
                                 }
                             }
                         }
+                    },
+                    "429": {
+                        "$ref": "#/components/responses/RateLimitExceeded"
                     }
                 },
                 "security": [
@@ -4091,6 +4184,9 @@
                                 }
                             }
                         }
+                    },
+                    "429": {
+                        "$ref": "#/components/responses/RateLimitExceeded"
                     }
                 },
                 "security": [
@@ -4169,6 +4265,9 @@
                                 }
                             }
                         }
+                    },
+                    "429": {
+                        "$ref": "#/components/responses/RateLimitExceeded"
                     }
                 },
                 "security": [
@@ -4289,6 +4388,9 @@
                                 }
                             }
                         }
+                    },
+                    "429": {
+                        "$ref": "#/components/responses/RateLimitExceeded"
                     }
                 },
                 "security": [
@@ -4434,6 +4536,17 @@
                     "statusCode": {
                         "description": "Status code",
                         "type": "integer"
+                    }
+                },
+                "type": "object"
+            },
+            "response_error_rate_limit": {
+                "description": "Rate limit exceeded response",
+                "properties": {
+                    "message": {
+                        "description": "Error message",
+                        "type": "string",
+                        "example": "Too Many Attempts."
                     }
                 },
                 "type": "object"
@@ -4981,6 +5094,66 @@
                 "type": "object"
             }
         },
+        "responses": {
+            "RateLimitExceeded": {
+                "description": "Rate limit exceeded. Check X-RateLimit-Type header to determine if minute (RPM) or daily (RPD) limit was hit.",
+                "headers": {
+                    "X-RateLimit-Limit": {
+                        "description": "Maximum requests allowed per minute (RPM)",
+                        "schema": {
+                            "type": "integer",
+                            "example": 3
+                        }
+                    },
+                    "X-RateLimit-Remaining": {
+                        "description": "Remaining requests in current minute window",
+                        "schema": {
+                            "type": "integer",
+                            "example": 0
+                        }
+                    },
+                    "X-RateLimit-Daily-Limit": {
+                        "description": "Maximum requests allowed per day (RPD)",
+                        "schema": {
+                            "type": "integer",
+                            "example": 100
+                        }
+                    },
+                    "X-RateLimit-Daily-Remaining": {
+                        "description": "Remaining requests in current day window",
+                        "schema": {
+                            "type": "integer",
+                            "example": 95
+                        }
+                    },
+                    "X-RateLimit-Type": {
+                        "description": "Type of rate limit exceeded: \"minute\" for RPM, \"daily\" for RPD",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "minute",
+                                "daily"
+                            ],
+                            "example": "minute"
+                        }
+                    },
+                    "Retry-After": {
+                        "description": "Seconds until rate limit resets (60 for minute, up to 86400 for daily)",
+                        "schema": {
+                            "type": "integer",
+                            "example": 60
+                        }
+                    }
+                },
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "$ref": "#/components/schemas/response_error_rate_limit"
+                        }
+                    }
+                }
+            }
+        },
         "parameters": {
             "AcceptHeader": {
                 "name": "Accept",
@@ -4992,6 +5165,54 @@
                     "enum": [
                         "application/json"
                     ]
+                }
+            }
+        },
+        "headers": {
+            "X-RateLimit-Limit": {
+                "description": "Maximum requests allowed per minute (RPM)",
+                "schema": {
+                    "type": "integer",
+                    "example": 3
+                }
+            },
+            "X-RateLimit-Remaining": {
+                "description": "Remaining requests in current minute window",
+                "schema": {
+                    "type": "integer",
+                    "example": 2
+                }
+            },
+            "X-RateLimit-Daily-Limit": {
+                "description": "Maximum requests allowed per day (RPD)",
+                "schema": {
+                    "type": "integer",
+                    "example": 100
+                }
+            },
+            "X-RateLimit-Daily-Remaining": {
+                "description": "Remaining requests in current day window",
+                "schema": {
+                    "type": "integer",
+                    "example": 95
+                }
+            },
+            "X-RateLimit-Type": {
+                "description": "Type of rate limit exceeded (only in 429 responses)",
+                "schema": {
+                    "type": "string",
+                    "enum": [
+                        "minute",
+                        "daily"
+                    ],
+                    "example": "minute"
+                }
+            },
+            "Retry-After": {
+                "description": "Seconds until rate limit resets (only in 429 responses)",
+                "schema": {
+                    "type": "integer",
+                    "example": 60
                 }
             }
         },

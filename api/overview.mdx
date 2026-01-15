@@ -6,65 +6,65 @@ description: "Complete reference of all deAPI endpoints"
 All endpoints use base URL `https://api.deapi.ai` and require authentication via `Authorization: Bearer <API_KEY>` header.
 
 <Note>
-Each generation/analysis endpoint has a corresponding `/price-calculation` endpoint to estimate costs before execution.
+  Each generation/analysis endpoint has a corresponding `/price-calculation` endpoint to estimate costs before execution.
 </Note>
 
 ## Generation
 
 Create images, videos, audio, and embeddings from text or images.
 
-| Method | Endpoint | Description | Docs |
-|--------|----------|-------------|------|
-| `POST` | `/api/v1/client/txt2img` | Generate image from text prompt | [→](/api/generation/text-to-image) |
-| `POST` | `/api/v1/client/txt2img/price-calculation` | Calculate text-to-image price | [→](/api/generation/text-to-image-price) |
-| `POST` | `/api/v1/client/txt2video` | Generate video from text prompt | [→](/api/generation/text-to-video) |
-| `POST` | `/api/v1/client/txt2video/price-calculation` | Calculate text-to-video price | [→](/api/generation/text-to-video-price) |
-| `POST` | `/api/v1/client/img2video` | Generate video from image (animate) | [→](/api/generation/image-to-video) |
-| `POST` | `/api/v1/client/img2video/price-calculation` | Calculate image-to-video price | [→](/api/generation/image-to-video-price) |
-| `POST` | `/api/v1/client/txt2audio` | Generate speech from text (TTS) | [→](/api/generation/text-to-speech) |
-| `POST` | `/api/v1/client/txt2audio/price-calculation` | Calculate text-to-speech price | [→](/api/generation/text-to-speech-price) |
-| `POST` | `/api/v1/client/txt2embedding` | Generate embeddings from text | [→](/api/generation/text-to-embedding) |
-| `POST` | `/api/v1/client/txt2embedding/price-calculation` | Calculate embedding price | [→](/api/generation/text-to-embedding-price) |
+| Method | Endpoint                                         | Description                         | Docs                                         |
+| ------ | ------------------------------------------------ | ----------------------------------- | -------------------------------------------- |
+| `POST` | `/api/v1/client/txt2img`                         | Generate image from text prompt     | [→](/api/generation/text-to-image)           |
+| `POST` | `/api/v1/client/txt2img/price-calculation`       | Calculate text-to-image price       | [→](/api/generation/text-to-image-price)     |
+| `POST` | `/api/v1/client/txt2video`                       | Generate video from text prompt     | [→](/api/generation/text-to-video)           |
+| `POST` | `/api/v1/client/txt2video/price-calculation`     | Calculate text-to-video price       | [→](/api/generation/text-to-video-price)     |
+| `POST` | `/api/v1/client/img2video`                       | Generate video from image (animate) | [→](/api/generation/image-to-video)          |
+| `POST` | `/api/v1/client/img2video/price-calculation`     | Calculate image-to-video price      | [→](/api/generation/image-to-video-price)    |
+| `POST` | `/api/v1/client/txt2audio`                       | Generate speech from text (TTS)     | [→](/api/generation/text-to-speech)          |
+| `POST` | `/api/v1/client/txt2audio/price-calculation`     | Calculate text-to-speech price      | [→](/api/generation/text-to-speech-price)    |
+| `POST` | `/api/v1/client/txt2embedding`                   | Generate embeddings from text       | [→](/api/generation/text-to-embedding)       |
+| `POST` | `/api/v1/client/txt2embedding/price-calculation` | Calculate embedding price           | [→](/api/generation/text-to-embedding-price) |
 
 ## Analysis
 
 Extract text and transcriptions from images, videos, and audio.
 
-| Method | Endpoint | Description | Docs |
-|--------|----------|-------------|------|
-| `POST` | `/api/v1/client/img2txt` | Extract text from image (OCR) | [→](/api/analysis/image-to-text) |
-| `POST` | `/api/v1/client/img2txt/price-calculation` | Calculate OCR price | [→](/api/analysis/image-to-text-price) |
-| `POST` | `/api/v1/client/vid2txt` | Transcribe video from URL (YouTube, X) | [→](/api/analysis/video-to-text) |
-| `POST` | `/api/v1/client/vid2txt/price-calculation` | Calculate video transcription price | [→](/api/analysis/video-to-text-price) |
-| `POST` | `/api/v1/client/aud2txt` | Transcribe X Spaces audio | [→](/api/analysis/audio-to-text-spaces) |
-| `POST` | `/api/v1/client/aud2txt/price-calculation` | Calculate X Spaces transcription price | [→](/api/analysis/audio-to-text-spaces-price) |
-| `POST` | `/api/v1/client/videofile2txt` | Transcribe uploaded video file | [→](/api/analysis/upload-video-file) |
-| `POST` | `/api/v1/client/videofile2txt/price-calculation` | Calculate video file transcription price | [→](/api/analysis/upload-video-file-price) |
-| `POST` | `/api/v1/client/audiofile2txt` | Transcribe uploaded audio file | [→](/api/analysis/upload-audio-file) |
-| `POST` | `/api/v1/client/audiofile2txt/price-calculation` | Calculate audio file transcription price | [→](/api/analysis/upload-audio-file-price) |
+| Method | Endpoint                                         | Description                              | Docs                                          |
+| ------ | ------------------------------------------------ | ---------------------------------------- | --------------------------------------------- |
+| `POST` | `/api/v1/client/img2txt`                         | Extract text from image (OCR)            | [→](/api/analysis/image-to-text)              |
+| `POST` | `/api/v1/client/img2txt/price-calculation`       | Calculate OCR price                      | [→](/api/analysis/image-to-text-price)        |
+| `POST` | `/api/v1/client/vid2txt`                         | Transcribe video from URL (YouTube, X)   | [→](/api/analysis/video-to-text)              |
+| `POST` | `/api/v1/client/vid2txt/price-calculation`       | Calculate video transcription price      | [→](/api/analysis/video-to-text-price)        |
+| `POST` | `/api/v1/client/aud2txt`                         | Transcribe X Spaces audio                | [→](/api/analysis/audio-to-text-spaces)       |
+| `POST` | `/api/v1/client/aud2txt/price-calculation`       | Calculate X Spaces transcription price   | [→](/api/analysis/audio-to-text-spaces-price) |
+| `POST` | `/api/v1/client/videofile2txt`                   | Transcribe uploaded video file           | [→](/api/analysis/upload-video-file)          |
+| `POST` | `/api/v1/client/videofile2txt/price-calculation` | Calculate video file transcription price | [→](/api/analysis/upload-video-file-price)    |
+| `POST` | `/api/v1/client/audiofile2txt`                   | Transcribe uploaded audio file           | [→](/api/analysis/upload-audio-file)          |
+| `POST` | `/api/v1/client/audiofile2txt/price-calculation` | Calculate audio file transcription price | [→](/api/analysis/upload-audio-file-price)    |
 
 ## Transformation
 
 Modify existing images.
 
-| Method | Endpoint | Description | Docs |
-|--------|----------|-------------|------|
-| `POST` | `/api/v1/client/img2img` | Transform image with text prompt | [→](/api/transformation/image-to-image) |
-| `POST` | `/api/v1/client/img2img/price-calculation` | Calculate image transformation price | [→](/api/transformation/image-to-image-price) |
-| `POST` | `/api/v1/client/img-rmbg` | Remove image background | [→](/api/transformation/background-removal) |
-| `POST` | `/api/v1/client/img-rmbg/price-calculation` | Calculate background removal price | [→](/api/transformation/background-removal-price) |
-| `POST` | `/api/v1/client/img-upscale` | Upscale image resolution | *Coming soon* |
-| `POST` | `/api/v1/client/img-upscale/price-calculation` | Calculate image upscale price | *Coming soon* |
+| Method | Endpoint                                       | Description                          | Docs                                              |
+| ------ | ---------------------------------------------- | ------------------------------------ | ------------------------------------------------- |
+| `POST` | `/api/v1/client/img2img`                       | Transform image with text prompt     | [→](/api/transformation/image-to-image)           |
+| `POST` | `/api/v1/client/img2img/price-calculation`     | Calculate image transformation price | [→](/api/transformation/image-to-image-price)     |
+| `POST` | `/api/v1/client/img-rmbg`                      | Remove image background              | [→](/api/transformation/background-removal)       |
+| `POST` | `/api/v1/client/img-rmbg/price-calculation`    | Calculate background removal price   | [→](/api/transformation/background-removal-price) |
+| `POST` | `/api/v1/client/img-upscale`                   | Upscale image resolution             | _Coming soon_                                     |
+| `POST` | `/api/v1/client/img-upscale/price-calculation` | Calculate image upscale price        | _Coming soon_                                     |
 
 ## Utilities
 
 Account management and job status tracking.
 
-| Method | Endpoint | Description | Docs |
-|--------|----------|-------------|------|
-| `GET` | `/api/v1/client/balance` | Get current account balance | [→](/api/utilities/check-balance) |
-| `GET` | `/api/v1/client/request-status/{job_request}` | Check job status and get results | [→](/api/utilities/get-results) |
-| `GET` | `/api/v1/client/models` | List all available models | [→](/api/utilities/model-selection) |
+| Method | Endpoint                                     | Description                      | Docs                                |
+| ------ | -------------------------------------------- | -------------------------------- | ----------------------------------- |
+| `GET`  | `/api/v1/client/balance`                     | Get current account balance      | [→](/api/utilities/check-balance)   |
+| `GET`  | `/api/v1/client/request-status/{request_id}` | Check job status and get results | [→](/api/utilities/get-results)     |
+| `GET`  | `/api/v1/client/models`                      | List all available models        | [→](/api/utilities/model-selection) |
 
 ## Workflow
 
@@ -78,12 +78,10 @@ Typical API usage follows this pattern:
     Call the `/price-calculation` endpoint with your parameters to estimate cost.
   </Step>
   <Step title="Submit job">
-    Call the main endpoint (e.g., `POST /api/v1/client/txt2img`) with your parameters.
-    Response contains `request_id`.
+    Call the main endpoint (e.g., `POST /api/v1/client/txt2img`) with your parameters. Response contains `request_id`.
   </Step>
   <Step title="Poll for results">
-    Call `GET /api/v1/client/request-status/{job_request}` until `status` is `done` or `error`.
-    Use the `request_id` from step 3 as the `job_request` path parameter.
+    Call `GET /api/v1/client/request-status/{request_id}` until `status` is `done` or `error`. 
   </Step>
   <Step title="Download result">
     When `status` is `done`, use `result_url` to download your generated content.
@@ -93,6 +91,7 @@ Typical API usage follows this pattern:
 ## Response Formats
 
 <CodeGroup>
+
 ```json Job Submission (txt2img, txt2video, etc.)
 {
   "data": {
@@ -100,6 +99,7 @@ Typical API usage follows this pattern:
   }
 }
 ```
+
 
 ```json Job Status (request-status)
 {
@@ -113,11 +113,13 @@ Typical API usage follows this pattern:
 }
 ```
 
+
 ```json Balance
 {
   "balance": 19.72
 }
 ```
+
 
 ```json Models List
 {
@@ -134,6 +136,7 @@ Typical API usage follows this pattern:
 }
 ```
 
+
 ```json Error (4xx/5xx)
 {
   "data": null,
@@ -142,10 +145,11 @@ Typical API usage follows this pattern:
   "statusCode": 401
 }
 ```
+
 </CodeGroup>
 
 <Note>
-Response structure varies by endpoint. See individual endpoint documentation for exact schemas.
+  Response structure varies by endpoint. See individual endpoint documentation for exact schemas.
 </Note>
 
 See [Errors](/api/errors) for detailed error handling documentation.

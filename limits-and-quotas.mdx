@@ -4,34 +4,160 @@ title: "Limits & Quotas"
 
 This section contains a description of rate limits and file upload specifications.
 
-deAPI is engineered for High Throughput capability upon deployment. Unlike traditional providers, API scalability is not restricted by complex access tiers during the initial integration phase.
+deAPI is engineered for High Throughput capability upon deployment. Unlike traditional providers, API scalability is not restricted by complex access levels during the initial integration phase.
 
-### Rate Limits
+---
 
-The default rate limit for all standard accounts is: 300 jobs / minute (applicable to all task types: video, audio, image).
+## Account Types
 
-#### Comparison: deAPI vs. Traditional Providers
+All new accounts start as **Basic** and can upgrade to **Premium** by making any payment.
 
-Many AI infrastructure providers enforce restrictive initial limits (RPM - Requests Per Minute), necessitating complex queue management systems for developers.
+| Type        | Qualification                   |
+| ----------- | ------------------------------- |
+| **Basic**   | New accounts (no payments made) |
+| **Premium** | Any payment made via Stripe     |
 
-**Availability**
+<Note>
+  Upon registration, you receive a **\$5 bonus** added to your balance. This bonus is available for **Basic accounts** with conservative rate limits designed for testing and evaluation.
 
-- Traditional Providers (e.g., OpenAI Tier 1): Often restricted to low RPM values (approx. 3 RPM) upon account creation.
-- deAPI: 300 RPM available immediately upon registration.
+  To upgrade to **Premium** (300 RPM, unlimited daily requests), simply top up your account with any available amount. Your remaining bonus balance carries over — for example, if you use \$2 of your bonus and then purchase \$10, your total balance becomes \$13 (\$3 remaining + \$10 purchased), now usable with Premium limits.
+</Note>
 
-**Scaling**
+<Warning>
+  Accounts registered with temporary or disposable email addresses do not receive the \$5 bonus. We value long-term users and honest usage.
+</Warning>
 
-- Traditional Providers: Typically require specific monetary spend thresholds and time delays to advance to higher Tiers.
-- deAPI: High throughput limits are provisioned instantly without a waiting period.
+---
 
-**Complexity**
+## Rate Limits
 
-- Traditional Providers: Often utilize separate quotas for tokens (TPM), requests (RPM), and daily limits (RPD).
-- deAPI: Unified limit structure: 300 jobs per minute.
+Rate limits are defined per endpoint as:
 
-Limits within deAPI are dynamic. Higher quotas may be provisioned based on platform utilization (credit usage). For High Volume Production requirements, please contact support via: [support@deapi.ai](mailto:support@deapi.ai)
+- **RPM** — Requests Per Minute
+- **RPD** — Requests Per Day
 
-### File Uploads
+Limits reset daily at **midnight UTC**.
+
+---
+
+### Basic Limits
+
+Basic accounts have conservative limits designed for testing and evaluation.
+
+#### Generation Endpoints
+
+| Endpoint                       | Models                             | RPM | RPD |
+| ------------------------------ | ---------------------------------- | --- | --- |
+| `/api/v1/client/txt2img`       | `Flux1schnell`, `ZImageTurbo_INT8` | 3   | 100 |
+| `/api/v1/client/txt2video`     | `Ltxv_13B_0_9_8_Distilled_FP8`     | 1   | 15  |
+| `/api/v1/client/img2video`     | `Ltxv_13B_0_9_8_Distilled_FP8`     | 1   | 15  |
+| `/api/v1/client/txt2audio`     | `Kokoro`                           | 5   | 300 |
+| `/api/v1/client/txt2embedding` | `Bge_M3_FP16`                      | 10  | 500 |
+
+#### Analysis Endpoints
+
+| Endpoint                           | Models               | RPM | RPD |
+| ---------------------------------- | -------------------- | --- | --- |
+| `/api/v1/client/img2txt`           | `Nanonets_Ocr_S_F16` | 5   | 50  |
+| **Whisper Transcription (shared)** | `WhisperLargeV3`     | 1   | 10  |
+
+<Warning>
+  **Whisper Shared Limit:** All four Whisper transcription endpoints share a single combined limit of **1 RPM** and **10 RPD**:
+
+  - `/api/v1/client/vid2txt` — Video URL transcription (YouTube, X, Twitch, Kick)
+  - `/api/v1/client/videofile2txt` — Video file upload transcription
+  - `/api/v1/client/aud2txt` — X Spaces transcription
+  - `/api/v1/client/audiofile2txt` — Audio file upload transcription
+
+  For example: 5× `/vid2txt` + 3× `/aud2txt` + 2× `/audiofile2txt` = 10 RPD ✓
+</Warning>
+
+#### Transformation Endpoints
+
+| Endpoint                     | Models                   | RPM | RPD |
+| ---------------------------- | ------------------------ | --- | --- |
+| `/api/v1/client/img2img`     | `QwenImageEdit_Plus_NF4` | 1   | 15  |
+| `/api/v1/client/img-rmbg`    | `Ben2`                   | 5   | 100 |
+| `/api/v1/client/img-upscale` | `RealESRGAN_x4plus`      | 5   | 100 |
+
+#### Utility Endpoints
+
+| Endpoint                                        | RPM | RPD |
+| ----------------------------------------------- | --- | --- |
+| Price Calculation (`/price-calculation/*`)      | 50  | 200 |
+| Request Status (`/request-status/{request_id}`) | 50  | 200 |
+
+---
+
+### Premium Limits
+
+Premium accounts have high limits suitable for production workloads. All endpoints share a unified **300 RPM** with **unlimited daily requests**.
+
+| Endpoint                       | Models                             | RPM | RPD       |
+| ------------------------------ | ---------------------------------- | --- | --------- |
+| `/api/v1/client/txt2img`       | `Flux1schnell`, `ZImageTurbo_INT8` | 300 | Unlimited |
+| `/api/v1/client/txt2video`     | `Ltxv_13B_0_9_8_Distilled_FP8`     | 300 | Unlimited |
+| `/api/v1/client/img2video`     | `Ltxv_13B_0_9_8_Distilled_FP8`     | 300 | Unlimited |
+| `/api/v1/client/txt2audio`     | `Kokoro`                           | 300 | Unlimited |
+| `/api/v1/client/txt2embedding` | `Bge_M3_FP16`                      | 300 | Unlimited |
+| `/api/v1/client/img2txt`       | `Nanonets_Ocr_S_F16`               | 300 | Unlimited |
+| `/api/v1/client/vid2txt`       | `WhisperLargeV3`                   | 300 | Unlimited |
+| `/api/v1/client/videofile2txt` | `WhisperLargeV3`                   | 300 | Unlimited |
+| `/api/v1/client/aud2txt`       | `WhisperLargeV3`                   | 300 | Unlimited |
+| `/api/v1/client/audiofile2txt` | `WhisperLargeV3`                   | 300 | Unlimited |
+| `/api/v1/client/img2img`       | `QwenImageEdit_Plus_NF4`           | 300 | Unlimited |
+| `/api/v1/client/img-rmbg`      | `Ben2`                             | 300 | Unlimited |
+| `/api/v1/client/img-upscale`   | `RealESRGAN_x4plus`                | 300 | Unlimited |
+
+<Info>
+  Premium Whisper endpoints have independent limits — each endpoint has its own 300 RPM allocation.
+</Info>
+
+---
+
+### Endpoints Without Rate Limits
+
+The following endpoints have no rate limits for all accounts:
+
+- **Utilities** — `/balance`, `/models`
+
+---
+
+### Basic vs Premium Comparison
+
+| Aspect              | Basic                     | Premium                  |
+| ------------------- | ------------------------- | ------------------------ |
+| RPM Limits          | 1–10 RPM                  | 300 RPM (all endpoints)  |
+| Daily Limits (RPD)  | Limited                   | Unlimited                |
+| Whisper Limit       | Shared across 4 endpoints | Independent per endpoint |
+| Upgrade Requirement | —                         | Any payment via Stripe   |
+
+---
+
+### deAPI vs. Traditional Providers
+
+Many AI infrastructure providers enforce restrictive initial limits, necessitating complex queue management systems for developers.
+
+**Getting Started**
+
+- Traditional Providers: Often require credit card verification or initial payment before any API access.
+- deAPI: Immediate access with \$5 bonus upon registration — no payment required to start testing.
+
+**Scaling to Production**
+
+- Traditional Providers: Typically require specific monetary spend thresholds (e.g., \$50+) and time delays (weeks/months) to unlock higher rate limits.
+- deAPI: Instant upgrade to Premium (300 RPM, unlimited daily requests) with any available top-up amount (\$10, \$25, or \$50).
+
+**Limit Structure**
+
+- Traditional Providers: Often utilize separate quotas for tokens (TPM), requests (RPM), daily limits (RPD), and per-model restrictions.
+- deAPI Premium: Simple unified structure — 300 RPM across all endpoints with unlimited daily requests.
+
+For High Volume Production requirements beyond Premium limits, please contact support via: [support@deapi.ai](mailto:support@deapi.ai)
+
+---
+
+## File Uploads
 
 The majority of endpoints (Video-to-Text, Audio-to-Text, Image-to-Image) support direct binary file uploads or URL-based inputs. The global limits for file uploads are specified below.
 
@@ -50,7 +176,9 @@ The majority of endpoints (Video-to-Text, Audio-to-Text, Image-to-Image) support
 - Max size: 10 MB
 - Supported Formats: jpg, png, webp
 
-### URL Input & Duration Limits
+---
+
+## URL Input & Duration Limits
 
 For endpoints processing content via direct URLs (e.g., X Spaces), specific duration limits apply regardless of file size.
 
@@ -62,3 +190,15 @@ For endpoints processing content via direct URLs (e.g., X Spaces), specific dura
 **2. Video-to-Text** (X, Kick, Twitch)
 
 - Max Duration: 600 minutes
+
+---
+
+## Rate Limit Errors
+
+When you exceed your rate limit, the API returns a `429 Too Many Requests` response.
+
+**How to handle:**
+
+1. **RPM exceeded** — Wait 60 seconds before retrying
+2. **RPD exceeded** — Wait until midnight UTC for daily reset
+3. **Need higher limits?** — [Upgrade to Premium](https://deapi.ai/billing) with any payment for 300 RPM and unlimited daily requests
