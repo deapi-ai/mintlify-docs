@@ -8,9 +8,9 @@
   },
   "favicon": "/favicon.png",
   "colors": {
-    "primary": "#6366F1",
-    "light": "#818CF8",
-    "dark": "#4F46E5"
+    "primary": "#FD9A00",
+    "light": "#FFAD33",
+    "dark": "#E58A00"
   },
   "api": {
     "baseUrl": "https://api.deapi.ai",
