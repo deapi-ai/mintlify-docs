@@ -138,7 +138,23 @@
             "pages": [
               "api/utilities/check-balance",
               "api/utilities/get-results",
-              "api/utilities/model-selection"
+              "api/utilities/model-selection",
+              {
+                "group": "Prompt Enhancement",
+                "pages": [
+                  "api/utilities/prompt-enhancement/overview",
+                  "api/utilities/prompt-enhancement/image-prompt-booster",
+                  "api/utilities/prompt-enhancement/image-prompt-booster-price",
+                  "api/utilities/prompt-enhancement/video-prompt-booster",
+                  "api/utilities/prompt-enhancement/video-prompt-booster-price",
+                  "api/utilities/prompt-enhancement/speech-prompt-booster",
+                  "api/utilities/prompt-enhancement/speech-prompt-booster-price",
+                  "api/utilities/prompt-enhancement/image-to-image-prompt-booster",
+                  "api/utilities/prompt-enhancement/image-to-image-prompt-booster-price",
+                  "api/utilities/prompt-enhancement/sample-prompts",
+                  "api/utilities/prompt-enhancement/sample-prompts-price"
+                ]
+              }
             ]
           }
         ]
