@@ -52,7 +52,7 @@
                                     "model": {
                                         "description": "The model to use for generation",
                                         "type": "string",
-                                        "example": "whisper-3-large"
+                                        "example": "WhisperLargeV3"
                                     },
                                     "return_result_in_response": {
                                         "description": "If true, the result will be returned directly in the response instead of only download url. Optional parameter.",
@@ -146,7 +146,7 @@
                                             "model": {
                                                 "description": "The model to use for generation",
                                                 "type": "string",
-                                                "example": "whisper-3-large"
+                                                "example": "WhisperLargeV3"
                                             }
                                         },
                                         "type": "object"
@@ -169,7 +169,7 @@
                                             "model": {
                                                 "description": "The model to use for generation",
                                                 "type": "string",
-                                                "example": "whisper-3-large"
+                                                "example": "WhisperLargeV3"
                                             }
                                         },
                                         "type": "object"
@@ -517,7 +517,7 @@
                                     "model": {
                                         "description": "The model to use for image editing. Available models can be retrieved via the GET /api/v1/client/models endpoint.",
                                         "type": "string",
-                                        "example": "stable-diffusion-v1-5"
+                                        "example": "QwenImageEdit_Plus_NF4"
                                     },
                                     "loras": {
                                         "description": "Array of LoRA models to apply",
@@ -646,7 +646,7 @@
                                     "model": {
                                         "description": "The model to use for generation",
                                         "type": "string",
-                                        "example": "stable-diffusion-v1-5"
+                                        "example": "QwenImageEdit_Plus_NF4"
                                     },
                                     "loras": {
                                         "description": "Array of LoRA models to apply",
@@ -1295,7 +1295,7 @@
                                     "model": {
                                         "description": "The background removal model to use",
                                         "type": "string",
-                                        "example": "RMBG-1.4"
+                                        "example": "Ben2"
                                     }
                                 },
                                 "type": "object"
@@ -1378,7 +1378,7 @@
                                             "model": {
                                                 "description": "The background removal model to use",
                                                 "type": "string",
-                                                "example": "RMBG-1.4"
+                                                "example": "Ben2"
                                             }
                                         },
                                         "type": "object"
@@ -1403,7 +1403,7 @@
                                             "model": {
                                                 "description": "The background removal model to use",
                                                 "type": "string",
-                                                "example": "RMBG-1.4"
+                                                "example": "Ben2"
                                             }
                                         },
                                         "type": "object"
@@ -3620,7 +3620,7 @@
                                     "model": {
                                         "description": "The model to use for generation",
                                         "type": "string",
-                                        "example": "whisper-3-large"
+                                        "example": "WhisperLargeV3"
                                     },
                                     "return_result_in_response": {
                                         "description": "If true, the result will be returned directly in the response instead of only download url. Optional parameter.",
@@ -3714,7 +3714,7 @@
                                             "model": {
                                                 "description": "The model to use for generation",
                                                 "type": "string",
-                                                "example": "whisper-3-large"
+                                                "example": "WhisperLargeV3"
                                             }
                                         },
                                         "type": "object"
@@ -3737,7 +3737,7 @@
                                             "model": {
                                                 "description": "The model to use for generation",
                                                 "type": "string",
-                                                "example": "whisper-3-large"
+                                                "example": "WhisperLargeV3"
                                             }
                                         },
                                         "type": "object"
@@ -3833,7 +3833,7 @@
                                     "model": {
                                         "description": "The background removal model to use",
                                         "type": "string",
-                                        "example": "RMBG-1.4"
+                                        "example": "Ben2"
                                     }
                                 },
                                 "type": "object"
@@ -3916,7 +3916,7 @@
                                             "model": {
                                                 "description": "The background removal model to use",
                                                 "type": "string",
-                                                "example": "RMBG-1.4"
+                                                "example": "Ben2"
                                             }
                                         },
                                         "type": "object"
@@ -3941,7 +3941,7 @@
                                             "model": {
                                                 "description": "The background removal model to use",
                                                 "type": "string",
-                                                "example": "RMBG-1.4"
+                                                "example": "Ben2"
                                             }
                                         },
                                         "type": "object"
