@@ -1,50 +1,218 @@
 ---
-title: "Execution Modes & HTTP Queue"
+title: 'Execution Modes & HTTP Queue'
+description: 'How to receive job results via webhooks, WebSockets, or polling'
 ---
 
-Explains how deAPI executes model requests over HTTP using a default queued job model (POST → request_id → GET /request-status), and outlines planned extensions like webhooks and synchronous modes.
+All deAPI model endpoints use an **asynchronous job queue**. You submit a request, receive a `request_id`, and retrieve results using one of three methods:
 
-All deAPI model endpoints follow the same execution pattern.
-Requests are sent as **asynchronous jobs** to a queue, and you fetch their status and results via a dedicated endpoint.
-
----
-
-### Default queued execution model
-
-Every model endpoint (Text-to-Image, Text-to-Speech, Image-to-Text, Image-to-Image, Video-to-Text, Image-to-Video, Text-to-Video, Text-to-Embedding, etc.) works the same way:
-
-1. You send a request to:
-   `POST /api/v1/client/{task}`
-2. The response returns a `request_id`
-3. You check progress and fetch the result via:
-   `GET /api/v1/client/request-status/{job_request}`
-
-The `request-status` response includes:
-
-- current job **status** (e.g. `pending`, `processing`, `done`, `error`),
-- optional **progress** information,
-- **result URLs** and/or inline output data,
-- optional **error** details when a job fails.
-
-This queued model is the **default** in deAPI because it:
-
-- keeps long-running jobs (image/video generation, transcription) off the critical HTTP path,
-- avoids common HTTP timeout issues,
-- lets deAPI schedule work efficiently across a distributed GPU network,
-- gives you one consistent pattern across all model endpoints.
-
-For low-level details, see:
-
-- [**Get Results**](/api/get-results) – `GET /api/v1/client/request-status/{job_request}`
-- individual API pages under **API** (Text-to-Image, Text-to-Speech, etc.).
+<CardGroup cols={3}>
+  <Card title="Webhooks" icon="bell" href="/execution-modes-and-integrations/webhooks">
+    **Recommended.** Results pushed to your server.
+  </Card>
+  <Card title="WebSockets" icon="plug" href="/execution-modes-and-integrations/websockets">
+    Real-time updates with live previews.
+  </Card>
+  <Card title="Polling" icon="rotate">
+    Query `/request-status` manually.
+  </Card>
+</CardGroup>
 
 ---
 
-### Future extensions: webhooks and synchronous HTTP
+## Webhooks (Recommended)
 
-On top of the queue model described above, we plan to add:
+<Info>
+For most integrations, use webhooks. They're the most reliable way to receive results without maintaining persistent connections or implementing polling logic.
+</Info>
 
-- **Webhooks for queued jobs** – instead of polling `request-status`, you will be able to provide a webhook URL that deAPI will call when the job finishes.
-- **Additional HTTP modes (e.g. synchronous requests)** – for small, low-latency jobs where returning the result in a single HTTP response makes sense.
+With webhooks, deAPI sends an HTTP POST to your server when a job completes. Configure a global webhook URL in [account settings](https://deapi.ai/dashboard/settings), or override per-request:
 
-Until these features are available, the **queued execution model** described on this page is the recommended way to run all model requests over HTTP.
+```bash
+# 1. Submit job with webhook_url
+curl -X POST https://api.deapi.ai/api/v1/client/txt2img \
+  -H "Authorization: Bearer $API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "prompt": "a beautiful sunset over mountains",
+    "model": "Flux1schnell",
+    "width": 1024,
+    "height": 768,
+    "guidance": 3.5,
+    "steps": 4,
+    "seed": -1,
+    "webhook_url": "https://your-server.com/webhooks/deapi"
+  }'
+
+# 2. Response contains request_id
+# {"data": {"request_id": "123e4567-e89b-12d3-a456-426614174000"}}
+
+# 3. deAPI POSTs to your webhook when done
+```
+
+**Webhook payload (job.completed):**
+```json
+{
+  "event": "job.completed",
+  "data": {
+    "job_request_id": "123e4567-e89b-12d3-a456-426614174000",
+    "status": "done",
+    "job_type": "txt2img",
+    "result_url": "https://storage.deapi.ai/results/.../output.png",
+    "processing_time_ms": 45000
+  }
+}
+```
+
+**Why webhooks:**
+- No polling required — results arrive automatically
+- Automatic retries with exponential backoff (up to 10 retries over ~24 hours)
+- Works with serverless and traditional backends
+- Secure with HMAC signature verification
+
+→ [Full Webhooks Documentation](/execution-modes-and-integrations/webhooks)
+
+---
+
+## WebSockets (Real-time)
+
+For interactive applications that need instant feedback and live previews during generation:
+
+```javascript
+import Pusher from 'pusher-js';
+
+const pusher = new Pusher('depin-api-prod-key', {
+    wsHost: 'soketi.deapi.ai',
+    wsPort: 443,
+    forceTLS: true,
+    cluster: 'mt1',
+    enabledTransports: ['ws', 'wss'],
+    authorizer: (channel) => ({
+        authorize: async (socketId, callback) => {
+            const res = await fetch('https://api.deapi.ai/broadcasting/auth', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${API_TOKEN}`
+                },
+                body: JSON.stringify({ socket_id: socketId, channel_name: channel.name })
+            });
+            callback(null, await res.json());
+        }
+    })
+});
+
+pusher.subscribe(`private-client.${CLIENT_ID}`)
+    .bind('request.status.updated', (data) => {
+        console.log(`Job ${data.request_id}: ${data.status} (${data.progress}%)`);
+        if (data.preview) displayPreview(data.preview);
+        if (data.result_url) downloadResult(data.result_url);
+    });
+```
+
+**Why WebSockets:**
+- Instant updates (milliseconds latency)
+- Live preview images during generation
+- Progress percentage updates
+- Ideal for user-facing UIs
+
+→ [Full WebSockets Documentation](/execution-modes-and-integrations/websockets)
+
+---
+
+## Polling (Fallback)
+
+If webhooks or WebSockets aren't feasible, poll the status endpoint:
+
+```bash
+# 1. Submit job (without webhook_url)
+curl -X POST https://api.deapi.ai/api/v1/client/txt2img \
+  -H "Authorization: Bearer $API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "prompt": "a beautiful sunset",
+    "model": "Flux1schnell",
+    "width": 512,
+    "height": 512,
+    "guidance": 3.5,
+    "steps": 4,
+    "seed": -1
+  }'
+
+# Response: {"data": {"request_id": "abc123..."}}
+
+# 2. Poll for results
+curl https://api.deapi.ai/api/v1/client/request-status/abc123 \
+  -H "Authorization: Bearer $API_KEY"
+```
+
+**Response fields:**
+
+| Field | Description |
+|-------|-------------|
+| `status` | `pending`, `processing`, `done`, or `error` |
+| `progress` | Progress percentage (when available) |
+| `result_url` | Download URL (when `done`) |
+| `error` | Error details (when `error`) |
+
+<Warning>
+Polling adds latency, wastes resources with unnecessary requests, and provides no live previews. Use webhooks or WebSockets when possible.
+</Warning>
+
+→ [Get Results Endpoint Reference](/api/utilities/get-results)
+
+---
+
+## Choosing a Method
+
+| Scenario | Recommended |
+|----------|-------------|
+| Backend service / serverless | Webhooks |
+| Interactive web app with progress UI | WebSockets |
+| Simple scripts / CLI tools | Polling |
+| Mobile app with real-time updates | WebSockets |
+| Batch processing pipeline | Webhooks |
+
+<Tip>
+Use webhooks as your primary method with WebSockets for UI updates. This gives you reliability (webhook retries) plus great UX (instant progress).
+</Tip>
+
+---
+
+## How Jobs Are Processed
+
+Every model endpoint follows the same pattern:
+
+<Steps>
+  <Step title="Submit request">
+    Send `POST /api/v1/client/{task}` with your parameters (optionally include `webhook_url`).
+  </Step>
+  <Step title="Receive request_id">
+    Response contains `request_id` for tracking.
+  </Step>
+  <Step title="Job queued">
+    Request enters the queue with status `pending`.
+  </Step>
+  <Step title="Worker processes">
+    GPU worker picks up the job, status becomes `processing`.
+  </Step>
+  <Step title="Results delivered">
+    Via webhook POST, WebSocket event, or polling response.
+  </Step>
+</Steps>
+
+This queued model:
+- Keeps long-running jobs off the HTTP request path
+- Avoids timeout issues for video/audio generation
+- Enables efficient GPU scheduling across the distributed network
+- Provides a consistent pattern across all endpoints
+
+---
+
+## Quick Reference
+
+| Endpoint | Description |
+|----------|-------------|
+| `POST /api/v1/client/{task}` | Submit a job |
+| `GET /api/v1/client/request-status/{request_id}` | Check job status (polling) |
+| `POST {your_webhook_url}` | Receive webhook notification |
+| `wss://soketi.deapi.ai` | WebSocket connection |
