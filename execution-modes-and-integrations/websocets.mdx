@@ -1,0 +1,475 @@
+---
+title: 'WebSockets'
+description: 'Receive real-time job status updates via WebSocket connections'
+---
+
+## Overview
+
+WebSockets provide real-time job status updates through a persistent connection. Unlike polling, updates are pushed instantly as they happen, including live preview images during generation.
+
+<Info>
+WebSockets are ideal for interactive applications where you need instant feedback on job progress.
+</Info>
+
+## Quick Start
+
+Install the required packages:
+
+```bash
+npm install pusher-js laravel-echo
+```
+
+Connect and listen for updates:
+
+```javascript
+import Pusher from 'pusher-js';
+
+const CLIENT_ID = 'your-client-id';      // From your dashboard
+const API_TOKEN = 'your-api-token';      // From authentication
+
+const pusher = new Pusher('depin-api-prod-key', {
+    wsHost: 'soketi.deapi.ai',
+    wsPort: 443,
+    forceTLS: true,
+    cluster: 'mt1',
+    enabledTransports: ['ws', 'wss'],
+    authorizer: (channel) => ({
+        authorize: async (socketId, callback) => {
+            const res = await fetch('https://api.deapi.ai/broadcasting/auth', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${API_TOKEN}`
+                },
+                body: JSON.stringify({ socket_id: socketId, channel_name: channel.name })
+            });
+            callback(null, await res.json());
+        }
+    })
+});
+
+pusher.subscribe(`private-client.${CLIENT_ID}`)
+    .bind('request.status.updated', (data) => {
+        console.log(`Job ${data.request_id}: ${data.status} (${data.progress}%)`);
+        if (data.result_url) console.log('Result:', data.result_url);
+    });
+```
+
+## When to Use WebSockets vs Webhooks
+
+| Feature | WebSockets | Webhooks |
+|---------|------------|----------|
+| Latency | Instant (milliseconds) | Near-instant (seconds) |
+| Connection | Persistent | Per-event HTTP request |
+| Progress updates | Yes, with image previews | No |
+| Server requirements | WebSocket client | HTTP endpoint |
+| Reliability | Requires active connection | Automatic retries |
+| Best for | Interactive UIs, real-time apps | Backend integrations, serverless |
+
+<Tip>
+For maximum reliability, use both: WebSockets for real-time UI updates and webhooks as a backup for critical notifications.
+</Tip>
+
+## Configuration
+
+### Connection Details
+
+| Setting | Value |
+|---------|-------|
+| Host | `soketi.deapi.ai` |
+| Port | `443` |
+| Protocol | WSS (secure) |
+| App Key | `depin-api-prod-key` |
+
+### Required Credentials
+
+- **Client ID:** Your unique identifier (from [dashboard](https://deapi.ai/dashboard))
+- **API Token:** Your authentication token (see [Authentication](/authentication))
+
+## Connecting
+
+We use a Pusher-compatible protocol. You can use any Pusher client library.
+
+### Using Laravel Echo (Recommended for Frontend)
+
+```javascript
+import Echo from 'laravel-echo';
+import Pusher from 'pusher-js';
+
+window.Pusher = Pusher;
+
+const echo = new Echo({
+    broadcaster: 'pusher',
+    key: 'depin-api-prod-key',
+    wsHost: 'soketi.deapi.ai',
+    wsPort: 443,
+    wssPort: 443,
+    forceTLS: true,
+    enabledTransports: ['ws', 'wss'],
+    cluster: 'mt1',
+    authorizer: (channel) => ({
+        authorize: (socketId, callback) => {
+            fetch('https://api.deapi.ai/broadcasting/auth', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${YOUR_API_TOKEN}`
+                },
+                body: JSON.stringify({
+                    socket_id: socketId,
+                    channel_name: channel.name
+                })
+            })
+            .then(response => response.json())
+            .then(data => callback(null, data))
+            .catch(error => callback(error));
+        }
+    })
+});
+
+// Subscribe to your channel
+echo.private(`client.${YOUR_CLIENT_ID}`)
+    .listen('.request.status.updated', (data) => {
+        console.log('Job update:', data);
+    });
+```
+
+### Using Pusher Client Directly
+
+<CodeGroup>
+```javascript JavaScript
+import Pusher from 'pusher-js';
+
+const pusher = new Pusher('depin-api-prod-key', {
+    wsHost: 'soketi.deapi.ai',
+    wsPort: 443,
+    wssPort: 443,
+    forceTLS: true,
+    enabledTransports: ['ws', 'wss'],
+    cluster: 'mt1',
+    authorizer: (channel) => ({
+        authorize: async (socketId, callback) => {
+            try {
+                const response = await fetch('https://api.deapi.ai/broadcasting/auth', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${YOUR_API_TOKEN}`
+                    },
+                    body: JSON.stringify({
+                        socket_id: socketId,
+                        channel_name: channel.name
+                    })
+                });
+                callback(null, await response.json());
+            } catch (error) {
+                callback(error);
+            }
+        }
+    })
+});
+
+const channel = pusher.subscribe(`private-client.${YOUR_CLIENT_ID}`);
+channel.bind('request.status.updated', (data) => {
+    console.log('Job update:', data);
+});
+```
+
+```python Python
+import pysher
+import time
+
+YOUR_API_TOKEN = 'your-api-token'
+YOUR_CLIENT_ID = 'your-client-id'
+
+pusher = pysher.Pusher(
+    key='depin-api-prod-key',
+    custom_host='soketi.deapi.ai',
+    secure=True,
+    port=443,
+    auth_endpoint='https://api.deapi.ai/broadcasting/auth',
+    auth_endpoint_headers={
+        'Authorization': f'Bearer {YOUR_API_TOKEN}'
+    }
+)
+
+def on_connect(data):
+    channel = pusher.subscribe(f'private-client.{YOUR_CLIENT_ID}')
+    channel.bind('request.status.updated', lambda data: print(f'Update: {data}'))
+
+pusher.connection.bind('pusher:connection_established', on_connect)
+pusher.connect()
+
+while True:
+    time.sleep(1)
+```
+</CodeGroup>
+
+## Channels
+
+Each client has a private channel scoped to their account:
+
+```
+private-client.{client_id}
+```
+
+<Warning>
+Private channels require authentication. You can only subscribe to your own channel.
+</Warning>
+
+<Info>
+When using Laravel Echo, use `.listen('.request.status.updated', ...)` with a dot prefix. With raw Pusher, use `.bind('request.status.updated', ...)` without the dot.
+</Info>
+
+## Events
+
+### request.status.updated
+
+Sent whenever a job's status changes or progress is updated.
+
+**Event Payload:**
+
+```json
+{
+  "request_id": "123e4567-e89b-12d3-a456-426614174000",
+  "status": "in_progress",
+  "preview": "data:image/jpeg;base64,/9j/4AAQSkZJRg...",
+  "result_url": null,
+  "progress": "45.50"
+}
+```
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `request_id` | string | Job's unique identifier (UUID) |
+| `status` | string | Current status: `processing`, `in_progress`, or `done` |
+| `preview` | string \| null | Base64 preview image (image generation jobs only) |
+| `result_url` | string \| null | Signed download URL (only when `done`) |
+| `progress` | string | Progress percentage as decimal string (e.g., `"45.50"`) |
+
+<Warning>
+The `result_url` is a signed URL that expires. Download promptly or use the job status endpoint to get a fresh URL.
+</Warning>
+
+### Status Flow
+
+```
+pending → processing → in_progress (multiple) → done
+                    ↘                         ↗
+                      ─────── error ─────────
+```
+
+| Status | Description | WebSocket Event |
+|--------|-------------|-----------------|
+| `pending` | Job queued, waiting for worker | No |
+| `processing` | Worker assigned, starting | Yes |
+| `in_progress` | Actively generating | Yes (with previews) |
+| `done` | Completed successfully | Yes (with result URL) |
+| `error` | Failed | Via [webhooks](/webhooks) only |
+
+## Complete Examples
+
+### React Hook
+
+```typescript
+import { useEffect, useState, useCallback } from 'react';
+import Echo from 'laravel-echo';
+import Pusher from 'pusher-js';
+
+interface JobUpdate {
+  request_id: string;
+  status: 'processing' | 'in_progress' | 'done';
+  preview: string | null;
+  result_url: string | null;
+  progress: string;
+}
+
+export function useJobUpdates(clientId: string, apiToken: string) {
+  const [updates, setUpdates] = useState<Map<string, JobUpdate>>(new Map());
+  const [connected, setConnected] = useState(false);
+
+  useEffect(() => {
+    window.Pusher = Pusher;
+
+    const echo = new Echo({
+      broadcaster: 'pusher',
+      key: 'depin-api-prod-key',
+      wsHost: 'soketi.deapi.ai',
+      wsPort: 443,
+      wssPort: 443,
+      forceTLS: true,
+      enabledTransports: ['ws', 'wss'],
+      cluster: 'mt1',
+      authorizer: (channel) => ({
+        authorize: (socketId, callback) => {
+          fetch('https://api.deapi.ai/broadcasting/auth', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${apiToken}`
+            },
+            body: JSON.stringify({
+              socket_id: socketId,
+              channel_name: channel.name
+            })
+          })
+          .then(res => res.json())
+          .then(data => callback(null, data))
+          .catch(err => callback(err));
+        }
+      })
+    });
+
+    echo.connector.pusher.connection.bind('connected', () => setConnected(true));
+    echo.connector.pusher.connection.bind('disconnected', () => setConnected(false));
+
+    echo.private(`client.${clientId}`)
+      .listen('.request.status.updated', (data: JobUpdate) => {
+        setUpdates(prev => new Map(prev).set(data.request_id, data));
+      });
+
+    return () => {
+      echo.leave(`client.${clientId}`);
+      echo.disconnect();
+    };
+  }, [clientId, apiToken]);
+
+  const getJobUpdate = useCallback((requestId: string) => updates.get(requestId), [updates]);
+
+  return { updates, connected, getJobUpdate };
+}
+```
+
+### Node.js Backend
+
+```javascript
+import Pusher from 'pusher-js';
+
+const CLIENT_ID = process.env.DEAPI_CLIENT_ID;
+const API_TOKEN = process.env.DEAPI_API_TOKEN;
+
+const pusher = new Pusher('depin-api-prod-key', {
+    wsHost: 'soketi.deapi.ai',
+    wsPort: 443,
+    wssPort: 443,
+    forceTLS: true,
+    enabledTransports: ['ws', 'wss'],
+    cluster: 'mt1',
+    authorizer: (channel) => ({
+        authorize: async (socketId, callback) => {
+            try {
+                const response = await fetch('https://api.deapi.ai/broadcasting/auth', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${API_TOKEN}`
+                    },
+                    body: JSON.stringify({
+                        socket_id: socketId,
+                        channel_name: channel.name
+                    })
+                });
+                callback(null, await response.json());
+            } catch (error) {
+                callback(error);
+            }
+        }
+    })
+});
+
+pusher.connection.bind('connected', () => console.log('Connected'));
+pusher.connection.bind('error', (err) => console.error('Error:', err));
+
+const channel = pusher.subscribe(`private-client.${CLIENT_ID}`);
+
+channel.bind('pusher:subscription_succeeded', () => console.log('Subscribed'));
+
+channel.bind('request.status.updated', (data) => {
+    console.log(`Job ${data.request_id}: ${data.status} (${data.progress}%)`);
+    if (data.preview) console.log('Preview available');
+    if (data.result_url) console.log('Download:', data.result_url);
+});
+
+process.on('SIGINT', () => { pusher.disconnect(); process.exit(); });
+```
+
+## Authentication
+
+Private channels require authorization via the broadcasting auth endpoint.
+
+**Endpoint:** `POST https://api.deapi.ai/broadcasting/auth`
+
+**Headers:**
+```
+Authorization: Bearer <your-api-token>
+Content-Type: application/json
+```
+
+**Request:**
+```json
+{
+  "socket_id": "123456.789012",
+  "channel_name": "private-client.42"
+}
+```
+
+**Response:**
+```json
+{
+  "auth": "depin-api-prod-key:signature..."
+}
+```
+
+<Info>
+The Pusher client libraries handle this automatically via the `authorizer` callback.
+</Info>
+
+## Connection Management
+
+### Keep-Alive
+
+The WebSocket server expects a ping every 30 seconds. Most Pusher client libraries handle this automatically. If implementing a custom client, send a `pusher:ping` event within the timeout window to maintain the connection.
+
+### Reconnection
+
+The Pusher client handles reconnection automatically with exponential backoff.
+
+```javascript
+// Monitor connection state
+pusher.connection.bind('state_change', (states) => {
+    console.log('State:', states.current);
+    // States: initialized, connecting, connected, unavailable, failed, disconnected
+});
+
+// Clean up when done
+pusher.unsubscribe(`private-client.${clientId}`);
+pusher.disconnect();
+```
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Connection fails immediately">
+    - Verify your API token is valid
+    - Check that you're using `soketi.deapi.ai` as the host
+    - Ensure port 443 is not blocked by your firewall
+  </Accordion>
+
+  <Accordion title="Authorization fails (403)">
+    - Confirm your client ID matches your API token
+    - Verify channel name format: `private-client.{your_client_id}`
+    - Check that your API token has not been revoked
+  </Accordion>
+
+  <Accordion title="Not receiving events">
+    - Use `.request.status.updated` with Echo (dot prefix) or `request.status.updated` with Pusher (no dot)
+    - Verify subscription succeeded via `pusher:subscription_succeeded` event
+    - Ensure jobs are submitted with the same client credentials
+  </Accordion>
+
+  <Accordion title="Connection drops frequently">
+    - The client library reconnects automatically
+    - Monitor `state_change` events to track connection health
+    - Consider using [webhooks](/webhooks) as a backup
+  </Accordion>
+</AccordionGroup>

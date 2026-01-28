@@ -81,6 +81,8 @@
         "group": "Execution Modes & Integrations",
         "pages": [
           "execution-modes-and-integrations/execution-modes-and-http-queue",
+          "execution-modes-and-integrations/webhooks",
+          "execution-modes-and-integrations/websockets",
           "execution-modes-and-integrations/mcp-server",
           "execution-modes-and-integrations/n8n-integration"
         ]

@@ -60,6 +60,14 @@
                                         "default": false,
                                         "example": false,
                                         "nullable": true
+                                    },
+                                    "webhook_url": {
+                                        "description": "Optional HTTPS URL to receive webhook notifications for job status changes (processing, completed, failed). Must be HTTPS. Max 2048 characters. See [Webhook Documentation](/execution-modes-and-integrations/webhooks) for payload structure and authentication details.",
+                                        "type": "string",
+                                        "format": "uri",
+                                        "maxLength": 2048,
+                                        "example": "https://your-server.com/webhooks/deapi",
+                                        "nullable": true
                                     }
                                 },
                                 "type": "object"
@@ -97,6 +105,9 @@
                                 }
                             }
                         }
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationError"
                     },
                     "429": {
                         "$ref": "#/components/responses/RateLimitExceeded"
@@ -210,6 +221,9 @@
                             }
                         }
                     },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationError"
+                    },
                     "429": {
                         "$ref": "#/components/responses/RateLimitExceeded"
                     }
@@ -265,6 +279,14 @@
                                         "default": false,
                                         "example": false,
                                         "nullable": true
+                                    },
+                                    "webhook_url": {
+                                        "description": "Optional HTTPS URL to receive webhook notifications for job status changes (processing, completed, failed). Must be HTTPS. Max 2048 characters. See [Webhook Documentation](/execution-modes-and-integrations/webhooks) for payload structure and authentication details.",
+                                        "type": "string",
+                                        "format": "uri",
+                                        "maxLength": 2048,
+                                        "example": "https://your-server.com/webhooks/deapi",
+                                        "nullable": true
                                     }
                                 },
                                 "type": "object"
@@ -302,6 +324,9 @@
                                 }
                             }
                         }
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationError"
                     },
                     "429": {
                         "$ref": "#/components/responses/RateLimitExceeded"
@@ -405,6 +430,9 @@
                                 }
                             }
                         }
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationError"
                     },
                     "429": {
                         "$ref": "#/components/responses/RateLimitExceeded"
@@ -557,6 +585,14 @@
                                         "description": "Random seed for generation",
                                         "type": "integer",
                                         "example": 42
+                                    },
+                                    "webhook_url": {
+                                        "description": "Optional HTTPS URL to receive webhook notifications for job status changes (processing, completed, failed). Must be HTTPS. Max 2048 characters. See [Webhook Documentation](/execution-modes-and-integrations/webhooks) for payload structure and authentication details.",
+                                        "type": "string",
+                                        "format": "uri",
+                                        "maxLength": 2048,
+                                        "example": "https://your-server.com/webhooks/deapi",
+                                        "nullable": true
                                     }
                                 },
                                 "type": "object"
@@ -594,6 +630,9 @@
                                 }
                             }
                         }
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationError"
                     },
                     "429": {
                         "$ref": "#/components/responses/RateLimitExceeded"
@@ -737,6 +776,9 @@
                             }
                         }
                     },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationError"
+                    },
                     "429": {
                         "$ref": "#/components/responses/RateLimitExceeded"
                     }
@@ -803,6 +845,14 @@
                                         "default": false,
                                         "example": false,
                                         "nullable": true
+                                    },
+                                    "webhook_url": {
+                                        "description": "Optional HTTPS URL to receive webhook notifications for job status changes (processing, completed, failed). Must be HTTPS. Max 2048 characters. See [Webhook Documentation](/execution-modes-and-integrations/webhooks) for payload structure and authentication details.",
+                                        "type": "string",
+                                        "format": "uri",
+                                        "maxLength": 2048,
+                                        "example": "https://your-server.com/webhooks/deapi",
+                                        "nullable": true
                                     }
                                 },
                                 "type": "object"
@@ -840,6 +890,9 @@
                                 }
                             }
                         }
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationError"
                     },
                     "429": {
                         "$ref": "#/components/responses/RateLimitExceeded"
@@ -996,6 +1049,9 @@
                             }
                         }
                     },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationError"
+                    },
                     "429": {
                         "$ref": "#/components/responses/RateLimitExceeded"
                     }
@@ -1098,6 +1154,14 @@
                                         "description": "The model to use for video generation. Available models can be retrieved via the GET /api/v1/client/models endpoint.",
                                         "type": "string",
                                         "example": "Ltxv_13B_0_9_8_Distilled_FP8"
+                                    },
+                                    "webhook_url": {
+                                        "description": "Optional HTTPS URL to receive webhook notifications for job status changes (processing, completed, failed). Must be HTTPS. Max 2048 characters. See [Webhook Documentation](/execution-modes-and-integrations/webhooks) for payload structure and authentication details.",
+                                        "type": "string",
+                                        "format": "uri",
+                                        "maxLength": 2048,
+                                        "example": "https://your-server.com/webhooks/deapi",
+                                        "nullable": true
                                     }
                                 },
                                 "type": "object"
@@ -1135,6 +1199,9 @@
                                 }
                             }
                         }
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationError"
                     },
                     "429": {
                         "$ref": "#/components/responses/RateLimitExceeded"
@@ -1253,6 +1320,9 @@
                             }
                         }
                     },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationError"
+                    },
                     "429": {
                         "$ref": "#/components/responses/RateLimitExceeded"
                     }
@@ -1295,7 +1365,15 @@
                                     "model": {
                                         "description": "The background removal model to use",
                                         "type": "string",
-                                        "example": "Ben2"
+                                        "example": "RMBG-1.4"
+                                    },
+                                    "webhook_url": {
+                                        "description": "Optional HTTPS URL to receive webhook notifications for job status changes (processing, completed, failed). Must be HTTPS. Max 2048 characters. See [Webhook Documentation](/execution-modes-and-integrations/webhooks) for payload structure and authentication details.",
+                                        "type": "string",
+                                        "format": "uri",
+                                        "maxLength": 2048,
+                                        "example": "https://your-server.com/webhooks/deapi",
+                                        "nullable": true
                                     }
                                 },
                                 "type": "object"
@@ -1333,6 +1411,9 @@
                                 }
                             }
                         }
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationError"
                     },
                     "429": {
                         "$ref": "#/components/responses/RateLimitExceeded"
@@ -1378,7 +1459,7 @@
                                             "model": {
                                                 "description": "The background removal model to use",
                                                 "type": "string",
-                                                "example": "Ben2"
+                                                "example": "RMBG-1.4"
                                             }
                                         },
                                         "type": "object"
@@ -1403,7 +1484,7 @@
                                             "model": {
                                                 "description": "The background removal model to use",
                                                 "type": "string",
-                                                "example": "Ben2"
+                                                "example": "RMBG-1.4"
                                             }
                                         },
                                         "type": "object"
@@ -1457,6 +1538,9 @@
                             }
                         }
                     },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationError"
+                    },
                     "429": {
                         "$ref": "#/components/responses/RateLimitExceeded"
                     }
@@ -1500,6 +1584,14 @@
                                         "description": "The upscaling model to use",
                                         "type": "string",
                                         "example": "RealESRGAN_x4plus"
+                                    },
+                                    "webhook_url": {
+                                        "description": "Optional HTTPS URL to receive webhook notifications for job status changes (processing, completed, failed). Must be HTTPS. Max 2048 characters. See [Webhook Documentation](/execution-modes-and-integrations/webhooks) for payload structure and authentication details.",
+                                        "type": "string",
+                                        "format": "uri",
+                                        "maxLength": 2048,
+                                        "example": "https://your-server.com/webhooks/deapi",
+                                        "nullable": true
                                     }
                                 },
                                 "type": "object"
@@ -1537,6 +1629,9 @@
                                 }
                             }
                         }
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationError"
                     },
                     "429": {
                         "$ref": "#/components/responses/RateLimitExceeded"
@@ -1661,6 +1756,9 @@
                             }
                         }
                     },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationError"
+                    },
                     "429": {
                         "$ref": "#/components/responses/RateLimitExceeded"
                     }
@@ -1764,6 +1862,14 @@
                                         "description": "Random seed for generation",
                                         "type": "integer",
                                         "example": 42
+                                    },
+                                    "webhook_url": {
+                                        "description": "Optional HTTPS URL to receive webhook notifications for job status changes (processing, completed, failed). Must be HTTPS. Max 2048 characters. See [Webhook Documentation](/execution-modes-and-integrations/webhooks) for payload structure and authentication details.",
+                                        "type": "string",
+                                        "format": "uri",
+                                        "maxLength": 2048,
+                                        "example": "https://your-server.com/webhooks/deapi",
+                                        "nullable": true
                                     }
                                 },
                                 "type": "object"
@@ -1801,6 +1907,9 @@
                                 }
                             }
                         }
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationError"
                     },
                     "429": {
                         "$ref": "#/components/responses/RateLimitExceeded"
@@ -2109,6 +2218,9 @@
                                 }
                             }
                         }
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationError"
                     },
                     "429": {
                         "$ref": "#/components/responses/RateLimitExceeded"
@@ -2950,6 +3062,14 @@
                                         "description": "Sample rate of generated audio",
                                         "type": "number",
                                         "example": 24000
+                                    },
+                                    "webhook_url": {
+                                        "description": "Optional HTTPS URL to receive webhook notifications for job status changes (processing, completed, failed). Must be HTTPS. Max 2048 characters. See [Webhook Documentation](/execution-modes-and-integrations/webhooks) for payload structure and authentication details.",
+                                        "type": "string",
+                                        "format": "uri",
+                                        "maxLength": 2048,
+                                        "example": "https://your-server.com/webhooks/deapi",
+                                        "nullable": true
                                     }
                                 },
                                 "type": "object"
@@ -2987,6 +3107,9 @@
                                 }
                             }
                         }
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationError"
                     },
                     "429": {
                         "$ref": "#/components/responses/RateLimitExceeded"
@@ -3118,6 +3241,9 @@
                             }
                         }
                     },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationError"
+                    },
                     "429": {
                         "$ref": "#/components/responses/RateLimitExceeded"
                     }
@@ -3183,6 +3309,14 @@
                                         "default": false,
                                         "example": false,
                                         "nullable": true
+                                    },
+                                    "webhook_url": {
+                                        "description": "Optional HTTPS URL to receive webhook notifications for job status changes (processing, completed, failed). Must be HTTPS. Max 2048 characters. See [Webhook Documentation](/execution-modes-and-integrations/webhooks) for payload structure and authentication details.",
+                                        "type": "string",
+                                        "format": "uri",
+                                        "maxLength": 2048,
+                                        "example": "https://your-server.com/webhooks/deapi",
+                                        "nullable": true
                                     }
                                 },
                                 "type": "object"
@@ -3220,6 +3354,9 @@
                                 }
                             }
                         }
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationError"
                     },
                     "429": {
                         "$ref": "#/components/responses/RateLimitExceeded"
@@ -3329,6 +3466,9 @@
                             }
                         }
                     },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationError"
+                    },
                     "429": {
                         "$ref": "#/components/responses/RateLimitExceeded"
                     }
@@ -3419,6 +3559,14 @@
                                         "description": "The model to use for video generation. Available models can be retrieved via the GET /api/v1/client/models endpoint.",
                                         "type": "string",
                                         "example": "Ltxv_13B_0_9_8_Distilled_FP8"
+                                    },
+                                    "webhook_url": {
+                                        "description": "Optional HTTPS URL to receive webhook notifications for job status changes (processing, completed, failed). Must be HTTPS. Max 2048 characters. See [Webhook Documentation](/execution-modes-and-integrations/webhooks) for payload structure and authentication details.",
+                                        "type": "string",
+                                        "format": "uri",
+                                        "maxLength": 2048,
+                                        "example": "https://your-server.com/webhooks/deapi",
+                                        "nullable": true
                                     }
                                 },
                                 "type": "object"
@@ -3456,6 +3604,9 @@
                                 }
                             }
                         }
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationError"
                     },
                     "429": {
                         "$ref": "#/components/responses/RateLimitExceeded"
@@ -3574,6 +3725,9 @@
                             }
                         }
                     },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationError"
+                    },
                     "429": {
                         "$ref": "#/components/responses/RateLimitExceeded"
                     }
@@ -3628,6 +3782,14 @@
                                         "default": false,
                                         "example": false,
                                         "nullable": true
+                                    },
+                                    "webhook_url": {
+                                        "description": "Optional HTTPS URL to receive webhook notifications for job status changes (processing, completed, failed). Must be HTTPS. Max 2048 characters. See [Webhook Documentation](/execution-modes-and-integrations/webhooks) for payload structure and authentication details.",
+                                        "type": "string",
+                                        "format": "uri",
+                                        "maxLength": 2048,
+                                        "example": "https://your-server.com/webhooks/deapi",
+                                        "nullable": true
                                     }
                                 },
                                 "type": "object"
@@ -3665,6 +3827,9 @@
                                 }
                             }
                         }
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationError"
                     },
                     "429": {
                         "$ref": "#/components/responses/RateLimitExceeded"
@@ -3791,6 +3956,9 @@
                             }
                         }
                     },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationError"
+                    },
                     "429": {
                         "$ref": "#/components/responses/RateLimitExceeded"
                     }
@@ -3833,7 +4001,15 @@
                                     "model": {
                                         "description": "The background removal model to use",
                                         "type": "string",
-                                        "example": "Ben2"
+                                        "example": "RMBG-1.4"
+                                    },
+                                    "webhook_url": {
+                                        "description": "Optional HTTPS URL to receive webhook notifications for job status changes (processing, completed, failed). Must be HTTPS. Max 2048 characters. See [Webhook Documentation](/execution-modes-and-integrations/webhooks) for payload structure and authentication details.",
+                                        "type": "string",
+                                        "format": "uri",
+                                        "maxLength": 2048,
+                                        "example": "https://your-server.com/webhooks/deapi",
+                                        "nullable": true
                                     }
                                 },
                                 "type": "object"
@@ -3871,6 +4047,9 @@
                                 }
                             }
                         }
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationError"
                     },
                     "429": {
                         "$ref": "#/components/responses/RateLimitExceeded"
@@ -3916,7 +4095,7 @@
                                             "model": {
                                                 "description": "The background removal model to use",
                                                 "type": "string",
-                                                "example": "Ben2"
+                                                "example": "RMBG-1.4"
                                             }
                                         },
                                         "type": "object"
@@ -3941,7 +4120,7 @@
                                             "model": {
                                                 "description": "The background removal model to use",
                                                 "type": "string",
-                                                "example": "Ben2"
+                                                "example": "RMBG-1.4"
                                             }
                                         },
                                         "type": "object"
@@ -3994,6 +4173,9 @@
                                 }
                             }
                         }
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationError"
                     },
                     "429": {
                         "$ref": "#/components/responses/RateLimitExceeded"
@@ -4049,6 +4231,14 @@
                                         "default": false,
                                         "example": false,
                                         "nullable": true
+                                    },
+                                    "webhook_url": {
+                                        "description": "Optional HTTPS URL to receive webhook notifications for job status changes (processing, completed, failed). Must be HTTPS. Max 2048 characters. See [Webhook Documentation](/execution-modes-and-integrations/webhooks) for payload structure and authentication details.",
+                                        "type": "string",
+                                        "format": "uri",
+                                        "maxLength": 2048,
+                                        "example": "https://your-server.com/webhooks/deapi",
+                                        "nullable": true
                                     }
                                 },
                                 "type": "object"
@@ -4086,6 +4276,9 @@
                                 }
                             }
                         }
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationError"
                     },
                     "429": {
                         "$ref": "#/components/responses/RateLimitExceeded"
@@ -4185,6 +4378,9 @@
                             }
                         }
                     },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationError"
+                    },
                     "429": {
                         "$ref": "#/components/responses/RateLimitExceeded"
                     }
@@ -4228,6 +4424,14 @@
                                         "description": "The upscaling model to use",
                                         "type": "string",
                                         "example": "RealESRGAN_x4plus"
+                                    },
+                                    "webhook_url": {
+                                        "description": "Optional HTTPS URL to receive webhook notifications for job status changes (processing, completed, failed). Must be HTTPS. Max 2048 characters. See [Webhook Documentation](/execution-modes-and-integrations/webhooks) for payload structure and authentication details.",
+                                        "type": "string",
+                                        "format": "uri",
+                                        "maxLength": 2048,
+                                        "example": "https://your-server.com/webhooks/deapi",
+                                        "nullable": true
                                     }
                                 },
                                 "type": "object"
@@ -4265,6 +4469,9 @@
                                 }
                             }
                         }
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationError"
                     },
                     "429": {
                         "$ref": "#/components/responses/RateLimitExceeded"
@@ -4388,6 +4595,9 @@
                                 }
                             }
                         }
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationError"
                     },
                     "429": {
                         "$ref": "#/components/responses/RateLimitExceeded"
@@ -4551,6 +4761,333 @@
                 },
                 "type": "object"
             },
+            "WebhookHeaders": {
+                "title": "Webhook Request Headers",
+                "description": "Headers included in all webhook notification requests. Use these to verify authenticity and process events.",
+                "properties": {
+                    "X-DeAPI-Signature": {
+                        "description": "HMAC-SHA256 signature for payload verification. Format: sha256=<hex-encoded-hmac>. Calculate as: HMAC-SHA256(key: webhook_secret, message: timestamp + \".\" + raw_json_payload)",
+                        "type": "string",
+                        "example": "sha256=5d41402abc4b2a76b9719d911017c592ae3b1e3c8a89f5f8c9d7e6f5a4b3c2d1"
+                    },
+                    "X-DeAPI-Timestamp": {
+                        "description": "Unix timestamp when the webhook was sent. Use for replay attack prevention - reject requests older than 5 minutes.",
+                        "type": "integer",
+                        "example": 1705315800
+                    },
+                    "X-DeAPI-Event": {
+                        "description": "The type of event that triggered this webhook",
+                        "type": "string",
+                        "enum": [
+                            "job.processing",
+                            "job.completed",
+                            "job.failed"
+                        ],
+                        "example": "job.completed"
+                    },
+                    "X-DeAPI-Delivery-Id": {
+                        "description": "Unique identifier for this webhook delivery. Use for idempotency handling.",
+                        "type": "string",
+                        "format": "uuid",
+                        "example": "550e8400-e29b-41d4-a716-446655440001"
+                    }
+                },
+                "type": "object"
+            },
+            "WebhookProcessingPayload": {
+                "title": "Webhook Payload - Job Processing",
+                "description": "Payload sent when a job transitions from pending to processing state. Indicates a worker has started processing the job.",
+                "required": [
+                    "event",
+                    "delivery_id",
+                    "timestamp",
+                    "data"
+                ],
+                "properties": {
+                    "event": {
+                        "description": "The event type",
+                        "type": "string",
+                        "example": "job.processing"
+                    },
+                    "delivery_id": {
+                        "description": "Unique identifier for this delivery",
+                        "type": "string",
+                        "format": "uuid",
+                        "example": "550e8400-e29b-41d4-a716-446655440000"
+                    },
+                    "timestamp": {
+                        "description": "ISO 8601 timestamp when the event occurred",
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2024-01-15T10:30:00.000Z"
+                    },
+                    "data": {
+                        "description": "Event-specific data",
+                        "required": [
+                            "job_request_id",
+                            "status",
+                            "previous_status",
+                            "job_type",
+                            "started_at"
+                        ],
+                        "properties": {
+                            "job_request_id": {
+                                "description": "The UUID of the job request",
+                                "type": "string",
+                                "format": "uuid",
+                                "example": "123e4567-e89b-12d3-a456-426614174000"
+                            },
+                            "status": {
+                                "description": "Current job status",
+                                "type": "string",
+                                "example": "processing"
+                            },
+                            "previous_status": {
+                                "description": "Previous job status",
+                                "type": "string",
+                                "example": "pending"
+                            },
+                            "job_type": {
+                                "description": "Type of inference job",
+                                "type": "string",
+                                "enum": [
+                                    "txt2img",
+                                    "img2txt",
+                                    "txt2audio",
+                                    "vid2txt",
+                                    "aud2txt",
+                                    "txt2video",
+                                    "img2video",
+                                    "img2img",
+                                    "img_upscale",
+                                    "img_rmbg",
+                                    "vid_upscale",
+                                    "vid_rmbg",
+                                    "txt2embedding",
+                                    "videofile2txt",
+                                    "audiofile2txt"
+                                ],
+                                "example": "txt2img"
+                            },
+                            "started_at": {
+                                "description": "ISO 8601 timestamp when processing started",
+                                "type": "string",
+                                "format": "date-time",
+                                "example": "2024-01-15T10:30:00.000Z"
+                            }
+                        },
+                        "type": "object"
+                    }
+                },
+                "type": "object"
+            },
+            "WebhookCompletedPayload": {
+                "title": "Webhook Payload - Job Completed",
+                "description": "Payload sent when a job completes successfully. Includes the result URL for downloading the output.",
+                "required": [
+                    "event",
+                    "delivery_id",
+                    "timestamp",
+                    "data"
+                ],
+                "properties": {
+                    "event": {
+                        "description": "The event type",
+                        "type": "string",
+                        "example": "job.completed"
+                    },
+                    "delivery_id": {
+                        "description": "Unique identifier for this delivery",
+                        "type": "string",
+                        "format": "uuid",
+                        "example": "550e8400-e29b-41d4-a716-446655440001"
+                    },
+                    "timestamp": {
+                        "description": "ISO 8601 timestamp when the event occurred",
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2024-01-15T10:30:45.000Z"
+                    },
+                    "data": {
+                        "description": "Event-specific data",
+                        "required": [
+                            "job_request_id",
+                            "status",
+                            "previous_status",
+                            "job_type",
+                            "completed_at",
+                            "result_url",
+                            "processing_time_ms"
+                        ],
+                        "properties": {
+                            "job_request_id": {
+                                "description": "The UUID of the job request",
+                                "type": "string",
+                                "format": "uuid",
+                                "example": "123e4567-e89b-12d3-a456-426614174000"
+                            },
+                            "status": {
+                                "description": "Current job status",
+                                "type": "string",
+                                "example": "done"
+                            },
+                            "previous_status": {
+                                "description": "Previous job status",
+                                "type": "string",
+                                "example": "processing"
+                            },
+                            "job_type": {
+                                "description": "Type of inference job",
+                                "type": "string",
+                                "enum": [
+                                    "txt2img",
+                                    "img2txt",
+                                    "txt2audio",
+                                    "vid2txt",
+                                    "aud2txt",
+                                    "txt2video",
+                                    "img2video",
+                                    "img2img",
+                                    "img_upscale",
+                                    "img_rmbg",
+                                    "vid_upscale",
+                                    "vid_rmbg",
+                                    "txt2embedding",
+                                    "videofile2txt",
+                                    "audiofile2txt"
+                                ],
+                                "example": "txt2img"
+                            },
+                            "completed_at": {
+                                "description": "ISO 8601 timestamp when the job completed",
+                                "type": "string",
+                                "format": "date-time",
+                                "example": "2024-01-15T10:30:45.000Z"
+                            },
+                            "result_url": {
+                                "description": "URL to download the job result",
+                                "type": "string",
+                                "format": "uri",
+                                "example": "https://storage.deapi.ai/results/123e4567-e89b-12d3-a456-426614174000/output.png"
+                            },
+                            "processing_time_ms": {
+                                "description": "Total processing time in milliseconds",
+                                "type": "integer",
+                                "example": 45000
+                            }
+                        },
+                        "type": "object"
+                    }
+                },
+                "type": "object"
+            },
+            "WebhookFailedPayload": {
+                "title": "Webhook Payload - Job Failed",
+                "description": "Payload sent when a job fails during processing. Includes error details for debugging.",
+                "required": [
+                    "event",
+                    "delivery_id",
+                    "timestamp",
+                    "data"
+                ],
+                "properties": {
+                    "event": {
+                        "description": "The event type",
+                        "type": "string",
+                        "example": "job.failed"
+                    },
+                    "delivery_id": {
+                        "description": "Unique identifier for this delivery",
+                        "type": "string",
+                        "format": "uuid",
+                        "example": "550e8400-e29b-41d4-a716-446655440002"
+                    },
+                    "timestamp": {
+                        "description": "ISO 8601 timestamp when the event occurred",
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2024-01-15T10:30:45.000Z"
+                    },
+                    "data": {
+                        "description": "Event-specific data",
+                        "required": [
+                            "job_request_id",
+                            "status",
+                            "previous_status",
+                            "job_type",
+                            "failed_at",
+                            "error_code",
+                            "error_message"
+                        ],
+                        "properties": {
+                            "job_request_id": {
+                                "description": "The UUID of the job request",
+                                "type": "string",
+                                "format": "uuid",
+                                "example": "123e4567-e89b-12d3-a456-426614174000"
+                            },
+                            "status": {
+                                "description": "Current job status",
+                                "type": "string",
+                                "example": "error"
+                            },
+                            "previous_status": {
+                                "description": "Previous job status",
+                                "type": "string",
+                                "example": "processing"
+                            },
+                            "job_type": {
+                                "description": "Type of inference job",
+                                "type": "string",
+                                "enum": [
+                                    "txt2img",
+                                    "img2txt",
+                                    "txt2audio",
+                                    "vid2txt",
+                                    "aud2txt",
+                                    "txt2video",
+                                    "img2video",
+                                    "img2img",
+                                    "img_upscale",
+                                    "img_rmbg",
+                                    "vid_upscale",
+                                    "vid_rmbg",
+                                    "txt2embedding",
+                                    "videofile2txt",
+                                    "audiofile2txt"
+                                ],
+                                "example": "txt2img"
+                            },
+                            "failed_at": {
+                                "description": "ISO 8601 timestamp when the job failed",
+                                "type": "string",
+                                "format": "date-time",
+                                "example": "2024-01-15T10:30:45.000Z"
+                            },
+                            "error_code": {
+                                "description": "Machine-readable error code",
+                                "type": "string",
+                                "enum": [
+                                    "WORKER_TIMEOUT",
+                                    "PROCESSING_ERROR",
+                                    "AGE_RESTRICTED",
+                                    "CONTEXT_LENGTH_EXCEEDED",
+                                    "INVALID_INPUT",
+                                    "UNKNOWN_ERROR"
+                                ],
+                                "example": "WORKER_TIMEOUT"
+                            },
+                            "error_message": {
+                                "description": "Human-readable error description",
+                                "type": "string",
+                                "example": "Worker failed to respond within the allowed time"
+                            }
+                        },
+                        "type": "object"
+                    }
+                },
+                "type": "object"
+            },
             "AudioFileToTextInferenceJobResource": {
                 "properties": {
                     "data": {
@@ -4651,17 +5188,11 @@
             "ClientDiffusionModelCollection": {
                 "properties": {
                     "data": {
-                        "description": "List of available models.",
-                        "properties": {
-                            "data": {
-                                "description": "List of available models",
-                                "type": "array",
-                                "items": {
-                                    "$ref": "#/components/schemas/ClientDiffusionModelResource"
-                                }
-                            }
-                        },
-                        "type": "object"
+                        "description": "List of available models",
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/ClientDiffusionModelResource"
+                        }
                     }
                 },
                 "type": "object"
@@ -5095,6 +5626,32 @@
             }
         },
         "responses": {
+            "ValidationError": {
+                "description": "Validation failed. Common errors include: model does not exist, model does not support the inference type for this endpoint, or invalid request parameters.",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "properties": {
+                                "message": {
+                                    "description": "General error message",
+                                    "type": "string",
+                                    "example": "The selected model does not support Text To Image."
+                                },
+                                "errors": {
+                                    "description": "Detailed validation errors by field",
+                                    "type": "object",
+                                    "example": {
+                                        "model": [
+                                            "The selected model does not support Text To Image."
+                                        ]
+                                    }
+                                }
+                            },
+                            "type": "object"
+                        }
+                    }
+                }
+            },
             "RateLimitExceeded": {
                 "description": "Rate limit exceeded. Check X-RateLimit-Type header to determine if minute (RPM) or daily (RPD) limit was hit.",
                 "headers": {

@@ -1,0 +1,367 @@
+---
+title: 'Webhooks'
+description: 'Receive real-time notifications about job status changes'
+---
+
+## Overview
+
+Webhooks allow you to receive real-time HTTP notifications when your inference jobs change status, eliminating the need to poll the `/request-status` endpoint.
+
+<Info>
+Webhooks are sent as `POST` requests to your specified URL with a JSON payload and security headers for verification.
+</Info>
+
+## Configuration
+
+### Global Webhook URL
+
+Configure a global webhook URL in your [account settings](https://deapi.ai/dashboard/settings). All jobs will send notifications to this URL unless overridden.
+
+### Per-Request Override
+
+You can override the global webhook URL on any job request by including the `webhook_url` parameter:
+
+```json
+{
+  "prompt": "a beautiful sunset over mountains",
+  "model": "flux-schnell",
+  "webhook_url": "https://your-server.com/webhooks/deapi"
+}
+```
+
+<Warning>
+Only HTTPS URLs are accepted. HTTP URLs will be rejected for security.
+</Warning>
+
+## Events
+
+Webhooks are sent on the following status transitions:
+
+| Event | Trigger | Description |
+|-------|---------|-------------|
+| `job.processing` | `pending → processing` | Job assigned to a worker, processing started |
+| `job.completed` | `processing → done` | Job completed successfully, results available |
+| `job.failed` | `processing → error` | Job failed during processing |
+
+## Request Format
+
+### Headers
+
+All webhook requests include these headers:
+
+| Header | Description | Example |
+|--------|-------------|---------|
+| `X-DeAPI-Signature` | HMAC-SHA256 signature for verification | `sha256=5d41402abc4b2a76b9719d911017c592...` |
+| `X-DeAPI-Timestamp` | Unix timestamp when webhook was sent | `1705315800` |
+| `X-DeAPI-Event` | Event type that triggered the webhook | `job.completed` |
+| `X-DeAPI-Delivery-Id` | Unique identifier for this delivery | `550e8400-e29b-41d4-a716-446655440001` |
+| `Content-Type` | Always `application/json` | `application/json` |
+| `User-Agent` | Identifies the sender | `DeAPI-Webhook/1.0` |
+
+### Payload Structure
+
+<Tabs>
+  <Tab title="job.processing">
+    Sent when a worker starts processing your job.
+
+    ```json
+    {
+      "event": "job.processing",
+      "delivery_id": "550e8400-e29b-41d4-a716-446655440000",
+      "timestamp": "2024-01-15T10:30:00.000Z",
+      "data": {
+        "job_request_id": "123e4567-e89b-12d3-a456-426614174000",
+        "status": "processing",
+        "previous_status": "pending",
+        "job_type": "txt2img",
+        "started_at": "2024-01-15T10:30:00.000Z"
+      }
+    }
+    ```
+
+    | Field | Type | Description |
+    |-------|------|-------------|
+    | `data.job_request_id` | string (UUID) | Your job's unique identifier |
+    | `data.status` | string | Current status: `processing` |
+    | `data.previous_status` | string | Previous status: `pending` |
+    | `data.job_type` | string | Type of job (e.g., `txt2img`, `vid2txt`) |
+    | `data.started_at` | string (ISO 8601) | When processing began |
+  </Tab>
+
+  <Tab title="job.completed">
+    Sent when your job completes successfully.
+
+    ```json
+    {
+      "event": "job.completed",
+      "delivery_id": "550e8400-e29b-41d4-a716-446655440001",
+      "timestamp": "2024-01-15T10:30:45.000Z",
+      "data": {
+        "job_request_id": "123e4567-e89b-12d3-a456-426614174000",
+        "status": "done",
+        "previous_status": "processing",
+        "job_type": "txt2img",
+        "completed_at": "2024-01-15T10:30:45.000Z",
+        "result_url": "https://storage.deapi.ai/results/.../output.png",
+        "processing_time_ms": 45000
+      }
+    }
+    ```
+
+    | Field | Type | Description |
+    |-------|------|-------------|
+    | `data.job_request_id` | string (UUID) | Your job's unique identifier |
+    | `data.status` | string | Current status: `done` |
+    | `data.previous_status` | string | Previous status: `processing` |
+    | `data.job_type` | string | Type of job |
+    | `data.completed_at` | string (ISO 8601) | When job completed |
+    | `data.result_url` | string (URL) | URL to download the result |
+    | `data.processing_time_ms` | integer | Processing time in milliseconds |
+  </Tab>
+
+  <Tab title="job.failed">
+    Sent when your job fails during processing.
+
+    ```json
+    {
+      "event": "job.failed",
+      "delivery_id": "550e8400-e29b-41d4-a716-446655440002",
+      "timestamp": "2024-01-15T10:30:45.000Z",
+      "data": {
+        "job_request_id": "123e4567-e89b-12d3-a456-426614174000",
+        "status": "error",
+        "previous_status": "processing",
+        "job_type": "txt2img",
+        "failed_at": "2024-01-15T10:30:45.000Z",
+        "error_code": "WORKER_TIMEOUT",
+        "error_message": "Worker failed to respond within the allowed time"
+      }
+    }
+    ```
+
+    | Field | Type | Description |
+    |-------|------|-------------|
+    | `data.job_request_id` | string (UUID) | Your job's unique identifier |
+    | `data.status` | string | Current status: `error` |
+    | `data.previous_status` | string | Previous status: `processing` |
+    | `data.job_type` | string | Type of job |
+    | `data.failed_at` | string (ISO 8601) | When the job failed |
+    | `data.error_code` | string | Machine-readable error code |
+    | `data.error_message` | string | Human-readable error description |
+
+    **Error Codes:**
+
+    | Code | Description |
+    |------|-------------|
+    | `WORKER_TIMEOUT` | Worker didn't respond in time |
+    | `PROCESSING_ERROR` | Error during inference |
+    | `AGE_RESTRICTED` | Content flagged as age-restricted |
+    | `CONTEXT_LENGTH_EXCEEDED` | Input exceeded model's context limit |
+    | `INVALID_INPUT` | Invalid input data |
+    | `UNKNOWN_ERROR` | Unexpected error |
+  </Tab>
+</Tabs>
+
+## Security
+
+### Signature Verification
+
+Every webhook includes an HMAC-SHA256 signature in the `X-DeAPI-Signature` header. **Always verify this signature** to ensure the request came from deAPI.
+
+**Signature format:** `sha256=<hex-encoded-hmac>`
+
+**How to verify:**
+
+1. Get the timestamp from `X-DeAPI-Timestamp` header
+2. Get the raw JSON body (don't parse it first)
+3. Concatenate: `timestamp + "." + raw_body`
+4. Calculate HMAC-SHA256 using your webhook secret
+5. Compare with the signature (use timing-safe comparison)
+
+<CodeGroup>
+```javascript Node.js
+const crypto = require('crypto');
+
+function verifyWebhook(req, secret) {
+  const signature = req.headers['x-deapi-signature'];
+  const timestamp = req.headers['x-deapi-timestamp'];
+  const body = req.rawBody; // Raw request body as string
+
+  // Check timestamp is within 5 minutes
+  const now = Math.floor(Date.now() / 1000);
+  if (Math.abs(now - parseInt(timestamp)) > 300) {
+    return false; // Reject old requests (replay attack prevention)
+  }
+
+  // Calculate expected signature
+  const message = `${timestamp}.${body}`;
+  const expected = 'sha256=' + crypto
+    .createHmac('sha256', secret)
+    .update(message)
+    .digest('hex');
+
+  // Timing-safe comparison
+  return crypto.timingSafeEqual(
+    Buffer.from(signature),
+    Buffer.from(expected)
+  );
+}
+```
+
+```python Python
+import hmac
+import hashlib
+import time
+
+def verify_webhook(headers, body, secret):
+    signature = headers.get('X-DeAPI-Signature', '')
+    timestamp = headers.get('X-DeAPI-Timestamp', '')
+
+    # Check timestamp is within 5 minutes
+    now = int(time.time())
+    if abs(now - int(timestamp)) > 300:
+        return False  # Reject old requests
+
+    # Calculate expected signature
+    message = f"{timestamp}.{body}"
+    expected = 'sha256=' + hmac.new(
+        secret.encode(),
+        message.encode(),
+        hashlib.sha256
+    ).hexdigest()
+
+    # Timing-safe comparison
+    return hmac.compare_digest(signature, expected)
+```
+
+```php PHP
+function verifyWebhook(array $headers, string $body, string $secret): bool
+{
+    $signature = $headers['X-DeAPI-Signature'] ?? '';
+    $timestamp = $headers['X-DeAPI-Timestamp'] ?? '';
+
+    // Check timestamp is within 5 minutes
+    if (abs(time() - (int) $timestamp) > 300) {
+        return false; // Reject old requests
+    }
+
+    // Calculate expected signature
+    $message = $timestamp . '.' . $body;
+    $expected = 'sha256=' . hash_hmac('sha256', $message, $secret);
+
+    // Timing-safe comparison
+    return hash_equals($expected, $signature);
+}
+```
+
+```go Go
+package main
+
+import (
+    "crypto/hmac"
+    "crypto/sha256"
+    "encoding/hex"
+    "fmt"
+    "math"
+    "strconv"
+    "time"
+)
+
+func verifyWebhook(signature, timestamp, body, secret string) bool {
+    // Check timestamp is within 5 minutes
+    ts, _ := strconv.ParseInt(timestamp, 10, 64)
+    now := time.Now().Unix()
+    if math.Abs(float64(now-ts)) > 300 {
+        return false
+    }
+
+    // Calculate expected signature
+    message := fmt.Sprintf("%s.%s", timestamp, body)
+    mac := hmac.New(sha256.New, []byte(secret))
+    mac.Write([]byte(message))
+    expected := "sha256=" + hex.EncodeToString(mac.Sum(nil))
+
+    // Timing-safe comparison
+    return hmac.Equal([]byte(signature), []byte(expected))
+}
+```
+</CodeGroup>
+
+### Best Practices
+
+<CardGroup cols={2}>
+  <Card title="Always verify signatures" icon="shield-check">
+    Never process webhooks without verifying the HMAC signature first.
+  </Card>
+  <Card title="Check timestamps" icon="clock">
+    Reject webhooks with timestamps older than 5 minutes to prevent replay attacks.
+  </Card>
+  <Card title="Use HTTPS" icon="lock">
+    Only configure HTTPS endpoints. HTTP is rejected automatically.
+  </Card>
+  <Card title="Handle idempotency" icon="arrows-rotate">
+    Use `delivery_id` to detect and handle duplicate deliveries.
+  </Card>
+</CardGroup>
+
+## Retry Policy
+
+If your endpoint fails to respond with a `2xx` status code, we'll retry delivery with exponential backoff:
+
+| Attempt | Delay | Cumulative Time |
+|---------|-------|-----------------|
+| 1 | Immediate | 0 |
+| 2 | 1 minute | 1 min |
+| 3 | 2 minutes | 3 min |
+| 4 | 5 minutes | 8 min |
+| 5 | 10 minutes | 18 min |
+| 6 | 30 minutes | 48 min |
+| 7 | 1 hour | 1h 48min |
+| 8 | 3 hours | 4h 48min |
+| 9 | 6 hours | 10h 48min |
+| 10 | 12 hours | 22h 48min |
+
+After 10 failed attempts (~24 hours), the webhook is marked as failed.
+
+<Warning>
+**Circuit Breaker:** After 10 consecutive failed deliveries across any webhooks for your account, webhooks are automatically disabled. Re-enable them in your account settings after fixing your endpoint.
+</Warning>
+
+## Response Requirements
+
+Your endpoint should:
+
+- Return a `2xx` status code (200-299) within **10 seconds**
+- Not follow redirects (3xx responses are treated as failures)
+- Process the webhook asynchronously if needed (respond quickly, process later)
+
+```javascript
+// Example: Express.js endpoint
+app.post('/webhooks/deapi', express.raw({ type: 'application/json' }), (req, res) => {
+  // Verify signature first
+  if (!verifyWebhook(req, process.env.DEAPI_WEBHOOK_SECRET)) {
+    return res.status(401).send('Invalid signature');
+  }
+
+  const event = JSON.parse(req.body);
+
+  // Respond immediately
+  res.status(200).send('OK');
+
+  // Process asynchronously
+  processWebhookAsync(event);
+});
+```
+
+## Testing
+
+Use [webhook.site](https://webhook.site) to test webhooks during development:
+
+1. Get a unique URL from webhook.site
+2. Configure it as your webhook URL (per-request or global)
+3. Submit a job and watch the webhooks arrive
+4. Verify headers and payloads match the expected format
+
+<Tip>
+You can also use tools like ngrok to expose your local development server to receive webhooks.
+</Tip>
