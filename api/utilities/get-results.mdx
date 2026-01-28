@@ -1,4 +1,15 @@
 ---
 title: "Get Results"
+description: 'Check job status and retrieve results via polling'
 openapi: "/openapi.json GET /api/v1/client/request-status/{request_id}"
 ---
+
+<Info>
+**Consider using webhooks or WebSockets instead of polling.**
+
+Polling requires repeated API calls and adds latency. For production applications, we recommend:
+- **[Webhooks](/execution-modes-and-integrations/webhooks)** — Results pushed to your server automatically (best for backends)
+- **[WebSockets](/execution-modes-and-integrations/websockets)** — Real-time updates with live previews (best for interactive UIs)
+
+See [Execution Modes](/execution-modes-and-integrations/execution-modes-and-http-queue) for a full comparison.
+</Info>
