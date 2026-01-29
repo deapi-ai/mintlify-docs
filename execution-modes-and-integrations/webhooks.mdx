@@ -1,6 +1,6 @@
 ---
-title: 'Webhooks'
-description: 'Receive real-time notifications about job status changes'
+title: "Webhooks"
+description: "Receive real-time notifications about job status changes"
 ---
 
 ## Overview
@@ -8,7 +8,7 @@ description: 'Receive real-time notifications about job status changes'
 Webhooks allow you to receive real-time HTTP notifications when your inference jobs change status, eliminating the need to poll the `/request-status` endpoint.
 
 <Info>
-Webhooks are sent as `POST` requests to your specified URL with a JSON payload and security headers for verification.
+  Webhooks are sent as `POST` requests to your specified URL with a JSON payload and security headers for verification.
 </Info>
 
 ## Configuration
@@ -30,18 +30,18 @@ You can override the global webhook URL on any job request by including the `web
 ```
 
 <Warning>
-Only HTTPS URLs are accepted. HTTP URLs will be rejected for security.
+  Only HTTPS URLs are accepted. HTTP URLs will be rejected for security.
 </Warning>
 
 ## Events
 
 Webhooks are sent on the following status transitions:
 
-| Event | Trigger | Description |
-|-------|---------|-------------|
-| `job.processing` | `pending → processing` | Job assigned to a worker, processing started |
-| `job.completed` | `processing → done` | Job completed successfully, results available |
-| `job.failed` | `processing → error` | Job failed during processing |
+| Event            | Trigger                | Description                                   |
+| ---------------- | ---------------------- | --------------------------------------------- |
+| `job.processing` | `pending → processing` | Job assigned to a worker, processing started  |
+| `job.completed`  | `processing → done`    | Job completed successfully, results available |
+| `job.failed`     | `processing → error`   | Job failed during processing                  |
 
 ## Request Format
 
@@ -49,14 +49,14 @@ Webhooks are sent on the following status transitions:
 
 All webhook requests include these headers:
 
-| Header | Description | Example |
-|--------|-------------|---------|
-| `X-DeAPI-Signature` | HMAC-SHA256 signature for verification | `sha256=5d41402abc4b2a76b9719d911017c592...` |
-| `X-DeAPI-Timestamp` | Unix timestamp when webhook was sent | `1705315800` |
-| `X-DeAPI-Event` | Event type that triggered the webhook | `job.completed` |
-| `X-DeAPI-Delivery-Id` | Unique identifier for this delivery | `550e8400-e29b-41d4-a716-446655440001` |
-| `Content-Type` | Always `application/json` | `application/json` |
-| `User-Agent` | Identifies the sender | `DeAPI-Webhook/1.0` |
+| Header                | Description                            | Example                                      |
+| --------------------- | -------------------------------------- | -------------------------------------------- |
+| `X-DeAPI-Signature`   | HMAC-SHA256 signature for verification | `sha256=5d41402abc4b2a76b9719d911017c592...` |
+| `X-DeAPI-Timestamp`   | Unix timestamp when webhook was sent   | `1705315800`                                 |
+| `X-DeAPI-Event`       | Event type that triggered the webhook  | `job.completed`                              |
+| `X-DeAPI-Delivery-Id` | Unique identifier for this delivery    | `550e8400-e29b-41d4-a716-446655440001`       |
+| `Content-Type`        | Always `application/json`              | `application/json`                           |
+| `User-Agent`          | Identifies the sender                  | `DeAPI-Webhook/1.0`                          |
 
 ### Payload Structure
 
@@ -79,15 +79,14 @@ All webhook requests include these headers:
     }
     ```
 
-    | Field | Type | Description |
-    |-------|------|-------------|
-    | `data.job_request_id` | string (UUID) | Your job's unique identifier |
-    | `data.status` | string | Current status: `processing` |
-    | `data.previous_status` | string | Previous status: `pending` |
-    | `data.job_type` | string | Type of job (e.g., `txt2img`, `vid2txt`) |
-    | `data.started_at` | string (ISO 8601) | When processing began |
+    | Field                  | Type              | Description                              |
+    | ---------------------- | ----------------- | ---------------------------------------- |
+    | `data.job_request_id`  | string (UUID)     | Your job's unique identifier             |
+    | `data.status`          | string            | Current status: `processing`             |
+    | `data.previous_status` | string            | Previous status: `pending`               |
+    | `data.job_type`        | string            | Type of job (e.g., `txt2img`, `vid2txt`) |
+    | `data.started_at`      | string (ISO 8601) | When processing began                    |
   </Tab>
-
   <Tab title="job.completed">
     Sent when your job completes successfully.
 
@@ -108,17 +107,16 @@ All webhook requests include these headers:
     }
     ```
 
-    | Field | Type | Description |
-    |-------|------|-------------|
-    | `data.job_request_id` | string (UUID) | Your job's unique identifier |
-    | `data.status` | string | Current status: `done` |
-    | `data.previous_status` | string | Previous status: `processing` |
-    | `data.job_type` | string | Type of job |
-    | `data.completed_at` | string (ISO 8601) | When job completed |
-    | `data.result_url` | string (URL) | URL to download the result |
-    | `data.processing_time_ms` | integer | Processing time in milliseconds |
+    | Field                     | Type              | Description                     |
+    | ------------------------- | ----------------- | ------------------------------- |
+    | `data.job_request_id`     | string (UUID)     | Your job's unique identifier    |
+    | `data.status`             | string            | Current status: `done`          |
+    | `data.previous_status`    | string            | Previous status: `processing`   |
+    | `data.job_type`           | string            | Type of job                     |
+    | `data.completed_at`       | string (ISO 8601) | When job completed              |
+    | `data.result_url`         | string (URL)      | URL to download the result      |
+    | `data.processing_time_ms` | integer           | Processing time in milliseconds |
   </Tab>
-
   <Tab title="job.failed">
     Sent when your job fails during processing.
 
@@ -139,26 +137,26 @@ All webhook requests include these headers:
     }
     ```
 
-    | Field | Type | Description |
-    |-------|------|-------------|
-    | `data.job_request_id` | string (UUID) | Your job's unique identifier |
-    | `data.status` | string | Current status: `error` |
-    | `data.previous_status` | string | Previous status: `processing` |
-    | `data.job_type` | string | Type of job |
-    | `data.failed_at` | string (ISO 8601) | When the job failed |
-    | `data.error_code` | string | Machine-readable error code |
-    | `data.error_message` | string | Human-readable error description |
+    | Field                  | Type              | Description                      |
+    | ---------------------- | ----------------- | -------------------------------- |
+    | `data.job_request_id`  | string (UUID)     | Your job's unique identifier     |
+    | `data.status`          | string            | Current status: `error`          |
+    | `data.previous_status` | string            | Previous status: `processing`    |
+    | `data.job_type`        | string            | Type of job                      |
+    | `data.failed_at`       | string (ISO 8601) | When the job failed              |
+    | `data.error_code`      | string            | Machine-readable error code      |
+    | `data.error_message`   | string            | Human-readable error description |
 
     **Error Codes:**
 
-    | Code | Description |
-    |------|-------------|
-    | `WORKER_TIMEOUT` | Worker didn't respond in time |
-    | `PROCESSING_ERROR` | Error during inference |
-    | `AGE_RESTRICTED` | Content flagged as age-restricted |
+    | Code                      | Description                          |
+    | ------------------------- | ------------------------------------ |
+    | `WORKER_TIMEOUT`          | Worker didn't respond in time        |
+    | `PROCESSING_ERROR`        | Error during inference               |
+    | `AGE_RESTRICTED`          | Content flagged as age-restricted    |
     | `CONTEXT_LENGTH_EXCEEDED` | Input exceeded model's context limit |
-    | `INVALID_INPUT` | Invalid input data |
-    | `UNKNOWN_ERROR` | Unexpected error |
+    | `INVALID_INPUT`           | Invalid input data                   |
+    | `UNKNOWN_ERROR`           | Unexpected error                     |
   </Tab>
 </Tabs>
 
@@ -179,13 +177,14 @@ Every webhook includes an HMAC-SHA256 signature in the `X-DeAPI-Signature` heade
 5. Compare with the signature (use timing-safe comparison)
 
 <CodeGroup>
+
 ```javascript Node.js
 const crypto = require('crypto');
 
 function verifyWebhook(req, secret) {
   const signature = req.headers['x-deapi-signature'];
   const timestamp = req.headers['x-deapi-timestamp'];
-  const body = req.rawBody; // Raw request body as string
+  const body = req.body.toString(); // Raw request body as string
 
   // Check timestamp is within 5 minutes
   const now = Math.floor(Date.now() / 1000);
@@ -207,6 +206,7 @@ function verifyWebhook(req, secret) {
   );
 }
 ```
+
 
 ```python Python
 import hmac
@@ -234,6 +234,7 @@ def verify_webhook(headers, body, secret):
     return hmac.compare_digest(signature, expected)
 ```
 
+
 ```php PHP
 function verifyWebhook(array $headers, string $body, string $secret): bool
 {
@@ -253,6 +254,7 @@ function verifyWebhook(array $headers, string $body, string $secret): bool
     return hash_equals($expected, $signature);
 }
 ```
+
 
 ```go Go
 package main
@@ -285,6 +287,7 @@ func verifyWebhook(signature, timestamp, body, secret string) bool {
     return hmac.Equal([]byte(signature), []byte(expected))
 }
 ```
+
 </CodeGroup>
 
 ### Best Practices
@@ -308,23 +311,23 @@ func verifyWebhook(signature, timestamp, body, secret string) bool {
 
 If your endpoint fails to respond with a `2xx` status code, we'll retry delivery with exponential backoff:
 
-| Attempt | Delay | Cumulative Time |
-|---------|-------|-----------------|
-| 1 | Immediate | 0 |
-| 2 | 1 minute | 1 min |
-| 3 | 2 minutes | 3 min |
-| 4 | 5 minutes | 8 min |
-| 5 | 10 minutes | 18 min |
-| 6 | 30 minutes | 48 min |
-| 7 | 1 hour | 1h 48min |
-| 8 | 3 hours | 4h 48min |
-| 9 | 6 hours | 10h 48min |
-| 10 | 12 hours | 22h 48min |
+| Attempt | Delay      | Cumulative Time |
+| ------- | ---------- | --------------- |
+| 1       | Immediate  | 0               |
+| 2       | 1 minute   | 1 min           |
+| 3       | 2 minutes  | 3 min           |
+| 4       | 5 minutes  | 8 min           |
+| 5       | 10 minutes | 18 min          |
+| 6       | 30 minutes | 48 min          |
+| 7       | 1 hour     | 1h 48min        |
+| 8       | 3 hours    | 4h 48min        |
+| 9       | 6 hours    | 10h 48min       |
+| 10      | 12 hours   | 22h 48min       |
 
 After 10 failed attempts (~24 hours), the webhook is marked as failed.
 
 <Warning>
-**Circuit Breaker:** After 10 consecutive failed deliveries across any webhooks for your account, webhooks are automatically disabled. Re-enable them in your account settings after fixing your endpoint.
+  **Circuit Breaker:** After 10 consecutive failed deliveries across any webhooks for your account, webhooks are automatically disabled. Re-enable them in your account settings after fixing your endpoint.
 </Warning>
 
 ## Response Requirements
@@ -363,5 +366,5 @@ Use [webhook.site](https://webhook.site) to test webhooks during development:
 4. Verify headers and payloads match the expected format
 
 <Tip>
-You can also use tools like ngrok to expose your local development server to receive webhooks.
+  You can also use tools like ngrok to expose your local development server to receive webhooks.
 </Tip>
