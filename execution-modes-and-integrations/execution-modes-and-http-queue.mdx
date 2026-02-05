@@ -1,6 +1,6 @@
 ---
-title: 'Execution Modes & HTTP Queue'
-description: 'How to receive job results via webhooks, WebSockets, or polling'
+title: "Execution Modes & HTTP Queue"
+description: "How to receive job results via webhooks, WebSockets, or polling"
 ---
 
 All deAPI model endpoints use an **asynchronous job queue**. You submit a request, receive a `request_id`, and retrieve results using one of three methods:
@@ -22,10 +22,10 @@ All deAPI model endpoints use an **asynchronous job queue**. You submit a reques
 ## Webhooks (Recommended)
 
 <Info>
-For most integrations, use webhooks. They're the most reliable way to receive results without maintaining persistent connections or implementing polling logic.
+  For most integrations, use webhooks. They're the most reliable way to receive results without maintaining persistent connections or implementing polling logic.
 </Info>
 
-With webhooks, deAPI sends an HTTP POST to your server when a job completes. Configure a global webhook URL in [account settings](https://deapi.ai/dashboard/settings), or override per-request:
+With webhooks, deAPI sends an HTTP POST to your server when a job completes. Configure a global webhook URL in [account settings](https://deapi.ai/settings/webhooks), or override per-request:
 
 ```bash
 # 1. Submit job with webhook_url
@@ -50,6 +50,7 @@ curl -X POST https://api.deapi.ai/api/v1/client/txt2img \
 ```
 
 **Webhook payload (job.completed):**
+
 ```json
 {
   "event": "job.completed",
@@ -64,6 +65,7 @@ curl -X POST https://api.deapi.ai/api/v1/client/txt2img \
 ```
 
 **Why webhooks:**
+
 - No polling required — results arrive automatically
 - Automatic retries with exponential backoff (up to 10 retries over ~24 hours)
 - Works with serverless and traditional backends
@@ -110,6 +112,7 @@ pusher.subscribe(`private-client.${CLIENT_ID}`)
 ```
 
 **Why WebSockets:**
+
 - Instant updates (milliseconds latency)
 - Live preview images during generation
 - Progress percentage updates
@@ -147,15 +150,15 @@ curl https://api.deapi.ai/api/v1/client/request-status/abc123 \
 
 **Response fields:**
 
-| Field | Description |
-|-------|-------------|
-| `status` | `pending`, `processing`, `done`, or `error` |
-| `progress` | Progress percentage (when available) |
-| `result_url` | Download URL (when `done`) |
-| `error` | Error details (when `error`) |
+| Field        | Description                                 |
+| ------------ | ------------------------------------------- |
+| `status`     | `pending`, `processing`, `done`, or `error` |
+| `progress`   | Progress percentage (when available)        |
+| `result_url` | Download URL (when `done`)                  |
+| `error`      | Error details (when `error`)                |
 
 <Warning>
-Polling adds latency, wastes resources with unnecessary requests, and provides no live previews. Use webhooks or WebSockets when possible.
+  Polling adds latency, wastes resources with unnecessary requests, and provides no live previews. Use webhooks or WebSockets when possible.
 </Warning>
 
 → [Get Results Endpoint Reference](/api/utilities/get-results)
@@ -164,16 +167,16 @@ Polling adds latency, wastes resources with unnecessary requests, and provides n
 
 ## Choosing a Method
 
-| Scenario | Recommended |
-|----------|-------------|
-| Backend service / serverless | Webhooks |
-| Interactive web app with progress UI | WebSockets |
-| Simple scripts / CLI tools | Polling |
-| Mobile app with real-time updates | WebSockets |
-| Batch processing pipeline | Webhooks |
+| Scenario                             | Recommended |
+| ------------------------------------ | ----------- |
+| Backend service / serverless         | Webhooks    |
+| Interactive web app with progress UI | WebSockets  |
+| Simple scripts / CLI tools           | Polling     |
+| Mobile app with real-time updates    | WebSockets  |
+| Batch processing pipeline            | Webhooks    |
 
 <Tip>
-Use webhooks as your primary method with WebSockets for UI updates. This gives you reliability (webhook retries) plus great UX (instant progress).
+  Use webhooks as your primary method with WebSockets for UI updates. This gives you reliability (webhook retries) plus great UX (instant progress).
 </Tip>
 
 ---
@@ -201,6 +204,7 @@ Every model endpoint follows the same pattern:
 </Steps>
 
 This queued model:
+
 - Keeps long-running jobs off the HTTP request path
 - Avoids timeout issues for video/audio generation
 - Enables efficient GPU scheduling across the distributed network
@@ -210,9 +214,9 @@ This queued model:
 
 ## Quick Reference
 
-| Endpoint | Description |
-|----------|-------------|
-| `POST /api/v1/client/{task}` | Submit a job |
-| `GET /api/v1/client/request-status/{request_id}` | Check job status (polling) |
-| `POST {your_webhook_url}` | Receive webhook notification |
-| `wss://soketi.deapi.ai` | WebSocket connection |
+| Endpoint                                         | Description                  |
+| ------------------------------------------------ | ---------------------------- |
+| `POST /api/v1/client/{task}`                     | Submit a job                 |
+| `GET /api/v1/client/request-status/{request_id}` | Check job status (polling)   |
+| `POST {your_webhook_url}`                        | Receive webhook notification |
+| `wss://soketi.deapi.ai`                          | WebSocket connection         |
