@@ -504,7 +504,7 @@
                 "tags": [
                     "Client API"
                 ],
-                "description": "Endpoint for requesting ima2img inference",
+                "description": "Endpoint for requesting img2img inference. Accepts either a single image via \"image\" or multiple images via \"images[]\" (mutually exclusive).",
                 "operationId": "requestImage2Image",
                 "parameters": [
                     {
@@ -512,16 +512,14 @@
                     }
                 ],
                 "requestBody": {
-                    "description": "Image generation parameters",
+                    "description": "Image generation parameters. Either \"image\" or \"images[]\" must be provided (not both).",
                     "required": true,
                     "content": {
                         "multipart/form-data": {
                             "schema": {
                                 "required": [
-                                    "image",
                                     "prompt",
                                     "model",
-                                    "guidance",
                                     "steps",
                                     "seed"
                                 ],
@@ -538,9 +536,29 @@
                                         "nullable": true
                                     },
                                     "image": {
-                                        "description": "Source image to edit. Supported formats: JPG, JPEG, PNG, GIF, BMP, WebP. Maximum file size: 10 MB.",
+                                        "description": "Single source image to edit. Required if \"images[]\" is not provided. Mutually exclusive with \"images[]\". Supported formats: JPG, JPEG, PNG, GIF, BMP, WebP. Maximum file size: 10 MB.",
                                         "type": "string",
                                         "format": "binary"
+                                    },
+                                    "images[]": {
+                                        "description": "Multiple source images for editing. Maximum count is model-dependent (see model specs max_input_images, defaults to 1). Required if \"image\" is not provided. Mutually exclusive with \"image\". Supported formats: JPG, JPEG, PNG, GIF, BMP, WebP. Maximum file size per image: 10 MB.",
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string",
+                                            "format": "binary"
+                                        }
+                                    },
+                                    "width": {
+                                        "description": "Output image width in pixels. Optional - defaults to first input image width if not specified. Subject to model-specific min/max limits.",
+                                        "type": "integer",
+                                        "example": 512,
+                                        "nullable": true
+                                    },
+                                    "height": {
+                                        "description": "Output image height in pixels. Optional - defaults to first input image height if not specified. Subject to model-specific min/max limits.",
+                                        "type": "integer",
+                                        "example": 512,
+                                        "nullable": true
                                     },
                                     "model": {
                                         "description": "The model to use for image editing. Available models can be retrieved via the GET /api/v1/client/models endpoint.",
@@ -1365,7 +1383,7 @@
                                     "model": {
                                         "description": "The background removal model to use",
                                         "type": "string",
-                                        "example": "RMBG-1.4"
+                                        "example": "Ben2"
                                     },
                                     "webhook_url": {
                                         "description": "Optional HTTPS URL to receive webhook notifications for job status changes (processing, completed, failed). Must be HTTPS. Max 2048 characters. See [Webhook Documentation](/execution-modes-and-integrations/webhooks) for payload structure and authentication details.",
@@ -1459,7 +1477,7 @@
                                             "model": {
                                                 "description": "The background removal model to use",
                                                 "type": "string",
-                                                "example": "RMBG-1.4"
+                                                "example": "Ben2"
                                             }
                                         },
                                         "type": "object"
@@ -1484,7 +1502,7 @@
                                             "model": {
                                                 "description": "The background removal model to use",
                                                 "type": "string",
-                                                "example": "RMBG-1.4"
+                                                "example": "Ben2"
                                             }
                                         },
                                         "type": "object"
@@ -5272,28 +5290,52 @@
                                 "type": "string"
                             },
                             "prompt": {
-                                "description": "The main prompt for video generation",
+                                "description": "The main prompt for image generation",
                                 "type": "string",
                                 "example": "A beautiful sunset over mountains"
                             },
                             "negative_prompt": {
-                                "description": "Elements to avoid in the generated video",
+                                "description": "Elements to avoid in the generated image",
                                 "type": "string",
                                 "example": "blur, darkness, noise",
                                 "nullable": true
                             },
                             "image": {
-                                "description": "Source image",
+                                "description": "First source image (base64 encoded, for backward compatibility)",
                                 "type": "string",
                                 "format": "binary"
                             },
+                            "images": {
+                                "description": "Array of source images with metadata",
+                                "type": "array",
+                                "items": {
+                                    "properties": {
+                                        "data": {
+                                            "description": "Base64 encoded image data",
+                                            "type": "string",
+                                            "format": "binary"
+                                        },
+                                        "width": {
+                                            "description": "Width of the source image in pixels",
+                                            "type": "integer",
+                                            "example": 512
+                                        },
+                                        "height": {
+                                            "description": "Height of the source image in pixels",
+                                            "type": "integer",
+                                            "example": 512
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            },
                             "width": {
-                                "description": "Width of the generated video in pixels",
+                                "description": "Width of the output image in pixels",
                                 "type": "integer",
                                 "example": 512
                             },
                             "height": {
-                                "description": "Height of the generated video in pixels",
+                                "description": "Height of the output image in pixels",
                                 "type": "integer",
                                 "example": 512
                             },
