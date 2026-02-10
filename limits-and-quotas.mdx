@@ -46,13 +46,13 @@ Basic accounts have conservative limits designed for testing and evaluation.
 
 #### Generation Endpoints
 
-| Endpoint                       | Models                             | RPM | RPD |
-| ------------------------------ | ---------------------------------- | --- | --- |
-| `/api/v1/client/txt2img`       | `Flux1schnell`, `ZImageTurbo_INT8` | 3   | 100 |
-| `/api/v1/client/txt2video`     | `Ltxv_13B_0_9_8_Distilled_FP8`     | 1   | 15  |
-| `/api/v1/client/img2video`     | `Ltxv_13B_0_9_8_Distilled_FP8`     | 1   | 15  |
-| `/api/v1/client/txt2audio`     | `Kokoro`                           | 5   | 300 |
-| `/api/v1/client/txt2embedding` | `Bge_M3_FP16`                      | 10  | 500 |
+| Endpoint                       | Models                                                   | RPM | RPD |
+| ------------------------------ | -------------------------------------------------------- | --- | --- |
+| `/api/v1/client/txt2img`       | `Flux1schnell`, `ZImageTurbo_INT8, Flux_2_Klein_4B_BF16` | 3   | 100 |
+| `/api/v1/client/txt2video`     | `Ltxv_13B_0_9_8_Distilled_FP8`                           | 1   | 15  |
+| `/api/v1/client/img2video`     | `Ltxv_13B_0_9_8_Distilled_FP8`                           | 1   | 15  |
+| `/api/v1/client/txt2audio`     | `Kokoro`                                                 | 5   | 300 |
+| `/api/v1/client/txt2embedding` | `Bge_M3_FP16`                                            | 10  | 500 |
 
 #### Analysis Endpoints
 
@@ -74,11 +74,11 @@ Basic accounts have conservative limits designed for testing and evaluation.
 
 #### Transformation Endpoints
 
-| Endpoint                     | Models                   | RPM | RPD |
-| ---------------------------- | ------------------------ | --- | --- |
-| `/api/v1/client/img2img`     | `QwenImageEdit_Plus_NF4` | 1   | 15  |
-| `/api/v1/client/img-rmbg`    | `Ben2`                   | 5   | 100 |
-| `/api/v1/client/img-upscale` | `RealESRGAN_x4plus`      | 5   | 100 |
+| Endpoint                     | Models                                         | RPM | RPD |
+| ---------------------------- | ---------------------------------------------- | --- | --- |
+| `/api/v1/client/img2img`     | `Flux_2_Klein_4B_BF16, QwenImageEdit_Plus_NF4` | 1   | 15  |
+| `/api/v1/client/img-rmbg`    | `Ben2`                                         | 5   | 100 |
+| `/api/v1/client/img-upscale` | `RealESRGAN_x4plus`                            | 5   | 100 |
 
 #### Utility Endpoints
 
