@@ -61,7 +61,7 @@ Models that generate images or video require dimensions (`width`, `height`) divi
 - **Text Recognition (Image-to-Text):** `Nanonets_Ocr_S_F16` targets clear captions and text extraction. For complex layouts, consider multiple passes or post-processing.
 - **Video Generation (Image-to-Video / Text-to-Video):** `Ltxv_13B_0_9_8_Distilled_FP8` is suited for short clips and stylized motion. Start with low duration/frames to validate aesthetics, then scale up.
 - **Embedding (Text-to-Embedding):** `Bge_M3_FP16` provides dense vector embeddings for semantic search, clustering, and retrieval-augmented generation (RAG). Use for similarity queries or knowledge base indexing.
-- **Image Transformation (Image-to-Image):** For edits and style transfer, start with `QwenImageEdit_Plus_NF4`. Use fewer steps for quick drafts and increase steps for higher fidelity; combine with masks or control prompts for targeted changes.
+- **Image Transformation (Image-to-Image):** For edits and style transfer, start with `Flux_2_Klein_4B_BF16`. Use fewer steps for quick drafts and increase steps for higher fidelity; combine with masks or control prompts for targeted changes.
 - **Background Removal (Image Background Removal):** `Ben2` provides fast, high-quality background removal for images up to 2048×2048px. Ideal for product photos, portraits, and generating transparent PNGs for downstream compositing or design work.
 
 For a deeper discussion of strengths/limits and typical parameter sets per task, see **Model Selection**.

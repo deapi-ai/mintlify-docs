@@ -93,21 +93,21 @@ Basic accounts have conservative limits designed for testing and evaluation.
 
 Premium accounts have high limits suitable for production workloads. All endpoints share a unified **300 RPM** with **unlimited daily requests**.
 
-| Endpoint                       | Models                             | RPM | RPD       |
-| ------------------------------ | ---------------------------------- | --- | --------- |
-| `/api/v1/client/txt2img`       | `Flux1schnell`, `ZImageTurbo_INT8` | 300 | Unlimited |
-| `/api/v1/client/txt2video`     | `Ltxv_13B_0_9_8_Distilled_FP8`     | 300 | Unlimited |
-| `/api/v1/client/img2video`     | `Ltxv_13B_0_9_8_Distilled_FP8`     | 300 | Unlimited |
-| `/api/v1/client/txt2audio`     | `Kokoro`                           | 300 | Unlimited |
-| `/api/v1/client/txt2embedding` | `Bge_M3_FP16`                      | 300 | Unlimited |
-| `/api/v1/client/img2txt`       | `Nanonets_Ocr_S_F16`               | 300 | Unlimited |
-| `/api/v1/client/vid2txt`       | `WhisperLargeV3`                   | 300 | Unlimited |
-| `/api/v1/client/videofile2txt` | `WhisperLargeV3`                   | 300 | Unlimited |
-| `/api/v1/client/aud2txt`       | `WhisperLargeV3`                   | 300 | Unlimited |
-| `/api/v1/client/audiofile2txt` | `WhisperLargeV3`                   | 300 | Unlimited |
-| `/api/v1/client/img2img`       | `QwenImageEdit_Plus_NF4`           | 300 | Unlimited |
-| `/api/v1/client/img-rmbg`      | `Ben2`                             | 300 | Unlimited |
-| `/api/v1/client/img-upscale`   | `RealESRGAN_x4plus`                | 300 | Unlimited |
+| Endpoint                       | Models                                                   | RPM | RPD       |
+| ------------------------------ | -------------------------------------------------------- | --- | --------- |
+| `/api/v1/client/txt2img`       | `Flux1schnell`, `ZImageTurbo_INT8, Flux_2_Klein_4B_BF16` | 300 | Unlimited |
+| `/api/v1/client/txt2video`     | `Ltxv_13B_0_9_8_Distilled_FP8`                           | 300 | Unlimited |
+| `/api/v1/client/img2video`     | `Ltxv_13B_0_9_8_Distilled_FP8`                           | 300 | Unlimited |
+| `/api/v1/client/txt2audio`     | `Kokoro`                                                 | 300 | Unlimited |
+| `/api/v1/client/txt2embedding` | `Bge_M3_FP16`                                            | 300 | Unlimited |
+| `/api/v1/client/img2txt`       | `Nanonets_Ocr_S_F16`                                     | 300 | Unlimited |
+| `/api/v1/client/vid2txt`       | `WhisperLargeV3`                                         | 300 | Unlimited |
+| `/api/v1/client/videofile2txt` | `WhisperLargeV3`                                         | 300 | Unlimited |
+| `/api/v1/client/aud2txt`       | `WhisperLargeV3`                                         | 300 | Unlimited |
+| `/api/v1/client/audiofile2txt` | `WhisperLargeV3`                                         | 300 | Unlimited |
+| `/api/v1/client/img2img`       | `Flux_2_Klein_4B_BF16, QwenImageEdit_Plus_NF4`           | 300 | Unlimited |
+| `/api/v1/client/img-rmbg`      | `Ben2`                                                   | 300 | Unlimited |
+| `/api/v1/client/img-upscale`   | `RealESRGAN_x4plus`                                      | 300 | Unlimited |
 
 <Info>
   Premium Whisper endpoints have independent limits — each endpoint has its own 300 RPM allocation.
