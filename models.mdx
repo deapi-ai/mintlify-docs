@@ -1,83 +1,147 @@
 ---
 title: "Models"
+description: "How to discover, select, and use models on deAPI"
 ---
 
-**deAPI** gives you a unified API across multiple open-source models running on a decentralized GPU cloud. Models evolve frequently; always rely on the **live list** (endpoint at the bottom) for the current availability and slugs.
+**deAPI** gives you a unified API across multiple open-source models running on a decentralized GPU cloud. We regularly expand the model lineup — new models, new capabilities, better performance — so your integration can always take advantage of the latest options.
 
-### How model selection works
+The [Model Selection](/api/utilities/model-selection) endpoint returns the live, authoritative list of all available models, their slugs, limits, and defaults. **Use it as the starting point for every integration.**
 
-- **`Every task requires a model parameter.`** Example: `model: "Flux1schnell"` for Text-to-Image or `model: "WhisperLargeV3"` for speech/video transcription.
-- **Display names vs. API slugs.** In tables and UI we show human-friendly names (e.g., "FLUX.1-schnell"). The API accepts stable slugs. Use the Models endpoint to fetch the exact `slug` strings.
-- **Quality ↔ Speed trade-off.** Larger models often yield higher quality but cost more and take longer. Use our Price Calculator on the homepage to estimate cost before running large jobs.
-- **Versioning & lifecycle.** Models may be updated, superseded, or deprecated. Your application should resolve the model slug at runtime (from the live list) or pin to a specific version string if reproducibility is critical.
-- **Safety & acceptable use.** Follow the Terms of Service. Some content types may be blocked or filtered. See the Safety section in each task's docs.
-
----
-
-### Supported tasks & models (curated)
-
-The table below lists the core, production-ready models available today. For the authoritative list (including experimental or newly added ones), use the Models endpoint.
-
-| Service (Task)                      | Short Summary                                   | What it's for                                                                                                                                                        | Display Name             | API Model Slug                 | Task key(s)              |
-| ----------------------------------- | ----------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------ | ------------------------------ | ------------------------ |
-| Text-to-Image                       | Generate images from text                       | Concept art, prototyping, creative exploration                                                                                                                       | FLUX.1-schnell           | `Flux1schnell`                 | `txt2img`                |
-| Text-to-Image                       | Generate images from text                       | Generate stunningly photorealistic visuals with exceptional clarity and high-fidelity details.                                                                       | Z-Image-Turbo INT8       | `ZImageTurbo_INT8`             | `txt2img`                |
-| Text-to-Image /<br />Image-to-Image | Generate images from text / edit existing image | Fast text-to-image generation and multi-reference image editing in a single unified model. Ideal for real-time applications, local development, and edge deployment. | FLUX.2 Klein 4B BF16     | `Flux_2_Klein_4B_BF16`         | `txt2img`<br />`img2img` |
-| Text-to-Speech                      | Turn text into natural voice                    | Narration, accessibility, product voices in multiple languages and tones                                                                                             | Kokoro-82M               | `Kokoro`                       | `txt2audio`              |
-| Video-to-Text                       | Transcribe video into text                      | Transcribe YouTube, Twitch VODs, Kick streams, X/Twitter videos — subtitles, captions, SEO                                                                           | Whisper large-v3         | `WhisperLargeV3`               | `video2txt`              |
-| Image/Text-to-Video                 | Generate short AI videos                        | Cinematic motion, transitions, stylization                                                                                                                           | LTX Video-0.9.8 13B      | `Ltxv_13B_0_9_8_Distilled_FP8` | `img2video`, `txt2video` |
-| Image-to-Text                       | Extract meaning from images                     | Descriptions, OCR, accessibility, moderation                                                                                                                         | Nanonets Ocr S F16       | `Nanonets_Ocr_S_F16`           | `img2txt`                |
-| Audio-to-Text                       | Convert audio into text                         | Subtitles, notes, search, accessibility (multi-language)                                                                                                             | Whisper large-v3         | `WhisperLargeV3`               | `video2txt`              |
-| Text-to-Embedding                   | Create vector embeddings                        | Search, RAG, semantic similarity, clustering                                                                                                                         | BGE M3                   | `Bge_M3_FP16`                  | `txt2embedding`          |
-| Image-to-Image                      | Transform existing images                       | Style transfer, edits, in/outpainting                                                                                                                                | QwenImageEdit-Plus (NF4) | `QwenImageEdit_Plus_NF4`       | `img2img`                |
-| Image Background Removal            | Remove background from images                   | Product photos, portraits, cutouts, compositing, e-commerce assets                                                                                                   | Ben2                     | `Ben2`                         | `img-rmbg`               |
-
-<Info>
-  Display names and example slugs above are provided for clarity; always fetch the live model list for the exact `slug` strings currently enabled on the network.
-</Info>
-
-### Resolution requirements
-
-Models that generate images or video require dimensions (`width`, `height`) divisible by a specific step value. If you provide dimensions that don't match, the API will automatically round them **up** to the nearest valid value.
-
-| Model                          | Task                 | Resolution Step | Example valid sizes       |
-| ------------------------------ | -------------------- | --------------- | ------------------------- |
-| `Flux1schnell`                 | txt2img              | 128             | 512, 640, 768, 896, 1024  |
-| `ZImageTurbo_INT8`             | txt2img              | 16              | 512, 528, 544, 768, 1024  |
-| `Ltxv_13B_0_9_8_Distilled_FP8` | txt2video, img2video | 16              | 256, 512, 768             |
-| `Flux_2_Klein_4B_BF16`         | txt2img, img2img     | 16              | 256, 512, 768, 1024, 1536 |
-
-<Info>
-  For example, if you request `width: 500` with `Flux1schnell`, the output will be `512px` wide (rounded up to nearest multiple of 128).
-</Info>
+<Tip>
+  This page explains how model selection works and how to use the endpoint. For the actual list of models and their exact slugs, always refer to the [Model Selection](/api/utilities/model-selection) endpoint.
+</Tip>
 
 ---
 
-### Picking the right model
+## Fetching the live model list
 
-- **Image Generation (Text-to-Image):** Start with `Flux_2_Klein_4B_BF16`, `Flux1schnell` or `ZImageTurbo_INT8` for fast iteration. Increase steps/resolution for quality; control style via prompt and (optionally) LoRAs.
-- **Speech Generation (TTS):** `Kokoro` offers natural prosody across multiple languages/voices. Choose voices/language in the payload; test speed vs. quality for your use case.
-- **Text Transcription (Video/Audio-to-Text):** `WhisperLargeV3` is a strong general-purpose baseline with robust multilingual support. Supports direct URL transcription from YouTube, Twitch, Kick, and X/Twitter — including VODs and finished stream recordings. For long videos, enable timestamps and chunking.
-- **Text Recognition (Image-to-Text):** `Nanonets_Ocr_S_F16` targets clear captions and text extraction. For complex layouts, consider multiple passes or post-processing.
-- **Video Generation (Image-to-Video / Text-to-Video):** `Ltxv_13B_0_9_8_Distilled_FP8` is suited for short clips and stylized motion. Start with low duration/frames to validate aesthetics, then scale up.
-- **Embedding (Text-to-Embedding):** `Bge_M3_FP16` provides dense vector embeddings for semantic search, clustering, and retrieval-augmented generation (RAG). Use for similarity queries or knowledge base indexing.
-- **Image Transformation (Image-to-Image):** For edits and style transfer, start with `Flux_2_Klein_4B_BF16`. Use fewer steps for quick drafts and increase steps for higher fidelity; combine with masks or control prompts for targeted changes.
-- **Background Removal (Image Background Removal):** `Ben2` provides fast, high-quality background removal for images up to 2048×2048px. Ideal for product photos, portraits, and generating transparent PNGs for downstream compositing or design work.
-
-For a deeper discussion of strengths/limits and typical parameter sets per task, see **Model Selection**.
-
----
-
-### API usage examples
-
-**1) List models (fetch slugs at runtime)**
+Before you start building, call the models endpoint to discover what's available:
 
 ```bash
 curl -X GET "https://api.deapi.ai/api/v1/client/models" \
-  -H "Authorization: Bearer $DEAPI_API_KEY"
+  -H "Authorization: Bearer $DEAPI_API_KEY" \
+  -H "Accept: application/json"
 ```
 
-**2) Use a model in Text-to-Image**
+The response returns a paginated `data` array of model objects. Each object contains:
+
+| Field             | Description                                                                                                                                                          |
+| ----------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `name`            | Human-friendly display name (for UI only — never send this to the API).                                                                                              |
+| `slug`            | **The exact string to pass as the `model` parameter** in any task endpoint.                                                                                          |
+| `inference_types` | Array of task types this model supports (e.g. `["txt2img"]`, `["img2video", "txt2video"]`).                                                                          |
+| `info.limits`     | Min/max constraints for parameters like width, height, steps, frames, fps, etc. Fields vary per model type.                                                          |
+| `info.features`   | Capability flags — e.g. `supports_guidance`, `supports_negative_prompt`, `supports_steps`, `supports_last_frame`. Not every model includes this field; some return it as an empty object. |
+| `info.defaults`   | Recommended default values for each parameter. Not every model includes this field.                                                                                  |
+| `loras`           | Array of available LoRA adapters (`display_name` + `name`). Present only on models that support LoRAs.                                                               |
+| `languages`       | Array of supported languages, each with available voices. Present only on speech models.                                                                             |
+
+<Note>
+  Not every model returns all fields. For example, a transcription model may return an empty `info`, while an image-generation model will include detailed `limits`, `features`, and `defaults`. Always check for the presence of fields before using them.
+</Note>
+
+You can filter the list by task type using the `filter[inference_types]` query parameter:
+
+```bash
+# Get only image-generation models
+curl -X GET "https://api.deapi.ai/api/v1/client/models?filter[inference_types]=txt2img" \
+  -H "Authorization: Bearer $DEAPI_API_KEY" \
+  -H "Accept: application/json"
+```
+
+See the full endpoint spec → [Model Selection](/api/utilities/model-selection)
+
+---
+
+## How model selection works
+
+- **Every task endpoint requires a model parameter.** Pass the `slug` value returned by the models endpoint — not the display name.
+- **Quality ↔ Speed trade-off.** Larger models often yield higher quality but cost more and take longer. See the [Pricing](/pricing) page for per-task rates.
+- **Versioning & lifecycle.** Models may be updated, superseded, or deprecated. Re-fetch the model list periodically to stay current.
+
+---
+
+## Supported tasks
+
+The table below shows which **task types** deAPI supports. To see which models are currently available for a given task, query the models endpoint with the corresponding `filter[inference_types]` value.
+
+| Task                | `inference_types` value | What it does                                                                        |
+| ------------------- | ----------------------- | ----------------------------------------------------------------------------------- |
+| Text-to-Image       | `txt2img`               | Generate images from text prompts — concept art, prototyping, creative exploration. |
+| Image-to-Image      | `img2img`               | Transform existing images — style transfer, edits, inpainting, outpainting.         |
+| Text-to-Speech      | `txt2audio`             | Turn text into natural voice — narration, accessibility, product voices.            |
+| Video-to-Text       | `video2text`            | Transcribe video by URL (YouTube, Twitch, Kick, X/Twitter) into text.               |
+| Audio-to-Text       | `audio2text`            | Transcribe audio by URL into text — subtitles, notes, search, accessibility.        |
+| Video File-to-Text  | `video_file2text`       | Transcribe an uploaded video file into text.                                        |
+| Audio File-to-Text  | `audio_file2text`       | Transcribe an uploaded audio file into text.                                        |
+| Image-to-Text (OCR) | `img2txt`               | Extract text and meaning from images — OCR, descriptions, accessibility.            |
+| Text-to-Video       | `txt2video`             | Generate short AI video clips from a text prompt.                                   |
+| Image-to-Video      | `img2video`             | Animate a still image into a short video clip.                                      |
+| Text-to-Embedding   | `txt2embedding`         | Create vector embeddings — search, RAG, semantic similarity, clustering.            |
+| Background Removal  | `img-rmbg`              | Remove background from images — product photos, portraits, compositing.             |
+| Image Upscale       | `img-upscale`           | Upscale images to higher resolution.                                                |
+
+<Note>
+  Some models support **multiple tasks** (e.g. both `txt2img` and `img2img`). The models endpoint will list all supported `inference_types` for each model.
+</Note>
+
+---
+
+## Choosing the right model
+
+When the models endpoint returns several options for the same task, use these guidelines:
+
+**Image generation** — Start with the fastest model for iteration. Increase steps and resolution for final quality. If the model object includes a non-empty `loras` array, you can use LoRA adapters for style control.
+
+**Speech generation (TTS)** — Check the model's `languages` array for available languages and voices. Use `info.defaults` for recommended speed and format settings. Test speed vs. quality for your use case.
+
+**Transcription (Video/Audio-to-Text)** — Transcription models support both URL-based and file-upload transcription. For long content, enable timestamps (`include_ts: true`). URL-based transcription works with YouTube, Twitch, Kick, and X/Twitter.
+
+**OCR (Image-to-Text)** — Check `info.limits` for the maximum supported image dimensions. For complex layouts, consider multiple passes or post-processing.
+
+**Video generation** — Start with low frame counts to validate aesthetics, then scale up. Check `info.limits.max_frames`, `min_frames`, and `max_fps` for each model. Some models support a `last_frame` feature (see `info.features.supports_last_frame`).
+
+**Embeddings** — Check `info.limits.max_input_tokens` and `max_total_tokens` for batch sizing. Use for semantic search, clustering, and retrieval-augmented generation (RAG).
+
+**Background removal** — Check `info.limits.max_width` and `max_height` for the maximum supported resolution.
+
+**Image upscale** — Check `info.limits` for input size constraints.
+
+---
+
+## Parameter limits & resolution rules
+
+Each model defines its own limits in the `info.limits` object. These limits vary between models and task types. Common fields include:
+
+- **Dimensions:** `min_width`, `max_width`, `min_height`, `max_height`, and (for image models) `resolution_step` — the value that width/height must be divisible by.
+- **Steps:** `min_steps`, `max_steps` — how many inference steps the model supports.
+- **Video-specific:** `min_frames`, `max_frames`, `min_fps`, `max_fps`.
+- **Text-specific:** `max_input_tokens`, `max_total_tokens` (for embedding models), `min_text`, `max_text` (for speech models).
+
+If you provide image dimensions that are not aligned to the required step, the API may adjust them automatically. To avoid unexpected output sizes, always round your `width` and `height` to a multiple of the model's `resolution_step` before sending the request.
+
+Some models do not support guidance. Check `info.features.supports_guidance` — if it's `false`, do not send a guidance value, or set it to `0`.
+
+<Tip>
+  Always read `info.limits` and `info.defaults` from the models endpoint for the specific model you're using. Do not assume that limits from one model apply to another.
+</Tip>
+
+---
+
+## API usage examples
+
+**1. Discover models for your task**
+
+```bash
+# Fetch all text-to-image models
+curl -X GET "https://api.deapi.ai/api/v1/client/models?filter[inference_types]=txt2img" \
+  -H "Authorization: Bearer $DEAPI_API_KEY" \
+  -H "Accept: application/json"
+
+# Read the response: pick a slug, note its limits and defaults.
+```
+
+**2. Use the slug in a generation request**
 
 ```bash
 curl -X POST "https://api.deapi.ai/api/v1/client/txt2img" \
@@ -85,22 +149,20 @@ curl -X POST "https://api.deapi.ai/api/v1/client/txt2img" \
   -H "Content-Type: application/json" \
   -H "Accept: application/json" \
   -d '{
-    "prompt": "isometric cozy cabin at dusk, soft rim light, artstation trending",
-    "model": "Flux1schnell",
+    "prompt": "isometric cozy cabin at dusk, soft rim light",
+    "model": "<MODEL_SLUG>",
     "width": 768,
     "height": 768,
     "steps": 4,
-    "guidance": 0,
-    "seed": 12345,
-    "loras": []
+    "seed": 12345
   }'
 ```
 
-<Note>
-  `Flux1schnell` has `max_steps: 10` and does not support guidance (`guidance` must be `0`). Always check model limits via the Models endpoint.
-</Note>
+<Warning>
+  Replace `<MODEL_SLUG>` with an actual `slug` value from the models endpoint. The `seed` field is required for image generation. Check `info.limits` for valid ranges of `width`, `height`, `steps`, and other parameters before sending.
+</Warning>
 
-**3) Use a model in Video-to-Text (YouTube)**
+**3. Transcribe a video by URL**
 
 ```bash
 curl -X POST "https://api.deapi.ai/api/v1/client/vid2txt" \
@@ -110,38 +172,38 @@ curl -X POST "https://api.deapi.ai/api/v1/client/vid2txt" \
   -d '{
     "video_url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
     "include_ts": true,
-    "model": "WhisperLargeV3"
+    "model": "<MODEL_SLUG>"
   }'
 ```
 
-<Info>
-  Jobs return a `request_id`. Poll results with `GET /api/v1/client/request-status/{request_id}`
-</Info>
+Jobs return a `request_id`. Poll results with `GET /api/v1/client/request-status/{request_id}`.
 
 ---
 
-### Best practices
+## Best practices
 
-- **Resolve the model list dynamically.** Don't hardcode slugs—fetch once at startup or periodically.
-- **Pin versions for reproducibility.** If you need bit-for-bit repeats (e.g., in T2I), pin model version + set seed.
-- **Budget before scaling.** Larger models and higher resolution/steps cost more—use the calculator on the homepage.
-- **Handle deprecation.** Implement a fallback path if a model becomes unavailable (e.g., switch to a recommended successor).
-
----
-
-### Related docs
-
-- **Model Selection**: how to choose the best model per task and budget.
-- **Endpoints:** Text-to-Image, Text-to-Speech, Image-to-Text (OCR), Image Background Removal, Image-to-Image, Video-to-Text, Audio-to-Text, Image-to-Video, Text-to-Video, Upload Video File, Upload Audio File, Text-to-Embedding, Get Results, Check Balance.
+- **Resolve models during integration.** Fetch the model list when building your integration and re-fetch periodically (e.g. daily or on deployment) to stay current. There's no need to call it on every request — the list doesn't change that often.
+- **Respect info.limits and info.defaults.** Use the returned defaults as a starting point. Stay within min/max boundaries to avoid unexpected rounding or errors. Note that some required fields (like `seed` for image generation) may not be listed in the model response — refer to the task endpoint docs for the full set of required parameters.
+- **Pin slugs only when you need reproducibility.** If you need consistent results across calls, keep the same slug and seed. But check the model list periodically — a slug may be retired and replaced.
+- **Budget before scaling.** Larger models and higher resolution/steps cost more — see the [Pricing](/pricing) page for per-task rates.
+- **Handle deprecation gracefully.** If a model returns an error, re-fetch the model list and switch to a suitable alternative.
 
 ---
 
-### Live models (API)
+## For AI agents & LLMs
 
-Use the endpoint below to retrieve the current, authoritative list of models (with `slug` strings to use in requests):
+If you are an AI agent, MCP client, or LLM integrating with deAPI:
 
-```
-GET https://api.deapi.ai/api/v1/client/models
-```
+1. **Call** `GET /api/v1/client/models` at the start of your session to get the current model list. Do not rely on model slugs from training data, cached documentation, or prior conversations — they may be outdated.
+2. **Use** `filter[inference_types]` to narrow down to the task you need (e.g. `txt2img`, `txt2audio`).
+3. **Read** `info.limits` and `info.defaults` from the response to construct valid request parameters. Also consult the task endpoint docs for required fields that may not appear in the model response (e.g. `seed` for image generation).
+4. **Pass** the `slug` field (not `name`) as the `model` parameter in task endpoints.
+5. **If a model slug returns an error**, re-fetch the model list — the model may have been deprecated or replaced.
 
-The response includes stable `slug` values to pass as the `model` parameter in any task endpoint.
+---
+
+## Related docs
+
+- [Model Selection endpoint](/api/utilities/model-selection) — the live API spec for fetching models.
+- [Pricing](/pricing) — cost per task and model tier.
+- [Execution Modes](/execution-modes-and-integrations/execution-modes-and-http-queue) — sync, async, webhooks, WebSockets.
