@@ -45,7 +45,7 @@ Models that generate images or video require dimensions (`width`, `height`) divi
 | `Flux1schnell`                 | txt2img              | 128             | 512, 640, 768, 896, 1024  |
 | `ZImageTurbo_INT8`             | txt2img              | 16              | 512, 528, 544, 768, 1024  |
 | `Ltxv_13B_0_9_8_Distilled_FP8` | txt2video, img2video | 16              | 256, 512, 768             |
-| `Flux2Klein4B_BF16`            | txt2img, img2img     | 16              | 256, 512, 768, 1024, 1536 |
+| `Flux_2_Klein_4B_BF16`         | txt2img, img2img     | 16              | 256, 512, 768, 1024, 1536 |
 
 <Info>
   For example, if you request `width: 500` with `Flux1schnell`, the output will be `512px` wide (rounded up to nearest multiple of 128).
@@ -55,7 +55,7 @@ Models that generate images or video require dimensions (`width`, `height`) divi
 
 ### Picking the right model
 
-- **Image Generation (Text-to-Image):** Start with `Flux2Klein4B_BF16`, `Flux1schnell` or `ZImageTurbo_INT8` for fast iteration. Increase steps/resolution for quality; control style via prompt and (optionally) LoRAs.
+- **Image Generation (Text-to-Image):** Start with `Flux_2_Klein_4B_BF16`, `Flux1schnell` or `ZImageTurbo_INT8` for fast iteration. Increase steps/resolution for quality; control style via prompt and (optionally) LoRAs.
 - **Speech Generation (TTS):** `Kokoro` offers natural prosody across multiple languages/voices. Choose voices/language in the payload; test speed vs. quality for your use case.
 - **Text Transcription (Video/Audio-to-Text):** `WhisperLargeV3` is a strong general-purpose baseline with robust multilingual support. Supports direct URL transcription from YouTube, Twitch, Kick, and X/Twitter — including VODs and finished stream recordings. For long videos, enable timestamps and chunking.
 - **Text Recognition (Image-to-Text):** `Nanonets_Ocr_S_F16` targets clear captions and text extraction. For complex layouts, consider multiple passes or post-processing.
