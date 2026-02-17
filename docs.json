@@ -131,7 +131,9 @@
               "api/transformation/image-to-image",
               "api/transformation/image-to-image-price",
               "api/transformation/background-removal",
-              "api/transformation/background-removal-price"
+              "api/transformation/background-removal-price",
+              "api/transformation/image-upscale",
+              "api/transformation/image-upscale-price"
             ]
           },
           {

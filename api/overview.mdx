@@ -53,8 +53,8 @@ Modify existing images.
 | `POST` | `/api/v1/client/img2img/price-calculation`     | Calculate image transformation price | [→](/api/transformation/image-to-image-price)     |
 | `POST` | `/api/v1/client/img-rmbg`                      | Remove image background              | [→](/api/transformation/background-removal)       |
 | `POST` | `/api/v1/client/img-rmbg/price-calculation`    | Calculate background removal price   | [→](/api/transformation/background-removal-price) |
-| `POST` | `/api/v1/client/img-upscale`                   | Upscale image resolution             | _Coming soon_                                     |
-| `POST` | `/api/v1/client/img-upscale/price-calculation` | Calculate image upscale price        | _Coming soon_                                     |
+| `POST` | `/api/v1/client/img-upscale`                   | Upscale image resolution             | [→](/api/transformation/image-upscale)            |
+| `POST` | `/api/v1/client/img-upscale/price-calculation` | Calculate image upscale price        | [→](/api/transformation/image-upscale-price)      |
 
 ## Utilities
 
@@ -81,7 +81,7 @@ Typical API usage follows this pattern:
     Call the main endpoint (e.g., `POST /api/v1/client/txt2img`) with your parameters. Response contains `request_id`.
   </Step>
   <Step title="Poll for results">
-    Call `GET /api/v1/client/request-status/{request_id}` until `status` is `done` or `error`. 
+    Call `GET /api/v1/client/request-status/{request_id}` until `status` is `done` or `error`.
   </Step>
   <Step title="Download result">
     When `status` is `done`, use `result_url` to download your generated content.
