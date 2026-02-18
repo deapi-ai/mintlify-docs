@@ -1,0 +1,342 @@
+---
+title: "n8n deAPI node"
+---
+
+This guide explains how to integrate deAPI with a **self-hosted n8n instance** using the official deAPI community node. The community node provides a simpler, no-code experience compared to the [HTTP Request-based approach](/execution-modes-and-integrations/n8n-integration).
+
+---
+
+### Why Use the Community Node?
+
+The `n8n-nodes-deapi` community node offers several advantages over manually configuring HTTP Request nodes:
+
+| Feature              | Community Node                  | HTTP Request Approach             |
+| -------------------- | ------------------------------- | --------------------------------- |
+| **Setup Complexity** | One-time installation           | Manual configuration per workflow |
+| **Job Completion**   | Automatic webhook-based waiting | Manual polling loop required      |
+| **Binary Data**      | Auto-downloaded and attached    | Manual download step needed       |
+| **Error Handling**   | Built-in with clear messages    | Manual status checking            |
+| **Credential Reuse** | Shared across all operations    | Configure per node                |
+
+---
+
+### Prerequisites
+
+Before you begin, ensure you have:
+
+- A **self-hosted n8n instance** accessible via **HTTPS** (required for webhook callbacks)
+- A **deAPI API key** from the [deAPI Dashboard](https://docs.deapi.ai/quickstart#2-obtain-your-api-key)
+- A **Webhook Secret** from [deAPI Webhook Settings](https://deapi.ai/settings/webhooks)
+
+<Warning>
+  The deAPI node uses webhooks to receive job completion notifications. Your n8n instance must be accessible via HTTPS for generation operations to work.
+</Warning>
+
+---
+
+### Installation
+
+#### Option 1: GUI Installation (Recommended)
+
+1. In your n8n instance, go to **Settings** \> **Community Nodes**
+2. Click **Install a community node**
+3. Enter `n8n-nodes-deapi` and click **Install**
+4. Restart n8n if prompted
+
+#### Option 2: Manual Installation (docker)
+
+If you're running n8n via docker:
+
+```bash
+docker exec -it <n8n-docker> sh
+mkdir ~/.n8n/nodes
+cd ~/.n8n/nodes
+npm i n8n-nodes-deapi
+```
+
+Then restart your n8n instance.
+
+---
+
+### Credential Configuration
+
+After installation, configure your deAPI credentials:
+
+1. In n8n, go to **Credentials** \> **Add Credential**
+2. Search for **deAPI API** and select it
+3. Fill in the required fields:
+
+| Field              | Description                             | Where to Get It                                                                  |
+| ------------------ | --------------------------------------- | -------------------------------------------------------------------------------- |
+| **API Key**        | Your deAPI API key for authentication   | [deAPI Quickstart Guide](https://docs.deapi.ai/quickstart#2-obtain-your-api-key) |
+| **Webhook Secret** | Secret for verifying webhook signatures | [deAPI Webhook Settings](https://deapi.ai/settings/webhooks)                     |
+
+4. Click **Save** to store the credentials
+
+<Note>
+  The Webhook Secret is used to verify that incoming webhook notifications are genuinely from deAPI. Keep it secure and never share it publicly.
+</Note>
+
+---
+
+### Available Operations
+
+The deAPI node provides two node types:
+
+#### Deapi Node (Regular Operations)
+
+Use this node to perform AI operations within your workflow.
+
+##### Image Operations
+
+| Operation             | Description                       | Models                                                   |
+| --------------------- | --------------------------------- | -------------------------------------------------------- |
+| **Generate**          | Generate images from text prompts | FLUX.1 Schnell, FLUX.2 Klein 4B BF16, Z-Image Turbo INT8 |
+| **Remove Background** | Remove background from images     | Ben2                                                     |
+| **Upscale**           | Increase image resolution by 4x   | RealESRGAN x4                                            |
+
+Image input operations (**Remove Background**, **Upscale**) accept JPG, JPEG, PNG, GIF, BMP, and WebP files up to 10 MB.
+
+##### Video Operations
+
+| Operation      | Description                                                             | Models                                       |
+| -------------- | ----------------------------------------------------------------------- | -------------------------------------------- |
+| **Generate**   | Generate video from text or image(s)                                    | LTX-Video 0.9.8 13B, LTX-2 19B Distilled FP8 |
+| **Transcribe** | Transcribe video to text (YouTube, Twitch, X, Kick URLs or file upload) | Whisper Large V3                             |
+
+Video file transcription accepts MP4, MPEG, MOV, AVI, WMV, and OGG files up to 10 MB.
+
+##### Audio Operations
+
+| Operation      | Description                   | Models           |
+| -------------- | ----------------------------- | ---------------- |
+| **Transcribe** | Transcribe audio file to text | Whisper Large V3 |
+
+Audio transcription accepts AAC, MP3, OGG, WAV, WebM, and FLAC files up to 10 MB.
+
+##### Prompt Operations
+
+| Operation                | Description                                         |
+| ------------------------ | --------------------------------------------------- |
+| **Image Prompt Booster** | Optimize prompts for text-to-image generation       |
+| **Video Prompt Booster** | Optimize prompts for text/image-to-video generation |
+
+#### DeapiTrigger Node (Webhook Trigger)
+
+Use this node to start workflows when deAPI sends job status updates. This is useful for:
+
+- Building event-driven workflows
+- Processing results from jobs submitted outside n8n
+- Monitoring job progress across multiple systems
+
+---
+
+### How the Webhook-Based Waiting Works
+
+Generation operations (image, video, transcription) use an efficient webhook-based pattern instead of polling:
+
+```
+1. Execute Phase
+
+   +-----------+     POST /txt2img      +-----------+
+   |   Deapi   | ---------------------> |   deAPI   |
+   |   Node    |   (includes webhook)   |   Server  |
+   +-----------+                        +-----------+
+        |
+        v
+   Workflow pauses
+   (frees memory)
+
+2. Processing Phase (no n8n resources used)
+
+   +-----------+                        +-----------+
+   |    n8n    |  <-- job.processing    |   deAPI   |
+   | (waiting) |     (acknowledged)     | (working) |
+   +-----------+                        +-----------+
+
+3. Resume Phase
+
+   +-----------+                        +-----------+
+   |    n8n    |  <-- job.completed     |   deAPI   |
+   | (resumes) |   (with result_url)    |  (done)   |
+   +-----------+                        +-----------+
+        |
+        v
+   Workflow continues
+   with generated content
+```
+
+**Key benefits:**
+
+- No polling loop consuming API calls
+- Workflow pauses and frees memory during processing
+- Results include binary data ready for downstream nodes
+
+---
+
+### Example Workflow: Text-to-Image Generation
+
+This example demonstrates a simple image generation workflow.
+
+#### Workflow Overview
+
+```
++------------------+      +-------------------+
+|  Manual Trigger  | ---> |    Deapi Node     |
+|                  |      | (Image: Generate) |
++------------------+      +-------------------+
+                                   |
+                                   v
+                          Generated image as
+                          binary data output
+```
+
+#### Step 1: Add a Trigger
+
+Add a **Manual Trigger** (or Schedule, Webhook, etc.) to start your workflow.
+
+#### Step 2: Add the Deapi Node
+
+1. Add a **Deapi** node to your workflow
+2. Select your **deAPI API** credentials
+3. Configure the operation:
+
+| Setting          | Value                                    |
+| ---------------- | ---------------------------------------- |
+| **Resource**     | Image                                    |
+| **Operation**    | Generate                                 |
+| **Model**        | FLUX.1 Schnell (or your preferred model) |
+| **Prompt**       | `Red Bull F1 car from 2025`              |
+| **Aspect Ratio** | Square, Landscape, or Portrait           |
+
+4. Optionally configure:
+   - **Negative Prompt** — Elements to exclude from the image
+   - **Resolution** — Select image dimensions other than the default ones, depending on your needs
+   - **Seed** — For reproducible results (use `-1` for random)
+   - **Steps** — Number of inference steps (higher = more detail)
+
+#### Step 3: Run the Workflow
+
+1. Click **Test Workflow** or **Execute Workflow**
+2. The node will:
+   - Submit the generation request to deAPI
+   - Pause the workflow while waiting
+   - Resume automatically when the image is ready
+3. The output contains the generated image as binary data
+
+#### Using the Generated Image
+
+The image is available in the `data` binary field. Connect downstream nodes to:
+
+- **Write Binary File** — Save to disk
+- **Send Email** — Attach to an email
+- **HTTP Request** — Upload to cloud storage
+- **Slack/Discord** — Share in a channel
+
+---
+
+### Using the DeapiTrigger Node
+
+The **DeapiTrigger** node listens for webhook events from deAPI, enabling event-driven workflows.
+
+#### Setup
+
+1. Add a **DeapiTrigger** node to a new workflow
+2. Select your **deAPI API** credentials
+3. Configure event filtering:
+
+| Setting                    | Description                                                             |
+| -------------------------- | ----------------------------------------------------------------------- |
+| **Events**                 | Select which events trigger the workflow: Processing, Completed, Failed |
+| **Download Binary Result** | Automatically download the result file for completed jobs               |
+
+4. **Activate the workflow** to make the webhook URL live
+5. Copy the **Webhook URL** displayed in the node
+6. Add this URL to your [deAPI Webhook Settings](https://deapi.ai/settings/webhooks)
+
+#### Event Types
+
+| Event              | Description                | Typical Use                       |
+| ------------------ | -------------------------- | --------------------------------- |
+| **job.processing** | Job has started processing | Update status in external system  |
+| **job.completed**  | Job finished successfully  | Process the generated content     |
+| **job.failed**     | Job encountered an error   | Handle errors, send notifications |
+
+---
+
+### Comparison: Community Node vs HTTP Request
+
+| Aspect                  | Community Node                | HTTP Request Approach                         |
+| ----------------------- | ----------------------------- | --------------------------------------------- |
+| **Nodes Required**      | 1 (Deapi node)                | 5+ (Submit, Poll loop, Check, Wait, Download) |
+| **Polling Logic**       | Automatic webhook             | Manual polling loop with Wait node            |
+| **Binary Handling**     | Auto-downloaded               | Manual HTTP Request to download               |
+| **Error Messages**      | Clear, contextual             | Raw API responses                             |
+| **Credential Setup**    | Once per n8n instance         | Once per n8n instance                         |
+| **Rate Limit Handling** | Built-in with helpful message | Manual detection and handling                 |
+| **Code Required**       | None                          | Expressions for URL templating                |
+
+---
+
+### Troubleshooting
+
+#### HTTPS Required
+
+Generation operations require your n8n instance to be accessible via HTTPS for webhook callbacks.
+
+**Solutions:**
+
+- Use a reverse proxy (nginx, Caddy, Traefik) with SSL termination
+- Use a tunnel service (ngrok, Cloudflare Tunnel) for development
+- Ensure your SSL certificate is valid and not self-signed
+
+#### Webhook Verification Failures
+
+If you see webhook signature verification errors:
+
+1. Verify your **Webhook Secret** matches the one in [deAPI Webhook Settings](https://deapi.ai/settings/webhooks)
+2. Ensure your n8n server clock is synchronized (signature includes timestamp)
+3. Check that no proxy is modifying the request body
+
+#### Timeout Errors
+
+Operations have a configurable **Wait Timeout** with defaults that vary by type:
+
+| Operation Type               | Default Timeout | Max Timeout |
+| ---------------------------- | --------------- | ----------- |
+| Generation (image, video)    | 60 seconds      | 240 seconds |
+| Transcription (video, audio) | 120 seconds     | 600 seconds |
+
+For long-running operations:
+
+1. Select the Deapi node
+2. Expand **Options**
+3. Increase **Wait Timeout** to allow more time
+
+#### Rate Limiting
+
+If you see "upgrade your plan" errors, you've hit deAPI's rate limits. Consider upgrading your deAPI plan for higher limits.
+
+---
+
+### Example Workflow Download
+
+An example n8n workflow demonstrating all available operations is available in the [GitHub repository](https://github.com/deapi-ai/n8n-nodes-deapi/blob/main/examples/deAPI_guide.json).
+
+1. Download [`deAPI_guide.json`](https://raw.githubusercontent.com/deapi-ai/n8n-nodes-deapi/main/examples/deAPI_guide.json)
+2. In n8n, go to **Workflows** \> **Import from File**
+3. Select the downloaded file
+4. Configure your deAPI credentials
+5. Explore the example nodes and sticky notes
+
+---
+
+### Resources
+
+- [n8n Community Nodes Documentation](https://docs.n8n.io/integrations/community-nodes/)
+- [n8n Integration (HTTP Request approach)](/execution-modes-and-integrations/n8n-integration)
+- [deAPI API Reference](/api/overview)
+- [Execution Modes & HTTP Queue](/execution-modes-and-integrations/execution-modes-and-http-queue)
+- [Model Selection Guide](/api/utilities/model-selection)
+- [GitHub Repository](https://github.com/deapi-ai/n8n-nodes-deapi)
+- [NPM Package](https://www.npmjs.com/package/n8n-nodes-deapi)
