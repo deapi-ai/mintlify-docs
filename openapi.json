@@ -41,7 +41,7 @@
                                 ],
                                 "properties": {
                                     "audio": {
-                                        "description": "Audio file to transcribe. Supported formats: AAC, MP3, OGG, WAV, WebM, FLAC. Maximum file size: 10 MB.",
+                                        "description": "Audio file to transcribe. Supported formats: AAC, MP3, OGG, WAV, WebM, FLAC. Maximum file size: 80 MB.",
                                         "type": "string",
                                         "format": "binary"
                                     },
@@ -146,7 +146,7 @@
                                         ],
                                         "properties": {
                                             "audio": {
-                                                "description": "Audio file to transcribe. Supported formats: AAC, MP3, OGG, WAV, WebM, FLAC. Maximum file size: 10 MB.",
+                                                "description": "Audio file to transcribe. Supported formats: AAC, MP3, OGG, WAV, WebM, FLAC. Maximum file size: 80 MB.",
                                                 "type": "string",
                                                 "format": "binary"
                                             },
@@ -3792,7 +3792,7 @@
                                 ],
                                 "properties": {
                                     "video": {
-                                        "description": "Video file to transcribe. Supported formats: MP4, MPEG, QuickTime (MOV), AVI, WMV, OGG. Maximum file size: 10 MB. Video must contain an audio stream.",
+                                        "description": "Video file to transcribe. Supported formats: MP4, MPEG, QuickTime (MOV), AVI, WMV, OGG. Maximum file size: 80 MB. Video must contain an audio stream.",
                                         "type": "string",
                                         "format": "binary"
                                     },
@@ -3897,7 +3897,7 @@
                                         ],
                                         "properties": {
                                             "video": {
-                                                "description": "Video file to transcribe. Supported formats: MP4, MPEG, QuickTime (MOV), AVI, WMV, OGG. Maximum file size: 10 MB. Video must contain an audio stream.",
+                                                "description": "Video file to transcribe. Supported formats: MP4, MPEG, QuickTime (MOV), AVI, WMV, OGG. Maximum file size: 80 MB. Video must contain an audio stream.",
                                                 "type": "string",
                                                 "format": "binary"
                                             },
@@ -4023,7 +4023,7 @@
                                 ],
                                 "properties": {
                                     "video": {
-                                        "description": "Video file to remove background from. Supported formats: MP4, MPEG, QuickTime, AVI, WMV, OGG. Maximum file size: 10 MB.",
+                                        "description": "Video file to remove background from. Supported formats: MP4, MPEG, QuickTime, AVI, WMV, OGG. Maximum file size: 80 MB.",
                                         "type": "string",
                                         "format": "binary"
                                     },
@@ -4117,7 +4117,7 @@
                                         ],
                                         "properties": {
                                             "video": {
-                                                "description": "Video file to remove background from. Supported formats: MP4, MPEG, QuickTime, AVI, WMV, OGG. Maximum file size: 10 MB.",
+                                                "description": "Video file to remove background from. Supported formats: MP4, MPEG, QuickTime, AVI, WMV, OGG. Maximum file size: 80 MB.",
                                                 "type": "string",
                                                 "format": "binary"
                                             },
@@ -4445,7 +4445,7 @@
                                 ],
                                 "properties": {
                                     "video": {
-                                        "description": "Video file to upscale. Supported formats: MP4, MPEG, QuickTime, AVI, WMV, OGG. Maximum file size: 10 MB.",
+                                        "description": "Video file to upscale. Supported formats: MP4, MPEG, QuickTime, AVI, WMV, OGG. Maximum file size: 80 MB.",
                                         "type": "string",
                                         "format": "binary"
                                     },
@@ -4539,7 +4539,7 @@
                                         ],
                                         "properties": {
                                             "video": {
-                                                "description": "Video file to upscale. Supported formats: MP4, MPEG, QuickTime, AVI, WMV, OGG. Maximum file size: 10 MB.",
+                                                "description": "Video file to upscale. Supported formats: MP4, MPEG, QuickTime, AVI, WMV, OGG. Maximum file size: 80 MB.",
                                                 "type": "string",
                                                 "format": "binary"
                                             },
