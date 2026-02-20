@@ -97,7 +97,7 @@
                         }
                     },
                     "404": {
-                        "description": "Unauthorized user.",
+                        "description": "Not found.",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -212,7 +212,7 @@
                         }
                     },
                     "404": {
-                        "description": "Unauthorized user.",
+                        "description": "Not found.",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -640,7 +640,7 @@
                         }
                     },
                     "404": {
-                        "description": "Unauthorized user.",
+                        "description": "Not found.",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -684,7 +684,6 @@
                                 "required": [
                                     "prompt",
                                     "model",
-                                    "guidance",
                                     "steps",
                                     "seed"
                                 ],
@@ -752,7 +751,7 @@
                 },
                 "responses": {
                     "200": {
-                        "description": "Calculated price for text2img inference.",
+                        "description": "Calculated price for img2img inference.",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -785,7 +784,7 @@
                         }
                     },
                     "404": {
-                        "description": "Unauthorized user.",
+                        "description": "Not found.",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -900,7 +899,7 @@
                         }
                     },
                     "404": {
-                        "description": "Unauthorized user.",
+                        "description": "Not found.",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -1058,7 +1057,7 @@
                         }
                     },
                     "404": {
-                        "description": "Unauthorized user.",
+                        "description": "Not found.",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -1094,7 +1093,7 @@
                     }
                 ],
                 "requestBody": {
-                    "description": "Image to text conversion parameters",
+                    "description": "Image to video generation parameters",
                     "required": true,
                     "content": {
                         "multipart/form-data": {
@@ -1209,7 +1208,7 @@
                         }
                     },
                     "404": {
-                        "description": "Unauthorized user.",
+                        "description": "Not found.",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -1329,7 +1328,7 @@
                         }
                     },
                     "404": {
-                        "description": "Unauthorized user.",
+                        "description": "Not found.",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -1383,7 +1382,7 @@
                                     "model": {
                                         "description": "The background removal model to use",
                                         "type": "string",
-                                        "example": "Ben2"
+                                        "example": "RMBG-1.4"
                                     },
                                     "webhook_url": {
                                         "description": "Optional HTTPS URL to receive webhook notifications for job status changes (processing, completed, failed). Must be HTTPS. Max 2048 characters. See [Webhook Documentation](/execution-modes-and-integrations/webhooks) for payload structure and authentication details.",
@@ -1477,7 +1476,7 @@
                                             "model": {
                                                 "description": "The background removal model to use",
                                                 "type": "string",
-                                                "example": "Ben2"
+                                                "example": "RMBG-1.4"
                                             }
                                         },
                                         "type": "object"
@@ -1502,7 +1501,7 @@
                                             "model": {
                                                 "description": "The background removal model to use",
                                                 "type": "string",
-                                                "example": "Ben2"
+                                                "example": "RMBG-1.4"
                                             }
                                         },
                                         "type": "object"
@@ -1917,7 +1916,7 @@
                         }
                     },
                     "404": {
-                        "description": "Unauthorized user.",
+                        "description": "Not found.",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -2045,8 +2044,20 @@
                                 "type": "string",
                                 "enum": [
                                     "txt2img",
+                                    "img2txt",
                                     "txt2audio",
-                                    "video2text"
+                                    "vid2txt",
+                                    "aud2txt",
+                                    "txt2video",
+                                    "img2video",
+                                    "img2img",
+                                    "img_upscale",
+                                    "img_rmbg",
+                                    "vid_upscale",
+                                    "vid_rmbg",
+                                    "txt2embedding",
+                                    "videofile2txt",
+                                    "audiofile2txt"
                                 ]
                             }
                         }
@@ -2228,7 +2239,7 @@
                         }
                     },
                     "404": {
-                        "description": "Unauthorized user.",
+                        "description": "Not found.",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -3117,7 +3128,7 @@
                         }
                     },
                     "404": {
-                        "description": "Unauthorized user.",
+                        "description": "Not found.",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -3217,7 +3228,7 @@
                 },
                 "responses": {
                     "200": {
-                        "description": "Calculated price for text2img inference.",
+                        "description": "Calculated price for text2audio inference.",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -3250,7 +3261,7 @@
                         }
                     },
                     "404": {
-                        "description": "Unauthorized user.",
+                        "description": "Not found.",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -3364,7 +3375,7 @@
                         }
                     },
                     "404": {
-                        "description": "Unauthorized user.",
+                        "description": "Not found.",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -3475,7 +3486,7 @@
                         }
                     },
                     "404": {
-                        "description": "Unauthorized user.",
+                        "description": "Not found.",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -3514,7 +3525,7 @@
                     "description": "Text to video conversion parameters",
                     "required": true,
                     "content": {
-                        "multipart/form-data": {
+                        "application/json": {
                             "schema": {
                                 "required": [
                                     "prompt",
@@ -3614,7 +3625,7 @@
                         }
                     },
                     "404": {
-                        "description": "Unauthorized user.",
+                        "description": "Not found.",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -3653,7 +3664,7 @@
                     "description": "Text to video conversion parameters",
                     "required": true,
                     "content": {
-                        "multipart/form-data": {
+                        "application/json": {
                             "schema": {
                                 "required": [
                                     "model",
@@ -3734,7 +3745,7 @@
                         }
                     },
                     "404": {
-                        "description": "Unauthorized user.",
+                        "description": "Not found.",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -3837,7 +3848,7 @@
                         }
                     },
                     "404": {
-                        "description": "Unauthorized user.",
+                        "description": "Not found.",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -3965,7 +3976,7 @@
                         }
                     },
                     "404": {
-                        "description": "Unauthorized user.",
+                        "description": "Not found.",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -4286,7 +4297,7 @@
                         }
                     },
                     "404": {
-                        "description": "Unauthorized user.",
+                        "description": "Not found.",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -4387,7 +4398,7 @@
                         }
                     },
                     "404": {
-                        "description": "Unauthorized user.",
+                        "description": "Not found.",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -4619,86 +4630,6 @@
                     },
                     "429": {
                         "$ref": "#/components/responses/RateLimitExceeded"
-                    }
-                },
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ]
-            }
-        },
-        "/api/v1/worker/models": {
-            "get": {
-                "tags": [
-                    "Client API"
-                ],
-                "description": "Endpoint for fetching all available models.",
-                "operationId": "workerModels",
-                "parameters": [
-                    {
-                        "$ref": "#/components/parameters/AcceptHeader"
-                    },
-                    {
-                        "name": "per_page",
-                        "in": "query",
-                        "required": false,
-                        "schema": {
-                            "type": "integer",
-                            "default": 15
-                        }
-                    },
-                    {
-                        "name": "page",
-                        "in": "query",
-                        "required": false,
-                        "schema": {
-                            "type": "integer",
-                            "default": 1
-                        }
-                    },
-                    {
-                        "name": "filter[is_basic]",
-                        "in": "query",
-                        "description": "If true returns all basic models.",
-                        "required": false,
-                        "style": "form",
-                        "explode": false,
-                        "schema": {
-                            "type": "boolean"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "List of available models.",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/ClientDiffusionModelCollection"
-                                }
-                            }
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized user.",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/response_error_default"
-                                }
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Request not found.",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/response_error_default"
-                                }
-                            }
-                        }
                     }
                 },
                 "security": [
@@ -5504,6 +5435,23 @@
                                 "description": "URL to the result file (e.g. generate image or audio). Only available when status is done",
                                 "type": "string",
                                 "example": "https://example.com/results/image.jpg",
+                                "nullable": true
+                            },
+                            "results_alt_formats": {
+                                "description": "Alternative format URLs for the result (jpg, webp). Only available for image-producing job types when status is done",
+                                "properties": {
+                                    "jpg": {
+                                        "type": "string",
+                                        "example": "https://example.com/results/image.jpg",
+                                        "nullable": true
+                                    },
+                                    "webp": {
+                                        "type": "string",
+                                        "example": "https://example.com/results/image.webp",
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object",
                                 "nullable": true
                             },
                             "result": {
