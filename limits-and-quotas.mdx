@@ -178,6 +178,19 @@ The majority of endpoints (Video-to-Text, Audio-to-Text, Image-to-Image) support
 
 ---
 
+## Model Parameter Limits
+
+Certain parameters — such as maximum character count, image resolution, frame count, or audio duration — are **model-specific** and may differ between models available on the same endpoint.
+
+These limits are returned dynamically via the [Models endpoint](/api/utilities/model-selection):
+```bash
+GET https://api.deapi.ai/api/v1/client/models
+```
+
+Check the `limits` field in each model object to see the applicable constraints before submitting a request. This ensures your inputs stay within the accepted bounds for the specific model you're using.
+
+---
+
 ## URL Input & Duration Limits
 
 For endpoints processing content via direct URLs (e.g., X Spaces), specific duration limits apply regardless of file size.
