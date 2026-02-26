@@ -1,8 +1,7 @@
 ---
 title: "MCP Server"
+description: "Describes the deAPI MCP server, its available tools, and how to connect agents or IDE integrations to use deAPI as a structured toolbox."
 ---
-
-Describes the deAPI MCP server, its available tools, and how to connect agents or IDE integrations to use deAPI as a structured toolbox.
 
 <Warning>
   **Alpha Release** — The MCP server is currently in alpha. You may encounter occasional issues or unexpected behavior as we continue to refine the service. We actively welcome feedback and bug reports — join the conversation on [Discord](https://discord.com/invite/UFfK5YRBsr).
@@ -19,12 +18,14 @@ The **Model Context Protocol (MCP)** is an open standard that enables AI models 
 With deAPI's MCP server, Claude, ChatGPT, Cursor, and other MCP-compatible clients can:
 
 - Generate images, videos, and audio directly within conversations
-- Transcribe YouTube videos or audio files
+- Transcribe YouTube / X / Twitch / Kick videos or audio files
 - Remove backgrounds and upscale images
 - Check pricing before running expensive operations
 - Access all deAPI capabilities through natural language
 
 New tools and capabilities will be added as the MCP server evolves. Follow our [Discord](https://discord.com/invite/UFfK5YRBsr) for updates and to share feature requests.
+
+The full source code for the MCP server is available on GitHub: [github.com/deapi-ai/mcp-server-deapi](https://github.com/deapi-ai/mcp-server-deapi)
 
 ---
 
@@ -66,6 +67,8 @@ The deAPI MCP server exposes the following tools:
 | `image_to_video`                 | Animate static images into videos                              |
 | `video_file_transcription`       | Transcribe uploaded video files to text                        |
 | `video_url_transcription`        | Transcribe videos from URLs (YouTube, X/Twitter, Twitch, Kick) |
+| `text_to_video_price`            | Calculate price for text-to-video generation                   |
+| `image_to_video_price`           | Calculate price for image-to-video generation                  |
 | `video_file_transcription_price` | Calculate price for video file transcription                   |
 | `video_url_transcription_price`  | Calculate price for video URL transcription                    |
 
@@ -76,8 +79,16 @@ The deAPI MCP server exposes the following tools:
 | `text_to_audio`                 | Convert text to natural-sounding speech (TTS)         |
 | `audio_transcription`           | Transcribe uploaded audio files to text using Whisper |
 | `audio_url_transcription`       | Transcribe audio from URLs (X/Twitter Spaces)         |
+| `text_to_audio_price`           | Calculate price for text-to-speech                    |
 | `audio_transcription_price`     | Calculate price for audio file transcription          |
 | `audio_url_transcription_price` | Calculate price for audio URL transcription           |
+
+#### Embeddings
+
+| Tool                      | Description                                  |
+| ------------------------- | -------------------------------------------- |
+| `text_to_embedding`       | Generate text embeddings for semantic search |
+| `text_to_embedding_price` | Calculate price for embedding generation     |
 
 #### Utility
 
@@ -124,6 +135,34 @@ To use deAPI MCP tools directly in Claude conversations:
 
 ---
 
+#### Claude Desktop
+
+To use deAPI MCP in the Claude Desktop app, configure it via the config file with a Bearer token. This is the recommended approach for desktop — no OAuth setup required.
+
+**Config file setup:**
+
+Edit your Claude Desktop configuration file:
+
+- **macOS**: `~/Library/Application Support/Claude/claude_desktop_config.json`
+- **Windows**: `%APPDATA%\Claude\claude_desktop_config.json`
+
+```json
+{
+  "mcpServers": {
+    "deapi": {
+      "url": "https://mcp.deapi.ai/mcp",
+      "headers": {
+        "Authorization": "Bearer YOUR_API_KEY"
+      }
+    }
+  }
+}
+```
+
+Replace `YOUR_API_KEY` with your actual deAPI key. Save the file and restart Claude Desktop.
+
+---
+
 #### Cursor IDE
 
 To integrate deAPI MCP into Cursor for AI-assisted development:
@@ -163,7 +202,9 @@ To integrate deAPI MCP into Cursor for AI-assisted development:
 - _"With deAPI MCP, transcribe this audio…"_
 - _"Via deAPI MCP, check my balance"_
 
-**Tip:** Cursor recognizes deAPI MCP tools when you mention keywords like "using deAPI MCP", "with deAPI MCP", or "via MCP" in your prompts.
+<Tip>
+  Cursor recognizes deAPI MCP tools when you mention keywords like "using deAPI MCP", "with deAPI MCP", or "via MCP" in your prompts.
+</Tip>
 
 ---
 
@@ -171,9 +212,9 @@ To integrate deAPI MCP into Cursor for AI-assisted development:
 
 To use deAPI MCP tools in ChatGPT conversations:
 
-<Note>
-  **Availability:** MCP is available in beta to **Pro, Plus, Business, Enterprise, and Education** accounts. The MCP apps work on both web and desktop, but Developer mode settings are only accessible in the **web version** at [chatgpt.com](https://chatgpt.com).
-</Note>
+<Info>
+  MCP is available in beta to **Pro, Plus, Business, Enterprise, and Education** accounts. The MCP apps work on both web and desktop, but Developer mode settings are only accessible in the **web version** at [chatgpt.com](https://chatgpt.com).
+</Info>
 
 **Step 1.** Get your API key from the [deAPI Dashboard](https://deapi.ai/dashboard)
 
@@ -213,41 +254,74 @@ To use deAPI MCP tools in ChatGPT conversations:
 
 ---
 
+### Self-Hosting
+
+You can run the MCP server on your own infrastructure. The full source code is available at [github.com/deapi-ai/mcp-server-deapi](https://github.com/deapi-ai/mcp-server-deapi) under the MIT license.
+
+#### Prerequisites
+
+- Python 3.10 or higher
+- `uv`, `pip`, or `conda` for package management
+- A deAPI API key from the [Dashboard](https://deapi.ai/dashboard)
+
+#### Quick Start
+
+```bash
+git clone https://github.com/deapi-ai/mcp-server-deapi.git
+cd mcp-server-deapi
+
+# Install dependencies (uv recommended)
+uv pip install -e .
+
+# Start the server
+python -m src.server_remote
+```
+
+The server will start on `http://localhost:8000` by default. For external access:
+
+```bash
+MCP_HOST=0.0.0.0 MCP_PORT=8000 python -m src.server_remote
+```
+
+#### Docker Deployment
+
+```bash
+# Build and run
+docker build -t mcp-server-deapi .
+docker run -d -p 8000:8000 --name mcp-server-deapi mcp-server-deapi
+
+# Or with Docker Compose
+docker-compose up -d
+```
+
+#### Cloud Deployment Options
+
+The server can be deployed to any platform that supports Python or Docker containers: Railway, Fly.io, Heroku, DigitalOcean App Platform, AWS ECS, GCP Cloud Run, and others. Detailed deployment instructions are available in [DEPLOYMENT.md](https://github.com/deapi-ai/mcp-server-deapi/blob/main/DEPLOYMENT.md) in the repository.
+
+#### Connecting a Self-Hosted Server
+
+Point your MCP client to your server URL instead of the default `https://mcp.deapi.ai/mcp`:
+
+```json
+{
+  "mcpServers": {
+    "deapi": {
+      "url": "http://your-server-ip:8000/mcp",
+      "headers": {
+        "Authorization": "Bearer YOUR_API_KEY"
+      }
+    }
+  }
+}
+```
+
+---
+
 ### Supported Models
 
-The MCP server provides access to all deAPI models:
+The MCP server provides access to all deAPI models.
 
-#### Text-to-Image
-
-- **Flux.1 schnell** — Fast, high-quality image generation
-- **Z-Image-Turbo INT8** — Optimized turbo model for quick and realistic generations
-
-#### Text-to-Speech
-
-- **Kokoro** — Natural TTS with multiple voices and languages
-
-#### Video Generation
-
-- **LTX-Video-0.9.8 13B** — Text-to-video and image-to-video generation
-
-#### Image Processing
-
-- **QwenImageEditPlus4Bit** — Advanced image-to-image transformation
-- **Ben2** — Background removal
-
-#### Transcription
-
-- **Whisper Large V3** — State-of-the-art speech recognition
-
-#### OCR
-
-- **Nanonets Ocr S** — Text extraction from images
-
-#### Embeddings
-
-- **BGE M3** — Text embeddings
-
-Use `get_available_models` tool to retrieve the full list with current specifications and limits.
+Use the `get_available_models` tool to retrieve the full list with current specifications and limits.
 
 ---
 
@@ -281,9 +355,33 @@ The assistant calls `image_remove_background` and returns a transparent PNG.
 
 #### Transcribe X/Twitter Spaces
 
-> "With deAPI MCP, transcribe this Twitter Space: https://twitter.com/i/spaces/..."
+> "With deAPI MCP, transcribe this Twitter Space: https://twitter.com/i/spaces/…"
 
 The assistant calls `audio_url_transcription` and returns the full transcript.
+
+---
+
+### Architecture
+
+#### Smart Adaptive Polling
+
+For async jobs, the server automatically polls for results with optimized intervals based on job type:
+
+| Job Type | Initial Delay | Max Delay | Timeout |
+| -------- | ------------- | --------- | ------- |
+| Audio    | 1s            | 5s        | 5 min   |
+| Image    | 2s            | 8s        | 5 min   |
+| Video    | 5s            | 30s       | 15 min  |
+
+Polling uses exponential backoff (1.5× multiplier by default), so jobs receive fast initial checks while heavier workloads avoid unnecessary load.
+
+#### Token Security
+
+The MCP server does **not** store your API token. Authentication works at the connection level:
+
+- **Remote hosted server**: OAuth 2.0 Authorization Code with PKCE, or Bearer token in HTTP headers
+- **Self-hosted server**: Bearer token forwarded per-request to the deAPI API
+- Tokens are never persisted or logged; tools do **not** accept `deapi_api_token` as a parameter
 
 ---
 
@@ -298,9 +396,7 @@ The assistant calls `audio_url_transcription` and returns the full transcript.
 | Direct programmatic control        | **HTTP API**   |
 | Agent-driven workflows             | **MCP Server** |
 
-Use the **MCP server** when you want an AI agent to decide which tools to call, with which parameters, and in what order.
-
-Use the **HTTP API + queue** for typical backend integrations where you directly manage requests and results.
+Use the **MCP server** when you want an AI agent to decide which tools to call, with which parameters, and in what order. Use the **HTTP API + queue** for typical backend integrations where you directly manage requests and results.
 
 ---
 
@@ -311,14 +407,14 @@ Use the **HTTP API + queue** for typical backend integrations where you directly
 - **Verify your API key** is valid and has sufficient balance
 - **Check the server URL** is exactly `https://mcp.deapi.ai/mcp`
 - **For Claude:** Ensure OAuth Client ID is `deapi-mcp` and Secret is your API key
-- **For Cursor:** Ensure Bearer token format — the Authorization header should be `Bearer YOUR_API_KEY`
+- **For Cursor / Claude Desktop:** Ensure Bearer token format — the Authorization header should be `Bearer YOUR_API_KEY`
 
 #### Tools Not Appearing
 
 - Restart your MCP client (Claude, ChatGPT, Cursor) after configuration changes
 - **In Claude:** Make sure you clicked **Allow** when prompted to grant permissions
 - **In ChatGPT:** Ensure Developer mode is enabled in Advanced settings
-- Verify JSON syntax in configuration files (Cursor)
+- Verify JSON syntax in configuration files (Cursor, Claude Desktop)
 - Check that your API key has the necessary permissions
 
 #### Jobs Stuck in Processing
@@ -326,3 +422,10 @@ Use the **HTTP API + queue** for typical backend integrations where you directly
 - Use `check_job_status` tool with the job ID to monitor progress
 - Large video generation or transcription jobs may take several minutes
 - Check [status.deapi.ai](https://status.deapi.ai/) for system status
+
+#### Remote Connection Issues (Self-Hosted)
+
+- Test the endpoint: `curl -N http://your-server:8000/mcp`
+- Check server logs: `docker logs mcp-server-deapi` or `journalctl -u mcp-server-deapi`
+- Verify firewall rules allow the configured port
+- For SSL issues, confirm certificates are valid and paths are correct in your proxy config
