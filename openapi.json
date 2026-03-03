@@ -41,7 +41,7 @@
                                 ],
                                 "properties": {
                                     "audio": {
-                                        "description": "Audio file to transcribe. Supported formats: AAC, MP3, OGG, WAV, WebM, FLAC. Maximum file size: 80 MB.",
+                                        "description": "Audio file to transcribe. Supported formats: AAC, MP3, OGG, WAV, WebM, FLAC. Maximum file size: 10 MB.",
                                         "type": "string",
                                         "format": "binary"
                                     },
@@ -146,7 +146,7 @@
                                         ],
                                         "properties": {
                                             "audio": {
-                                                "description": "Audio file to transcribe. Supported formats: AAC, MP3, OGG, WAV, WebM, FLAC. Maximum file size: 80 MB.",
+                                                "description": "Audio file to transcribe. Supported formats: AAC, MP3, OGG, WAV, WebM, FLAC. Maximum file size: 10 MB.",
                                                 "type": "string",
                                                 "format": "binary"
                                             },
@@ -3042,15 +3042,14 @@
                     }
                 ],
                 "requestBody": {
-                    "description": "Audio generation parameters",
+                    "description": "Audio generation parameters. Supports three TTS modes: custom_voice (default, preset speakers), voice_clone (clone from reference audio), voice_design (create voice from description).",
                     "required": true,
                     "content": {
-                        "application/json": {
+                        "multipart/form-data": {
                             "schema": {
                                 "required": [
                                     "text",
                                     "model",
-                                    "voice",
                                     "lang",
                                     "speed",
                                     "format",
@@ -3067,10 +3066,22 @@
                                         "type": "string",
                                         "example": "Kokoro"
                                     },
-                                    "voice": {
-                                        "description": "Name of the voice to be used during audio generation",
+                                    "mode": {
+                                        "description": "TTS mode: custom_voice (default), voice_clone, or voice_design. Determines which fields are required.",
                                         "type": "string",
-                                        "example": "af_sky"
+                                        "enum": [
+                                            "custom_voice",
+                                            "voice_clone",
+                                            "voice_design"
+                                        ],
+                                        "example": "custom_voice",
+                                        "nullable": true
+                                    },
+                                    "voice": {
+                                        "description": "Name of the voice to be used. Required for custom_voice mode.",
+                                        "type": "string",
+                                        "example": "af_sky",
+                                        "nullable": true
                                     },
                                     "lang": {
                                         "description": "Language to be used during audio generation",
@@ -3091,6 +3102,22 @@
                                         "description": "Sample rate of generated audio",
                                         "type": "number",
                                         "example": 24000
+                                    },
+                                    "ref_audio": {
+                                        "description": "Reference audio file for voice cloning. Supported formats: mp3, wav, flac, ogg, m4a. Max 10MB. Duration must be between 3-10 seconds (model-specific limits may apply). Required for voice_clone mode.",
+                                        "type": "string",
+                                        "format": "binary",
+                                        "nullable": true
+                                    },
+                                    "ref_text": {
+                                        "description": "Optional transcript of the reference audio for improved voice cloning accuracy.",
+                                        "type": "string",
+                                        "nullable": true
+                                    },
+                                    "instruct": {
+                                        "description": "Natural language voice description for voice_design mode (e.g. \"A warm female voice with a British accent\"), or style/emotion control in custom_voice mode.",
+                                        "type": "string",
+                                        "nullable": true
                                     },
                                     "webhook_url": {
                                         "description": "Optional HTTPS URL to receive webhook notifications for job status changes (processing, completed, failed). Must be HTTPS. Max 2048 characters. See [Webhook Documentation](/execution-modes-and-integrations/webhooks) for payload structure and authentication details.",
@@ -3164,14 +3191,13 @@
                     }
                 ],
                 "requestBody": {
-                    "description": "Audio generation parameters. Either text or count_text must be provided.",
+                    "description": "Audio generation parameters. Either text or count_text must be provided. Voice is optional (not needed for voice_clone or voice_design modes).",
                     "required": true,
                     "content": {
                         "application/json": {
                             "schema": {
                                 "required": [
                                     "model",
-                                    "voice",
                                     "lang",
                                     "speed",
                                     "format",
@@ -3195,10 +3221,22 @@
                                         "type": "string",
                                         "example": "Kokoro"
                                     },
-                                    "voice": {
-                                        "description": "Name of the voice to be used during audio generation",
+                                    "mode": {
+                                        "description": "TTS mode: custom_voice (default), voice_clone, or voice_design.",
                                         "type": "string",
-                                        "example": "af_sky"
+                                        "enum": [
+                                            "custom_voice",
+                                            "voice_clone",
+                                            "voice_design"
+                                        ],
+                                        "example": "custom_voice",
+                                        "nullable": true
+                                    },
+                                    "voice": {
+                                        "description": "Name of the voice to be used. Only relevant for custom_voice mode.",
+                                        "type": "string",
+                                        "example": "af_sky",
+                                        "nullable": true
                                     },
                                     "lang": {
                                         "description": "Language to be used during audio generation",
@@ -3219,6 +3257,11 @@
                                         "description": "Sample rate of generated audio",
                                         "type": "number",
                                         "example": 24000
+                                    },
+                                    "instruct": {
+                                        "description": "Natural language voice description for voice_design mode price calculation.",
+                                        "type": "string",
+                                        "nullable": true
                                     }
                                 },
                                 "type": "object"
@@ -3768,6 +3811,261 @@
                 ]
             }
         },
+        "/api/v1/client/txt2music": {
+            "post": {
+                "tags": [
+                    "Client API"
+                ],
+                "description": "Endpoint for requesting text2music inference",
+                "operationId": "requestTxt2Music",
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/AcceptHeader"
+                    }
+                ],
+                "requestBody": {
+                    "description": "Music generation parameters",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "caption",
+                                    "model",
+                                    "duration",
+                                    "inference_steps",
+                                    "guidance_scale",
+                                    "seed",
+                                    "format"
+                                ],
+                                "properties": {
+                                    "caption": {
+                                        "description": "Text description of the music to generate",
+                                        "type": "string",
+                                        "example": "upbeat electronic dance music with energetic synths"
+                                    },
+                                    "model": {
+                                        "description": "The model to use for music generation. Available models can be retrieved via the GET /api/v1/client/models endpoint.",
+                                        "type": "string",
+                                        "example": "ACE-Step-v1.5-turbo"
+                                    },
+                                    "lyrics": {
+                                        "description": "Lyrics for the music. Use \"[Instrumental]\" for instrumental tracks.",
+                                        "type": "string",
+                                        "example": "[Instrumental]",
+                                        "nullable": true
+                                    },
+                                    "duration": {
+                                        "description": "Duration in seconds (10-600)",
+                                        "type": "number",
+                                        "example": 30
+                                    },
+                                    "bpm": {
+                                        "description": "Beats per minute (30-300)",
+                                        "type": "integer",
+                                        "example": 120,
+                                        "nullable": true
+                                    },
+                                    "keyscale": {
+                                        "description": "Musical key/scale (e.g. \"C major\", \"F# minor\")",
+                                        "type": "string",
+                                        "example": "C major",
+                                        "nullable": true
+                                    },
+                                    "timesignature": {
+                                        "description": "Time signature. Must be 2, 3, 4, or 6.",
+                                        "type": "integer",
+                                        "example": 4,
+                                        "nullable": true
+                                    },
+                                    "vocal_language": {
+                                        "description": "Language code for vocals (e.g. \"en\", \"es\", \"fr\")",
+                                        "type": "string",
+                                        "example": "en",
+                                        "nullable": true
+                                    },
+                                    "inference_steps": {
+                                        "description": "Number of diffusion inference steps (1-100). Use 8 for turbo models, 32+ for base models.",
+                                        "type": "integer",
+                                        "example": 8
+                                    },
+                                    "guidance_scale": {
+                                        "description": "Classifier-free guidance scale (0-20)",
+                                        "type": "number",
+                                        "example": 7
+                                    },
+                                    "seed": {
+                                        "description": "Random seed. Use -1 for random.",
+                                        "type": "integer",
+                                        "example": -1
+                                    },
+                                    "format": {
+                                        "description": "Audio output format",
+                                        "type": "string",
+                                        "example": "flac"
+                                    },
+                                    "webhook_url": {
+                                        "description": "Optional HTTPS URL to receive webhook notifications for job status changes (processing, completed, failed). Must be HTTPS. Max 2048 characters.",
+                                        "type": "string",
+                                        "format": "uri",
+                                        "maxLength": 2048,
+                                        "example": "https://your-server.com/webhooks/deapi",
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "ID of the inference request.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/JobRequestResponseResource"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized user.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/response_error_default"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Model not found.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/response_error_default"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationError"
+                    },
+                    "429": {
+                        "$ref": "#/components/responses/RateLimitExceeded"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/client/txt2music/price-calculation": {
+            "post": {
+                "tags": [
+                    "Client API"
+                ],
+                "description": "Endpoint for calculating price for text2music inference. Requires duration and inference_steps parameters.",
+                "operationId": "requestPriceForTxt2Music",
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/AcceptHeader"
+                    }
+                ],
+                "requestBody": {
+                    "description": "Music generation parameters for price calculation.",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "model",
+                                    "duration",
+                                    "inference_steps"
+                                ],
+                                "properties": {
+                                    "model": {
+                                        "description": "The model to use for music generation. Available models can be retrieved via the GET /api/v1/client/models endpoint.",
+                                        "type": "string",
+                                        "example": "ACE-Step-v1.5-turbo"
+                                    },
+                                    "duration": {
+                                        "description": "Duration in seconds (10-600)",
+                                        "type": "number",
+                                        "example": 30
+                                    },
+                                    "inference_steps": {
+                                        "description": "Number of diffusion inference steps (1-100). Use 8 for turbo models, 32+ for base models.",
+                                        "type": "integer",
+                                        "example": 8
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Calculated price for text2music inference.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "properties": {
+                                                "price": {
+                                                    "description": "Calculated price for the inference",
+                                                    "type": "number",
+                                                    "format": "float",
+                                                    "example": 0.25
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized user.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/response_error_default"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Model not found.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/response_error_default"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationError"
+                    },
+                    "429": {
+                        "$ref": "#/components/responses/RateLimitExceeded"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
         "/api/v1/client/videofile2txt": {
             "post": {
                 "tags": [
@@ -3792,7 +4090,7 @@
                                 ],
                                 "properties": {
                                     "video": {
-                                        "description": "Video file to transcribe. Supported formats: MP4, MPEG, QuickTime (MOV), AVI, WMV, OGG. Maximum file size: 80 MB. Video must contain an audio stream.",
+                                        "description": "Video file to transcribe. Supported formats: MP4, MPEG, QuickTime (MOV), AVI, WMV, OGG. Maximum file size: 10 MB. Video must contain an audio stream.",
                                         "type": "string",
                                         "format": "binary"
                                     },
@@ -3897,7 +4195,7 @@
                                         ],
                                         "properties": {
                                             "video": {
-                                                "description": "Video file to transcribe. Supported formats: MP4, MPEG, QuickTime (MOV), AVI, WMV, OGG. Maximum file size: 80 MB. Video must contain an audio stream.",
+                                                "description": "Video file to transcribe. Supported formats: MP4, MPEG, QuickTime (MOV), AVI, WMV, OGG. Maximum file size: 10 MB. Video must contain an audio stream.",
                                                 "type": "string",
                                                 "format": "binary"
                                             },
@@ -4023,7 +4321,7 @@
                                 ],
                                 "properties": {
                                     "video": {
-                                        "description": "Video file to remove background from. Supported formats: MP4, MPEG, QuickTime, AVI, WMV, OGG. Maximum file size: 80 MB.",
+                                        "description": "Video file to remove background from. Supported formats: MP4, MPEG, QuickTime, AVI, WMV, OGG. Maximum file size: 10 MB.",
                                         "type": "string",
                                         "format": "binary"
                                     },
@@ -4117,7 +4415,7 @@
                                         ],
                                         "properties": {
                                             "video": {
-                                                "description": "Video file to remove background from. Supported formats: MP4, MPEG, QuickTime, AVI, WMV, OGG. Maximum file size: 80 MB.",
+                                                "description": "Video file to remove background from. Supported formats: MP4, MPEG, QuickTime, AVI, WMV, OGG. Maximum file size: 10 MB.",
                                                 "type": "string",
                                                 "format": "binary"
                                             },
@@ -4445,7 +4743,7 @@
                                 ],
                                 "properties": {
                                     "video": {
-                                        "description": "Video file to upscale. Supported formats: MP4, MPEG, QuickTime, AVI, WMV, OGG. Maximum file size: 80 MB.",
+                                        "description": "Video file to upscale. Supported formats: MP4, MPEG, QuickTime, AVI, WMV, OGG. Maximum file size: 10 MB.",
                                         "type": "string",
                                         "format": "binary"
                                     },
@@ -4539,7 +4837,7 @@
                                         ],
                                         "properties": {
                                             "video": {
-                                                "description": "Video file to upscale. Supported formats: MP4, MPEG, QuickTime, AVI, WMV, OGG. Maximum file size: 80 MB.",
+                                                "description": "Video file to upscale. Supported formats: MP4, MPEG, QuickTime, AVI, WMV, OGG. Maximum file size: 10 MB.",
                                                 "type": "string",
                                                 "format": "binary"
                                             },
@@ -5545,6 +5843,75 @@
                                 "description": "Random seed for generation",
                                 "type": "integer",
                                 "example": 42
+                            }
+                        },
+                        "type": "object"
+                    }
+                },
+                "type": "object"
+            },
+            "Txt2MusicInferenceJobResource": {
+                "properties": {
+                    "data": {
+                        "description": "Job settings data",
+                        "properties": {
+                            "job_id": {
+                                "description": "Unique job identifier",
+                                "type": "string"
+                            },
+                            "model": {
+                                "description": "Model name used for music generation",
+                                "type": "string"
+                            },
+                            "caption": {
+                                "description": "Text description of the music",
+                                "type": "string"
+                            },
+                            "lyrics": {
+                                "description": "Lyrics for the music",
+                                "type": "string",
+                                "nullable": true
+                            },
+                            "duration": {
+                                "description": "Duration in seconds",
+                                "type": "number"
+                            },
+                            "bpm": {
+                                "description": "Beats per minute",
+                                "type": "integer",
+                                "nullable": true
+                            },
+                            "keyscale": {
+                                "description": "Musical key/scale",
+                                "type": "string",
+                                "nullable": true
+                            },
+                            "timesignature": {
+                                "description": "Time signature",
+                                "type": "integer",
+                                "nullable": true
+                            },
+                            "vocal_language": {
+                                "description": "Language for vocals",
+                                "type": "string",
+                                "nullable": true
+                            },
+                            "inference_steps": {
+                                "description": "Number of inference steps",
+                                "type": "integer"
+                            },
+                            "guidance_scale": {
+                                "description": "Guidance scale",
+                                "type": "number"
+                            },
+                            "seed": {
+                                "description": "Random seed",
+                                "type": "integer"
+                            },
+                            "format": {
+                                "description": "Audio output format",
+                                "type": "string",
+                                "example": "flac"
                             }
                         },
                         "type": "object"

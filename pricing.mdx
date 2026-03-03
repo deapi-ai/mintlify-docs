@@ -18,7 +18,8 @@ Example pricing is shown below for reference; exact, up-to-date rates are always
 | Text-to-Image (Z-Image-Turbo INT8)                | resolution × steps                  | 0.00405 USD for 512x512, 4 steps                          | Generates very realistic images                                                     |
 | Text-to-Image (Flux.2 Klein 4B BF16)              | resolution × steps                  | 0.00186 USD for<br />512x512, 4 steps                     | Unified generation & editing                                                        |
 | Image-to-Image                                    | steps (style transfer)              | ~0.0132 USD for 512x512, 20 steps                         | Cost scales with steps and GPU time                                                 |
-| Text-to-Speech (TTS)                              | number of characters                | 0.77 USD per 1 M characters                               | Adjustable speed multipliers (fast = 0.5× cost, slow = 2× cost)                     |
+| Text-to-Speech (TTS)                              | number of characters                | 0.77 USD per 1 M characters                               | Adjustable speed multipliers (fast = 0.5× cost, slow = 2× cost). Supports voice cloning and voice design modes. |
+| Text-to-Music                                     | duration + inference steps          | Use `/price-calculation` endpoint                         | 10–600 second tracks; cost scales with duration and inference steps                 |
 | Text-to-Video                                     | video duration + resolution         | 0.001737 USD for 2s, 256×256                              | 2–5 second clips; higher res or steps increase cost                                 |
 | Image-to-Video                                    | source image + motion interpolation | 0.001737 USD for 2s, 256×256                              | 2–5 second output, smooth motion                                                    |
 | Video-to-Text (X, Twitch, Kick, YT Transcription) | video length                        | from 0.021 USD per hour                                   | Supports timestamps, multilingual                                                   |
@@ -44,6 +45,13 @@ Example pricing is shown below for reference; exact, up-to-date rates are always
   - Fast (2.0×): 0.5× the base cost
   - Slow (0.5×): 2.0× the base cost
 - Useful tip: using faster playback (2×) for drafts can reduce cost by ~50%.
+- All three TTS modes (custom_voice, voice_clone, voice_design) use the same per-character pricing model.
+
+**Text-to-Music (Music Generation)**
+
+- Price depends on track duration (10–600 seconds) and the number of inference steps.
+- Turbo models use fewer steps (e.g. 8) and are cheaper; base models use more steps (e.g. 32+) for higher quality.
+- Use the `/price-calculation` endpoint with your `model`, `duration`, and `inference_steps` to get exact pricing before generation.
 
 **Text-to-Video**
 

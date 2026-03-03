@@ -1,0 +1,63 @@
+---
+title: "SDKs & Integrations"
+---
+
+## Python SDK
+
+The official Python SDK for deAPI. Generate images, videos, audio, transcriptions, embeddings, and more — through a type-safe Python interface with sync and async support.
+
+<Card icon="github" href="https://github.com/deapi-ai/deapi-python-sdk" title="GitHub Repository">
+  deapi-ai/deapi-python-sdk
+</Card>
+
+### Installation
+
+```bash
+pip install deapi-python-sdk
+```
+
+**Requirements:** Python 3.9+
+
+### Quick Start
+
+```python
+from deapi import DeapiClient
+
+client = DeapiClient(api_key="sk-your-api-key")
+
+# Generate an image
+job = client.images.generate(
+    prompt="a cat floating in a nebula, photorealistic",
+    model="Flux_2_Klein_4B_BF16",
+    width=1024,
+    height=1024,
+    steps=4,
+    seed=-1,
+)
+
+# Wait for the result (polls with exponential backoff)
+result = job.wait()
+print(result.result_url)
+```
+
+### Features
+
+- **Full API coverage** — images, video, audio (TTS, voice cloning, music), transcription, embeddings, OCR, prompt enhancement
+- **Sync + Async** — `DeapiClient` and `AsyncDeapiClient`
+- **Job polling** — automatic exponential backoff with `.wait()`
+- **Auto-retry** — built-in retry on rate limits (429) and server errors (5xx)
+- **Type-safe** — full type hints, Pydantic v2 models, `py.typed` marker
+- **Webhook verification** — HMAC-SHA256 signature validation
+- **Price calculation** — every method has a `_price` counterpart to check cost before submitting
+
+<Tip>
+  For full documentation, configuration options, usage examples, and API reference, visit the [GitHub repository](https://github.com/deapi-ai/deapi-python-sdk).
+</Tip>
+
+---
+
+## Coming Soon
+
+We're working on official SDKs for:
+
+- Node.js / TypeScript

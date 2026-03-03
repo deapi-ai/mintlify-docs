@@ -69,7 +69,8 @@ The table below shows which **task types** deAPI supports. To see which models a
 | ------------------- | ----------------------- | ----------------------------------------------------------------------------------- |
 | Text-to-Image       | `txt2img`               | Generate images from text prompts — concept art, prototyping, creative exploration. |
 | Image-to-Image      | `img2img`               | Transform existing images — style transfer, edits, inpainting, outpainting.         |
-| Text-to-Speech      | `txt2audio`             | Turn text into natural voice — narration, accessibility, product voices.            |
+| Text-to-Speech      | `txt2audio`             | Turn text into natural voice — narration, accessibility, product voices. Supports voice cloning and voice design. |
+| Text-to-Music       | `txt2music`             | Generate music tracks from text — background music, jingles, songs with vocals.     |
 | Video-to-Text       | `video2text`            | Transcribe video by URL (YouTube, Twitch, Kick, X/Twitter) into text.               |
 | Audio-to-Text       | `audio2text`            | Transcribe audio by URL into text — subtitles, notes, search, accessibility.        |
 | Video File-to-Text  | `video_file2text`       | Transcribe an uploaded video file into text.                                        |
@@ -93,7 +94,9 @@ When the models endpoint returns several options for the same task, use these gu
 
 **Image generation** — Start with the fastest model for iteration. Increase steps and resolution for final quality. If the model object includes a non-empty `loras` array, you can use LoRA adapters for style control.
 
-**Speech generation (TTS)** — Check the model's `languages` array for available languages and voices. Use `info.defaults` for recommended speed and format settings. Test speed vs. quality for your use case.
+**Speech generation (TTS)** — Check the model's `languages` array for available languages and voices. Use `info.defaults` for recommended speed and format settings. The endpoint supports three modes: `custom_voice` (preset speakers), `voice_clone` (clone from reference audio), and `voice_design` (create voice from a text description). Not all models support all modes — check model capabilities before selecting a mode.
+
+**Music generation** — Provide a text description (`caption`) of the desired music style. Optionally include `lyrics` (use `"[Instrumental]"` for instrumental tracks), `bpm`, `keyscale`, and `timesignature` to fine-tune the output. Check `info.limits` for supported duration range and inference steps. Use fewer steps with turbo models (e.g. 8) and more steps with base models (e.g. 32+).
 
 **Transcription (Video/Audio-to-Text)** — Transcription models support both URL-based and file-upload transcription. For long content, enable timestamps (`include_ts: true`). URL-based transcription works with YouTube, Twitch, Kick, and X/Twitter.
 

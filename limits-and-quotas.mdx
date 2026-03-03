@@ -51,7 +51,8 @@ Basic accounts have conservative limits designed for testing and evaluation.
 | `/api/v1/client/txt2img`       | `Flux1schnell`, `ZImageTurbo_INT8, Flux_2_Klein_4B_BF16` | 3   | 100 |
 | `/api/v1/client/txt2video`     | `Ltxv_13B_0_9_8_Distilled_FP8`                           | 1   | 15  |
 | `/api/v1/client/img2video`     | `Ltxv_13B_0_9_8_Distilled_FP8`                           | 1   | 15  |
-| `/api/v1/client/txt2audio`     | `Kokoro`                                                 | 5   | 300 |
+| `/api/v1/client/txt2audio`     | `Kokoro`, `Chatterbox`, `Qwen3_TTS`                      | 5   | 300 |
+| `/api/v1/client/txt2music`     | `ACE-Step-v1.5-turbo`                                    | 1   | 15  |
 | `/api/v1/client/txt2embedding` | `Bge_M3_FP16`                                            | 10  | 500 |
 
 #### Analysis Endpoints
@@ -98,7 +99,8 @@ Premium accounts have high limits suitable for production workloads. All endpoin
 | `/api/v1/client/txt2img`       | `Flux1schnell`, `ZImageTurbo_INT8, Flux_2_Klein_4B_BF16` | 300 | Unlimited |
 | `/api/v1/client/txt2video`     | `Ltxv_13B_0_9_8_Distilled_FP8`                           | 300 | Unlimited |
 | `/api/v1/client/img2video`     | `Ltxv_13B_0_9_8_Distilled_FP8`                           | 300 | Unlimited |
-| `/api/v1/client/txt2audio`     | `Kokoro`                                                 | 300 | Unlimited |
+| `/api/v1/client/txt2audio`     | `Kokoro`,`Chatterbox`, `Qwen3_TTS`                       | 300 | Unlimited |
+| `/api/v1/client/txt2music`     | `ACE-Step-v1.5-turbo`                                    | 300 | Unlimited |
 | `/api/v1/client/txt2embedding` | `Bge_M3_FP16`                                            | 300 | Unlimited |
 | `/api/v1/client/img2txt`       | `Nanonets_Ocr_S_F16`                                     | 300 | Unlimited |
 | `/api/v1/client/vid2txt`       | `WhisperLargeV3`                                         | 300 | Unlimited |
@@ -166,10 +168,11 @@ The majority of endpoints (Video-to-Text, Audio-to-Text, Image-to-Image) support
 - Max size: 80 MB
 - Supported Formats: MP4, MPEG, QuickTime (MOV), AVI, WMV, OGG
 
-**2. Audio** (Audio-to-Text)
+**2. Audio** (Audio-to-Text, Voice Cloning reference audio)
 
 - Max size: 80 MB
 - Supported Formats: AAC, MP3, OGG, WAV, WebM, FLAC
+- Voice Cloning reference audio: max 10 MB, 3–10 seconds duration. Supported formats: MP3, WAV, FLAC, OGG, M4A.
 
 **3. Images** (Image-to-Image, OCR)
 
@@ -183,6 +186,7 @@ The majority of endpoints (Video-to-Text, Audio-to-Text, Image-to-Image) support
 Certain parameters — such as maximum character count, image resolution, frame count, or audio duration — are **model-specific** and may differ between models available on the same endpoint.
 
 These limits are returned dynamically via the [Models endpoint](/api/utilities/model-selection):
+
 ```bash
 GET https://api.deapi.ai/api/v1/client/models
 ```

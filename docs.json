@@ -105,6 +105,8 @@
               "api/generation/image-to-video-price",
               "api/generation/text-to-speech",
               "api/generation/text-to-speech-price",
+              "api/generation/text-to-music",
+              "api/generation/text-to-music-price",
               "api/generation/text-to-embedding",
               "api/generation/text-to-embedding-price"
             ]
@@ -168,7 +170,7 @@
       {
         "group": "Other",
         "pages": [
-          "other/sdks-and-integrations-coming-soon",
+          "other/sdks-and-integrations",
           "other/payment-methods",
           "other/faq-frequently-asked-questions",
           "other/support-and-contact"
