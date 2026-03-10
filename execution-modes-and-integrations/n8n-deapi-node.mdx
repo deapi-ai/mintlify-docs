@@ -87,7 +87,7 @@ The deAPI node provides two node types:
 
 Use this node to perform AI operations within your workflow.
 
-##### Image Operations
+##### **Image Operations**
 
 | Operation             | Description                       | Models                                                   |
 | --------------------- | --------------------------------- | -------------------------------------------------------- |
@@ -97,16 +97,16 @@ Use this node to perform AI operations within your workflow.
 
 Image input operations (**Remove Background**, **Upscale**) accept JPG, JPEG, PNG, GIF, BMP, and WebP files up to 10 MB.
 
-##### Video Operations
+##### **Video Operations**
 
-| Operation      | Description                                                             | Models                                       |
-| -------------- | ----------------------------------------------------------------------- | -------------------------------------------- |
-| **Generate**   | Generate video from text or image(s)                                    | LTX-Video 0.9.8 13B, LTX-2 19B Distilled FP8 |
-| **Transcribe** | Transcribe video to text (YouTube, Twitch, X, Kick URLs or file upload) | Whisper Large V3                             |
+| Operation      | Description                                                                     | Models                                       |
+| -------------- | ------------------------------------------------------------------------------- | -------------------------------------------- |
+| **Generate**   | Generate video from text or image(s)                                            | LTX-Video 0.9.8 13B, LTX-2 19B Distilled FP8 |
+| **Transcribe** | Transcribe video to text (YouTube, Twitch, X, Kick, TikTok URLs or file upload) | Whisper Large V3                             |
 
 Video file transcription accepts MP4, MPEG, MOV, AVI, WMV, and OGG files up to 10 MB.
 
-##### Audio Operations
+##### **Audio Operations**
 
 | Operation      | Description                   | Models           |
 | -------------- | ----------------------------- | ---------------- |
@@ -114,7 +114,7 @@ Video file transcription accepts MP4, MPEG, MOV, AVI, WMV, and OGG files up to 1
 
 Audio transcription accepts AAC, MP3, OGG, WAV, WebM, and FLAC files up to 10 MB.
 
-##### Prompt Operations
+##### **Prompt Operations**
 
 | Operation                | Description                                         |
 | ------------------------ | --------------------------------------------------- |
@@ -135,7 +135,7 @@ Use this node to start workflows when deAPI sends job status updates. This is us
 
 Generation operations (image, video, transcription) use an efficient webhook-based pattern instead of polling:
 
-```
+```text
 1. Execute Phase
 
    +-----------+     POST /txt2img      +-----------+
@@ -180,7 +180,7 @@ This example demonstrates a simple image generation workflow.
 
 #### Workflow Overview
 
-```
+```text
 +------------------+      +-------------------+
 |  Manual Trigger  | ---> |    Deapi Node     |
 |                  |      | (Image: Generate) |
@@ -201,13 +201,13 @@ Add a **Manual Trigger** (or Schedule, Webhook, etc.) to start your workflow.
 2. Select your **deAPI API** credentials
 3. Configure the operation:
 
-| Setting          | Value                                    |
-| ---------------- | ---------------------------------------- |
-| **Resource**     | Image                                    |
-| **Operation**    | Generate                                 |
-| **Model**        | FLUX.1 Schnell (or your preferred model) |
-| **Prompt**       | `Red Bull F1 car from 2025`              |
-| **Aspect Ratio** | Square, Landscape, or Portrait           |
+| Setting          | Value                                  |
+| ---------------- | -------------------------------------- |
+| **Resource**     | Image                                  |
+| **Operation**    | Generate                               |
+| **Model**        | FLUX.2 Klain (or your preferred model) |
+| **Prompt**       | `Red Bull F1 car from 2025`            |
+| **Aspect Ratio** | Square, Landscape, or Portrait         |
 
 4. Optionally configure:
    - **Negative Prompt** — Elements to exclude from the image
