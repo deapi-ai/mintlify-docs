@@ -46,14 +46,15 @@ Basic accounts have conservative limits designed for testing and evaluation.
 
 #### Generation Endpoints
 
-| Endpoint                       | Models                                                   | RPM | RPD |
-| ------------------------------ | -------------------------------------------------------- | --- | --- |
-| `/api/v1/client/txt2img`       | `Flux1schnell`, `ZImageTurbo_INT8, Flux_2_Klein_4B_BF16` | 3   | 100 |
-| `/api/v1/client/txt2video`     | `Ltxv_13B_0_9_8_Distilled_FP8`                           | 1   | 15  |
-| `/api/v1/client/img2video`     | `Ltxv_13B_0_9_8_Distilled_FP8`                           | 1   | 15  |
-| `/api/v1/client/txt2audio`     | `Kokoro`, `Chatterbox`, `Qwen3_TTS`                      | 5   | 300 |
-| `/api/v1/client/txt2music`     | `ACE-Step-v1.5-turbo`                                    | 1   | 15  |
-| `/api/v1/client/txt2embedding` | `Bge_M3_FP16`                                            | 10  | 500 |
+| Endpoint                       | Models                                                                    | RPM | RPD |
+| ------------------------------ | ------------------------------------------------------------------------- | --- | --- |
+| `/api/v1/client/txt2img`       | `Flux1schnell`, `ZImageTurbo_INT8, Flux_2_Klein_4B_BF16`                  | 3   | 100 |
+| `/api/v1/client/txt2video`     | `Ltxv_13B_0_9_8_Distilled_FP8`, `Ltx2_19B_Dist_FP8, Ltx2_3_19B_Dist_INT8` | 1   | 15  |
+| `/api/v1/client/img2video`     | `Ltxv_13B_0_9_8_Distilled_FP8`, `Ltx2_19B_Dist_FP8, Ltx2_3_19B_Dist_INT8` | 1   | 15  |
+| `/api/v1/client/aud2video`     | `Ltx2_3_19B_Dist_INT8`                                                    | 1   | 15  |
+| `/api/v1/client/txt2audio`     | `Kokoro`, `Chatterbox`, `Qwen3_TTS`                                       | 5   | 300 |
+| `/api/v1/client/txt2music`     | `ACE-Step-v1.5-turbo`                                                     | 1   | 15  |
+| `/api/v1/client/txt2embedding` | `Bge_M3_FP16`                                                             | 10  | 500 |
 
 #### Analysis Endpoints
 
@@ -94,22 +95,23 @@ Basic accounts have conservative limits designed for testing and evaluation.
 
 Premium accounts have high limits suitable for production workloads. All endpoints share a unified **300 RPM** with **unlimited daily requests**.
 
-| Endpoint                       | Models                                                   | RPM | RPD       |
-| ------------------------------ | -------------------------------------------------------- | --- | --------- |
-| `/api/v1/client/txt2img`       | `Flux1schnell`, `ZImageTurbo_INT8, Flux_2_Klein_4B_BF16` | 300 | Unlimited |
-| `/api/v1/client/txt2video`     | `Ltxv_13B_0_9_8_Distilled_FP8`                           | 300 | Unlimited |
-| `/api/v1/client/img2video`     | `Ltxv_13B_0_9_8_Distilled_FP8`                           | 300 | Unlimited |
-| `/api/v1/client/txt2audio`     | `Kokoro`,`Chatterbox`, `Qwen3_TTS`                       | 300 | Unlimited |
-| `/api/v1/client/txt2music`     | `ACE-Step-v1.5-turbo`                                    | 300 | Unlimited |
-| `/api/v1/client/txt2embedding` | `Bge_M3_FP16`                                            | 300 | Unlimited |
-| `/api/v1/client/img2txt`       | `Nanonets_Ocr_S_F16`                                     | 300 | Unlimited |
-| `/api/v1/client/vid2txt`       | `WhisperLargeV3`                                         | 300 | Unlimited |
-| `/api/v1/client/videofile2txt` | `WhisperLargeV3`                                         | 300 | Unlimited |
-| `/api/v1/client/aud2txt`       | `WhisperLargeV3`                                         | 300 | Unlimited |
-| `/api/v1/client/audiofile2txt` | `WhisperLargeV3`                                         | 300 | Unlimited |
-| `/api/v1/client/img2img`       | `Flux_2_Klein_4B_BF16, QwenImageEdit_Plus_NF4`           | 300 | Unlimited |
-| `/api/v1/client/img-rmbg`      | `Ben2`                                                   | 300 | Unlimited |
-| `/api/v1/client/img-upscale`   | `RealESRGAN_x4plus`                                      | 300 | Unlimited |
+| Endpoint                       | Models                                                                     | RPM | RPD       |
+| ------------------------------ | -------------------------------------------------------------------------- | --- | --------- |
+| `/api/v1/client/txt2img`       | `Flux1schnell`, `ZImageTurbo_INT8, Flux_2_Klein_4B_BF16`                   | 300 | Unlimited |
+| `/api/v1/client/txt2video`     | `Ltxv_13B_0_9_8_Distilled_FP8`, `Ltx2_19B_Dist_FP8 , Ltx2_3_19B_Dist_INT8` | 300 | Unlimited |
+| `/api/v1/client/img2video`     | `Ltxv_13B_0_9_8_Distilled_FP8`, `Ltx2_19B_Dist_FP8, Ltx2_3_19B_Dist_INT8`  | 300 | Unlimited |
+| `/api/v1/client/aud2video`     | `Ltx2_3_19B_Dist_INT8`                                                     | 300 | Unlimited |
+| `/api/v1/client/txt2audio`     | `Kokoro`,`Chatterbox`, `Qwen3_TTS`                                         | 300 | Unlimited |
+| `/api/v1/client/txt2music`     | `ACE-Step-v1.5-turbo`                                                      | 300 | Unlimited |
+| `/api/v1/client/txt2embedding` | `Bge_M3_FP16`                                                              | 300 | Unlimited |
+| `/api/v1/client/img2txt`       | `Nanonets_Ocr_S_F16`                                                       | 300 | Unlimited |
+| `/api/v1/client/vid2txt`       | `WhisperLargeV3`                                                           | 300 | Unlimited |
+| `/api/v1/client/videofile2txt` | `WhisperLargeV3`                                                           | 300 | Unlimited |
+| `/api/v1/client/aud2txt`       | `WhisperLargeV3`                                                           | 300 | Unlimited |
+| `/api/v1/client/audiofile2txt` | `WhisperLargeV3`                                                           | 300 | Unlimited |
+| `/api/v1/client/img2img`       | `Flux_2_Klein_4B_BF16, QwenImageEdit_Plus_NF4`                             | 300 | Unlimited |
+| `/api/v1/client/img-rmbg`      | `Ben2`                                                                     | 300 | Unlimited |
+| `/api/v1/client/img-upscale`   | `RealESRGAN_x4plus`                                                        | 300 | Unlimited |
 
 <Info>
   Premium Whisper endpoints have independent limits — each endpoint has its own 300 RPM allocation.
@@ -168,11 +170,13 @@ The majority of endpoints (Video-to-Text, Audio-to-Text, Image-to-Image) support
 - Max size: 80 MB
 - Supported Formats: MP4, MPEG, QuickTime (MOV), AVI, WMV, OGG
 
-**2. Audio** (Audio-to-Text, Voice Cloning reference audio)
+**2. Audio** (Audio-to-Text, Voice Cloning reference audio, Audio-to-Video, Music reference audio)
 
 - Max size: 80 MB
 - Supported Formats: AAC, MP3, OGG, WAV, WebM, FLAC
 - Voice Cloning reference audio: max 10 MB, 3–10 seconds duration. Supported formats: MP3, WAV, FLAC, OGG, M4A.
+- Audio-to-Video conditioning audio: max 20 MB. Supported formats: MP3, WAV, OGG, FLAC.
+- Music reference audio (style transfer): max 10 MB. Supported formats: MP3, WAV, FLAC, OGG, M4A.
 
 **3. Images** (Image-to-Image, OCR)
 

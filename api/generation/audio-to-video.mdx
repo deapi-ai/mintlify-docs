@@ -1,0 +1,10 @@
+---
+title: "Audio-to-Video"
+openapi: "/openapi.json POST /api/v1/client/aud2video"
+---
+
+Audio-to-Video generates video clips conditioned on an audio file and a text prompt. You can optionally provide first and last frame images to control the visual start and end points. The endpoint returns a task ID to track processing status.
+
+<Note>
+**Prerequisite:** To ensure a successful request, you must first consult the [Model Selection](/api/utilities/model-selection) endpoint to identify a valid model `slug`, check specific **limits** and **features**.
+</Note>

@@ -17,6 +17,280 @@
         }
     ],
     "paths": {
+        "/api/v1/client/aud2video": {
+            "post": {
+                "tags": [
+                    "Client API"
+                ],
+                "description": "Endpoint for requesting audio2video inference",
+                "operationId": "requestAud2Video",
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/AcceptHeader"
+                    }
+                ],
+                "requestBody": {
+                    "description": "Audio to video generation parameters",
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "required": [
+                                    "prompt",
+                                    "audio",
+                                    "model",
+                                    "width",
+                                    "height",
+                                    "seed",
+                                    "frames"
+                                ],
+                                "properties": {
+                                    "prompt": {
+                                        "description": "The main prompt for video generation",
+                                        "type": "string",
+                                        "example": "A beautiful sunset over mountains with dramatic music"
+                                    },
+                                    "negative_prompt": {
+                                        "description": "Elements to avoid in the generated video",
+                                        "type": "string",
+                                        "example": "blur, darkness, noise",
+                                        "nullable": true
+                                    },
+                                    "audio": {
+                                        "description": "Audio file to condition the video generation. Supported formats: MP3, WAV, OGG, FLAC. Maximum file size: 20 MB.",
+                                        "type": "string",
+                                        "format": "binary"
+                                    },
+                                    "first_frame_image": {
+                                        "description": "Image for the first frame of video (optional). Supported formats: JPG, JPEG, PNG, GIF, BMP, WebP. Maximum file size: 10 MB.",
+                                        "type": "string",
+                                        "format": "binary",
+                                        "nullable": true
+                                    },
+                                    "last_frame_image": {
+                                        "description": "Image for the last frame of video (optional). Supported formats: JPG, JPEG, PNG, GIF, BMP, WebP. Maximum file size: 10 MB.",
+                                        "type": "string",
+                                        "format": "binary",
+                                        "nullable": true
+                                    },
+                                    "width": {
+                                        "description": "Width of the generated video in pixels",
+                                        "type": "integer",
+                                        "example": 512
+                                    },
+                                    "height": {
+                                        "description": "Height of the generated video in pixels",
+                                        "type": "integer",
+                                        "example": 512
+                                    },
+                                    "guidance": {
+                                        "description": "Guidance scale for the generation",
+                                        "type": "number",
+                                        "example": 7.5
+                                    },
+                                    "steps": {
+                                        "description": "Number of inference steps",
+                                        "type": "integer",
+                                        "example": 20
+                                    },
+                                    "frames": {
+                                        "description": "Number of video frames to generate",
+                                        "type": "integer",
+                                        "example": 97
+                                    },
+                                    "fps": {
+                                        "description": "FPS of generated video",
+                                        "type": "integer",
+                                        "example": 24
+                                    },
+                                    "seed": {
+                                        "description": "Random seed for generation",
+                                        "type": "integer",
+                                        "example": 42
+                                    },
+                                    "model": {
+                                        "description": "The model to use for video generation. Available models can be retrieved via the GET /api/v1/client/models endpoint.",
+                                        "type": "string",
+                                        "example": "Ltx2_19B_Dist_FP8"
+                                    },
+                                    "webhook_url": {
+                                        "description": "Optional HTTPS URL to receive webhook notifications for job status changes (processing, completed, failed). Must be HTTPS. Max 2048 characters. See [Webhook Documentation](/execution-modes-and-integrations/webhooks) for payload structure and authentication details.",
+                                        "type": "string",
+                                        "format": "uri",
+                                        "maxLength": 2048,
+                                        "example": "https://your-server.com/webhooks/deapi",
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "ID of the inference request.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/JobRequestResponseResource"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized user.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/response_error_default"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not found.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/response_error_default"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationError"
+                    },
+                    "429": {
+                        "$ref": "#/components/responses/RateLimitExceeded"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/client/aud2video/price-calculation": {
+            "post": {
+                "tags": [
+                    "Client API"
+                ],
+                "description": "Endpoint for calculating price for audio2video inference",
+                "operationId": "requestAud2VideoPrice",
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/AcceptHeader"
+                    }
+                ],
+                "requestBody": {
+                    "description": "Audio to video price calculation parameters",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "model",
+                                    "width",
+                                    "height",
+                                    "frames"
+                                ],
+                                "properties": {
+                                    "width": {
+                                        "description": "Width of the generated video in pixels",
+                                        "type": "integer",
+                                        "example": 512
+                                    },
+                                    "height": {
+                                        "description": "Height of the generated video in pixels",
+                                        "type": "integer",
+                                        "example": 512
+                                    },
+                                    "steps": {
+                                        "description": "Number of inference steps",
+                                        "type": "integer",
+                                        "example": 20
+                                    },
+                                    "frames": {
+                                        "description": "Number of video frames to generate",
+                                        "type": "integer",
+                                        "example": 97
+                                    },
+                                    "fps": {
+                                        "description": "FPS of generated video",
+                                        "type": "integer",
+                                        "example": 24
+                                    },
+                                    "model": {
+                                        "description": "The model to use for video generation. Available models can be retrieved via the GET /api/v1/client/models endpoint.",
+                                        "type": "string",
+                                        "example": "Ltx2_19B_Dist_FP8"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Calculated price for audio2video inference.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "properties": {
+                                                "price": {
+                                                    "description": "Calculated price for the inference",
+                                                    "type": "number",
+                                                    "format": "float",
+                                                    "example": 0.15
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized user.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/response_error_default"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not found.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/response_error_default"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationError"
+                    },
+                    "429": {
+                        "$ref": "#/components/responses/RateLimitExceeded"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
         "/api/v1/client/audiofile2txt": {
             "post": {
                 "tags": [
@@ -3827,11 +4101,12 @@
                     "description": "Music generation parameters",
                     "required": true,
                     "content": {
-                        "application/json": {
+                        "multipart/form-data": {
                             "schema": {
                                 "required": [
                                     "caption",
                                     "model",
+                                    "lyrics",
                                     "duration",
                                     "inference_steps",
                                     "guidance_scale",
@@ -3850,10 +4125,9 @@
                                         "example": "ACE-Step-v1.5-turbo"
                                     },
                                     "lyrics": {
-                                        "description": "Lyrics for the music. Use \"[Instrumental]\" for instrumental tracks.",
+                                        "description": "Lyrics for the music. Use \"[Instrumental]\" for instrumental tracks without vocals.",
                                         "type": "string",
-                                        "example": "[Instrumental]",
-                                        "nullable": true
+                                        "example": "[Instrumental]"
                                     },
                                     "duration": {
                                         "description": "Duration in seconds (10-600)",
@@ -3903,6 +4177,12 @@
                                         "description": "Audio output format",
                                         "type": "string",
                                         "example": "flac"
+                                    },
+                                    "reference_audio": {
+                                        "description": "Optional reference audio file for style transfer. Supported formats: mp3, wav, flac, ogg, m4a. Max size configurable (default 10MB). Duration must be within model-specific limits.",
+                                        "type": "string",
+                                        "format": "binary",
+                                        "nullable": true
                                     },
                                     "webhook_url": {
                                         "description": "Optional HTTPS URL to receive webhook notifications for job status changes (processing, completed, failed). Must be HTTPS. Max 2048 characters.",
@@ -4539,7 +4819,7 @@
                                 ],
                                 "properties": {
                                     "video_url": {
-                                        "description": "URL of video to transcribe",
+                                        "description": "Public video URL to transcribe. Supported platforms: YouTube, TikTok, Twitch, Kick, X.",
                                         "type": "string",
                                         "example": "https://www.youtube.com/watch?v=jNQXAC9IVRw"
                                     },
@@ -5335,6 +5615,88 @@
                 },
                 "type": "object"
             },
+            "AudioToVideoInferenceJobResource": {
+                "properties": {
+                    "data": {
+                        "description": "Job settings data",
+                        "properties": {
+                            "job_id": {
+                                "description": "Unique job identifier",
+                                "type": "string"
+                            },
+                            "model": {
+                                "description": "Model name used for generation",
+                                "type": "string"
+                            },
+                            "prompt": {
+                                "description": "The main prompt for video generation",
+                                "type": "string",
+                                "example": "A beautiful sunset over mountains with dramatic music"
+                            },
+                            "negative_prompt": {
+                                "description": "Elements to avoid in the generated video",
+                                "type": "string",
+                                "example": "blur, darkness, noise",
+                                "nullable": true
+                            },
+                            "audio": {
+                                "description": "Base64-encoded audio file for audio conditioning",
+                                "type": "string",
+                                "format": "binary"
+                            },
+                            "first_frame_image": {
+                                "description": "Base64-encoded image for the first frame of video",
+                                "type": "string",
+                                "format": "binary",
+                                "nullable": true
+                            },
+                            "last_frame_image": {
+                                "description": "Base64-encoded image for the last frame of video",
+                                "type": "string",
+                                "format": "binary",
+                                "nullable": true
+                            },
+                            "width": {
+                                "description": "Width of the generated video in pixels",
+                                "type": "integer",
+                                "example": 512
+                            },
+                            "height": {
+                                "description": "Height of the generated video in pixels",
+                                "type": "integer",
+                                "example": 512
+                            },
+                            "guidance": {
+                                "description": "Guidance scale for the generation",
+                                "type": "number",
+                                "example": 7.5
+                            },
+                            "steps": {
+                                "description": "Number of inference steps",
+                                "type": "integer",
+                                "example": 50
+                            },
+                            "frames": {
+                                "description": "Number of video frames to generate",
+                                "type": "integer",
+                                "example": 97
+                            },
+                            "fps": {
+                                "description": "FPS of generated video",
+                                "type": "integer",
+                                "example": 24
+                            },
+                            "seed": {
+                                "description": "Random seed for generation",
+                                "type": "integer",
+                                "example": 42
+                            }
+                        },
+                        "type": "object"
+                    }
+                },
+                "type": "object"
+            },
             "AudioFileToTextInferenceJobResource": {
                 "properties": {
                     "data": {
@@ -5912,6 +6274,11 @@
                                 "description": "Audio output format",
                                 "type": "string",
                                 "example": "flac"
+                            },
+                            "reference_audio": {
+                                "description": "Presigned URL for reference audio file (when provided)",
+                                "type": "string",
+                                "nullable": true
                             }
                         },
                         "type": "object"

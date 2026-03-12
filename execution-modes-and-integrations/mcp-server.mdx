@@ -4,7 +4,7 @@ description: "Describes the deAPI MCP server, its available tools, and how to co
 ---
 
 <Warning>
-  **Alpha Release** — The MCP server is currently in alpha. You may encounter occasional issues or unexpected behavior as we continue to refine the service. We actively welcome feedback and bug reports — join the conversation on [Discord](https://discord.com/invite/UFfK5YRBsr).
+  The MCP server is currently in beta. You may encounter occasional issues or unexpected behavior as we continue to refine the service. We actively welcome feedback and bug reports — join the conversation on [Discord](https://discord.com/invite/UFfK5YRBsr).
 </Warning>
 
 In addition to the HTTP API, deAPI exposes an **MCP (Model Context Protocol) server**. This allows AI assistants, IDE extensions, and MCP-aware tools to call deAPI capabilities as structured tools instead of manually constructing HTTP requests.
@@ -65,10 +65,12 @@ The deAPI MCP server exposes the following tools:
 | -------------------------------- | -------------------------------------------------------------- |
 | `text_to_video`                  | Generate videos from text prompts                              |
 | `image_to_video`                 | Animate static images into videos                              |
+| `audio_to_video`                 | Generate video conditioned on audio and text prompt            |
 | `video_file_transcription`       | Transcribe uploaded video files to text                        |
-| `video_url_transcription`        | Transcribe videos from URLs (YouTube, X, Twitch, Kick, TikTok) |
+| `video_url_transcription`        | Transcribe videos from URLs (YouTube, X, Twitch, TikTok, Kick) |
 | `text_to_video_price`            | Calculate price for text-to-video generation                   |
 | `image_to_video_price`           | Calculate price for image-to-video generation                  |
+| `audio_to_video_price`           | Calculate price for audio-to-video generation                  |
 | `video_file_transcription_price` | Calculate price for video file transcription                   |
 | `video_url_transcription_price`  | Calculate price for video URL transcription                    |
 
@@ -77,9 +79,11 @@ The deAPI MCP server exposes the following tools:
 | Tool                            | Description                                           |
 | ------------------------------- | ----------------------------------------------------- |
 | `text_to_audio`                 | Convert text to natural-sounding speech (TTS)         |
+| `text_to_music`                 | Generate music tracks from text descriptions          |
 | `audio_transcription`           | Transcribe uploaded audio files to text using Whisper |
 | `audio_url_transcription`       | Transcribe audio from URLs (X/Twitter Spaces)         |
 | `text_to_audio_price`           | Calculate price for text-to-speech                    |
+| `text_to_music_price`           | Calculate price for music generation                  |
 | `audio_transcription_price`     | Calculate price for audio file transcription          |
 | `audio_url_transcription_price` | Calculate price for audio URL transcription           |
 

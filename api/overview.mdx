@@ -21,6 +21,8 @@ Create images, videos, audio, and embeddings from text or images.
 | `POST` | `/api/v1/client/txt2video/price-calculation`     | Calculate text-to-video price       | [→](/api/generation/text-to-video-price)     |
 | `POST` | `/api/v1/client/img2video`                       | Generate video from image (animate) | [→](/api/generation/image-to-video)          |
 | `POST` | `/api/v1/client/img2video/price-calculation`     | Calculate image-to-video price      | [→](/api/generation/image-to-video-price)    |
+| `POST` | `/api/v1/client/aud2video`                       | Generate video from audio + prompt  | [→](/api/generation/audio-to-video)          |
+| `POST` | `/api/v1/client/aud2video/price-calculation`     | Calculate audio-to-video price      | [→](/api/generation/audio-to-video-price)    |
 | `POST` | `/api/v1/client/txt2audio`                       | Generate speech from text (TTS)     | [→](/api/generation/text-to-speech)          |
 | `POST` | `/api/v1/client/txt2audio/price-calculation`     | Calculate text-to-speech price      | [→](/api/generation/text-to-speech-price)    |
 | `POST` | `/api/v1/client/txt2embedding`                   | Generate embeddings from text       | [→](/api/generation/text-to-embedding)       |
@@ -32,18 +34,18 @@ Create images, videos, audio, and embeddings from text or images.
 
 Extract text and transcriptions from images, videos, and audio.
 
-| Method | Endpoint                                         | Description                              | Docs                                          |
-| ------ | ------------------------------------------------ | ---------------------------------------- | --------------------------------------------- |
-| `POST` | `/api/v1/client/img2txt`                         | Extract text from image (OCR)            | [→](/api/analysis/image-to-text)              |
-| `POST` | `/api/v1/client/img2txt/price-calculation`       | Calculate OCR price                      | [→](/api/analysis/image-to-text-price)        |
-| `POST` | `/api/v1/client/vid2txt`                         | Transcribe video from URL (YouTube, X)   | [→](/api/analysis/video-to-text)              |
-| `POST` | `/api/v1/client/vid2txt/price-calculation`       | Calculate video transcription price      | [→](/api/analysis/video-to-text-price)        |
-| `POST` | `/api/v1/client/aud2txt`                         | Transcribe X Spaces audio                | [→](/api/analysis/audio-to-text-spaces)       |
-| `POST` | `/api/v1/client/aud2txt/price-calculation`       | Calculate X Spaces transcription price   | [→](/api/analysis/audio-to-text-spaces-price) |
-| `POST` | `/api/v1/client/videofile2txt`                   | Transcribe uploaded video file           | [→](/api/analysis/upload-video-file)          |
-| `POST` | `/api/v1/client/videofile2txt/price-calculation` | Calculate video file transcription price | [→](/api/analysis/upload-video-file-price)    |
-| `POST` | `/api/v1/client/audiofile2txt`                   | Transcribe uploaded audio file           | [→](/api/analysis/upload-audio-file)          |
-| `POST` | `/api/v1/client/audiofile2txt/price-calculation` | Calculate audio file transcription price | [→](/api/analysis/upload-audio-file-price)    |
+| Method | Endpoint                                         | Description                                                  | Docs                                          |
+| ------ | ------------------------------------------------ | ------------------------------------------------------------ | --------------------------------------------- |
+| `POST` | `/api/v1/client/img2txt`                         | Extract text from image (OCR)                                | [→](/api/analysis/image-to-text)              |
+| `POST` | `/api/v1/client/img2txt/price-calculation`       | Calculate OCR price                                          | [→](/api/analysis/image-to-text-price)        |
+| `POST` | `/api/v1/client/vid2txt`                         | Transcribe video from URL (YouTube, X, TikTok, Twitch, Kick) | [→](/api/analysis/video-to-text)              |
+| `POST` | `/api/v1/client/vid2txt/price-calculation`       | Calculate video transcription price                          | [→](/api/analysis/video-to-text-price)        |
+| `POST` | `/api/v1/client/aud2txt`                         | Transcribe X Spaces audio                                    | [→](/api/analysis/audio-to-text-spaces)       |
+| `POST` | `/api/v1/client/aud2txt/price-calculation`       | Calculate X Spaces transcription price                       | [→](/api/analysis/audio-to-text-spaces-price) |
+| `POST` | `/api/v1/client/videofile2txt`                   | Transcribe uploaded video file                               | [→](/api/analysis/upload-video-file)          |
+| `POST` | `/api/v1/client/videofile2txt/price-calculation` | Calculate video file transcription price                     | [→](/api/analysis/upload-video-file-price)    |
+| `POST` | `/api/v1/client/audiofile2txt`                   | Transcribe uploaded audio file                               | [→](/api/analysis/upload-audio-file)          |
+| `POST` | `/api/v1/client/audiofile2txt/price-calculation` | Calculate audio file transcription price                     | [→](/api/analysis/upload-audio-file-price)    |
 
 ## Transformation
 

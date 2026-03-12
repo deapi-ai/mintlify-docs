@@ -103,6 +103,8 @@
               "api/generation/text-to-video-price",
               "api/generation/image-to-video",
               "api/generation/image-to-video-price",
+              "api/generation/audio-to-video",
+              "api/generation/audio-to-video-price",
               "api/generation/text-to-speech",
               "api/generation/text-to-speech-price",
               "api/generation/text-to-music",
