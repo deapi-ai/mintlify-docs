@@ -4085,6 +4085,204 @@
                 ]
             }
         },
+        "/api/v1/client/transcribe": {
+            "post": {
+                "tags": [
+                    "Client API"
+                ],
+                "description": "Unified endpoint for requesting audio/video transcription. Accepts either a source URL (YouTube, Twitter, Twitch, Kick, TikTok, Twitter Spaces) or a file upload (audio/video). The job type is auto-detected from the input.",
+                "operationId": "requestTranscribe",
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/AcceptHeader"
+                    }
+                ],
+                "requestBody": {
+                    "description": "Transcription parameters. Provide exactly one of source_url or source_file.",
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "required": [
+                                    "include_ts",
+                                    "model"
+                                ],
+                                "properties": {
+                                    "source_url": {
+                                        "description": "URL of video/audio to transcribe (YouTube, Twitter/X, Twitch, Kick, TikTok, Twitter Spaces). Mutually exclusive with source_file.",
+                                        "type": "string",
+                                        "example": "https://www.youtube.com/watch?v=jNQXAC9IVRw"
+                                    },
+                                    "source_file": {
+                                        "description": "Audio or video file to transcribe. Supported audio: aac, mpeg, ogg, wav, webm, flac. Supported video: mp4, mpeg, quicktime, avi, wmv, ogg. Mutually exclusive with source_url.",
+                                        "type": "string",
+                                        "format": "binary"
+                                    },
+                                    "include_ts": {
+                                        "description": "Should transcription include timestamps",
+                                        "type": "boolean"
+                                    },
+                                    "model": {
+                                        "description": "The model to use for transcription. Available models can be retrieved via the GET /api/v1/client/models endpoint.",
+                                        "type": "string",
+                                        "example": "WhisperLargeV3"
+                                    },
+                                    "return_result_in_response": {
+                                        "description": "If true, the result will be returned directly in the response instead of only download url.",
+                                        "type": "boolean",
+                                        "default": false,
+                                        "nullable": true
+                                    },
+                                    "webhook_url": {
+                                        "description": "Optional HTTPS URL to receive webhook notifications for job status changes.",
+                                        "type": "string",
+                                        "format": "uri",
+                                        "maxLength": 2048,
+                                        "example": "https://your-server.com/webhooks/deapi",
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "ID of the inference request.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/JobRequestResponseResource"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized user.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/response_error_default"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationError"
+                    },
+                    "429": {
+                        "$ref": "#/components/responses/RateLimitExceeded"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/client/transcribe/price-calculation": {
+            "post": {
+                "tags": [
+                    "Client API"
+                ],
+                "description": "Unified endpoint for calculating transcription price. Provide one of: source_url, source_file, or duration_seconds.",
+                "operationId": "requestTranscribePrice",
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/AcceptHeader"
+                    }
+                ],
+                "requestBody": {
+                    "description": "Transcription price calculation parameters",
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "required": [
+                                    "include_ts",
+                                    "model"
+                                ],
+                                "properties": {
+                                    "source_url": {
+                                        "description": "URL of video/audio to estimate price for. Mutually exclusive with source_file and duration_seconds.",
+                                        "type": "string",
+                                        "example": "https://www.youtube.com/watch?v=jNQXAC9IVRw"
+                                    },
+                                    "source_file": {
+                                        "description": "Audio or video file to estimate price for. Mutually exclusive with source_url and duration_seconds.",
+                                        "type": "string",
+                                        "format": "binary"
+                                    },
+                                    "duration_seconds": {
+                                        "description": "Duration in seconds for direct price estimation. Mutually exclusive with source_url and source_file.",
+                                        "type": "number",
+                                        "example": 3600
+                                    },
+                                    "include_ts": {
+                                        "description": "Should transcription include timestamps",
+                                        "type": "boolean"
+                                    },
+                                    "model": {
+                                        "description": "The model to use for transcription.",
+                                        "type": "string",
+                                        "example": "WhisperLargeV3"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Calculated price for transcription.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "properties": {
+                                                "price": {
+                                                    "description": "Calculated price for the transcription",
+                                                    "type": "number",
+                                                    "format": "float",
+                                                    "example": 0.25
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized user.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/response_error_default"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationError"
+                    },
+                    "429": {
+                        "$ref": "#/components/responses/RateLimitExceeded"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
         "/api/v1/client/txt2music": {
             "post": {
                 "tags": [
@@ -4751,6 +4949,242 @@
                                                     "type": "number",
                                                     "format": "float",
                                                     "example": 0.25
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized user.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/response_error_default"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not found.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/response_error_default"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationError"
+                    },
+                    "429": {
+                        "$ref": "#/components/responses/RateLimitExceeded"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/client/videos/replace": {
+            "post": {
+                "tags": [
+                    "Client API"
+                ],
+                "description": "Endpoint for requesting video character replacement inference. Replaces a person in the input video with the character from the reference image.",
+                "operationId": "requestVideoReplace",
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/AcceptHeader"
+                    }
+                ],
+                "requestBody": {
+                    "description": "Video replace parameters",
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "required": [
+                                    "video",
+                                    "ref_image",
+                                    "model"
+                                ],
+                                "properties": {
+                                    "video": {
+                                        "description": "Input video file. Supported formats: MP4, MPEG, QuickTime, AVI, WMV, OGG.",
+                                        "type": "string",
+                                        "format": "binary"
+                                    },
+                                    "ref_image": {
+                                        "description": "Reference character image. Supported formats: JPG, JPEG, PNG, GIF, BMP, WebP. Maximum file size: 10 MB.",
+                                        "type": "string",
+                                        "format": "binary"
+                                    },
+                                    "prompt": {
+                                        "description": "Optional text prompt to guide the replacement",
+                                        "type": "string",
+                                        "nullable": true
+                                    },
+                                    "width": {
+                                        "description": "Output video width in pixels. If omitted, uses input video width. Must be provided together with height.",
+                                        "type": "integer",
+                                        "nullable": true
+                                    },
+                                    "height": {
+                                        "description": "Output video height in pixels. If omitted, uses input video height. Must be provided together with width.",
+                                        "type": "integer",
+                                        "nullable": true
+                                    },
+                                    "steps": {
+                                        "description": "Number of inference steps (default: 4)",
+                                        "type": "integer",
+                                        "example": 4
+                                    },
+                                    "seed": {
+                                        "description": "Random seed for generation (default: -1 for random)",
+                                        "type": "integer",
+                                        "example": -1
+                                    },
+                                    "model": {
+                                        "description": "The model to use for video replacement. Available models can be retrieved via the GET /api/v1/client/models endpoint.",
+                                        "type": "string"
+                                    },
+                                    "webhook_url": {
+                                        "description": "Optional HTTPS URL to receive webhook notifications for job status changes. Must be HTTPS. Max 2048 characters.",
+                                        "type": "string",
+                                        "format": "uri",
+                                        "maxLength": 2048,
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "ID of the inference request.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/JobRequestResponseResource"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized user.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/response_error_default"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not found.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/response_error_default"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationError"
+                    },
+                    "429": {
+                        "$ref": "#/components/responses/RateLimitExceeded"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/client/videos/replace/price": {
+            "post": {
+                "tags": [
+                    "Client API"
+                ],
+                "description": "Endpoint for calculating price for video replace inference",
+                "operationId": "requestVideoReplacePrice",
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/AcceptHeader"
+                    }
+                ],
+                "requestBody": {
+                    "description": "Video replace price calculation parameters",
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "required": [
+                                    "model"
+                                ],
+                                "properties": {
+                                    "video": {
+                                        "description": "Input video file. If provided, duration and dimensions are extracted automatically. Required if duration is not provided.",
+                                        "type": "string",
+                                        "format": "binary",
+                                        "nullable": true
+                                    },
+                                    "duration": {
+                                        "description": "Input video duration in seconds. Required if video file is not provided.",
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 5,
+                                        "nullable": true
+                                    },
+                                    "width": {
+                                        "description": "Output video width in pixels. If omitted and video file is provided, uses video native width.",
+                                        "type": "integer",
+                                        "example": 512,
+                                        "nullable": true
+                                    },
+                                    "height": {
+                                        "description": "Output video height in pixels. If omitted and video file is provided, uses video native height.",
+                                        "type": "integer",
+                                        "example": 512,
+                                        "nullable": true
+                                    },
+                                    "model": {
+                                        "description": "The model to use for video replacement. Available models can be retrieved via the GET /api/v1/client/models endpoint.",
+                                        "type": "string"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Calculated price for video replace inference.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "properties": {
+                                                "price": {
+                                                    "description": "Calculated price for the inference",
+                                                    "type": "number",
+                                                    "format": "float",
+                                                    "example": 0.15
                                                 }
                                             },
                                             "type": "object"
@@ -6306,6 +6740,59 @@
                             "include_ts": {
                                 "description": "Should transcription include timestamps",
                                 "type": "boolean"
+                            }
+                        },
+                        "type": "object"
+                    }
+                },
+                "type": "object"
+            },
+            "VideoReplaceInferenceJobResource": {
+                "properties": {
+                    "data": {
+                        "description": "Job settings data",
+                        "properties": {
+                            "job_id": {
+                                "description": "Unique job identifier",
+                                "type": "string"
+                            },
+                            "model": {
+                                "description": "Model name used for video replacement",
+                                "type": "string"
+                            },
+                            "video": {
+                                "description": "Presigned URL for the input video file",
+                                "type": "string"
+                            },
+                            "ref_image": {
+                                "description": "Presigned URL for the reference character image",
+                                "type": "string"
+                            },
+                            "prompt": {
+                                "description": "Text prompt for guiding the replacement",
+                                "type": "string",
+                                "nullable": true
+                            },
+                            "width": {
+                                "description": "Output video width in pixels",
+                                "type": "integer"
+                            },
+                            "height": {
+                                "description": "Output video height in pixels",
+                                "type": "integer"
+                            },
+                            "steps": {
+                                "description": "Number of inference steps",
+                                "type": "integer"
+                            },
+                            "seed": {
+                                "description": "Random seed for generation",
+                                "type": "integer"
+                            },
+                            "mode": {
+                                "description": "Animation mode for the worker endpoint",
+                                "type": "string",
+                                "example": "replace"
                             }
                         },
                         "type": "object"

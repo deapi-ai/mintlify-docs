@@ -25,16 +25,16 @@ curl -X GET "https://api.deapi.ai/api/v1/client/models" \
 
 The response returns a paginated `data` array of model objects. Each object contains:
 
-| Field             | Description                                                                                                                                                                               |
-| ----------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `name`            | Human-friendly display name (for UI only — never send this to the API).                                                                                                                   |
-| `slug`            | **`The exact string to pass as the model parameter`** in any task endpoint.                                                                                                               |
-| `inference_types` | Array of task types this model supports (e.g. `["txt2img"]`, `["img2video", "txt2video"]`).                                                                                               |
-| `info.limits`     | Min/max constraints for parameters like width, height, steps, frames, fps, etc. Fields vary per model type.                                                                               |
-| `info.features`   | Capability flags — e.g. `supports_guidance`, `supports_negative_prompt`, `supports_steps`, `supports_last_frame`. Not every model includes this field; some return it as an empty object. |
-| `info.defaults`   | Recommended default values for each parameter. Not every model includes this field.                                                                                                       |
-| `loras`           | Array of available LoRA adapters (`display_name` + `name`). Present only on models that support LoRAs.                                                                                    |
-| `languages`       | Array of supported languages, each with available voices. Present only on speech models.                                                                                                  |
+| Field | Description |
+| --- | --- |
+| `name` | Human-friendly display name (for UI only — never send this to the API). |
+| `slug` | **`The exact string to pass as the model parameter`** in any task endpoint. |
+| `inference_types` | Array of task types this model supports (e.g. `["txt2img"]`, `["img2video", "txt2video"]`). |
+| `info.limits` | Min/max constraints for parameters like width, height, steps, frames, fps, etc. Fields vary per model type. |
+| `info.features` | Capability flags — e.g. `supports_guidance`, `supports_negative_prompt`, `supports_steps`, `supports_last_frame`. Not every model includes this field; some return it as an empty object. |
+| `info.defaults` | Recommended default values for each parameter. Not every model includes this field. |
+| `loras` | Array of available LoRA adapters (`display_name` \+ `name`). Present only on models that support LoRAs. |
+| `languages` | Array of supported languages, each with available voices. Present only on speech models. |
 
 <Note>
   Not every model returns all fields. For example, a transcription model may return an empty `info`, while an image-generation model will include detailed `limits`, `features`, and `defaults`. Always check for the presence of fields before using them.
@@ -65,23 +65,25 @@ See the full endpoint spec → [Model Selection](/api/utilities/model-selection)
 
 The table below shows which **task types** deAPI supports. To see which models are currently available for a given task, query the models endpoint with the corresponding `filter[inference_types]` value.
 
-| Task                | `inference_types` value | What it does                                                                                                      |
-| ------------------- | ----------------------- | ----------------------------------------------------------------------------------------------------------------- |
-| Text-to-Image       | `txt2img`               | Generate images from text prompts — concept art, prototyping, creative exploration.                               |
-| Image-to-Image      | `img2img`               | Transform existing images — style transfer, edits, inpainting, outpainting.                                       |
-| Text-to-Speech      | `txt2audio`             | Turn text into natural voice — narration, accessibility, product voices. Supports voice cloning and voice design. |
-| Text-to-Music       | `txt2music`             | Generate music tracks from text — background music, jingles, songs with vocals.                                   |
-| Video-to-Text       | `video2text`            | Transcribe video by URL (YouTube, Twitch, Kick, X , TikTok) into text.                                             |
-| Audio-to-Text       | `audio2text`            | Transcribe audio by URL into text — subtitles, notes, search, accessibility.                                      |
-| Video File-to-Text  | `video_file2text`       | Transcribe an uploaded video file into text.                                                                      |
-| Audio File-to-Text  | `audio_file2text`       | Transcribe an uploaded audio file into text.                                                                      |
-| Image-to-Text (OCR) | `img2txt`               | Extract text and meaning from images — OCR, descriptions, accessibility.                                          |
-| Text-to-Video       | `txt2video`             | Generate short AI video clips from a text prompt.                                                                 |
-| Image-to-Video      | `img2video`             | Animate a still image into a short video clip.                                                                    |
-| Audio-to-Video      | `aud2video`             | Generate video conditioned on an audio file and a text prompt.                                                    |
-| Text-to-Embedding   | `txt2embedding`         | Create vector embeddings — search, RAG, semantic similarity, clustering.                                          |
-| Background Removal  | `img-rmbg`              | Remove background from images — product photos, portraits, compositing.                                           |
-| Image Upscale       | `img-upscale`           | Upscale images to higher resolution.                                                                              |
+| Task | `inference_types` value | What it does |
+| --- | --- | --- |
+| Text-to-Image | `txt2img` | Generate images from text prompts — concept art, prototyping, creative exploration. |
+| Image-to-Image | `img2img` | Transform existing images — style transfer, edits, inpainting, outpainting. |
+| Text-to-Speech | `txt2audio` | Turn text into natural voice — narration, accessibility, product voices. Supports voice cloning and voice design. |
+| Text-to-Music | `txt2music` | Generate music tracks from text — background music, jingles, songs with vocals. |
+| Video-to-Text | `video2text` | Transcribe video by URL (YouTube, Twitch, Kick, X , TikTok) into text. |
+| Audio-to-Text | `audio2text` | Transcribe audio by URL into text — subtitles, notes, search, accessibility. |
+| Video File-to-Text | `video_file2text` | Transcribe an uploaded video file into text. |
+| Audio File-to-Text | `audio_file2text` | Transcribe an uploaded audio file into text. |
+| Image-to-Text (OCR) | `img2txt` | Extract text and meaning from images — OCR, descriptions, accessibility. |
+| Text-to-Video | `txt2video` | Generate short AI video clips from a text prompt. |
+| Image-to-Video | `img2video` | Animate a still image into a short video clip. |
+| Audio-to-Video | `aud2video` | Generate video conditioned on an audio file and a text prompt. |
+| Text-to-Embedding | `txt2embedding` | Create vector embeddings — search, RAG, semantic similarity, clustering. |
+| Background Removal | `img-rmbg` | Remove background from images — product photos, portraits, compositing. |
+| Image Upscale | `img-upscale` | Upscale images to higher resolution. |
+| Transcribe (Unified) | `transcribe` | Unified transcription — auto-detects URL or file upload. Replaces vid2txt, aud2txt, videofile2txt, audiofile2txt. |
+| Video Replace | `videos_replace` | Replace a person in a video with a character from a reference image. |
 
 <Note>
   Some models support **multiple tasks** (e.g. both `txt2img` and `img2img`). The models endpoint will list all supported `inference_types` for each model.
@@ -104,6 +106,8 @@ When the models endpoint returns several options for the same task, use these gu
 **OCR (Image-to-Text)** — Check `info.limits` for the maximum supported image dimensions. For complex layouts, consider multiple passes or post-processing.
 
 **Video generation** — Start with low frame counts to validate aesthetics, then scale up. Check `info.limits.max_frames`, `min_frames`, and `max_fps` for each model. Some models support a `last_frame` feature (see `info.features.supports_last_frame`). For audio-to-video, provide an audio file to condition the video generation alongside your text prompt — some models (e.g. LTX 2.3) support `txt2video`, `img2video`, and `aud2video` tasks.
+
+**Video replace (Animate)** — Upload a video and a reference character image. The model replaces the person in the video with the character from the image. Optionally provide a text prompt to guide the replacement. Check `info.limits` for supported video duration and resolution.
 
 **Embeddings** — Check `info.limits.max_input_tokens` and `max_total_tokens` for batch sizing. Use for semantic search, clustering, and retrieval-augmented generation (RAG).
 

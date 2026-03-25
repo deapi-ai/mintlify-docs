@@ -98,6 +98,11 @@ Example pricing is shown below for reference; exact, up-to-date rates are always
 - Costs scale linearly with token count, making it efficient even at large volumes.
 - Important: Different embedding models may have varying dimensionality (e.g. 768 vs. 1024), but pricing is standardized per token for simplicity.
 
+**Video Replace (Animate)**
+
+- Replaces a character in a video using a reference image.
+- Price depends on video duration, resolution, and inference steps.
+- Use the `/videos/replace/price` endpoint with your `model`, `duration` (or upload `video`), `width`, and `height` to get exact pricing.
 ---
 
 ### Best Practices & Guidance

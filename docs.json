@@ -126,7 +126,9 @@
               "api/analysis/upload-video-file",
               "api/analysis/upload-video-file-price",
               "api/analysis/upload-audio-file",
-              "api/analysis/upload-audio-file-price"
+              "api/analysis/upload-audio-file-price",
+              "api/analysis/transcribe",
+              "api/analysis/transcribe-price"
             ]
           },
           {
@@ -135,6 +137,8 @@
             "pages": [
               "api/transformation/image-to-image",
               "api/transformation/image-to-image-price",
+              "api/transformation/video-replace",
+              "api/transformation/video-replace-price",
               "api/transformation/background-removal",
               "api/transformation/background-removal-price",
               "api/transformation/image-upscale",
