@@ -171,6 +171,10 @@ Replace `YOUR_API_KEY` with your actual deAPI key. Save the file and restart Cla
 
 To integrate deAPI MCP into Cursor for AI-assisted development:
 
+<Tip>
+  **Quick setup:** Press `Cmd+Shift+P` (macOS) or `Ctrl+Shift+P` (Windows/Linux), type **"MCP Settings"** and press Enter — this opens the MCP configuration file directly.
+</Tip>
+
 **Step 1.** Get your API key from the [deAPI Dashboard](https://deapi.ai/dashboard)
 
 **Step 2.** Open Cursor Settings:
@@ -255,6 +259,52 @@ To use deAPI MCP tools in ChatGPT conversations:
 - _"With deAPI MCP, transcribe this YouTube video: [URL]"_
 - _"Check my deAPI MCP balance"_
 - _"With deAPI MCP, transcribe this Kick video: [URL]"_
+
+---
+
+#### Claude Code
+
+To use deAPI MCP in Claude Code, open a terminal in your project directory and run:
+
+```bash
+claude mcp add deapi -s user -t http https://mcp.deapi.ai/mcp --header "Authorization: Bearer YOUR_API_KEY"
+```
+
+Replace `YOUR_API_KEY` with your actual deAPI key. The server will be available in all your Claude Code sessions.
+
+---
+
+#### Codex
+
+To use deAPI MCP in Codex, add the server to your configuration file.
+
+Edit `~/.codex/config.toml` (user-level) or `.codex/config.toml` (project-level) and add:
+
+```toml
+[mcp_servers.deapi]
+url = "https://mcp.deapi.ai/mcp"
+bearer_token_env_var = "DEAPI_TOKEN"
+```
+
+Then set the environment variable with your deAPI key:
+
+```bash
+export DEAPI_TOKEN="YOUR_API_KEY"
+```
+
+Replace `YOUR_API_KEY` with your actual deAPI key.
+
+---
+
+#### Gemini CLI
+
+To use deAPI MCP in Gemini CLI, open a terminal in your project directory and run:
+
+```bash
+gemini mcp add --transport http --header "Authorization: Bearer YOUR_API_KEY" deapi https://mcp.deapi.ai/mcp
+```
+
+Replace `YOUR_API_KEY` with your actual deAPI key.
 
 ---
 
@@ -395,6 +445,7 @@ The MCP server does **not** store your API token. Authentication works at the co
 | ---------------------------------- | -------------- |
 | AI assistants & chatbots           | **MCP Server** |
 | IDE integrations (Cursor, VS Code) | **MCP Server** |
+| Terminal AI tools (Claude Code, Codex, Gemini CLI) | **MCP Server** |
 | Backend services & workers         | **HTTP API**   |
 | Batch processing                   | **HTTP API**   |
 | Direct programmatic control        | **HTTP API**   |
