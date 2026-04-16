@@ -25,7 +25,7 @@ All deAPI model endpoints use an **asynchronous job queue**. You submit a reques
   For most integrations, use webhooks. They're the most reliable way to receive results without maintaining persistent connections or implementing polling logic.
 </Info>
 
-With webhooks, deAPI sends an HTTP POST to your server when a job completes. Configure a global webhook URL in [account settings](https://deapi.ai/settings/webhooks), or override per-request:
+With webhooks, deAPI sends an HTTP POST to your server when a job completes. Configure a global webhook URL in [account settings](https://app.deapi.ai/settings/webhooks), or override per-request:
 
 ```bash
 # 1. Submit job with webhook_url

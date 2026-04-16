@@ -26,7 +26,7 @@ Before you begin, ensure you have:
 
 - A **self-hosted n8n instance** accessible via **HTTPS** (required for webhook callbacks)
 - A **deAPI API key** from the [deAPI Dashboard](https://docs.deapi.ai/quickstart#2-obtain-your-api-key)
-- A **Webhook Secret** from [deAPI Webhook Settings](https://deapi.ai/settings/webhooks)
+- A **Webhook Secret** from [deAPI Webhook Settings](https://app.deapi.ai/settings/webhooks)
 
 <Warning>
   The deAPI node uses webhooks to receive job completion notifications. Your n8n instance must be accessible via HTTPS for generation operations to work.
@@ -69,7 +69,7 @@ After installation, configure your deAPI credentials:
 | Field              | Description                             | Where to Get It                                                                  |
 | ------------------ | --------------------------------------- | -------------------------------------------------------------------------------- |
 | **API Key**        | Your deAPI API key for authentication   | [deAPI Quickstart Guide](https://docs.deapi.ai/quickstart#2-obtain-your-api-key) |
-| **Webhook Secret** | Secret for verifying webhook signatures | [deAPI Webhook Settings](https://deapi.ai/settings/webhooks)                     |
+| **Webhook Secret** | Secret for verifying webhook signatures | [deAPI Webhook Settings](https://app.deapi.ai/settings/webhooks)                     |
 
 4. Click **Save** to store the credentials
 
@@ -252,7 +252,7 @@ The **DeapiTrigger** node listens for webhook events from deAPI, enabling event-
 
 4. **Activate the workflow** to make the webhook URL live
 5. Copy the **Webhook URL** displayed in the node
-6. Add this URL to your [deAPI Webhook Settings](https://deapi.ai/settings/webhooks)
+6. Add this URL to your [deAPI Webhook Settings](https://app.deapi.ai/settings/webhooks)
 
 #### Event Types
 
@@ -294,7 +294,7 @@ Generation operations require your n8n instance to be accessible via HTTPS for w
 
 If you see webhook signature verification errors:
 
-1. Verify your **Webhook Secret** matches the one in [deAPI Webhook Settings](https://deapi.ai/settings/webhooks)
+1. Verify your **Webhook Secret** matches the one in [deAPI Webhook Settings](https://app.deapi.ai/settings/webhooks)
 2. Ensure your n8n server clock is synchronized (signature includes timestamp)
 3. Check that no proxy is modifying the request body
 
