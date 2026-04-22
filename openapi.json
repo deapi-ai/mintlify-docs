@@ -5466,6 +5466,14 @@
                                         "type": "string",
                                         "example": "RealESRGAN_x4plus"
                                     },
+                                    "scale": {
+                                        "description": "Optional upscale factor (e.g. 2, 4). Only allowed for models that support a configurable scale; fixed-scale models (e.g. x2/x4 only) reject this field. Validated against the per-model min/max scale defined in the admin panel.",
+                                        "type": "integer",
+                                        "maximum": 16,
+                                        "minimum": 1,
+                                        "example": 4,
+                                        "nullable": true
+                                    },
                                     "webhook_url": {
                                         "description": "Optional HTTPS URL to receive webhook notifications for job status changes (processing, completed, failed). Must be HTTPS. Max 2048 characters. See [Webhook Documentation](/execution-modes-and-integrations/webhooks) for payload structure and authentication details.",
                                         "type": "string",
@@ -5559,6 +5567,14 @@
                                                 "description": "The upscaling model to use",
                                                 "type": "string",
                                                 "example": "RealESRGAN_x4plus"
+                                            },
+                                            "scale": {
+                                                "description": "Optional upscale factor. Only allowed for models that support a configurable scale.",
+                                                "type": "integer",
+                                                "maximum": 16,
+                                                "minimum": 1,
+                                                "example": 4,
+                                                "nullable": true
                                             }
                                         },
                                         "type": "object"
@@ -5580,10 +5596,26 @@
                                                 "type": "integer",
                                                 "example": 1080
                                             },
+                                            "duration": {
+                                                "description": "Optional video duration in seconds. Allows validating against the model's max allowed duration without uploading the file. Pricing itself is not duration-dependent for video upscaling.",
+                                                "type": "number",
+                                                "format": "float",
+                                                "minimum": 0.1,
+                                                "example": 12.5,
+                                                "nullable": true
+                                            },
                                             "model": {
                                                 "description": "The upscaling model to use",
                                                 "type": "string",
                                                 "example": "RealESRGAN_x4plus"
+                                            },
+                                            "scale": {
+                                                "description": "Optional upscale factor. Only allowed for models that support a configurable scale.",
+                                                "type": "integer",
+                                                "maximum": 16,
+                                                "minimum": 1,
+                                                "example": 4,
+                                                "nullable": true
                                             }
                                         },
                                         "type": "object"
@@ -6793,6 +6825,42 @@
                                 "description": "Animation mode for the worker endpoint",
                                 "type": "string",
                                 "example": "replace"
+                            }
+                        },
+                        "type": "object"
+                    }
+                },
+                "type": "object"
+            },
+            "VideoUpscaleInferenceJobResource": {
+                "properties": {
+                    "data": {
+                        "description": "Job settings data",
+                        "properties": {
+                            "job_id": {
+                                "description": "Unique job identifier",
+                                "type": "string"
+                            },
+                            "model": {
+                                "description": "Model name used for upscaling",
+                                "type": "string"
+                            },
+                            "video": {
+                                "description": "Presigned URL for the input video file",
+                                "type": "string"
+                            },
+                            "input_width": {
+                                "description": "Input video width in pixels",
+                                "type": "integer"
+                            },
+                            "input_height": {
+                                "description": "Input video height in pixels",
+                                "type": "integer"
+                            },
+                            "scale": {
+                                "description": "Upscale factor. Null for fixed-scale models.",
+                                "type": "integer",
+                                "nullable": true
                             }
                         },
                         "type": "object"
