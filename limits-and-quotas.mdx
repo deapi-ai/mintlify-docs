@@ -81,6 +81,7 @@ Basic accounts have conservative limits designed for testing and evaluation.
 | `/api/v1/client/img2img`     | `Flux_2_Klein_4B_BF16, QwenImageEdit_Plus_NF4` | 1   | 15  |
 | `/api/v1/client/img-rmbg`    | `Ben2`                                         | 5   | 100 |
 | `/api/v1/client/img-upscale` | `RealESRGAN_x4plus`                            | 5   | 100 |
+| `/api/v1/client/vid-upscale` | `RealESRGAN_x4plus`                            | 1   | 15  |
 
 #### Utility Endpoints
 
@@ -112,6 +113,7 @@ Premium accounts have high limits suitable for production workloads. All endpoin
 | `/api/v1/client/img2img`       | `Flux_2_Klein_4B_BF16, QwenImageEdit_Plus_NF4`                             | 300 | Unlimited |
 | `/api/v1/client/img-rmbg`      | `Ben2`                                                                     | 300 | Unlimited |
 | `/api/v1/client/img-upscale`   | `RealESRGAN_x4plus`                                                        | 300 | Unlimited |
+| `/api/v1/client/vid-upscale`   | `RealESRGAN_x4plus`                                                        | 300 | Unlimited |
 
 <Info>
   Premium Whisper endpoints have independent limits — each endpoint has its own 300 RPM allocation.
@@ -165,7 +167,7 @@ For High Volume Production requirements beyond Premium limits, please contact su
 
 The majority of endpoints (Video-to-Text, Audio-to-Text, Image-to-Image) support direct binary file uploads or URL-based inputs. The global limits for file uploads are specified below.
 
-**1. Video** (Video-to-Text, Image-to-Video)
+**1. Video** (Video-to-Text, Image-to-Video, Video Upscale, Video Replace)
 
 - Max size: 80 MB
 - Supported Formats: MP4, MPEG, QuickTime (MOV), AVI, WMV, OGG

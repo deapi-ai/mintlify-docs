@@ -25,6 +25,7 @@ Example pricing is shown below for reference; exact, up-to-date rates are always
 | Video-to-Text (X, Twitch, Kick, YT Transcription) | video length                        | from 0.021 USD per hour                                   | Supports timestamps, multilingual                                                   |
 | Image-to-Text (OCR)                               | output characters                   | 0.00928 USD per 1,000 output chars (for 1024×1024 images) | Also includes object detection, scene understanding                                 |
 | Text-to-Embedding                                 | number of tokens processed          | 0.000068 USD per 1,000 tokens                             | Supports large-scale semantic search and RAG; cost scales linearly with token count |
+| Video Upscale                                     | resolution × duration × scale       | Use `/price-calculation` endpoint                         | Cost scales with input resolution, video duration, and target scale factor           |
 
 ---
 
@@ -103,6 +104,12 @@ Example pricing is shown below for reference; exact, up-to-date rates are always
 - Replaces a character in a video using a reference image.
 - Price depends on video duration, resolution, and inference steps.
 - Use the `/videos/replace/price` endpoint with your `model`, `duration` (or upload `video`), `width`, and `height` to get exact pricing.
+
+**Video Upscale**
+
+- Increases video resolution (e.g. 2×, 4×) using AI super-resolution.
+- Price scales with input resolution, video duration, and the selected `scale` factor (only for models with configurable scale — fixed-scale models use their built-in factor).
+- Use the `/vid-upscale/price-calculation` endpoint with your `model`, `width`, `height`, optional `duration`, and optional `scale` to get exact pricing before uploading the file.
 ---
 
 ### Best Practices & Guidance

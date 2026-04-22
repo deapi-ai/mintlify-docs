@@ -82,6 +82,7 @@ The table below shows which **task types** deAPI supports. To see which models a
 | Text-to-Embedding | `txt2embedding` | Create vector embeddings — search, RAG, semantic similarity, clustering. |
 | Background Removal | `img-rmbg` | Remove background from images — product photos, portraits, compositing. |
 | Image Upscale | `img-upscale` | Upscale images to higher resolution. |
+| Video Upscale | `vid_upscale` | Upscale videos to higher resolution — sharpen, restore, and enlarge video content. |
 | Transcribe (Unified) | `transcribe` | Unified transcription — auto-detects URL or file upload. Replaces vid2txt, aud2txt, videofile2txt, audiofile2txt. |
 | Video Replace | `videos_replace` | Replace a person in a video with a character from a reference image. |
 
@@ -114,6 +115,8 @@ When the models endpoint returns several options for the same task, use these gu
 **Background removal** — Check `info.limits.max_width` and `max_height` for the maximum supported resolution.
 
 **Image upscale** — Check `info.limits` for input size constraints.
+
+**Video upscale** — Check `info.limits` for input size and duration constraints. Some models support a configurable `scale` factor (e.g. 2×–16×); others are fixed-scale (e.g. x2/x4 only) and reject the `scale` field. Check the per-model `min_scale`/`max_scale` in `info.limits` before sending the request.
 
 ---
 
