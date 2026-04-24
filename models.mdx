@@ -5,10 +5,10 @@ description: "How to discover, select, and use models on deAPI"
 
 **deAPI** gives you a unified API across multiple open-source models running on a decentralized GPU cloud. We regularly expand the model lineup — new models, new capabilities, better performance — so your integration can always take advantage of the latest options.
 
-The [Model Selection](/api/utilities/model-selection) endpoint returns the live, authoritative list of all available models, their slugs, limits, and defaults. **Use it as the starting point for every integration.**
+The [Model Selection](/api/v2/utilities/models) endpoint returns the live, authoritative list of all available models, their slugs, limits, and defaults. **Use it as the starting point for every integration.**
 
 <Tip>
-  This page explains how model selection works and how to use the endpoint. For the actual list of models and their exact slugs, always refer to the [Model Selection](/api/utilities/model-selection) endpoint.
+  This page explains how model selection works and how to use the endpoint. For the actual list of models and their exact slugs, always refer to the [Model Selection](/api/v2/utilities/models) endpoint.
 </Tip>
 
 ---
@@ -18,7 +18,7 @@ The [Model Selection](/api/utilities/model-selection) endpoint returns the live,
 Before you start building, call the models endpoint to discover what's available:
 
 ```bash
-curl -X GET "https://api.deapi.ai/api/v1/client/models" \
+curl -X GET "https://api.deapi.ai/api/v2/models" \
   -H "Authorization: Bearer $DEAPI_API_KEY" \
   -H "Accept: application/json"
 ```
@@ -44,12 +44,12 @@ You can filter the list by task type using the `filter[inference_types]` query p
 
 ```bash
 # Get only image-generation models
-curl -X GET "https://api.deapi.ai/api/v1/client/models?filter[inference_types]=txt2img" \
+curl -X GET "https://api.deapi.ai/api/v2/models?filter[inference_types]=txt2img" \
   -H "Authorization: Bearer $DEAPI_API_KEY" \
   -H "Accept: application/json"
 ```
 
-See the full endpoint spec → [Model Selection](/api/utilities/model-selection)
+See the full endpoint spec → [Model Selection](/api/v2/utilities/models)
 
 ---
 
@@ -85,6 +85,7 @@ The table below shows which **task types** deAPI supports. To see which models a
 | Video Upscale | `vid_upscale` | Upscale videos to higher resolution — sharpen, restore, and enlarge video content. |
 | Transcribe (Unified) | `transcribe` | Unified transcription — auto-detects URL or file upload. Replaces vid2txt, aud2txt, videofile2txt, audiofile2txt. |
 | Video Replace | `videos_replace` | Replace a person in a video with a character from a reference image. |
+| Video Background Removal | `vid_rmbg` | Remove background from videos for transparent/keyed output (v2 only). |
 
 <Note>
   Some models support **multiple tasks** (e.g. both `txt2img` and `img2img`). The models endpoint will list all supported `inference_types` for each model.
@@ -145,7 +146,7 @@ Some models do not support guidance. Check `info.features.supports_guidance` —
 
 ```bash
 # Fetch all text-to-image models
-curl -X GET "https://api.deapi.ai/api/v1/client/models?filter[inference_types]=txt2img" \
+curl -X GET "https://api.deapi.ai/api/v2/models?filter[inference_types]=txt2img" \
   -H "Authorization: Bearer $DEAPI_API_KEY" \
   -H "Accept: application/json"
 
@@ -155,7 +156,7 @@ curl -X GET "https://api.deapi.ai/api/v1/client/models?filter[inference_types]=t
 **2. Use the slug in a generation request**
 
 ```bash
-curl -X POST "https://api.deapi.ai/api/v1/client/txt2img" \
+curl -X POST "https://api.deapi.ai/api/v2/images/generations" \
   -H "Authorization: Bearer $DEAPI_API_KEY" \
   -H "Content-Type: application/json" \
   -H "Accept: application/json" \
@@ -176,7 +177,7 @@ curl -X POST "https://api.deapi.ai/api/v1/client/txt2img" \
 **3. Transcribe a video by URL**
 
 ```bash
-curl -X POST "https://api.deapi.ai/api/v1/client/vid2txt" \
+curl -X POST "https://api.deapi.ai/api/v2/audio/transcriptions" \
   -H "Authorization: Bearer $DEAPI_API_KEY" \
   -H "Content-Type: application/json" \
   -H "Accept: application/json" \
@@ -187,7 +188,7 @@ curl -X POST "https://api.deapi.ai/api/v1/client/vid2txt" \
   }'
 ```
 
-Jobs return a `request_id`. Poll results with `GET /api/v1/client/request-status/{request_id}`.
+Jobs return a `request_id`. Poll results with `GET /api/v2/jobs/{request_id}`.
 
 ---
 
@@ -205,7 +206,7 @@ Jobs return a `request_id`. Poll results with `GET /api/v1/client/request-status
 
 If you are an AI agent, MCP client, or LLM integrating with deAPI:
 
-1. **Call** `GET /api/v1/client/models` at the start of your session to get the current model list. Do not rely on model slugs from training data, cached documentation, or prior conversations — they may be outdated.
+1. **Call** `GET /api/v2/models` at the start of your session to get the current model list. Do not rely on model slugs from training data, cached documentation, or prior conversations — they may be outdated.
 2. **Use** `filter[inference_types]` to narrow down to the task you need (e.g. `txt2img`, `txt2audio`, `aud2video`).
 3. **Read** `info.limits` and `info.defaults` from the response to construct valid request parameters. Also consult the task endpoint docs for required fields that may not appear in the model response (e.g. `seed` for image generation).
 4. **Pass** the `slug` field (not `name`) as the `model` parameter in task endpoints.
@@ -215,6 +216,6 @@ If you are an AI agent, MCP client, or LLM integrating with deAPI:
 
 ## Related docs
 
-- [Model Selection endpoint](/api/utilities/model-selection) — the live API spec for fetching models.
+- [Model Selection endpoint](/api/v2/utilities/models) — the live API spec for fetching models.
 - [Pricing](/pricing) — cost per task and model tier.
 - [Execution Modes](/execution-modes-and-integrations/execution-modes-and-http-queue) — sync, async, webhooks, WebSockets.

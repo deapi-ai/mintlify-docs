@@ -44,51 +44,36 @@ Limits reset daily at **midnight UTC**.
 
 Basic accounts have conservative limits designed for testing and evaluation.
 
-#### Generation Endpoints
+#### Generation & Transformation Endpoints
 
-| Endpoint                       | Models                                                                    | RPM | RPD |
-| ------------------------------ | ------------------------------------------------------------------------- | --- | --- |
-| `/api/v1/client/txt2img`       | `Flux1schnell`, `ZImageTurbo_INT8, Flux_2_Klein_4B_BF16`                  | 3   | 100 |
-| `/api/v1/client/txt2video`     | `Ltxv_13B_0_9_8_Distilled_FP8`, `Ltx2_19B_Dist_FP8, Ltx2_3_19B_Dist_INT8` | 1   | 15  |
-| `/api/v1/client/img2video`     | `Ltxv_13B_0_9_8_Distilled_FP8`, `Ltx2_19B_Dist_FP8, Ltx2_3_19B_Dist_INT8` | 1   | 15  |
-| `/api/v1/client/aud2video`     | `Ltx2_3_19B_Dist_INT8`                                                    | 1   | 15  |
-| `/api/v1/client/txt2audio`     | `Kokoro`, `Chatterbox`, `Qwen3_TTS`                                       | 5   | 300 |
-| `/api/v1/client/txt2music`     | `ACE-Step-v1.5-turbo`                                                     | 1   | 15  |
-| `/api/v1/client/txt2embedding` | `Bge_M3_FP16`                                                             | 10  | 500 |
+| Endpoint                                    | Models                                                                    | RPM | RPD |
+| ------------------------------------------- | ------------------------------------------------------------------------- | --- | --- |
+| `/api/v2/images/generations`                | `Flux1schnell`, `ZImageTurbo_INT8`, `Flux_2_Klein_4B_BF16`                | 3   | 100 |
+| `/api/v2/images/edits`                      | `Flux_2_Klein_4B_BF16`, `QwenImageEdit_Plus_NF4`                          | 1   | 15  |
+| `/api/v2/images/ocr`                        | `Nanonets_Ocr_S_F16`                                                      | 5   | 50  |
+| `/api/v2/images/background-removals`        | `Ben2`                                                                    | 5   | 100 |
+| `/api/v2/images/upscales`                   | `RealESRGAN_x4plus`                                                       | 5   | 100 |
+| `/api/v2/videos/generations`                | `Ltxv_13B_0_9_8_Distilled_FP8`, `Ltx2_19B_Dist_FP8`, `Ltx2_3_19B_Dist_INT8` | 1   | 15  |
+| `/api/v2/videos/animations`                 | `Ltxv_13B_0_9_8_Distilled_FP8`, `Ltx2_19B_Dist_FP8`, `Ltx2_3_19B_Dist_INT8` | 1   | 15  |
+| `/api/v2/videos/audio-syncs`                | `Ltx2_3_19B_Dist_INT8`                                                    | 1   | 15  |
+| `/api/v2/videos/replacements`               | (see Model Selection)                                                     | 1   | 15  |
+| `/api/v2/videos/background-removals`        | (see Model Selection)                                                     | 1   | 15  |
+| `/api/v2/videos/upscales`                   | `RealESRGAN_x4plus`                                                       | 1   | 15  |
+| `/api/v2/audio/speech`                      | `Kokoro`, `Chatterbox`, `Qwen3_TTS`                                       | 5   | 300 |
+| `/api/v2/audio/music`                       | `ACE-Step-v1.5-turbo`                                                     | 1   | 15  |
+| `/api/v2/audio/transcriptions`              | `WhisperLargeV3`                                                          | 1   | 10  |
+| `/api/v2/embeddings`                        | `Bge_M3_FP16`                                                             | 10  | 500 |
 
-#### Analysis Endpoints
-
-| Endpoint                           | Models               | RPM | RPD |
-| ---------------------------------- | -------------------- | --- | --- |
-| `/api/v1/client/img2txt`           | `Nanonets_Ocr_S_F16` | 5   | 50  |
-| **Whisper Transcription (shared)** | `WhisperLargeV3`     | 1   | 10  |
-
-<Warning>
-  **Whisper Shared Limit:** All four Whisper transcription endpoints share a single combined limit of **1 RPM** and **10 RPD**:
-
-  - `/api/v1/client/vid2txt` — Video URL transcription (YouTube, X, Twitch, TikTok, Kick)
-  - `/api/v1/client/videofile2txt` — Video file upload transcription
-  - `/api/v1/client/aud2txt` — X Spaces transcription
-  - `/api/v1/client/audiofile2txt` — Audio file upload transcription
-
-  For example: 5× `/vid2txt` + 3× `/aud2txt` + 2× `/audiofile2txt` = 10 RPD ✓
-</Warning>
-
-#### Transformation Endpoints
-
-| Endpoint                     | Models                                         | RPM | RPD |
-| ---------------------------- | ---------------------------------------------- | --- | --- |
-| `/api/v1/client/img2img`     | `Flux_2_Klein_4B_BF16, QwenImageEdit_Plus_NF4` | 1   | 15  |
-| `/api/v1/client/img-rmbg`    | `Ben2`                                         | 5   | 100 |
-| `/api/v1/client/img-upscale` | `RealESRGAN_x4plus`                            | 5   | 100 |
-| `/api/v1/client/vid-upscale` | `RealESRGAN_x4plus`                            | 1   | 15  |
+<Note>
+  In v2 transcription is unified into a single endpoint (`/api/v2/audio/transcriptions`) — the Whisper shared-limit across 4 v1 endpoints no longer applies.
+</Note>
 
 #### Utility Endpoints
 
 | Endpoint                                        | RPM | RPD |
 | ----------------------------------------------- | --- | --- |
-| Price Calculation (`/price-calculation/*`)      | 50  | 200 |
-| Request Status (`/request-status/{request_id}`) | 50  | 200 |
+| Price Calculation (`/api/v2/**/price`)          | 50  | 200 |
+| Jobs Status (`/api/v2/jobs/{job_request}`)      | 50  | 200 |
 
 ---
 
@@ -96,27 +81,26 @@ Basic accounts have conservative limits designed for testing and evaluation.
 
 Premium accounts have high limits suitable for production workloads. All endpoints share a unified **300 RPM** with **unlimited daily requests**.
 
-| Endpoint                       | Models                                                                     | RPM | RPD       |
-| ------------------------------ | -------------------------------------------------------------------------- | --- | --------- |
-| `/api/v1/client/txt2img`       | `Flux1schnell`, `ZImageTurbo_INT8, Flux_2_Klein_4B_BF16`                   | 300 | Unlimited |
-| `/api/v1/client/txt2video`     | `Ltxv_13B_0_9_8_Distilled_FP8`, `Ltx2_19B_Dist_FP8 , Ltx2_3_19B_Dist_INT8` | 300 | Unlimited |
-| `/api/v1/client/img2video`     | `Ltxv_13B_0_9_8_Distilled_FP8`, `Ltx2_19B_Dist_FP8, Ltx2_3_19B_Dist_INT8`  | 300 | Unlimited |
-| `/api/v1/client/aud2video`     | `Ltx2_3_19B_Dist_INT8`                                                     | 300 | Unlimited |
-| `/api/v1/client/txt2audio`     | `Kokoro`,`Chatterbox`, `Qwen3_TTS`                                         | 300 | Unlimited |
-| `/api/v1/client/txt2music`     | `ACE-Step-v1.5-turbo`                                                      | 300 | Unlimited |
-| `/api/v1/client/txt2embedding` | `Bge_M3_FP16`                                                              | 300 | Unlimited |
-| `/api/v1/client/img2txt`       | `Nanonets_Ocr_S_F16`                                                       | 300 | Unlimited |
-| `/api/v1/client/vid2txt`       | `WhisperLargeV3`                                                           | 300 | Unlimited |
-| `/api/v1/client/videofile2txt` | `WhisperLargeV3`                                                           | 300 | Unlimited |
-| `/api/v1/client/aud2txt`       | `WhisperLargeV3`                                                           | 300 | Unlimited |
-| `/api/v1/client/audiofile2txt` | `WhisperLargeV3`                                                           | 300 | Unlimited |
-| `/api/v1/client/img2img`       | `Flux_2_Klein_4B_BF16, QwenImageEdit_Plus_NF4`                             | 300 | Unlimited |
-| `/api/v1/client/img-rmbg`      | `Ben2`                                                                     | 300 | Unlimited |
-| `/api/v1/client/img-upscale`   | `RealESRGAN_x4plus`                                                        | 300 | Unlimited |
-| `/api/v1/client/vid-upscale`   | `RealESRGAN_x4plus`                                                        | 300 | Unlimited |
+| Endpoint                                    | Models                                                                    | RPM | RPD       |
+| ------------------------------------------- | ------------------------------------------------------------------------- | --- | --------- |
+| `/api/v2/images/generations`                | `Flux1schnell`, `ZImageTurbo_INT8`, `Flux_2_Klein_4B_BF16`                | 300 | Unlimited |
+| `/api/v2/images/edits`                      | `Flux_2_Klein_4B_BF16`, `QwenImageEdit_Plus_NF4`                          | 300 | Unlimited |
+| `/api/v2/images/ocr`                        | `Nanonets_Ocr_S_F16`                                                      | 300 | Unlimited |
+| `/api/v2/images/background-removals`        | `Ben2`                                                                    | 300 | Unlimited |
+| `/api/v2/images/upscales`                   | `RealESRGAN_x4plus`                                                       | 300 | Unlimited |
+| `/api/v2/videos/generations`                | `Ltxv_13B_0_9_8_Distilled_FP8`, `Ltx2_19B_Dist_FP8`, `Ltx2_3_19B_Dist_INT8` | 300 | Unlimited |
+| `/api/v2/videos/animations`                 | `Ltxv_13B_0_9_8_Distilled_FP8`, `Ltx2_19B_Dist_FP8`, `Ltx2_3_19B_Dist_INT8` | 300 | Unlimited |
+| `/api/v2/videos/audio-syncs`                | `Ltx2_3_19B_Dist_INT8`                                                    | 300 | Unlimited |
+| `/api/v2/videos/replacements`               | (see Model Selection)                                                     | 300 | Unlimited |
+| `/api/v2/videos/background-removals`        | (see Model Selection)                                                     | 300 | Unlimited |
+| `/api/v2/videos/upscales`                   | `RealESRGAN_x4plus`                                                       | 300 | Unlimited |
+| `/api/v2/audio/speech`                      | `Kokoro`, `Chatterbox`, `Qwen3_TTS`                                       | 300 | Unlimited |
+| `/api/v2/audio/music`                       | `ACE-Step-v1.5-turbo`                                                     | 300 | Unlimited |
+| `/api/v2/audio/transcriptions`              | `WhisperLargeV3`                                                          | 300 | Unlimited |
+| `/api/v2/embeddings`                        | `Bge_M3_FP16`                                                             | 300 | Unlimited |
 
 <Info>
-  Premium Whisper endpoints have independent limits — each endpoint has its own 300 RPM allocation.
+  In v2 Whisper is a single endpoint (`/api/v2/audio/transcriptions`) with its own 300 RPM allocation.
 </Info>
 
 ---
@@ -125,7 +109,7 @@ Premium accounts have high limits suitable for production workloads. All endpoin
 
 The following endpoints have no rate limits for all accounts:
 
-- **Utilities** — `/balance`, `/models`
+- **Utilities** — `/api/v2/account/balance`, `/api/v2/models`
 
 ---
 
@@ -135,7 +119,7 @@ The following endpoints have no rate limits for all accounts:
 | ------------------- | ------------------------- | ------------------------ |
 | RPM Limits          | 1–10 RPM                  | 300 RPM (all endpoints)  |
 | Daily Limits (RPD)  | Limited                   | Unlimited                |
-| Whisper Limit       | Shared across 4 endpoints | Independent per endpoint |
+| Transcription Limit | 1 unified endpoint (v2)   | 300 RPM (v2)             |
 | Upgrade Requirement | —                         | Any payment via Stripe   |
 
 ---
@@ -191,10 +175,10 @@ The majority of endpoints (Video-to-Text, Audio-to-Text, Image-to-Image) support
 
 Certain parameters — such as maximum character count, image resolution, frame count, or audio duration — are **model-specific** and may differ between models available on the same endpoint.
 
-These limits are returned dynamically via the [Models endpoint](/api/utilities/model-selection):
+These limits are returned dynamically via the [Models endpoint](/api/v2/utilities/models):
 
 ```bash
-GET https://api.deapi.ai/api/v1/client/models
+GET https://api.deapi.ai/api/v2/models
 ```
 
 Check the `limits` field in each model object to see the applicable constraints before submitting a request. This ensures your inputs stay within the accepted bounds for the specific model you're using.

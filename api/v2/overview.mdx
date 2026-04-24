@@ -1,0 +1,168 @@
+---
+title: "API Overview"
+description: "Complete reference of all deAPI v2 endpoints"
+---
+
+All endpoints use base URL `https://api.deapi.ai` and require authentication via `Authorization: Bearer <API_KEY>` header.
+
+<Note>
+  Each POST endpoint has a corresponding `/price` endpoint to estimate costs before execution.
+</Note>
+
+## Images
+
+| Method | Endpoint                                        | Description                          | Docs                                          |
+| ------ | ----------------------------------------------- | ------------------------------------ | --------------------------------------------- |
+| `POST` | `/api/v2/images/generations`                    | Generate image from text prompt      | [→](/api/v2/images/generations)               |
+| `POST` | `/api/v2/images/generations/price`              | Calculate image generation price     | [→](/api/v2/images/generations-price)         |
+| `POST` | `/api/v2/images/edits`                          | Edit/transform an image              | [→](/api/v2/images/edits)                     |
+| `POST` | `/api/v2/images/edits/price`                    | Calculate image edit price           | [→](/api/v2/images/edits-price)               |
+| `POST` | `/api/v2/images/ocr`                            | Extract text from image (OCR)        | [→](/api/v2/images/ocr)                       |
+| `POST` | `/api/v2/images/ocr/price`                      | Calculate OCR price                  | [→](/api/v2/images/ocr-price)                 |
+| `POST` | `/api/v2/images/background-removals`            | Remove image background              | [→](/api/v2/images/background-removals)       |
+| `POST` | `/api/v2/images/background-removals/price`      | Calculate bg removal price           | [→](/api/v2/images/background-removals-price) |
+| `POST` | `/api/v2/images/upscales`                       | Upscale image resolution             | [→](/api/v2/images/upscales)                  |
+| `POST` | `/api/v2/images/upscales/price`                 | Calculate image upscale price        | [→](/api/v2/images/upscales-price)            |
+
+## Videos
+
+| Method | Endpoint                                        | Description                          | Docs                                          |
+| ------ | ----------------------------------------------- | ------------------------------------ | --------------------------------------------- |
+| `POST` | `/api/v2/videos/generations`                    | Generate video from text prompt      | [→](/api/v2/videos/generations)               |
+| `POST` | `/api/v2/videos/generations/price`              | Calculate video generation price     | [→](/api/v2/videos/generations-price)         |
+| `POST` | `/api/v2/videos/animations`                     | Animate image into video             | [→](/api/v2/videos/animations)                |
+| `POST` | `/api/v2/videos/animations/price`               | Calculate animation price            | [→](/api/v2/videos/animations-price)          |
+| `POST` | `/api/v2/videos/audio-syncs`                    | Generate video from audio + prompt   | [→](/api/v2/videos/audio-syncs)               |
+| `POST` | `/api/v2/videos/audio-syncs/price`              | Calculate audio-sync price           | [→](/api/v2/videos/audio-syncs-price)         |
+| `POST` | `/api/v2/videos/replacements`                   | Replace character in video           | [→](/api/v2/videos/replacements)              |
+| `POST` | `/api/v2/videos/replacements/price`             | Calculate replacement price          | [→](/api/v2/videos/replacements-price)        |
+| `POST` | `/api/v2/videos/background-removals`            | Remove video background              | [→](/api/v2/videos/background-removals)       |
+| `POST` | `/api/v2/videos/background-removals/price`      | Calculate video bg removal price     | [→](/api/v2/videos/background-removals-price) |
+| `POST` | `/api/v2/videos/upscales`                       | Upscale video resolution             | [→](/api/v2/videos/upscales)                  |
+| `POST` | `/api/v2/videos/upscales/price`                 | Calculate video upscale price        | [→](/api/v2/videos/upscales-price)            |
+
+## Audio
+
+| Method | Endpoint                                        | Description                          | Docs                                          |
+| ------ | ----------------------------------------------- | ------------------------------------ | --------------------------------------------- |
+| `POST` | `/api/v2/audio/speech`                          | Generate speech from text (TTS)      | [→](/api/v2/audio/speech)                     |
+| `POST` | `/api/v2/audio/speech/price`                    | Calculate TTS price                  | [→](/api/v2/audio/speech-price)               |
+| `POST` | `/api/v2/audio/music`                           | Generate music from text             | [→](/api/v2/audio/music)                      |
+| `POST` | `/api/v2/audio/music/price`                     | Calculate music price                | [→](/api/v2/audio/music-price)                |
+| `POST` | `/api/v2/audio/transcriptions`                  | Transcribe audio/video (unified)     | [→](/api/v2/audio/transcriptions)             |
+| `POST` | `/api/v2/audio/transcriptions/price`            | Calculate transcription price        | [→](/api/v2/audio/transcriptions-price)       |
+
+## Embeddings
+
+| Method | Endpoint                                        | Description                          | Docs                                          |
+| ------ | ----------------------------------------------- | ------------------------------------ | --------------------------------------------- |
+| `POST` | `/api/v2/embeddings`                            | Generate text embeddings             | [→](/api/v2/embeddings/embeddings)            |
+| `POST` | `/api/v2/embeddings/price`                      | Calculate embedding price            | [→](/api/v2/embeddings/embeddings-price)      |
+
+## Prompt Enhancement
+
+AI-powered prompt optimization tools. These endpoints share the v1 URL path — v2 clients call them without any change in authentication or rate limits.
+
+| Method | Endpoint                                        | Description                          | Docs                                                           |
+| ------ | ----------------------------------------------- | ------------------------------------ | -------------------------------------------------------------- |
+| `POST` | `/api/v1/client/prompt/image`                   | Image prompt booster                 | [→](/api/v2/prompt-enhancement/image-prompt-booster)           |
+| `POST` | `/api/v1/client/prompt/video`                   | Video prompt booster                 | [→](/api/v2/prompt-enhancement/video-prompt-booster)           |
+| `POST` | `/api/v1/client/prompt/speech`                  | Speech prompt booster                | [→](/api/v2/prompt-enhancement/speech-prompt-booster)          |
+| `POST` | `/api/v1/client/prompt/image2image`             | Image-to-image prompt booster        | [→](/api/v2/prompt-enhancement/image-to-image-prompt-booster)  |
+| `GET`  | `/api/v1/client/prompts/samples`                | Generate sample prompts              | [→](/api/v2/prompt-enhancement/sample-prompts)                 |
+
+## Utilities
+
+| Method | Endpoint                                     | Description                          | Docs                                          |
+| ------ | -------------------------------------------- | ------------------------------------ | --------------------------------------------- |
+| `GET`  | `/api/v2/account/balance`                    | Get current account balance          | [→](/api/v2/utilities/balance)                |
+| `GET`  | `/api/v2/jobs/{job_request}`                 | Check job status and get results     | [→](/api/v2/utilities/jobs)                   |
+| `GET`  | `/api/v2/models`                             | List all available models            | [→](/api/v2/utilities/models)                 |
+
+## Workflow
+
+Typical API usage follows this pattern:
+
+<Steps>
+  <Step title="Check available models">
+    Call `GET /api/v2/models` to get current models and their parameters.
+  </Step>
+  <Step title="Calculate price (optional)">
+    Call the `/price` endpoint with your parameters to estimate cost.
+  </Step>
+  <Step title="Submit job">
+    Call the main endpoint (e.g., `POST /api/v2/images/generations`). Response contains `request_id`.
+  </Step>
+  <Step title="Poll or receive via webhook">
+    Call `GET /api/v2/jobs/{request_id}` or use webhooks / WebSockets for push updates.
+  </Step>
+  <Step title="Download result">
+    When `status` is `done`, use `result_url` to download your generated content.
+  </Step>
+</Steps>
+
+## Response Formats
+
+<CodeGroup>
+
+```json Job Submission (generations, edits, etc.)
+{
+  "data": {
+    "request_id": "c08a339c-73e5-4d67-a4d5-231302fbff9a"
+  }
+}
+```
+
+
+```json Job Status (GET /api/v2/jobs/{id})
+{
+  "data": {
+    "status": "done",
+    "progress": 100.0,
+    "result_url": "https://...",
+    "result": null,
+    "preview": null
+  }
+}
+```
+
+
+```json Balance
+{
+  "balance": 19.72
+}
+```
+
+
+```json Models List
+{
+  "data": {
+    "data": [
+      {
+        "name": "Flux.1 schnell",
+        "slug": "Flux1schnell",
+        "inference_types": ["txt2img"],
+        "info": { }
+      }
+    ]
+  }
+}
+```
+
+
+```json Error (4xx/5xx)
+{
+  "data": null,
+  "message": "Error description",
+  "errors": [],
+  "statusCode": 401
+}
+```
+
+</CodeGroup>
+
+<Note>
+  Response structure varies by endpoint. See individual endpoint documentation for exact schemas.
+</Note>
+
+See [Errors](/api/v2/errors) for detailed error handling documentation.

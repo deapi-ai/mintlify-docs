@@ -1,0 +1,15 @@
+---
+title: "Get Job Results"
+openapi: "/openapi-v2.json GET /api/v2/jobs/{job_request}"
+---
+
+Retrieve the current status and result of a submitted inference job. Use the `request_id` returned by any `POST /api/v2/**` endpoint.
+
+<Info>
+**Consider using webhooks or WebSockets instead of polling.**
+
+- **[Webhooks](/execution-modes-and-integrations/webhooks)** — Results pushed to your server automatically
+- **[WebSockets](/execution-modes-and-integrations/websockets)** — Real-time updates with live previews
+
+See [Execution Modes](/execution-modes-and-integrations/execution-modes-and-http-queue) for full comparison.
+</Info>

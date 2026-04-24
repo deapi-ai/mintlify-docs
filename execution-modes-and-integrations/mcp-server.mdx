@@ -19,7 +19,7 @@ With deAPI's MCP server, Claude, ChatGPT, Cursor, and other MCP-compatible clien
 
 - Generate images, videos, and audio directly within conversations
 - Transcribe YouTube / X / Twitch / Kick / TikTok videos or audio files
-- Remove backgrounds and upscale images and videos
+- Remove backgrounds and upscale images and videos and videos
 - Check pricing before running expensive operations
 - Access all deAPI capabilities through natural language
 
@@ -46,33 +46,39 @@ The deAPI MCP server exposes the following tools:
 
 #### Image Generation & Manipulation
 
-| Tool                            | Description                                                                       |
-| ------------------------------- | --------------------------------------------------------------------------------- |
-| `text_to_image`                 | Generate images from text prompts using AI diffusion models (Flux, Z-Image-Turbo) |
-| `image_to_image`                | Transform existing images using text prompts (style transfer, editing)            |
-| `image_to_text`                 | Extract text from images using OCR                                                |
-| `image_remove_background`       | Remove background from images (transparent PNG output)                            |
-| `image_upscale`                 | Upscale images to higher resolution                                               |
-| `text_to_image_price`           | Calculate price for text-to-image generation                                      |
-| `image_to_image_price`          | Calculate price for image transformation                                          |
-| `image_to_text_price`           | Calculate price for OCR extraction                                                |
-| `image_remove_background_price` | Calculate price for background removal                                            |
-| `image_upscale_price`           | Calculate price for image upscaling                                               |
+| Tool                            | Description                                                                                                          |
+| ------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| `text_to_image`                 | Generate images from text prompts using AI diffusion models (Flux, Z-Image-Turbo) — uses `/api/v2/images/generations` |
+| `image_to_image`                | Transform existing images using text prompts (style transfer, editing) — uses `/api/v2/images/edits`                 |
+| `image_to_text`                 | Extract text from images using OCR — uses `/api/v2/images/ocr`                                                       |
+| `image_remove_background`       | Remove background from images (transparent PNG output) — uses `/api/v2/images/background-removals`                   |
+| `image_upscale`                 | Upscale images to higher resolution — uses `/api/v2/images/upscales`                                                 |
+| `text_to_image_price`           | Calculate price for text-to-image generation                                                                          |
+| `image_to_image_price`          | Calculate price for image transformation                                                                              |
+| `image_to_text_price`           | Calculate price for OCR extraction                                                                                    |
+| `image_remove_background_price` | Calculate price for background removal                                                                                |
+| `image_upscale_price`           | Calculate price for image upscaling                                                                                   |
 
 #### Video Generation & Processing
 
-| Tool                             | Description                                                    |
-| -------------------------------- | -------------------------------------------------------------- |
-| `text_to_video`                  | Generate videos from text prompts                              |
-| `image_to_video`                 | Animate static images into videos                              |
-| `audio_to_video`                 | Generate video conditioned on audio and text prompt            |
-| `video_file_transcription`       | Transcribe uploaded video files to text                        |
-| `video_url_transcription`        | Transcribe videos from URLs (YouTube, X, Twitch, TikTok, Kick) |
-| `text_to_video_price`            | Calculate price for text-to-video generation                   |
-| `image_to_video_price`           | Calculate price for image-to-video generation                  |
-| `audio_to_video_price`           | Calculate price for audio-to-video generation                  |
-| `video_file_transcription_price` | Calculate price for video file transcription                   |
-| `video_url_transcription_price`  | Calculate price for video URL transcription                    |
+| Tool                             | Description                                                                                          |
+| -------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| `text_to_video`                  | Generate videos from text prompts — uses `/api/v2/videos/generations`                                |
+| `image_to_video`                 | Animate static images into videos — uses `/api/v2/videos/animations`                                 |
+| `audio_to_video`                 | Generate video conditioned on audio and text prompt — uses `/api/v2/videos/audio-syncs`              |
+| `video_replace`                  | Replace a person in a video with a character image — uses `/api/v2/videos/replacements`              |
+| `video_upscale`                  | Upscale videos to higher resolution — uses `/api/v2/videos/upscales`                                 |
+| `video_background_removal`       | Remove background from videos (keyed/transparent output) — uses `/api/v2/videos/background-removals` |
+| `video_file_transcription`       | Transcribe uploaded video files to text — uses `/api/v2/audio/transcriptions`                        |
+| `video_url_transcription`        | Transcribe videos from URLs (YouTube, X, Twitch, TikTok, Kick) — uses `/api/v2/audio/transcriptions` |
+| `text_to_video_price`            | Calculate price for text-to-video generation                                                          |
+| `image_to_video_price`           | Calculate price for image-to-video generation                                                         |
+| `audio_to_video_price`           | Calculate price for audio-to-video generation                                                         |
+| `video_replace_price`            | Calculate price for video character replacement                                                       |
+| `video_upscale_price`            | Calculate price for video upscaling                                                                   |
+| `video_background_removal_price` | Calculate price for video background removal                                                          |
+| `video_file_transcription_price` | Calculate price for video file transcription                                                          |
+| `video_url_transcription_price`  | Calculate price for video URL transcription                                                           |
 
 #### Audio & Speech
 

@@ -1,0 +1,11 @@
+---
+title: "Video Background Removal"
+openapi: "/openapi-v2.json POST /api/v2/videos/background-removals"
+description: "Remove the background from a video for transparent or keyed output."
+---
+
+Remove the background from an input video, producing a keyed/transparent output usable for compositing. Available exclusively in v2. Returns a `request_id` for status polling.
+
+<Note>
+**Prerequisite:** Consult the [Model Selection](/api/v2/utilities/models) endpoint to identify a valid model `slug` and check specific **limits**.
+</Note>

@@ -1,0 +1,31 @@
+---
+title: "Prompt Enhancement"
+description: "AI-powered prompt optimization tools for better generation results."
+---
+
+<Info>
+Prompt Enhancement endpoints share the v1 URL path (`/api/v1/client/prompt/*` and `/api/v1/client/prompts/samples`). v2 clients call them with the same Bearer token and without changes to request structure — they remain stable across API versions.
+</Info>
+
+## Available Boosters
+
+| Booster                                                                                     | Endpoint                                    | Use Case                                 |
+| ------------------------------------------------------------------------------------------- | ------------------------------------------- | ---------------------------------------- |
+| [Image Prompt Booster](/api/v2/prompt-enhancement/image-prompt-booster)                     | `POST /api/v1/client/prompt/image`          | Text-to-image generation                 |
+| [Video Prompt Booster](/api/v2/prompt-enhancement/video-prompt-booster)                     | `POST /api/v1/client/prompt/video`          | Text/image-to-video generation           |
+| [Speech Prompt Booster](/api/v2/prompt-enhancement/speech-prompt-booster)                   | `POST /api/v1/client/prompt/speech`         | Text-to-speech synthesis                 |
+| [Image-to-Image Booster](/api/v2/prompt-enhancement/image-to-image-prompt-booster)          | `POST /api/v1/client/prompt/image2image`    | Image transformation (`img2img`) prompts |
+| [Sample Prompts](/api/v2/prompt-enhancement/sample-prompts)                                 | `GET /api/v1/client/prompts/samples`        | Generate creative prompt ideas           |
+
+## Workflow
+
+<Steps>
+  <Step title="Enhance your prompt">
+    Call the appropriate booster endpoint with your raw prompt (e.g., `POST /api/v1/client/prompt/image`).
+  </Step>
+  <Step title="Use the enhanced prompt">
+    Plug the returned optimized prompt into any v2 generation endpoint — `/api/v2/images/generations`, `/api/v2/videos/generations`, `/api/v2/audio/speech`, etc.
+  </Step>
+</Steps>
+
+See individual booster pages for request/response schemas.

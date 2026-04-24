@@ -1,0 +1,10 @@
+---
+title: "Embeddings"
+openapi: "/openapi-v2.json POST /api/v2/embeddings"
+---
+
+Generate vector embeddings from text for semantic search, clustering, and retrieval-augmented generation (RAG). Returns a `request_id` for status polling.
+
+<Note>
+**Prerequisite:** Consult the [Model Selection](/api/v2/utilities/models) endpoint to identify a valid model `slug` and check its vector dimensionality and maximum input length.
+</Note>
