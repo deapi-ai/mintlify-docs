@@ -13,10 +13,17 @@
     "dark": "#E58A00"
   },
   "api": {
+    "openapi": [
+      "openapi.json",
+      "openapi-v2.json"
+    ],
     "baseUrl": "https://api.deapi.ai",
     "auth": {
       "method": "bearer"
     }
+  },
+  "seo": {
+    "indexing": "all"
   },
   "navbar": {
     "links": [
