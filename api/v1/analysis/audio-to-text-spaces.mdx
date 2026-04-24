@@ -4,7 +4,7 @@ openapi: "/openapi.json POST /api/v1/client/aud2txt"
 ---
 
 <Note>
-**Prerequisite:** To ensure a successful request, you must first consult the [Model Selection](/api/utilities/model-selection) endpoint to identify a valid model `slug`, check specific **limits** and **features**, and verify **LoRA** availability.
+**Prerequisite:** To ensure a successful request, you must first consult the [Model Selection](/api/v1/utilities/model-selection) endpoint to identify a valid model `slug`, check specific **limits** and **features**, and verify **LoRA** availability.
 </Note>
 
 ## Technical Notes & Constraints
@@ -21,5 +21,5 @@ openapi: "/openapi.json POST /api/v1/client/aud2txt"
 - A prolonged 0% status is normal behavior for long X Spaces.
 
 <Info>
-Transcription for standard video posts on X is handled via the [Video-to-Text](/api/analysis/video-to-text) endpoint.
+Transcription for standard video posts on X is handled via the [Video-to-Text](/api/v1/analysis/video-to-text) endpoint.
 </Info>

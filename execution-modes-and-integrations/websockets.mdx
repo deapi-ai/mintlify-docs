@@ -84,7 +84,7 @@ For maximum reliability, use both: WebSockets for real-time UI updates and webho
 ### Required Credentials
 
 - **Client ID:** Your unique identifier (from [dashboard](https://app.deapi.ai/dashboard))
-- **API Token:** Your authentication token (see [Authentication](/authentication))
+- **API Token:** Your authentication token (see [Quickstart](/quickstart))
 
 ## Connecting
 
@@ -265,7 +265,7 @@ pending → processing → in_progress (multiple) → done
 | `processing` | Worker assigned, starting | Yes |
 | `in_progress` | Actively generating | Yes (with previews) |
 | `done` | Completed successfully | Yes (with result URL) |
-| `error` | Failed | Via [webhooks](/webhooks) only |
+| `error` | Failed | Via [webhooks](/execution-modes-and-integrations/webhooks) only |
 
 ## Complete Examples
 
@@ -470,6 +470,6 @@ pusher.disconnect();
   <Accordion title="Connection drops frequently">
     - The client library reconnects automatically
     - Monitor `state_change` events to track connection health
-    - Consider using [webhooks](/webhooks) as a backup
+    - Consider using [webhooks](/execution-modes-and-integrations/webhooks) as a backup
   </Accordion>
 </AccordionGroup>

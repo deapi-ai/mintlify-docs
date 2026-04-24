@@ -6,7 +6,7 @@ openapi: "/openapi.json POST /api/v1/client/txt2music"
 Text-to-Music generates music tracks from text descriptions. You can control genre, tempo, key, time signature, and even provide lyrics. Optionally upload a `reference_audio` file for style transfer — the model will use it as a stylistic reference for the generated track. The endpoint returns a task ID to track processing status. Ideal for apps needing automated music creation — background tracks, jingles, or full songs with vocals.
 
 <Note>
-**Prerequisite:** To ensure a successful request, you must first consult the [Model Selection](/api/utilities/model-selection) endpoint to identify a valid model `slug` and check specific **limits**.
+**Prerequisite:** To ensure a successful request, you must first consult the [Model Selection](/api/v1/utilities/model-selection) endpoint to identify a valid model `slug` and check specific **limits**.
 </Note>
 
 <Warning>
