@@ -145,8 +145,6 @@
               "api/v2/videos/audio-syncs-price",
               "api/v2/videos/replacements",
               "api/v2/videos/replacements-price",
-              "api/v2/videos/background-removals",
-              "api/v2/videos/background-removals-price",
               "api/v2/videos/upscales",
               "api/v2/videos/upscales-price"
             ]
