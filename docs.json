@@ -22,7 +22,7 @@
     "links": [
       {
         "label": "Dashboard",
-        "href": "https://deapi.ai/dashboard"
+        "href": "https://app.deapi.ai/dashboard"
       },
       {
         "label": "Status",
@@ -36,7 +36,7 @@
     "primary": {
       "type": "button",
       "label": "Get API Key",
-      "href": "https://deapi.ai/dashboard"
+      "href": "https://app.deapi.ai/dashboard"
     }
   },
   "footer": {
