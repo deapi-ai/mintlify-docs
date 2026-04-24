@@ -5464,7 +5464,7 @@
                                     "model": {
                                         "description": "The upscaling model to use",
                                         "type": "string",
-                                        "example": "RealESRGAN_x4plus"
+                                        "example": "RealESRGAN_Vid_x4"
                                     },
                                     "scale": {
                                         "description": "Optional upscale factor (e.g. 2, 4). Only allowed for models that support a configurable scale; fixed-scale models (e.g. x2/x4 only) reject this field. Validated against the per-model min/max scale defined in the admin panel.",
@@ -5566,7 +5566,7 @@
                                             "model": {
                                                 "description": "The upscaling model to use",
                                                 "type": "string",
-                                                "example": "RealESRGAN_x4plus"
+                                                "example": "RealESRGAN_Vid_x4"
                                             },
                                             "scale": {
                                                 "description": "Optional upscale factor. Only allowed for models that support a configurable scale.",
@@ -5607,7 +5607,7 @@
                                             "model": {
                                                 "description": "The upscaling model to use",
                                                 "type": "string",
-                                                "example": "RealESRGAN_x4plus"
+                                                "example": "RealESRGAN_Vid_x4"
                                             },
                                             "scale": {
                                                 "description": "Optional upscale factor. Only allowed for models that support a configurable scale.",
