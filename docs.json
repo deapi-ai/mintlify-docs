@@ -13,16 +13,23 @@
     "dark": "#E58A00"
   },
   "api": {
+    "openapi": [
+      "openapi.json",
+      "openapi-v2.json"
+    ],
     "baseUrl": "https://api.deapi.ai",
     "auth": {
       "method": "bearer"
     }
   },
+  "seo": {
+    "indexing": "all"
+  },
   "navbar": {
     "links": [
       {
         "label": "Dashboard",
-        "href": "https://deapi.ai/dashboard"
+        "href": "https://app.deapi.ai/dashboard"
       },
       {
         "label": "Status",
@@ -36,7 +43,7 @@
     "primary": {
       "type": "button",
       "label": "Get API Key",
-      "href": "https://deapi.ai/dashboard"
+      "href": "https://app.deapi.ai/dashboard"
     }
   },
   "footer": {
@@ -65,140 +72,226 @@
     ]
   },
   "navigation": {
-    "groups": [
+    "tabs": [
       {
-        "group": "Get started",
-        "pages": [
-          "introduction",
-          "quickstart",
-          "models",
-          "pricing",
-          "architecture-and-security",
-          "limits-and-quotas"
-        ]
-      },
-      {
-        "group": "Execution Modes & Integrations",
-        "pages": [
-          "execution-modes-and-integrations/execution-modes-and-http-queue",
-          "execution-modes-and-integrations/webhooks",
-          "execution-modes-and-integrations/websockets",
-          "execution-modes-and-integrations/mcp-server",
-          "execution-modes-and-integrations/n8n-integration",
-          "execution-modes-and-integrations/n8n-deapi-node"
-        ]
-      },
-      {
-        "group": "API",
-        "pages": [
-          "api/overview",
-          "api/errors",
+        "tab": "Guides",
+        "groups": [
           {
-            "group": "Generation",
-            "expanded": false,
+            "group": "Get started",
             "pages": [
-              "api/generation/text-to-image",
-              "api/generation/text-to-image-price",
-              "api/generation/text-to-video",
-              "api/generation/text-to-video-price",
-              "api/generation/image-to-video",
-              "api/generation/image-to-video-price",
-              "api/generation/audio-to-video",
-              "api/generation/audio-to-video-price",
-              "api/generation/text-to-speech",
-              "api/generation/text-to-speech-price",
-              "api/generation/text-to-music",
-              "api/generation/text-to-music-price",
-              "api/generation/text-to-embedding",
-              "api/generation/text-to-embedding-price"
+              "introduction",
+              "quickstart",
+              "models",
+              "pricing",
+              "architecture-and-security",
+              "limits-and-quotas"
             ]
           },
           {
-            "group": "Analysis",
-            "expanded": false,
+            "group": "Execution Modes & Integrations",
             "pages": [
-              "api/analysis/image-to-text",
-              "api/analysis/image-to-text-price",
-              "api/analysis/video-to-text",
-              "api/analysis/video-to-text-price",
-              "api/analysis/audio-to-text-spaces",
-              "api/analysis/audio-to-text-spaces-price",
-              "api/analysis/upload-video-file",
-              "api/analysis/upload-video-file-price",
-              "api/analysis/upload-audio-file",
-              "api/analysis/upload-audio-file-price",
-              "api/analysis/transcribe",
-              "api/analysis/transcribe-price"
+              "execution-modes-and-integrations/execution-modes-and-http-queue",
+              "execution-modes-and-integrations/webhooks",
+              "execution-modes-and-integrations/websockets",
+              "execution-modes-and-integrations/mcp-server",
+              "execution-modes-and-integrations/n8n-integration",
+              "execution-modes-and-integrations/n8n-deapi-node"
             ]
           },
           {
-            "group": "Transformation",
-            "expanded": false,
+            "group": "Other",
             "pages": [
-              "api/transformation/image-to-image",
-              "api/transformation/image-to-image-price",
-              "api/transformation/video-replace",
-              "api/transformation/video-replace-price",
-              "api/transformation/background-removal",
-              "api/transformation/background-removal-price",
-              "api/transformation/image-upscale",
-              "api/transformation/image-upscale-price",
-              "api/transformation/video-upscale",
-              "api/transformation/video-upscale-price"
-            ]
-          },
-          {
-            "group": "Prompt Enhancement",
-            "expanded": false,
-            "pages": [
-              "api/prompt-enhancement/overview",
-              "api/prompt-enhancement/image-prompt-booster",
-              "api/prompt-enhancement/image-prompt-booster-price",
-              "api/prompt-enhancement/video-prompt-booster",
-              "api/prompt-enhancement/video-prompt-booster-price",
-              "api/prompt-enhancement/speech-prompt-booster",
-              "api/prompt-enhancement/speech-prompt-booster-price",
-              "api/prompt-enhancement/image-to-image-prompt-booster",
-              "api/prompt-enhancement/image-to-image-prompt-booster-price",
-              "api/prompt-enhancement/sample-prompts",
-              "api/prompt-enhancement/sample-prompts-price"
-            ]
-          },
-          {
-            "group": "Utilities",
-            "expanded": false,
-            "pages": [
-              "api/utilities/check-balance",
-              "api/utilities/get-results",
-              "api/utilities/model-selection"
+              "other/sdks-and-integrations",
+              "other/payment-methods",
+              "other/faq-frequently-asked-questions",
+              "other/support-and-contact"
             ]
           }
         ]
       },
       {
-        "group": "Other",
-        "pages": [
-          "other/sdks-and-integrations",
-          "other/payment-methods",
-          "other/faq-frequently-asked-questions",
-          "other/support-and-contact"
+        "tab": "API v2 (Latest)",
+        "groups": [
+          {
+            "group": "Overview",
+            "pages": [
+              "api/v2/overview",
+              "api/v2/errors"
+            ]
+          },
+          {
+            "group": "Images",
+            "pages": [
+              "api/v2/images/generations",
+              "api/v2/images/generations-price",
+              "api/v2/images/edits",
+              "api/v2/images/edits-price",
+              "api/v2/images/ocr",
+              "api/v2/images/ocr-price",
+              "api/v2/images/background-removals",
+              "api/v2/images/background-removals-price",
+              "api/v2/images/upscales",
+              "api/v2/images/upscales-price"
+            ]
+          },
+          {
+            "group": "Videos",
+            "pages": [
+              "api/v2/videos/generations",
+              "api/v2/videos/generations-price",
+              "api/v2/videos/animations",
+              "api/v2/videos/animations-price",
+              "api/v2/videos/audio-syncs",
+              "api/v2/videos/audio-syncs-price",
+              "api/v2/videos/replacements",
+              "api/v2/videos/replacements-price",
+              "api/v2/videos/upscales",
+              "api/v2/videos/upscales-price"
+            ]
+          },
+          {
+            "group": "Audio",
+            "pages": [
+              "api/v2/audio/speech",
+              "api/v2/audio/speech-price",
+              "api/v2/audio/music",
+              "api/v2/audio/music-price",
+              "api/v2/audio/transcriptions",
+              "api/v2/audio/transcriptions-price"
+            ]
+          },
+          {
+            "group": "Embeddings",
+            "pages": [
+              "api/v2/embeddings/embeddings",
+              "api/v2/embeddings/embeddings-price"
+            ]
+          },
+          {
+            "group": "Prompt Enhancement",
+            "pages": [
+              "api/v2/prompt-enhancement/overview",
+              "api/v2/prompt-enhancement/image-prompt-booster",
+              "api/v2/prompt-enhancement/image-prompt-booster-price",
+              "api/v2/prompt-enhancement/video-prompt-booster",
+              "api/v2/prompt-enhancement/video-prompt-booster-price",
+              "api/v2/prompt-enhancement/speech-prompt-booster",
+              "api/v2/prompt-enhancement/speech-prompt-booster-price",
+              "api/v2/prompt-enhancement/image-to-image-prompt-booster",
+              "api/v2/prompt-enhancement/image-to-image-prompt-booster-price",
+              "api/v2/prompt-enhancement/sample-prompts",
+              "api/v2/prompt-enhancement/sample-prompts-price"
+            ]
+          },
+          {
+            "group": "Utilities",
+            "pages": [
+              "api/v2/utilities/balance",
+              "api/v2/utilities/jobs",
+              "api/v2/utilities/models"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "API v1 (Stable)",
+        "groups": [
+          {
+            "group": "Overview",
+            "pages": [
+              "api/v1/overview",
+              "api/v1/errors"
+            ]
+          },
+          {
+            "group": "Generation",
+            "pages": [
+              "api/v1/generation/text-to-image",
+              "api/v1/generation/text-to-image-price",
+              "api/v1/generation/text-to-video",
+              "api/v1/generation/text-to-video-price",
+              "api/v1/generation/image-to-video",
+              "api/v1/generation/image-to-video-price",
+              "api/v1/generation/audio-to-video",
+              "api/v1/generation/audio-to-video-price",
+              "api/v1/generation/text-to-speech",
+              "api/v1/generation/text-to-speech-price",
+              "api/v1/generation/text-to-music",
+              "api/v1/generation/text-to-music-price",
+              "api/v1/generation/text-to-embedding",
+              "api/v1/generation/text-to-embedding-price"
+            ]
+          },
+          {
+            "group": "Analysis",
+            "pages": [
+              "api/v1/analysis/image-to-text",
+              "api/v1/analysis/image-to-text-price",
+              "api/v1/analysis/video-to-text",
+              "api/v1/analysis/video-to-text-price",
+              "api/v1/analysis/audio-to-text-spaces",
+              "api/v1/analysis/audio-to-text-spaces-price",
+              "api/v1/analysis/upload-video-file",
+              "api/v1/analysis/upload-video-file-price",
+              "api/v1/analysis/upload-audio-file",
+              "api/v1/analysis/upload-audio-file-price",
+              "api/v1/analysis/transcribe",
+              "api/v1/analysis/transcribe-price"
+            ]
+          },
+          {
+            "group": "Transformation",
+            "pages": [
+              "api/v1/transformation/image-to-image",
+              "api/v1/transformation/image-to-image-price",
+              "api/v1/transformation/video-replace",
+              "api/v1/transformation/video-replace-price",
+              "api/v1/transformation/background-removal",
+              "api/v1/transformation/background-removal-price",
+              "api/v1/transformation/image-upscale",
+              "api/v1/transformation/image-upscale-price",
+              "api/v1/transformation/video-upscale",
+              "api/v1/transformation/video-upscale-price"
+            ]
+          },
+          {
+            "group": "Prompt Enhancement",
+            "pages": [
+              "api/v1/prompt-enhancement/overview",
+              "api/v1/prompt-enhancement/image-prompt-booster",
+              "api/v1/prompt-enhancement/image-prompt-booster-price",
+              "api/v1/prompt-enhancement/video-prompt-booster",
+              "api/v1/prompt-enhancement/video-prompt-booster-price",
+              "api/v1/prompt-enhancement/speech-prompt-booster",
+              "api/v1/prompt-enhancement/speech-prompt-booster-price",
+              "api/v1/prompt-enhancement/image-to-image-prompt-booster",
+              "api/v1/prompt-enhancement/image-to-image-prompt-booster-price",
+              "api/v1/prompt-enhancement/sample-prompts",
+              "api/v1/prompt-enhancement/sample-prompts-price"
+            ]
+          },
+          {
+            "group": "Utilities",
+            "pages": [
+              "api/v1/utilities/check-balance",
+              "api/v1/utilities/get-results",
+              "api/v1/utilities/model-selection"
+            ]
+          }
         ]
       }
+    ],
+    "anchors": [
+      {
+        "anchor": "Status",
+        "icon": "signal",
+        "href": "https://status.deapi.ai/"
+      },
+      {
+        "anchor": "Discord",
+        "icon": "discord",
+        "href": "https://discord.com/invite/UFfK5YRBsr"
+      }
     ]
-  },
-  "anchors": [
-    {
-      "anchor": "Status",
-      "icon": "signal",
-      "href": "https://status.deapi.ai/"
-    },
-    {
-      "anchor": "Discord",
-      "icon": "discord",
-      "href": "https://discord.com/invite/UFfK5YRBsr"
-    }
-  ],
-  "seo": {
-    "indexing": "all"
   }
 }

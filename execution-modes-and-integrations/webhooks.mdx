@@ -5,7 +5,7 @@ description: "Receive real-time notifications about job status changes"
 
 ## Overview
 
-Webhooks allow you to receive real-time HTTP notifications when your inference jobs change status, eliminating the need to poll the `/request-status` endpoint.
+Webhooks allow you to receive real-time HTTP notifications when your inference jobs change status, eliminating the need to poll the `/api/v2/jobs/{id}` endpoint.
 
 <Info>
   Webhooks are sent as `POST` requests to your specified URL with a JSON payload and security headers for verification.
@@ -73,7 +73,7 @@ All webhook requests include these headers:
         "job_request_id": "123e4567-e89b-12d3-a456-426614174000",
         "status": "processing",
         "previous_status": "pending",
-        "job_type": "txt2img",
+        "job_type": "image_generation",
         "started_at": "2024-01-15T10:30:00.000Z"
       }
     }
@@ -84,7 +84,7 @@ All webhook requests include these headers:
     | `data.job_request_id`  | string (UUID)     | Your job's unique identifier             |
     | `data.status`          | string            | Current status: `processing`             |
     | `data.previous_status` | string            | Previous status: `pending`               |
-    | `data.job_type`        | string            | Type of job (e.g., `txt2img`, `vid2txt`) |
+    | `data.job_type`        | string            | Type of job (e.g., `image_generation`, `video_upscale`, `transcription`) |
     | `data.started_at`      | string (ISO 8601) | When processing began                    |
   </Tab>
   <Tab title="job.completed">
@@ -99,7 +99,7 @@ All webhook requests include these headers:
         "job_request_id": "123e4567-e89b-12d3-a456-426614174000",
         "status": "done",
         "previous_status": "processing",
-        "job_type": "txt2img",
+        "job_type": "image_generation",
         "completed_at": "2024-01-15T10:30:45.000Z",
         "result_url": "https://storage.deapi.ai/results/.../output.png",
         "processing_time_ms": 45000
@@ -129,7 +129,7 @@ All webhook requests include these headers:
         "job_request_id": "123e4567-e89b-12d3-a456-426614174000",
         "status": "error",
         "previous_status": "processing",
-        "job_type": "txt2img",
+        "job_type": "image_generation",
         "failed_at": "2024-01-15T10:30:45.000Z",
         "error_code": "WORKER_TIMEOUT",
         "error_message": "Worker failed to respond within the allowed time"

@@ -54,21 +54,23 @@ To add funds, go to your [Dashboard → Billing](https://app.deapi.ai/billing) s
 
 Once your API key is activated and your account has sufficient credits, you can start making requests to deAPI immediately.
 
-**Available Services:**
+**Available Services (v2):**
 
-- **Text-to-Image** – Generate visuals from descriptive text prompts.
-- **Text-to-Speech (TTS)** – Convert text into high-quality spoken audio. Supports preset voices, voice cloning from reference audio, and voice design from text descriptions.
-- **Text-to-Music** – Generate music tracks from text descriptions with control over lyrics, tempo, key, and style.
-- **Video-to-Text** – Automatically transcribe audio and video files. Transcript from url X, Twitch, Kick, TikTok, YouTube.
-- **Audio-to-Text** - Ability to transcribe from X (Twitter) Spaces.
-- **Image-to-Text** – Extract written content from images using AI-powered optical character recognition (OCR).
-- **Text-to-Video** – Generate dynamic video content from descriptive text prompts using advanced generative models.
-- **Image-to-Video** – Transform static images into animated video sequences with motion synthesis and scene expansion.
-- **Image-to-Image** – Modify or restyle existing images based on new prompts, masks, or style instructions.
-- **Image Background Removal** – Remove backgrounds from images for product photos, portraits, and transparent PNGs.
-- **Image Upscale** – Upscale images to higher resolution using AI-powered super-resolution models.
-- **Video Upscale** – Upscale videos to higher resolution using AI-powered super-resolution models.
-- **Text-to-Embedding** – Convert text into vector embeddings for semantic search, similarity matching, and retrieval-augmented generation (RAG).
+- **Image Generation** — `POST /api/v2/images/generations` — Generate images from text prompts using AI diffusion models.
+- **Image Edit** — `POST /api/v2/images/edits` — Transform existing images with text prompts.
+- **Image OCR** — `POST /api/v2/images/ocr` — Extract text from images.
+- **Image Background Removal** — `POST /api/v2/images/background-removals` — Transparent PNG output.
+- **Image Upscale** — `POST /api/v2/images/upscales` — AI super-resolution for images.
+- **Video Generation** — `POST /api/v2/videos/generations` — Generate videos from text prompts.
+- **Video Animation (Image-to-Video)** — `POST /api/v2/videos/animations` — Animate still images.
+- **Video Audio Sync** — `POST /api/v2/videos/audio-syncs` — Generate video from audio + prompt.
+- **Video Replacement** — `POST /api/v2/videos/replacements` — Swap characters in videos.
+- **Video Upscale** — `POST /api/v2/videos/upscales` — AI super-resolution for videos.
+- **Text-to-Speech** — `POST /api/v2/audio/speech` — Preset voices, voice cloning, voice design.
+- **Text-to-Music** — `POST /api/v2/audio/music` — Tracks with lyrics, tempo, key, style control.
+- **Transcription** — `POST /api/v2/audio/transcriptions` — Unified audio + video (YouTube, X, Twitch, Kick, TikTok, X/Twitter Spaces, file uploads).
+- **Text-to-Embedding** — `POST /api/v2/embeddings` — Vector embeddings for semantic search and RAG.
+- **Prompt Enhancement** — `/api/v1/client/prompt/*` — AI-powered prompt boosters (shared with v1).
 
 ---
 

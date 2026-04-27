@@ -13,7 +13,7 @@ All deAPI model endpoints use an **asynchronous job queue**. You submit a reques
     Real-time updates with live previews.
   </Card>
   <Card title="Polling" icon="rotate">
-    Query `/request-status` manually.
+    Query `/api/v2/jobs/{id}` manually.
   </Card>
 </CardGroup>
 
@@ -29,7 +29,7 @@ With webhooks, deAPI sends an HTTP POST to your server when a job completes. Con
 
 ```bash
 # 1. Submit job with webhook_url
-curl -X POST https://api.deapi.ai/api/v1/client/txt2img \
+curl -X POST https://api.deapi.ai/api/v2/images/generations \
   -H "Authorization: Bearer $API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
@@ -57,7 +57,7 @@ curl -X POST https://api.deapi.ai/api/v1/client/txt2img \
   "data": {
     "job_request_id": "123e4567-e89b-12d3-a456-426614174000",
     "status": "done",
-    "job_type": "txt2img",
+    "job_type": "image_generation",
     "result_url": "https://storage.deapi.ai/results/.../output.png",
     "processing_time_ms": 45000
   }
@@ -128,7 +128,7 @@ If webhooks or WebSockets aren't feasible, poll the status endpoint:
 
 ```bash
 # 1. Submit job (without webhook_url)
-curl -X POST https://api.deapi.ai/api/v1/client/txt2img \
+curl -X POST https://api.deapi.ai/api/v2/images/generations \
   -H "Authorization: Bearer $API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
@@ -144,7 +144,7 @@ curl -X POST https://api.deapi.ai/api/v1/client/txt2img \
 # Response: {"data": {"request_id": "abc123..."}}
 
 # 2. Poll for results
-curl https://api.deapi.ai/api/v1/client/request-status/abc123 \
+curl https://api.deapi.ai/api/v2/jobs/abc123 \
   -H "Authorization: Bearer $API_KEY"
 ```
 
@@ -161,7 +161,7 @@ curl https://api.deapi.ai/api/v1/client/request-status/abc123 \
   Polling adds latency, wastes resources with unnecessary requests, and provides no live previews. Use webhooks or WebSockets when possible.
 </Warning>
 
-→ [Get Results Endpoint Reference](/api/utilities/get-results)
+→ [Get Job Results Endpoint Reference](/api/v2/utilities/jobs)
 
 ---
 
@@ -187,7 +187,7 @@ Every model endpoint follows the same pattern:
 
 <Steps>
   <Step title="Submit request">
-    Send `POST /api/v1/client/{task}` with your parameters (optionally include `webhook_url`).
+    Send `POST /api/v2/{resource}/{operation}` with your parameters (optionally include `webhook_url`).
   </Step>
   <Step title="Receive request_id">
     Response contains `request_id` for tracking.
@@ -216,7 +216,7 @@ This queued model:
 
 | Endpoint                                         | Description                  |
 | ------------------------------------------------ | ---------------------------- |
-| `POST /api/v1/client/{task}`                     | Submit a job                 |
-| `GET /api/v1/client/request-status/{request_id}` | Check job status (polling)   |
+| `POST /api/v2/{resource}/{operation}`            | Submit a job                 |
+| `GET /api/v2/jobs/{request_id}`                  | Check job status (polling)   |
 | `POST {your_webhook_url}`                        | Receive webhook notification |
 | `wss://soketi.deapi.ai`                          | WebSocket connection         |

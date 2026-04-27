@@ -1,0 +1,10 @@
+---
+title: "Model Selection"
+openapi: "/openapi-v2.json GET /api/v2/models"
+---
+
+List every available model with `slug`, supported `inference_types`, per-model limits (resolution, duration, steps), and feature flags (e.g., LoRA support).
+
+<Tip>
+Call `GET /api/v2/models` once at session start, cache the result, and use the returned `slug` values in your generation/edit requests. Filter with `?filter[inference_types]=txt2img` to narrow results by task.
+</Tip>

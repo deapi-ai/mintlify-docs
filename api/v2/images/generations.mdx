@@ -1,0 +1,10 @@
+---
+title: "Image Generation"
+openapi: "/openapi-v2.json POST /api/v2/images/generations"
+---
+
+Image Generation creates images from text prompts using AI diffusion models. The endpoint returns a `request_id` you can poll via `GET /api/v2/jobs/{request_id}` or receive via webhooks / WebSockets.
+
+<Note>
+**Prerequisite:** Consult the [Model Selection](/api/v2/utilities/models) endpoint to identify a valid model `slug`, check specific **limits** and **features**, and verify **LoRA** availability. Please **omit** the LoRA parameter by default during initial testing.
+</Note>

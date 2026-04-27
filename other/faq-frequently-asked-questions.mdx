@@ -32,7 +32,7 @@ Authorization: Bearer YOUR_API_KEY
 
 #### 5. **How do I retrieve the results of my tasks?**
 
-After submitting a task, you'll receive a `request_id`. Use this ID with the **Get Results** endpoint (`GET /api/v1/client/request-status/{request_id}`) to fetch your generated image, video, audio, or transcription.
+After submitting a task, you'll receive a `request_id`. Use this ID with the **Get Job Results** endpoint (`GET /api/v2/jobs/{request_id}`) to fetch your generated image, video, audio, or transcription.
 
 ---
 
@@ -55,7 +55,7 @@ Yes. Visit the **Model Selection** endpoint to browse available models, or check
 
 #### 8. **What file types are supported?**
 
-**Video** (Video-to-Text, Image-to-Video, Video Upscale, Video Replace):
+**Video** (Transcription, Animation, Upscale, Replacement):
 
 - Max size: 80 MB
 - Supported formats: mp4, avi, mov, mkv, webm
@@ -74,21 +74,23 @@ Yes. Visit the **Model Selection** endpoint to browse available models, or check
 
 #### 9. **What services does deAPI offer?**
 
-deAPI provides the following AI-powered services:
+deAPI provides the following AI-powered services (v2 REST API):
 
-- **Text-to-Image** — Generate images from text prompts (Flux, Z-Image-Turbo)
-- **Image-to-Image** — Transform and edit existing images
-- **Image Background Removal** — Remove backgrounds for transparent PNGs
-- **Text-to-Video** — Generate videos from text descriptions
-- **Image-to-Video** — Animate static images into videos
-- **Text-to-Speech (TTS)** — Convert text to natural-sounding audio with preset voices, voice cloning, or voice design
-- **Text-to-Music** — Generate music tracks from text descriptions with lyrics, tempo, key, and style control
-- **Video-to-Text** — Transcribe videos from YouTube, Twitch, Kick, TikTok, X, and file uploads
-- **Audio-to-Text** — Transcribe audio files and X/Twitter Spaces
-- **Image-to-Text (OCR)** — Extract text from images
-- **Image Upscale** — Upscale images to higher resolution
-- **Video Upscale** — Upscale videos to higher resolution
-- **Text-to-Embedding** — Generate vector embeddings for semantic search
+- **Image Generation** — `/api/v2/images/generations`
+- **Image Edit** — `/api/v2/images/edits`
+- **Image OCR** — `/api/v2/images/ocr`
+- **Image Background Removal** — `/api/v2/images/background-removals`
+- **Image Upscale** — `/api/v2/images/upscales`
+- **Video Generation** — `/api/v2/videos/generations`
+- **Video Animation** — `/api/v2/videos/animations`
+- **Video Audio Sync** — `/api/v2/videos/audio-syncs`
+- **Video Replacement** — `/api/v2/videos/replacements`
+- **Video Upscale** — `/api/v2/videos/upscales`
+- **Text-to-Speech** — `/api/v2/audio/speech`
+- **Text-to-Music** — `/api/v2/audio/music`
+- **Transcription** (unified audio/video) — `/api/v2/audio/transcriptions`
+- **Text-to-Embedding** — `/api/v2/embeddings`
+- **Prompt Enhancement** — `/api/v1/client/prompt/*` (shared with v1)
 
 ---
 
@@ -104,13 +106,22 @@ Yes! deAPI works seamlessly with **n8n** and other workflow automation platforms
 
 ---
 
-#### 12. **Is deAPI ready for production use?**
+#### 12. **What's the difference between v1 and v2?**
+
+- **v2** (default, REST-style) — Resource-based URLs (`/api/v2/images/generations`, `/api/v2/videos/upscales`), unified transcription (`/audio/transcriptions` replaces 5 separate v1 endpoints), new video background removal endpoint.
+- **v1** (stable, task-style) — Task-based URLs (`/api/v1/client/txt2img`, `/api/v1/client/vid-upscale`). Fully supported for existing integrations.
+
+Both versions share authentication, rate limits, webhooks, and the same model catalog. Prompt Enhancement endpoints remain under the v1 path and are accessible from both. Switch docs version using the dropdown in the top-right corner.
+
+---
+
+#### 13. **Is deAPI ready for production use?**
 
 Yes. deAPI is built to support production-grade workloads. All models and services are optimized for speed, reliability, and scalability. The platform offers 300 RPM immediately after the first account top-up.
 
 ---
 
-#### 13. **What should I do if I get an error?**
+#### 14. **What should I do if I get an error?**
 
 Check the error code and make sure:
 

@@ -1,0 +1,15 @@
+---
+title: "Audio/Video Transcription"
+openapi: "/openapi-v2.json POST /api/v2/audio/transcriptions"
+description: "Unified transcription — auto-detects URL or file upload for audio and video sources (YouTube, X, Twitch, Kick, TikTok, X/Twitter Spaces)."
+---
+
+Unified transcription endpoint that replaces the five v1 endpoints (`vid2txt`, `aud2txt`, `videofile2txt`, `audiofile2txt`, `transcribe`). Accepts URLs or multipart file uploads. Returns a `request_id` for status polling.
+
+<Info>
+Source detection is automatic: pass a public `video_url` / `audio_url`, or upload a file via multipart form-data.
+</Info>
+
+<Note>
+**Prerequisite:** Consult the [Model Selection](/api/v2/utilities/models) endpoint to identify a valid model `slug` and check supported languages.
+</Note>

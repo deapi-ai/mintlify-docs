@@ -1,0 +1,11 @@
+---
+title: "Video Replacement"
+openapi: "/openapi-v2.json POST /api/v2/videos/replacements"
+description: "Replace a person in a video with a character from a reference image."
+---
+
+Swap a character in an input video for one shown in a reference image, preserving motion and composition. Returns a `request_id` for status polling.
+
+<Note>
+**Prerequisite:** Consult the [Model Selection](/api/v2/utilities/models) endpoint to identify a valid model `slug` and check specific **limits**.
+</Note>
