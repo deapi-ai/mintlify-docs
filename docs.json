@@ -194,7 +194,7 @@
         ]
       },
       {
-        "tab": "API v1 (Stable)",
+        "tab": "API v1 (Depricated)",
         "groups": [
           {
             "group": "Overview",
@@ -279,18 +279,6 @@
             ]
           }
         ]
-      }
-    ],
-    "anchors": [
-      {
-        "anchor": "Status",
-        "icon": "signal",
-        "href": "https://status.deapi.ai/"
-      },
-      {
-        "anchor": "Discord",
-        "icon": "discord",
-        "href": "https://discord.com/invite/UFfK5YRBsr"
       }
     ]
   }
