@@ -1,0 +1,383 @@
+---
+title: "OpenAI Compatibility"
+description: "Use deAPI as a drop-in replacement for OpenAI SDK — change two parameters, keep all your existing code."
+---
+
+deAPI's OpenAI-compatible API gives you access to image generation, speech synthesis, transcription, video generation, and embeddings — at lower cost, on decentralized GPU infrastructure. Switch from OpenAI by changing two parameters. Your existing code stays unchanged.
+
+This is the same approach used by Groq, Together AI, Fireworks AI, and other leading inference providers.
+
+---
+
+## Quick start
+
+<Tabs>
+  <Tab title="Python">
+    ```python
+    from openai import OpenAI
+    
+    client = OpenAI(
+        api_key="dpn-sk-your-token-here",
+        base_url="https://oai.deapi.ai/v1"
+    )
+    
+    # Generate an image — same call as OpenAI
+    response = client.images.generate(
+        model="Flux1schnell",
+        prompt="A futuristic city at sunset, cinematic lighting",
+        size="1024x1024",
+        n=1
+    )
+    print(response.data[0].url)
+    ```
+  </Tab>
+  <Tab title="Node.js / TypeScript">
+    ```typescript
+    import OpenAI from "openai";
+    
+    const client = new OpenAI({
+      apiKey: "dpn-sk-your-token-here",
+      baseURL: "https://oai.deapi.ai/v1",
+    });
+    
+    // Generate an image — same call as OpenAI
+    const response = await client.images.generate({
+      model: "Flux1schnell",
+      prompt: "A futuristic city at sunset, cinematic lighting",
+      size: "1024x1024",
+      n: 1,
+    });
+    console.log(response.data[0].url);
+    ```
+  </Tab>
+  <Tab title="cURL">
+    ```bash
+    curl -X POST "https://oai.deapi.ai/v1/images/generations" \
+      -H "Authorization: Bearer dpn-sk-your-token-here" \
+      -H "Content-Type: application/json" \
+      -d '{
+        "model": "Flux1schnell",
+        "prompt": "A futuristic city at sunset, cinematic lighting",
+        "size": "1024x1024",
+        "n": 1
+      }'
+    ```
+  </Tab>
+</Tabs>
+
+<Tip>
+  **Get your API key** at [app.deapi.ai/dashboard](https://app.deapi.ai/dashboard). New accounts receive a **\$5 bonus** — no credit card required.
+</Tip>
+
+---
+
+## What changes vs OpenAI
+
+| Parameter | OpenAI | deAPI |
+| --- | --- | --- |
+| `base_url` / `baseURL` | `https://api.openai.com/v1` | `https://oai.deapi.ai/v1` |
+| `api_key` / `apiKey` | `sk-...` | Your deAPI key (starts with `dpn-sk-`) |
+| `model` | e.g. `dall-e-3` | deAPI model ID (e.g. `Flux1schnell`) |
+
+Your full API key looks like `dpn-sk-2206|ixoAULVrh...` — the `dpn-sk-` prefix is required by the gateway. You can find it in your [Dashboard → Settings → API Keys](https://app.deapi.ai/dashboard).
+
+Everything else — request format, response schema, error envelope — follows the OpenAI specification.
+
+---
+
+## Available models
+
+deAPI runs open-source models, not OpenAI's proprietary ones. Model IDs are native slugs (e.g. `Flux1schnell`, `Kokoro`, `WhisperLargeV3`) — not OpenAI model names. This is by design.
+
+Use `GET /v1/models` to fetch the current list:
+
+```bash
+curl "https://oai.deapi.ai/v1/models" \
+  -H "Authorization: Bearer dpn-sk-your-token-here"
+```
+
+Response follows the OpenAI format:
+
+```json
+{
+  "object": "list",
+  "data": [
+    { "id": "Flux1schnell", "object": "model", "created": 1700000000, "owned_by": "deapi" },
+    { "id": "Kokoro", "object": "model", "created": 1700000000, "owned_by": "deapi" }
+  ]
+}
+```
+
+Models are added and updated regularly. For the full, always-current list with capabilities, limits, and defaults, see the [Model Selection endpoint](/api/v2/utilities/models) and the [Models guide](/models).
+
+---
+
+## Supported endpoints
+
+| Endpoint | Status | Description |
+| --- | --- | --- |
+| `GET /v1/models` | ✅ | List available models |
+| `POST /v1/images/generations` | ✅ | Text-to-image |
+| `POST /v1/images/edits` | ✅ | Image editing (img2img) |
+| `POST /v1/audio/speech` | ✅ | Text-to-speech |
+| `POST /v1/audio/transcriptions` | ✅ | Audio & video transcription |
+| `POST /v1/embeddings` | ✅ | Text embeddings |
+| `POST /v1/videos` | ✅ | Video generation |
+| `POST /v1/chat/completions` | ❌ | Not in scope — deAPI does not serve LLMs |
+| `POST /v1/images/edits` with `mask` | ❌ | Inpainting not supported — returns 400 |
+| `POST /v1/files` | 🔜 | Coming soon — files are sent inline (multipart) for now |
+
+---
+
+## Migration examples
+
+### Image generation (DALL-E → deAPI)
+
+**Before (OpenAI):**
+
+```python
+from openai import OpenAI
+
+client = OpenAI(api_key="sk-...")
+
+response = client.images.generate(
+    model="dall-e-3",
+    prompt="A cozy cabin in the woods",
+    size="1024x1024",
+    n=1
+)
+```
+
+**After (deAPI) — change `api_key`, `base_url`, and `model`:**
+
+```python
+from openai import OpenAI
+
+client = OpenAI(
+    api_key="dpn-sk-your-token-here",       # ← changed
+    base_url="https://oai.deapi.ai/v1"   # ← changed
+)
+
+response = client.images.generate(
+    model="Flux1schnell",                 # ← deAPI model ID
+    prompt="A cozy cabin in the woods",
+    size="1024x1024",
+    n=1
+)
+```
+
+---
+
+### Text-to-speech (OpenAI TTS → deAPI)
+
+**Before (OpenAI):**
+
+```python
+audio = client.audio.speech.create(
+    model="tts-1",
+    voice="alloy",
+    input="Hello world"
+)
+```
+
+**After (deAPI):**
+
+```python
+from openai import OpenAI
+
+client = OpenAI(
+    api_key="dpn-sk-your-token-here",
+    base_url="https://oai.deapi.ai/v1"
+)
+
+audio = client.audio.speech.create(
+    model="Kokoro",
+    voice="alloy",   # OpenAI voice aliases supported: alloy, echo, fable, onyx, nova, shimmer
+    input="Hello world"
+)
+```
+
+Supported output formats: `mp3`, `wav`, `flac`, `opus`.
+
+<Note>
+  `Kokoro` supports the same six OpenAI voice aliases (`alloy`, `echo`, `fable`, `onyx`, `nova`, `shimmer`). Voice language is determined by the voice prefix, not the input text: `af_`/`am_` → US English, `bf_`/`bm_` → British English. See the [TTS endpoint docs](/api/v2/audio/speech) for the full voice list.
+</Note>
+
+---
+
+### Transcription (Whisper → deAPI)
+
+**Before (OpenAI):**
+
+```python
+with open("audio.mp3", "rb") as f:
+    transcript = client.audio.transcriptions.create(
+        model="whisper-1",
+        file=f
+    )
+print(transcript.text)
+```
+
+**After (deAPI):**
+
+```python
+from openai import OpenAI
+
+client = OpenAI(
+    api_key="dpn-sk-your-token-here",
+    base_url="https://oai.deapi.ai/v1"
+)
+
+with open("audio.mp3", "rb") as f:
+    transcript = client.audio.transcriptions.create(
+        model="WhisperLargeV3",
+        file=f
+    )
+print(transcript.text)
+```
+
+Supported `response_format` values: `"json"` (default), `"text"`, `"verbose_json"`.
+
+The maximum file size is **80MB** – more than three times the OpenAI limit of 25MB.
+
+---
+
+### Embeddings
+
+**Before (OpenAI):**
+
+```python
+response = client.embeddings.create(
+    model="text-embedding-3-small",
+    input="The quick brown fox"
+)
+```
+
+**After (deAPI):**
+
+```python
+from openai import OpenAI
+
+client = OpenAI(
+    api_key="dpn-sk-your-token-here",
+    base_url="https://oai.deapi.ai/v1"
+)
+
+response = client.embeddings.create(
+    model="Bge_M3_FP16",
+    input="The quick brown fox"
+)
+
+# Vector dimension: 1024
+print(len(response.data[0].embedding))  # → 1024
+```
+
+Supports single string and array input. Supports `encoding_format: "base64"`.
+
+---
+
+## Framework integrations
+
+Because deAPI uses the OpenAI API format, it works with any framework that accepts a `base_url` / `api_base` parameter.
+
+### LangChain
+
+```python
+from langchain_openai import OpenAIEmbeddings
+
+embeddings = OpenAIEmbeddings(
+    openai_api_key="dpn-sk-your-token-here",
+    openai_api_base="https://oai.deapi.ai/v1",
+    model="Bge_M3_FP16"
+)
+```
+
+### LlamaIndex
+
+```python
+from llama_index.embeddings.openai import OpenAIEmbedding
+
+embed_model = OpenAIEmbedding(
+    api_key="dpn-sk-your-token-here",
+    api_base="https://oai.deapi.ai/v1",
+    model="Bge_M3_FP16"
+)
+```
+
+### Vercel AI SDK
+
+```typescript
+import { createOpenAI } from "@ai-sdk/openai";
+
+const deapi = createOpenAI({
+  apiKey: "dpn-sk-your-token-here",
+  baseURL: "https://oai.deapi.ai/v1",
+});
+```
+
+### Environment variables
+
+If your codebase already uses the standard OpenAI environment variables, override them at the process level — zero code changes required:
+
+```bash
+export OPENAI_API_KEY="dpn-sk-your-token-here"
+export OPENAI_BASE_URL="https://oai.deapi.ai/v1"
+```
+
+For multi-provider setups (e.g. OpenAI for chat, deAPI for images and audio), instantiate separate clients:
+
+```python
+import os
+from openai import OpenAI
+
+openai_client = OpenAI(api_key=os.environ["OPENAI_KEY"])
+
+deapi_client = OpenAI(
+    api_key=os.environ["DEAPI_KEY"],
+    base_url="https://oai.deapi.ai/v1",
+)
+
+# openai_client → GPT models
+# deapi_client  → images, audio, video, embeddings
+```
+
+---
+
+## Known differences
+
+| Feature | OpenAI | deAPI |
+| --- | --- | --- |
+| Chat completions | ✅ | ❌ Out of scope |
+| Inpainting (`mask` in `/v1/images/edits`) | ✅ | ❌ Returns 400 |
+| Model IDs | `dall-e-3`, `tts-1`, `whisper-1` | Native slugs (e.g. `Flux1schnell`, `Kokoro`) |
+| Image `size` values | OpenAI fixed set | Model-specific — check [Models](/models) |
+| Max `n` (images) | 10 | 4 |
+| Audio file size limit | 25 MB | 80 MB |
+| Embedding dimensions | 1536 (ada-002) | Model-specific (e.g. 1024 for `Bge_M3_FP16`) |
+| `style: "vivid"` | Controls image style | Accepted but ignored |
+| Video generation | ❌ | ✅ `POST /v1/videos` |
+| `/v1/files` | ✅ | 🔜 Coming soon |
+
+For the full list of models, supported parameters, and limits, see the [Model Selection endpoint](/api/v2/utilities/models).
+
+---
+
+## Next steps
+
+<CardGroup cols={2}>
+  <Card title="Models" icon="cube" href="/models">
+    Discover all available models and their capabilities
+  </Card>
+
+  <Card title="Quickstart" icon="rocket" href="/quickstart">
+    Get your API key and make your first request
+  </Card>
+
+  <Card title="API v2 Reference" icon="code" href="/api/v2/overview">
+    Full native API reference with all endpoints
+  </Card>
+
+  <Card title="Pricing" icon="credit-card" href="/pricing">
+    Pay-as-you-go rates per task and model
+  </Card>
+</CardGroup>

@@ -106,7 +106,13 @@ Yes! deAPI works seamlessly with **n8n** and other workflow automation platforms
 
 ---
 
-#### 12. **What's the difference between v1 and v2?**
+#### 12. **Can I use deAPI with the OpenAI SDK?**
+
+Yes. deAPI exposes an **OpenAI-compatible** endpoint at `https://oai.deapi.ai/v1`. Set `base_url` (and your `api_key`) on the official OpenAI SDK and your existing code keeps working — only `model` needs to be a deAPI slug (e.g. `Flux1schnell`, `Kokoro`, `WhisperLargeV3`, `Bge_M3_FP16`). Supported endpoints: image generation, image edits, text-to-speech, transcription, embeddings, and video generation. Chat completions and inpainting are not in scope. See [OpenAI Compatibility](/openai-compatibility) for the full guide.
+
+---
+
+#### 13. **What's the difference between v1 and v2?**
 
 - **v2** (default, REST-style) — Resource-based URLs (`/api/v2/images/generations`, `/api/v2/videos/upscales`), unified transcription (`/audio/transcriptions` replaces 5 separate v1 endpoints), new video background removal endpoint.
 - **v1** (stable, task-style) — Task-based URLs (`/api/v1/client/txt2img`, `/api/v1/client/vid-upscale`). Fully supported for existing integrations.
@@ -115,13 +121,13 @@ Both versions share authentication, rate limits, webhooks, and the same model ca
 
 ---
 
-#### 13. **Is deAPI ready for production use?**
+#### 14. **Is deAPI ready for production use?**
 
 Yes. deAPI is built to support production-grade workloads. All models and services are optimized for speed, reliability, and scalability. The platform offers 300 RPM immediately after the first account top-up.
 
 ---
 
-#### 14. **What should I do if I get an error?**
+#### 15. **What should I do if I get an error?**
 
 Check the error code and make sure:
 

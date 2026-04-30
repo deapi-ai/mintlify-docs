@@ -8,3 +8,7 @@ Generate natural-sounding speech from text. Supports preset voices, voice clonin
 <Note>
 **Prerequisite:** Consult the [Model Selection](/api/v2/utilities/models) endpoint to identify a valid model `slug` and the per-model voice catalog.
 </Note>
+
+<Tip>
+**OpenAI SDK users:** This endpoint is also available via the OpenAI-compatible surface as `POST /v1/audio/speech` at `https://oai.deapi.ai/v1`. The six OpenAI voice aliases (`alloy`, `echo`, `fable`, `onyx`, `nova`, `shimmer`) are supported on `Kokoro`. See [OpenAI Compatibility](/openai-compatibility).
+</Tip>
