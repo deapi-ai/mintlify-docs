@@ -12,15 +12,15 @@ deAPI is engineered for High Throughput capability upon deployment. Unlike tradi
 
 All new accounts start as **Basic** and can upgrade to **Premium** by making any payment.
 
-| Type        | Qualification                   |
-| ----------- | ------------------------------- |
-| **Basic**   | New accounts (no payments made) |
-| **Premium** | Any payment made via Stripe     |
+| Type | Qualification |
+| --- | --- |
+| **Basic** | New accounts (no payments made) |
+| **Premium** | Any payment made via Stripe |
 
 <Note>
   Upon registration, you receive a **\$5 bonus** added to your balance. This bonus is available for **Basic accounts** with conservative rate limits designed for testing and evaluation.
 
-  To upgrade to **Premium** (300 RPM, unlimited daily requests), simply top up your account with any available amount. Your remaining bonus balance carries over — for example, if you use \$2 of your bonus and then purchase \$10, your total balance becomes \$13 (\$3 remaining + \$10 purchased), now usable with Premium limits.
+  To upgrade to **Premium** (300 RPM, unlimited daily requests), simply top up your account with any available amount. Your remaining bonus balance carries over — for example, if you use \$2 of your bonus and then purchase \$10, your total balance becomes \$13 (\$3 remaining \+ \$10 purchased), now usable with Premium limits.
 </Note>
 
 <Warning>
@@ -46,22 +46,22 @@ Basic accounts have conservative limits designed for testing and evaluation.
 
 #### Generation & Transformation Endpoints
 
-| Endpoint                                    | Models                                                                    | RPM | RPD |
-| ------------------------------------------- | ------------------------------------------------------------------------- | --- | --- |
-| `/api/v2/images/generations`                | `Flux1schnell`, `ZImageTurbo_INT8`, `Flux_2_Klein_4B_BF16`                | 3   | 100 |
-| `/api/v2/images/edits`                      | `Flux_2_Klein_4B_BF16`, `QwenImageEdit_Plus_NF4`                          | 1   | 15  |
-| `/api/v2/images/ocr`                        | `Nanonets_Ocr_S_F16`                                                      | 5   | 50  |
-| `/api/v2/images/background-removals`        | `Ben2`                                                                    | 5   | 100 |
-| `/api/v2/images/upscales`                   | `RealESRGAN_x4`                                                       | 5   | 100 |
-| `/api/v2/videos/generations`                | `Ltxv_13B_0_9_8_Distilled_FP8`, `Ltx2_19B_Dist_FP8`, `Ltx2_3_22B_Dist_INT8` | 1   | 15  |
-| `/api/v2/videos/animations`                 | `Ltxv_13B_0_9_8_Distilled_FP8`, `Ltx2_19B_Dist_FP8`, `Ltx2_3_22B_Dist_INT8` | 1   | 15  |
-| `/api/v2/videos/audio-syncs`                | `Ltx2_3_22B_Dist_INT8`                                                    | 1   | 15  |
-| `/api/v2/videos/replacements`               | (see Model Selection)                                                     | 1   | 15  |
-| `/api/v2/videos/upscales`                   | `RealESRGAN_Vid_x4`                                                       | 1   | 15  |
-| `/api/v2/audio/speech`                      | `Kokoro`, `Chatterbox`, `Qwen3_TTS`                                       | 5   | 300 |
-| `/api/v2/audio/music`                       | `AceStep_1_5_Turbo`                                                     | 1   | 15  |
-| `/api/v2/audio/transcriptions`              | `WhisperLargeV3`                                                          | 1   | 10  |
-| `/api/v2/embeddings`                        | `Bge_M3_FP16`                                                             | 10  | 500 |
+| Endpoint | Models | RPM | RPD |
+| --- | --- | --- | --- |
+| `/api/v2/images/generations` | `Flux1schnell`, `ZImageTurbo_INT8`, `Flux_2_Klein_4B_BF16` | 3 | 100 |
+| `/api/v2/images/edits` | `Flux_2_Klein_4B_BF16`, `QwenImageEdit_Plus_NF4` | 1 | 15 |
+| `/api/v2/images/ocr` | `Nanonets_Ocr_S_F16` | 5 | 50 |
+| `/api/v2/images/background-removals` | `Ben2` | 5 | 100 |
+| `/api/v2/images/upscales` | `RealESRGAN_x4` | 5 | 100 |
+| `/api/v2/videos/generations` | `Ltxv_13B_0_9_8_Distilled_FP8`, `Ltx2_19B_Dist_FP8`, `Ltx2_3_22B_Dist_INT8` | 1 | 15 |
+| `/api/v2/videos/animations` | `Ltxv_13B_0_9_8_Distilled_FP8`, `Ltx2_19B_Dist_FP8`, `Ltx2_3_22B_Dist_INT8` | 1 | 15 |
+| `/api/v2/videos/audio-syncs` | `Ltx2_3_22B_Dist_INT8` | 1 | 15 |
+| `/api/v2/videos/replacements` | (see Model Selection) | 1 | 15 |
+| `/api/v2/videos/upscales` | `RealESRGAN_Vid_x4 , RealESRGAN_Vid_x2 , FlashVSR_Tiny` | 1 | 15 |
+| `/api/v2/audio/speech` | `Kokoro`, `Chatterbox`, `Qwen3_TTS` | 5 | 300 |
+| `/api/v2/audio/music` | `AceStep_1_5_Turbo` | 1 | 15 |
+| `/api/v2/audio/transcriptions` | `WhisperLargeV3` | 1 | 10 |
+| `/api/v2/embeddings` | `Bge_M3_FP16` | 10 | 500 |
 
 <Note>
   In v2 transcription is unified into a single endpoint (`/api/v2/audio/transcriptions`) — the Whisper shared-limit across 4 v1 endpoints no longer applies.
@@ -69,10 +69,10 @@ Basic accounts have conservative limits designed for testing and evaluation.
 
 #### Utility Endpoints
 
-| Endpoint                                        | RPM | RPD |
-| ----------------------------------------------- | --- | --- |
-| Price Calculation (`/api/v2/**/price`)          | 50  | 200 |
-| Jobs Status (`/api/v2/jobs/{job_request}`)      | 50  | 200 |
+| Endpoint | RPM | RPD |
+| --- | --- | --- |
+| Price Calculation (`/api/v2/**/price`) | 50 | 200 |
+| Jobs Status (`/api/v2/jobs/{job_request}`) | 50 | 200 |
 
 ---
 
@@ -80,22 +80,22 @@ Basic accounts have conservative limits designed for testing and evaluation.
 
 Premium accounts have high limits suitable for production workloads. All endpoints share a unified **300 RPM** with **unlimited daily requests**.
 
-| Endpoint                                    | Models                                                                    | RPM | RPD       |
-| ------------------------------------------- | ------------------------------------------------------------------------- | --- | --------- |
-| `/api/v2/images/generations`                | `Flux1schnell`, `ZImageTurbo_INT8`, `Flux_2_Klein_4B_BF16`                | 300 | Unlimited |
-| `/api/v2/images/edits`                      | `Flux_2_Klein_4B_BF16`, `QwenImageEdit_Plus_NF4`                          | 300 | Unlimited |
-| `/api/v2/images/ocr`                        | `Nanonets_Ocr_S_F16`                                                      | 300 | Unlimited |
-| `/api/v2/images/background-removals`        | `Ben2`                                                                    | 300 | Unlimited |
-| `/api/v2/images/upscales`                   | `RealESRGAN_x4`                                                       | 300 | Unlimited |
-| `/api/v2/videos/generations`                | `Ltxv_13B_0_9_8_Distilled_FP8`, `Ltx2_19B_Dist_FP8`, `Ltx2_3_22B_Dist_INT8` | 300 | Unlimited |
-| `/api/v2/videos/animations`                 | `Ltxv_13B_0_9_8_Distilled_FP8`, `Ltx2_19B_Dist_FP8`, `Ltx2_3_22B_Dist_INT8` | 300 | Unlimited |
-| `/api/v2/videos/audio-syncs`                | `Ltx2_3_22B_Dist_INT8`                                                    | 300 | Unlimited |
-| `/api/v2/videos/replacements`               | (see Model Selection)                                                     | 300 | Unlimited |
-| `/api/v2/videos/upscales`                   | `RealESRGAN_Vid_x4`                                                       | 300 | Unlimited |
-| `/api/v2/audio/speech`                      | `Kokoro`, `Chatterbox`, `Qwen3_TTS`                                       | 300 | Unlimited |
-| `/api/v2/audio/music`                       | `AceStep_1_5_Turbo`                                                     | 300 | Unlimited |
-| `/api/v2/audio/transcriptions`              | `WhisperLargeV3`                                                          | 300 | Unlimited |
-| `/api/v2/embeddings`                        | `Bge_M3_FP16`                                                             | 300 | Unlimited |
+| Endpoint | Models | RPM | RPD |
+| --- | --- | --- | --- |
+| `/api/v2/images/generations` | `Flux1schnell`, `ZImageTurbo_INT8`, `Flux_2_Klein_4B_BF16` | 300 | Unlimited |
+| `/api/v2/images/edits` | `Flux_2_Klein_4B_BF16`, `QwenImageEdit_Plus_NF4` | 300 | Unlimited |
+| `/api/v2/images/ocr` | `Nanonets_Ocr_S_F16` | 300 | Unlimited |
+| `/api/v2/images/background-removals` | `Ben2` | 300 | Unlimited |
+| `/api/v2/images/upscales` | `RealESRGAN_x4` | 300 | Unlimited |
+| `/api/v2/videos/generations` | `Ltxv_13B_0_9_8_Distilled_FP8`, `Ltx2_19B_Dist_FP8`, `Ltx2_3_22B_Dist_INT8` | 300 | Unlimited |
+| `/api/v2/videos/animations` | `Ltxv_13B_0_9_8_Distilled_FP8`, `Ltx2_19B_Dist_FP8`, `Ltx2_3_22B_Dist_INT8` | 300 | Unlimited |
+| `/api/v2/videos/audio-syncs` | `Ltx2_3_22B_Dist_INT8` | 300 | Unlimited |
+| `/api/v2/videos/replacements` | (see Model Selection) | 300 | Unlimited |
+| `/api/v2/videos/upscales` | `RealESRGAN_Vid_x4 , RealESRGAN_Vid_x2 , FlashVSR_Tiny` | 300 | Unlimited |
+| `/api/v2/audio/speech` | `Kokoro`, `Chatterbox`, `Qwen3_TTS` | 300 | Unlimited |
+| `/api/v2/audio/music` | `AceStep_1_5_Turbo` | 300 | Unlimited |
+| `/api/v2/audio/transcriptions` | `WhisperLargeV3` | 300 | Unlimited |
+| `/api/v2/embeddings` | `Bge_M3_FP16` | 300 | Unlimited |
 
 <Info>
   In v2 Whisper is a single endpoint (`/api/v2/audio/transcriptions`) with its own 300 RPM allocation.
@@ -113,12 +113,12 @@ The following endpoints have no rate limits for all accounts:
 
 ### Basic vs Premium Comparison
 
-| Aspect              | Basic                     | Premium                  |
-| ------------------- | ------------------------- | ------------------------ |
-| RPM Limits          | 1–10 RPM                  | 300 RPM (all endpoints)  |
-| Daily Limits (RPD)  | Limited                   | Unlimited                |
-| Transcription Limit | 1 unified endpoint (v2)   | 300 RPM (v2)             |
-| Upgrade Requirement | —                         | Any payment via Stripe   |
+| Aspect | Basic | Premium |
+| --- | --- | --- |
+| RPM Limits | 1–10 RPM | 300 RPM (all endpoints) |
+| Daily Limits (RPD) | Limited | Unlimited |
+| Transcription Limit | 1 unified endpoint (v2) | 300 RPM (v2) |
+| Upgrade Requirement | — | Any payment via Stripe |
 
 ---
 
@@ -133,7 +133,7 @@ Many AI infrastructure providers enforce restrictive initial limits, necessitati
 
 **Scaling to Production**
 
-- Traditional Providers: Typically require specific monetary spend thresholds (e.g., \$50+) and time delays (weeks/months) to unlock higher rate limits.
+- Traditional Providers: Typically require specific monetary spend thresholds (e.g., \$50\+) and time delays (weeks/months) to unlock higher rate limits.
 - deAPI: Instant upgrade to Premium (300 RPM, unlimited daily requests) with any available top-up amount (\$10, \$25, or \$50).
 
 **Limit Structure**
