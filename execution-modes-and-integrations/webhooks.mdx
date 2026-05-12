@@ -19,19 +19,29 @@ Configure a global webhook URL in your [account settings](https://app.deapi.ai/s
 
 ### Per-Request Override
 
-You can override the global webhook URL on any job request by including the `webhook_url` parameter:
+You can override the global webhook URL on any job request by including the `webhook_url` parameter. Optionally, you can also pass a `webhook_secret` to sign the callback for that specific job with a job-scoped secret instead of your account's default:
 
 ```json
 {
   "prompt": "a beautiful sunset over mountains",
   "model": "flux-schnell",
-  "webhook_url": "https://your-server.com/webhooks/deapi"
+  "webhook_url": "https://your-server.com/webhooks/deapi",
+  "webhook_secret": "your-per-job-secret-32-to-255-chars"
 }
 ```
 
+| Parameter        | Type            | Required | Description                                                                                                                                           |
+| ---------------- | --------------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `webhook_url`    | string (HTTPS)  | No       | Overrides the global webhook URL for this job only.                                                                                                   |
+| `webhook_secret` | string (32–255) | No       | Overrides the global webhook secret for this job only. Used to compute the `X-DeAPI-Signature` HMAC-SHA256. Must be sent together with `webhook_url`. |
+
 <Warning>
-  Only HTTPS URLs are accepted. HTTP URLs will be rejected for security.
+  Only HTTPS URLs are accepted. HTTP URLs will be rejected for security. `webhook_secret` must always be sent together with `webhook_url` — it cannot be used to override the secret for the globally configured URL.
 </Warning>
+
+<Info>
+  When `webhook_secret` is provided, every callback for that job (including retries) is signed with it instead of your account's default secret. Use this when you want to scope a secret to a specific job — for example per-tenant secrets, short-lived tokens, or delivering to a different receiver than your global endpoint. Make sure the receiver verifying the signature uses the same per-job secret.
+</Info>
 
 ## Events
 
@@ -165,6 +175,10 @@ All webhook requests include these headers:
 ### Signature Verification
 
 Every webhook includes an HMAC-SHA256 signature in the `X-DeAPI-Signature` header. **Always verify this signature** to ensure the request came from deAPI.
+
+<Info>
+  If you supplied a `webhook_secret` in the original job request, every callback for that job (including all retries) is signed with **that** secret. Otherwise, the signature uses the global webhook secret from your [account settings](https://app.deapi.ai/settings/webhooks). Your verification code must use whichever secret you sent for that job — typically by looking it up from `data.job_request_id` in your own store.
+</Info>
 
 **Signature format:** `sha256=<hex-encoded-hmac>`
 
