@@ -100,7 +100,7 @@ When the models endpoint returns several options for the same task, use these gu
 
 **Speech generation (TTS)** — Check the model's `languages` array for available languages and voices. Use `info.defaults` for recommended speed and format settings. The endpoint supports three modes: `custom_voice` (preset speakers), `voice_clone` (clone from reference audio), and `voice_design` (create voice from a text description). Not all models support all modes — check model capabilities before selecting a mode.
 
-**Music generation** — Provide a text description (`caption`) of the desired music style. Optionally include `lyrics` (use `"[Instrumental]"` for instrumental tracks), `bpm`, `keyscale`, and `timesignature` to fine-tune the output. You can also upload a `reference_audio` file for style transfer. Check `info.limits` for supported duration range and inference steps. Use fewer steps with turbo models (e.g. 8) and more steps with base models (e.g. 32+).
+**Music generation** — Provide a text description (`caption`) of the desired music style. Optionally include `lyrics` (use `"[Instrumental]"` for instrumental tracks), `bpm`, `keyscale`, and `timesignature` to fine-tune the output. You can also upload a `reference_audio` file for style transfer. Check `info.limits` for supported duration range and inference steps. Use fewer steps with turbo models (e.g. 8) and more steps with base models (e.g. 32\+).
 
 **Transcription (Video/Audio-to-Text)** — Transcription models support both URL-based and file-upload transcription. For long content, enable timestamps (`include_ts: true`). URL-based transcription works with YouTube, Twitch, Kick, TikTok and X/Twitter.
 
@@ -218,3 +218,4 @@ If you are an AI agent, MCP client, or LLM integrating with deAPI:
 - [Model Selection endpoint](/api/v2/utilities/models) — the live API spec for fetching models.
 - [Pricing](/pricing) — cost per task and model tier.
 - [Execution Modes](/execution-modes-and-integrations/execution-modes-and-http-queue) — sync, async, webhooks, WebSockets.
+- [OpenAI Compatibility](/openai-compatibility) — call deAPI with the OpenAI SDK using native model slugs.

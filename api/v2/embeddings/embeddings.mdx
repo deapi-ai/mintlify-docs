@@ -8,3 +8,7 @@ Generate vector embeddings from text for semantic search, clustering, and retrie
 <Note>
 **Prerequisite:** Consult the [Model Selection](/api/v2/utilities/models) endpoint to identify a valid model `slug` and check its vector dimensionality and maximum input length.
 </Note>
+
+<Tip>
+**OpenAI SDK users:** This endpoint is also available via the OpenAI-compatible surface as `POST /v1/embeddings` at `https://oai.deapi.ai/v1`. Supports single string and array input, plus `encoding_format: "base64"`. See [OpenAI Compatibility](/openai-compatibility).
+</Tip>

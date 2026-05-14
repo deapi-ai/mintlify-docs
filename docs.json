@@ -84,6 +84,7 @@
               "quickstart",
               "models",
               "pricing",
+              "openai-compatibility",
               "architecture-and-security",
               "limits-and-quotas"
             ]

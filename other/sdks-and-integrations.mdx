@@ -56,6 +56,27 @@ print(result.result_url)
 
 ---
 
+## OpenAI SDK (drop-in compatible)
+
+deAPI also exposes an OpenAI-compatible endpoint at `https://oai.deapi.ai/v1`. If you're already using the official OpenAI SDK in any language, you can route image generation, text-to-speech, transcription, embeddings, and video generation to deAPI by changing only `base_url` and `api_key` — your existing code stays unchanged. This works with Python, Node.js / TypeScript, Go, Java, .NET, and any framework that accepts a `base_url` parameter (LangChain, LlamaIndex, Vercel AI SDK).
+
+```python
+from openai import OpenAI
+
+client = OpenAI(
+    api_key="dpn-sk-your-token-here",
+    base_url="https://oai.deapi.ai/v1",
+)
+
+response = client.images.generate(model="Flux1schnell", prompt="...", size="1024x1024", n=1)
+```
+
+<Card icon="plug" href="/openai-compatibility" title="OpenAI Compatibility — full guide">
+  Migration examples, supported endpoints, framework integrations, and known differences
+</Card>
+
+---
+
 ## Coming Soon
 
 We're working on official SDKs for:
