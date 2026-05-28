@@ -15,5 +15,5 @@ Source detection is automatic: pass a public `video_url` / `audio_url`, or uploa
 </Note>
 
 <Tip>
-**OpenAI SDK users:** This endpoint is also available via the OpenAI-compatible surface as `POST /v1/audio/transcriptions` at `https://oai.deapi.ai/v1`. Maximum file size is **50 MB** (twice OpenAI's 25 MB). See [OpenAI Compatibility](/openai-compatibility).
+**OpenAI SDK users:** This endpoint is also available via the OpenAI-compatible surface as `POST /v1/audio/transcriptions` at `https://oai.deapi.ai/v1`. Maximum file size per upload is **20 MB for audio** and **50 MB for video**, subject to a global **75 MB** request body cap. See [OpenAI Compatibility](/openai-compatibility) and [Limits & Quotas](/limits-and-quotas#file-uploads).
 </Tip>

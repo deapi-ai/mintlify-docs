@@ -149,23 +149,43 @@ For High Volume Production requirements beyond Premium limits, please contact su
 
 The majority of endpoints (Video-to-Text, Audio-to-Text, Image-to-Image) support direct binary file uploads or URL-based inputs. The global limits for file uploads are specified below.
 
-**1. Video** (Video-to-Text, Image-to-Video, Video Upscale, Video Replace)
+### Global Request & Response Caps
 
-- Max size: 80 MB
+These caps apply to every endpoint regardless of media type. Exceeding them returns `413 Payload Too Large`.
+
+| Cap | Limit | Scope |
+| --- | --- | --- |
+| Request body (input) | **75 MB** | Total size of any single API request (multipart upload + JSON fields combined) |
+| Job result (output) | **100 MB** | Maximum size of the generated artifact returned by a worker job |
+
+<Note>
+  Per-type caps below are always **≤ the global 75 MB request body cap**. If you send multiple files in one request, the sum must still fit within 75 MB.
+</Note>
+
+### Per-Type Upload Limits
+
+**1. Video** (Video-to-Text, Image-to-Video, Video Upscale, Video Replace, Video Background Removal)
+
+- Max size: **50 MB**
 - Supported Formats: MP4, MPEG, QuickTime (MOV), AVI, WMV, OGG
 
 **2. Audio** (Audio-to-Text, Voice Cloning reference audio, Audio-to-Video, Music reference audio)
 
-- Max size: 80 MB
+- Max size: **20 MB**
 - Supported Formats: AAC, MP3, OGG, WAV, WebM, FLAC
-- Voice Cloning reference audio: max 10 MB, 3–10 seconds duration. Supported formats: MP3, WAV, FLAC, OGG, M4A.
-- Audio-to-Video conditioning audio: max 20 MB. Supported formats: MP3, WAV, OGG, FLAC.
-- Music reference audio (style transfer): max 10 MB. Supported formats: MP3, WAV, FLAC, OGG, M4A.
+- Voice Cloning reference audio: max **15 MB**, 3–10 seconds duration. Supported formats: MP3, WAV, FLAC, OGG, M4A.
+- Audio-to-Video conditioning audio: max **20 MB**. Supported formats: MP3, WAV, OGG, FLAC.
+- Music reference audio (style transfer): max **15 MB**. Supported formats: MP3, WAV, FLAC, OGG, M4A.
 
-**3. Images** (Image-to-Image, OCR)
+**3. Images** (Image-to-Image, OCR, Background Removal, Upscale, Image-to-Video first/last frame, Reference Character)
 
-- Max size: 10 MB
+- Max size: **10 MB**
 - Supported Formats: JPG, JPEG, PNG, GIF, BMP, WebP
+- Dimensions: **min 64 px**, **max 5000 px** per side
+
+<Tip>
+  For larger source media that won't fit under the request body cap, prefer **URL-based inputs** (`source_url` / `video_url` / `audio_url`) where supported — they bypass the upload cap entirely and are subject only to the duration limits listed below.
+</Tip>
 
 ---
 

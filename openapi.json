@@ -315,7 +315,7 @@
                                 ],
                                 "properties": {
                                     "audio": {
-                                        "description": "Audio file to transcribe. Supported formats: AAC, MP3, OGG, WAV, WebM, FLAC. Maximum file size: 10 MB.",
+                                        "description": "Audio file to transcribe. Supported formats: AAC, MP3, OGG, WAV, WebM, FLAC. Maximum file size: 20 MB.",
                                         "type": "string",
                                         "format": "binary"
                                     },
@@ -420,7 +420,7 @@
                                         ],
                                         "properties": {
                                             "audio": {
-                                                "description": "Audio file to transcribe. Supported formats: AAC, MP3, OGG, WAV, WebM, FLAC. Maximum file size: 10 MB.",
+                                                "description": "Audio file to transcribe. Supported formats: AAC, MP3, OGG, WAV, WebM, FLAC. Maximum file size: 20 MB.",
                                                 "type": "string",
                                                 "format": "binary"
                                             },
@@ -3378,7 +3378,7 @@
                                         "example": 24000
                                     },
                                     "ref_audio": {
-                                        "description": "Reference audio file for voice cloning. Supported formats: mp3, wav, flac, ogg, m4a. Max 10MB. Duration must be between 3-10 seconds (model-specific limits may apply). Required for voice_clone mode.",
+                                        "description": "Reference audio file for voice cloning. Supported formats: mp3, wav, flac, ogg, m4a. Max 15MB. Duration must be between 3-10 seconds (model-specific limits may apply). Required for voice_clone mode.",
                                         "type": "string",
                                         "format": "binary",
                                         "nullable": true
@@ -4114,7 +4114,7 @@
                                         "example": "https://www.youtube.com/watch?v=jNQXAC9IVRw"
                                     },
                                     "source_file": {
-                                        "description": "Audio or video file to transcribe. Supported audio: aac, mpeg, ogg, wav, webm, flac. Supported video: mp4, mpeg, quicktime, avi, wmv, ogg. Mutually exclusive with source_url.",
+                                        "description": "Audio or video file to transcribe. Supported audio: aac, mpeg, ogg, wav, webm, flac (max 20 MB). Supported video: mp4, mpeg, quicktime, avi, wmv, ogg (max 50 MB). Total request body is capped at 75 MB. Mutually exclusive with source_url.",
                                         "type": "string",
                                         "format": "binary"
                                     },
@@ -4377,7 +4377,7 @@
                                         "example": "flac"
                                     },
                                     "reference_audio": {
-                                        "description": "Optional reference audio file for style transfer. Supported formats: mp3, wav, flac, ogg, m4a. Max size configurable (default 10MB). Duration must be within model-specific limits.",
+                                        "description": "Optional reference audio file for style transfer. Supported formats: mp3, wav, flac, ogg, m4a. Max size configurable (default 15MB). Duration must be within model-specific limits.",
                                         "type": "string",
                                         "format": "binary",
                                         "nullable": true
@@ -4568,7 +4568,7 @@
                                 ],
                                 "properties": {
                                     "video": {
-                                        "description": "Video file to transcribe. Supported formats: MP4, MPEG, QuickTime (MOV), AVI, WMV, OGG. Maximum file size: 10 MB. Video must contain an audio stream.",
+                                        "description": "Video file to transcribe. Supported formats: MP4, MPEG, QuickTime (MOV), AVI, WMV, OGG. Maximum file size: 50 MB. Video must contain an audio stream.",
                                         "type": "string",
                                         "format": "binary"
                                     },
@@ -4673,7 +4673,7 @@
                                         ],
                                         "properties": {
                                             "video": {
-                                                "description": "Video file to transcribe. Supported formats: MP4, MPEG, QuickTime (MOV), AVI, WMV, OGG. Maximum file size: 10 MB. Video must contain an audio stream.",
+                                                "description": "Video file to transcribe. Supported formats: MP4, MPEG, QuickTime (MOV), AVI, WMV, OGG. Maximum file size: 50 MB. Video must contain an audio stream.",
                                                 "type": "string",
                                                 "format": "binary"
                                             },
@@ -4799,7 +4799,7 @@
                                 ],
                                 "properties": {
                                     "video": {
-                                        "description": "Video file to remove background from. Supported formats: MP4, MPEG, QuickTime, AVI, WMV, OGG. Maximum file size: 10 MB.",
+                                        "description": "Video file to remove background from. Supported formats: MP4, MPEG, QuickTime, AVI, WMV, OGG. Maximum file size: 50 MB.",
                                         "type": "string",
                                         "format": "binary"
                                     },
@@ -4893,7 +4893,7 @@
                                         ],
                                         "properties": {
                                             "video": {
-                                                "description": "Video file to remove background from. Supported formats: MP4, MPEG, QuickTime, AVI, WMV, OGG. Maximum file size: 10 MB.",
+                                                "description": "Video file to remove background from. Supported formats: MP4, MPEG, QuickTime, AVI, WMV, OGG. Maximum file size: 50 MB.",
                                                 "type": "string",
                                                 "format": "binary"
                                             },
@@ -5457,7 +5457,7 @@
                                 ],
                                 "properties": {
                                     "video": {
-                                        "description": "Video file to upscale. Supported formats: MP4, MPEG, QuickTime, AVI, WMV, OGG. Maximum file size: 10 MB.",
+                                        "description": "Video file to upscale. Supported formats: MP4, MPEG, QuickTime, AVI, WMV, OGG. Maximum file size: 50 MB.",
                                         "type": "string",
                                         "format": "binary"
                                     },
@@ -5559,7 +5559,7 @@
                                         ],
                                         "properties": {
                                             "video": {
-                                                "description": "Video file to upscale. Supported formats: MP4, MPEG, QuickTime, AVI, WMV, OGG. Maximum file size: 10 MB.",
+                                                "description": "Video file to upscale. Supported formats: MP4, MPEG, QuickTime, AVI, WMV, OGG. Maximum file size: 50 MB.",
                                                 "type": "string",
                                                 "format": "binary"
                                             },
