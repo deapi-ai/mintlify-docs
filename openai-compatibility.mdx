@@ -238,7 +238,7 @@ print(transcript.text)
 
 Supported `response_format` values: `"json"` (default), `"text"`, `"verbose_json"`.
 
-The maximum file size is **80MB** – more than three times the OpenAI limit of 25MB.
+The maximum audio file size is **20 MB**, subject to a global **75 MB** request body cap. See [Limits & Quotas → File Uploads](/limits-and-quotas#file-uploads) for the full breakdown.
 
 ---
 
@@ -352,7 +352,7 @@ deapi_client = OpenAI(
 | Model IDs | `dall-e-3`, `tts-1`, `whisper-1` | Native slugs (e.g. `Flux1schnell`, `Kokoro`) |
 | Image `size` values | OpenAI fixed set | Model-specific — check [Models](/models) |
 | Max `n` (images) | 10 | 4 |
-| Audio file size limit | 25 MB | 80 MB |
+| Audio file size limit | 25 MB | 20 MB (per-file) — total request body capped at 75 MB |
 | Embedding dimensions | 1536 (ada-002) | Model-specific (e.g. 1024 for `Bge_M3_FP16`) |
 | `style: "vivid"` | Controls image style | Accepted but ignored |
 | Video generation | ❌ | ✅ `POST /v1/videos` |

@@ -57,18 +57,22 @@ Yes. Visit the **Model Selection** endpoint to browse available models, or check
 
 **Video** (Transcription, Animation, Upscale, Replacement):
 
-- Max size: 80 MB
-- Supported formats: mp4, avi, mov, mkv, webm
+- Max size: 50 MB
+- Supported formats: MP4, MPEG, MOV, AVI, WMV, OGG
 
 **Audio** (Audio-to-Text):
 
-- Max size: 50 MB (recommended), up to 80 MB
-- Supported formats: mp3, wav, m4a, flac, ogg
+- Max size: 20 MB
+- Supported formats: AAC, MP3, OGG, WAV, WebM, FLAC
 
 **Images** (Image-to-Image, OCR, Background Removal):
 
-- Max size: 10 MB
-- Supported formats: jpg, png, webp
+- Max size: 10 MB (dimensions: 64–5000 px per side)
+- Supported formats: JPG, JPEG, PNG, GIF, BMP, WebP
+
+<Note>
+  Every API request is also subject to a global **75 MB request body cap** (input) and **100 MB job result cap** (output). For full details see [Limits & Quotas → File Uploads](/limits-and-quotas#file-uploads).
+</Note>
 
 ---
 

@@ -6,7 +6,7 @@ openapi: "/openapi.json POST /api/v1/client/txt2audio"
 Text-to-Speech converts text into natural-sounding audio. The endpoint supports three TTS modes via the `mode` parameter:
 
 - **`custom_voice`** (default) — Use a preset voice from the model's voice library. Requires the `voice` parameter.
-- **`voice_clone`** — Clone a voice from a short reference audio clip. Requires the `ref_audio` parameter (3–10 seconds, max 10 MB). Optionally provide `ref_text` with a transcript of the reference audio for improved accuracy.
+- **`voice_clone`** — Clone a voice from a short reference audio clip. Requires the `ref_audio` parameter (3–10 seconds, max 15 MB). Optionally provide `ref_text` with a transcript of the reference audio for improved accuracy.
 - **`voice_design`** — Create a new voice from a natural language description. Requires the `instruct` parameter (e.g. `"A warm female voice with a British accent"`).
 
 <Note>
