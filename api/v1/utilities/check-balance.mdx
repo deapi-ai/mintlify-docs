@@ -2,3 +2,7 @@
 title: "Check Balance"
 openapi: "/openapi.json GET /api/v1/client/balance"
 ---
+
+<Note>
+  **Minimum balance.** Generation requires an account balance of at least **\$0.49**. When your balance drops below this threshold, new jobs are rejected until you top up. This safeguard prevents a single job from costing more than your remaining funds, since the final price of a generation is only known once it completes. Top up your account and generation resumes immediately — no other action is required.
+</Note>

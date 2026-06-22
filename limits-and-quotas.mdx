@@ -36,7 +36,39 @@ Rate limits are defined per endpoint as:
 - **RPM** — Requests Per Minute
 - **RPD** — Requests Per Day
 
-Limits reset daily at **midnight UTC**.
+deAPI is engineered for High Throughput capability upon deployment. Unlike traditional providers, API scalability is not restricted by complex access levels during the initial integration phase.
+
+---
+
+## Account Types
+
+All new accounts start as **Basic** and can upgrade to **Premium** by making any payment.
+
+| Type | Qualification |
+| --- | --- |
+| **Basic** | New accounts (no payments made) |
+| **Premium** | Any payment made via Stripe |
+
+<Note>
+  Upon registration, you receive a **\$5 bonus** added to your balance. This bonus is available for **Basic accounts** with conservative rate limits designed for testing and evaluation.
+
+  To upgrade to **Premium** (300 RPM, unlimited daily requests), simply top up your account with any available amount. Your remaining bonus balance carries over — for example, if you use \$2 of your bonus and then purchase \$10, your total balance becomes \$13 (\$3 remaining \+ \$10 purchased), now usable with Premium limits.
+</Note>
+
+<Warning>
+  Accounts registered with temporary or disposable email addresses do not receive the \$5 bonus. We value long-term users and honest usage.
+</Warning>
+
+---
+
+## Rate Limits
+
+Rate limits are defined per endpoint as:
+
+- **RPM** — Requests Per Minute
+- **RPD** — Requests Per Day
+
+Limits reset daily at **midnight UTC**.Limits reset daily at **midnight UTC**.
 
 ---
 
@@ -44,7 +76,13 @@ Limits reset daily at **midnight UTC**.
 
 Basic accounts have conservative limits designed for testing and evaluation.
 
-#### Generation & Transformation Endpoints
+---
+
+### Basic Limits
+
+Basic accounts have conservative limits designed for testing and evaluation.
+
+#### Generation & Transformation EndpoinGeneration & Transformation Endpoints
 
 | Endpoint | Models | RPM | RPD |
 | --- | --- | --- | --- |
@@ -131,17 +169,102 @@ Many AI infrastructure providers enforce restrictive initial limits, necessitati
 - Traditional Providers: Often require credit card verification or initial payment before any API access.
 - deAPI: Immediate access with \$5 bonus upon registration — no payment required to start testing.
 
-**Scaling to Production**
+| Endpoint | Models | RPM | RPD |
+| --- | --- | --- | --- |
+| `/api/v2/images/generations` | `Flux1schnell`, `ZImageTurbo_INT8`, `Flux_2_Klein_4B_BF16` | 3 | 100 |
+| `/api/v2/images/edits` | `Flux_2_Klein_4B_BF16`, `QwenImageEdit_Plus_NF4` | 1 | 15 |
+| `/api/v2/images/ocr` | `Nanonets_Ocr_S_F16` | 5 | 50 |
+| `/api/v2/images/background-removals` | `Ben2` | 5 | 100 |
+| `/api/v2/images/upscales` | `RealESRGAN_x4` | 5 | 100 |
+| `/api/v2/videos/generations` | `Ltxv_13B_0_9_8_Distilled_FP8`, `Ltx2_19B_Dist_FP8`, `Ltx2_3_22B_Dist_INT8` | 1 | 15 |
+| `/api/v2/videos/animations` | `Ltxv_13B_0_9_8_Distilled_FP8`, `Ltx2_19B_Dist_FP8`, `Ltx2_3_22B_Dist_INT8` | 1 | 15 |
+| `/api/v2/videos/audio-syncs` | `Ltx2_3_22B_Dist_INT8` | 1 | 15 |
+| `/api/v2/videos/replacements` | (see Model Selection) | 1 | 15 |
+| `/api/v2/videos/upscales` | `RealESRGAN_Vid_x4 , RealESRGAN_Vid_x2 , FlashVSR_Tiny` | 1 | 15 |
+| `/api/v2/audio/speech` | `Kokoro`, `Chatterbox`, `Qwen3_TTS` | 5 | 300 |
+| `/api/v2/audio/music` | `AceStep_1_5_Turbo` | 1 | 15 |
+| `/api/v2/audio/transcriptions` | `WhisperLargeV3` | 1 | 10 |
+| `/api/v2/embeddings` | `Bge_M3_FP16` | 10 | 500 |
 
-- Traditional Providers: Typically require specific monetary spend thresholds (e.g., \$50\+) and time delays (weeks/months) to unlock higher rate limits.
-- deAPI: Instant upgrade to Premium (300 RPM, unlimited daily requests) with any available top-up amount (\$10, \$25, or \$50).
+<Note>
+  In v2 transcription is unified into a single endpoint (`/api/v2/audio/transcriptions`) — the Whisper shared-limit across 4 v1 endpoints no longer applies.
+</Note>
 
-**Limit Structure**
+#### Utility Endpoints
 
-- Traditional Providers: Often utilize separate quotas for tokens (TPM), requests (RPM), daily limits (RPD), and per-model restrictions.
-- deAPI Premium: Simple unified structure — 300 RPM across all endpoints with unlimited daily requests.
+| Endpoint | RPM | RPD |
+| --- | --- | --- |
+| Price Calculation (`/api/v2/**/price`) | 50 | 200 |
+| Jobs Status (`/api/v2/jobs/{job_request}`) | 50 | 200 |
 
-For High Volume Production requirements beyond Premium limits, please contact support via: [support@deapi.ai](mailto:support@deapi.ai)
+---
+
+### Premium Limits
+
+Premium accounts have high limits suitable for production workloads. All endpoints share a unified **300 RPM** with **unlimited daily requests**.
+
+| Endpoint | Models | RPM | RPD |
+| --- | --- | --- | --- |
+| `/api/v2/images/generations` | `Flux1schnell`, `ZImageTurbo_INT8`, `Flux_2_Klein_4B_BF16` | 300 | Unlimited |
+| `/api/v2/images/edits` | `Flux_2_Klein_4B_BF16`, `QwenImageEdit_Plus_NF4` | 300 | Unlimited |
+| `/api/v2/images/ocr` | `Nanonets_Ocr_S_F16` | 300 | Unlimited |
+| `/api/v2/images/background-removals` | `Ben2` | 300 | Unlimited |
+| `/api/v2/images/upscales` | `RealESRGAN_x4` | 300 | Unlimited |
+| `/api/v2/videos/generations` | `Ltxv_13B_0_9_8_Distilled_FP8`, `Ltx2_19B_Dist_FP8`, `Ltx2_3_22B_Dist_INT8` | 300 | Unlimited |
+| `/api/v2/videos/animations` | `Ltxv_13B_0_9_8_Distilled_FP8`, `Ltx2_19B_Dist_FP8`, `Ltx2_3_22B_Dist_INT8` | 300 | Unlimited |
+| `/api/v2/videos/audio-syncs` | `Ltx2_3_22B_Dist_INT8` | 300 | Unlimited |
+| `/api/v2/videos/replacements` | (see Model Selection) | 300 | Unlimited |
+| `/api/v2/videos/upscales` | `RealESRGAN_Vid_x4 , RealESRGAN_Vid_x2 , FlashVSR_Tiny` | 300 | Unlimited |
+| `/api/v2/audio/speech` | `Kokoro`, `Chatterbox`, `Qwen3_TTS` | 300 | Unlimited |
+| `/api/v2/audio/music` | `AceStep_1_5_Turbo` | 300 | Unlimited |
+| `/api/v2/audio/transcriptions` | `WhisperLargeV3` | 300 | Unlimited |
+| `/api/v2/embeddings` | `Bge_M3_FP16` | 300 | Unlimited |
+
+<Info>
+  In v2 Whisper is a single endpoint (`/api/v2/audio/transcriptions`) with its own 300 RPM allocation.
+</Info>
+
+---
+
+### Endpoints Without Rate Limits
+
+The following endpoints have no rate limits for all accounts:
+
+- **Utilities** — `/api/v2/account/balance`, `/api/v2/models`
+
+---
+
+### Basic vs Premium Comparison
+
+| Aspect | Basic | Premium |
+| --- | --- | --- |
+| RPM Limits | 1–10 RPM | 300 RPM (all endpoints) |
+| Daily Limits (RPD) | Limited | Unlimited |
+| Transcription Limit | 1 unified endpoint (v2) | 300 RPM (v2) |
+| Upgrade Requirement | — | Any payment via Stripe |
+
+---
+
+### deAPI vs. Traditional Providers
+
+Many AI infrastructure providers enforce restrictive initial limits, necessitating complex queue management systems for developers.
+
+**Getting Started**
+
+- Traditional Providers: Often require credit card verification or initial payment before any API access.
+- deAPI: Immediate access with \$5 bonus upon registration — no payment required to start testing.
+
+**Scaling to ProductionScaling to Production**
+
+- Traditional Providers: Typically require specific monetary spend thresholds (e.g., \$50\+) and time delays (weeks/months) to unlock higher rate limitTypically require specific monetary spend thresholds (e.g., \$50\+) and time delays (weeks/months) to unlock higher rate limits.
+- deAPI: Instant upgrade to Premium (300 RPM, unlimited daily requests) with any available top-up amount (\$10, \$25, or \$50)nstant upgrade to Premium (300 RPM, unlimited daily requests) with any available top-up amount (\$10, \$25, or \$50).
+
+**Limit StructureLimit Structure**
+
+- Traditional Providers: Often utilize separate quotas for tokens (TPM), requests (RPM), daily limits (RPD), and per-model restrictionOften utilize separate quotas for tokens (TPM), requests (RPM), daily limits (RPD), and per-model restrictions.
+- deAPI Premium: Simple unified structure — 300 RPM across all endpoints with unlimited daily requests Premium: Simple unified structure — 300 RPM across all endpoints with unlimited daily requests.
+
+For High Volume Production requirements beyond Premium limits, please contact support via: [support@deapi.ai](mailto:support@deapi.ai)For High Volume Production requirements beyond Premium limits, please contact support via: [support@deapi.ai](mailto:support@deapi.ai)
 
 ---
 
@@ -149,13 +272,30 @@ For High Volume Production requirements beyond Premium limits, please contact su
 
 The majority of endpoints (Video-to-Text, Audio-to-Text, Image-to-Image) support direct binary file uploads or URL-based inputs. The global limits for file uploads are specified below.
 
-### Global Request & Response Caps
+---
 
-These caps apply to every endpoint regardless of media type. Exceeding them returns `413 Payload Too Large`.
+## File Uploads
+
+The majority of endpoints (Video-to-Text, Audio-to-Text, Image-to-Image) support direct binary file uploads or URL-based inputs. The global limits for file uploads are specified below.
+
+### Global Request & Response CapGlobal Request & Response Caps
+
+These caps apply to every endpoint regardless of media type. Exceeding them returns `413 Payload Too Large`se caps apply to every endpoint regardless of media type. Exceeding them returns `413 Payload Too Large`.
 
 | Cap | Limit | Scope |
 | --- | --- | --- |
-| Request body (input) | **75 MB** | Total size of any single API request (multipart upload + JSON fields combined) |
+| Request body (input) | **75 MB** | Total size of any single API request (multipart upload \+ JSON fields combined) |
+| Job result (output) | **100 MB** | Maximum size of the generated artifact returned by a worker job |
+
+<Note>
+  Per-type caps below are always **≤ the global 75 MB request body cap**. If you send multiple files in one request, the sum must still fit within 75 MB.
+</Note>
+
+### Per-Type Upload Limits
+
+| Cap | Limit | Scope |
+| --- | --- | --- |
+| Request body (input) | **75 MB** | Total size of any single API request (multipart upload \+ JSON fields combined) |
 | Job result (output) | **100 MB** | Maximum size of the generated artifact returned by a worker job |
 
 <Note>
@@ -168,20 +308,6 @@ These caps apply to every endpoint regardless of media type. Exceeding them retu
 
 - Max size: **50 MB**
 - Supported Formats: MP4, MPEG, QuickTime (MOV), AVI, WMV, OGG
-
-**2. Audio** (Audio-to-Text, Voice Cloning reference audio, Audio-to-Video, Music reference audio)
-
-- Max size: **20 MB**
-- Supported Formats: AAC, MP3, OGG, WAV, WebM, FLAC
-- Voice Cloning reference audio: max **15 MB**, 3–10 seconds duration. Supported formats: MP3, WAV, FLAC, OGG, M4A.
-- Audio-to-Video conditioning audio: max **20 MB**. Supported formats: MP3, WAV, OGG, FLAC.
-- Music reference audio (style transfer): max **15 MB**. Supported formats: MP3, WAV, FLAC, OGG, M4A.
-
-**3. Images** (Image-to-Image, OCR, Background Removal, Upscale, Image-to-Video first/last frame, Reference Character)
-
-- Max size: **10 MB**
-- Supported Formats: JPG, JPEG, PNG, GIF, BMP, WebP
-- Dimensions: **min 64 px**, **max 5000 px** per side
 
 <Tip>
   For larger source media that won't fit under the request body cap, prefer **URL-based inputs** (`source_url` / `video_url` / `audio_url`) where supported — they bypass the upload cap entirely and are subject only to the duration limits listed below.
@@ -199,8 +325,6 @@ These limits are returned dynamically via the [Models endpoint](/api/v2/utilitie
 GET https://api.deapi.ai/api/v2/models
 ```
 
-Check the `limits` field in each model object to see the applicable constraints before submitting a request. This ensures your inputs stay within the accepted bounds for the specific model you're using.
-
 ---
 
 ## URL Input & Duration Limits
@@ -211,10 +335,6 @@ For endpoints processing content via direct URLs (e.g., X Spaces), specific dura
 
 - Max Duration: 600 minutes
 - Note: Processing speeds for X Spaces may vary due to external bandwidth limits.
-
-**2. Video-to-Text** (X, Kick, Twitch)
-
-- Max Duration: 600 minutes
 
 ---
 
