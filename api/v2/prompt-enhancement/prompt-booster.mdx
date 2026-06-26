@@ -1,0 +1,30 @@
+---
+title: "prompt-booster"
+---
+
+Enhance a raw user prompt into a detailed, model-friendly prompt using the AI guide that matches the **target model** and **inference type**.
+
+- Set **`type`** (v2 dot notation) and **`model_slug`** to pick the right guide.
+- For **`images.edits`** and **`videos.animations`**, also send the source **`image`** (URL, data-URI, base64, or file).
+- Synchronous — the enhanced prompt is returned directly in the response body (`{ prompt, negative_prompt }`).
+
+<Info>
+  Required fields: `prompt`, `type`, `model_slug` (plus `image` for `images.edits` / `videos.animations`). The returned `negative_prompt` is provided for compatibility and is ignored by models that do not support negative prompts (e.g. FLUX.2 Klein).
+</Info>
+
+### Accepted `type` values
+
+`images.generations`, `images.edits`, `images.upscales`, `images.background-removals`, `images.ocr`, `videos.generations`, `videos.animations`, `videos.upscales`, `videos.background-removals`, `videos.transcriptions`, `audio.speech`, `audio.music`, `audio.transcriptions`, `embeddings`
+
+### Example (image-to-image)
+
+```bash
+curl -X POST "https://api.deapi.ai/api/v2/prompts/enhancements" \
+  -H "Authorization: Bearer <TOKEN>" \
+  -F "prompt=Make it look like a digital photo" \
+  -F "type=images.edits" \
+  -F "model_slug=Flux_2_Klein_4B_BF16" \
+  -F "image=@source.jpg"
+```
+
+Then send the returned `prompt` to the matching generation endpoint (e.g. `POST /api/v2/images/edits`).

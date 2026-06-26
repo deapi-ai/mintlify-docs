@@ -237,6 +237,170 @@
                 ]
             }
         },
+        "/api/v2/prompts/enhancements": {
+            "post": {
+                "tags": [
+                    "Client API v2"
+                ],
+                "description": "Unified prompt booster — enhance prompts for any model and type using AI-powered guide system. Accepted `type` values (v2 noun-based dot notation): `images.generations`, `images.edits`, `images.upscales`, `images.background-removals`, `images.ocr`, `videos.generations`, `videos.animations`, `videos.upscales`, `videos.background-removals`, `videos.transcriptions`, `audio.speech`, `audio.music`, `audio.transcriptions`, `embeddings`.",
+                "operationId": "clientBoostPromptV2",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "properties": {
+                                    "prompt": {
+                                        "type": "string",
+                                        "minLength": 3,
+                                        "example": "A beautiful landscape with mountains"
+                                    },
+                                    "negative_prompt": {
+                                        "type": "string",
+                                        "minLength": 3,
+                                        "example": "blurry, low quality",
+                                        "nullable": true
+                                    },
+                                    "type": {
+                                        "description": "Inference type in v2 dot notation (e.g. images.generations, videos.animations, audio.speech)",
+                                        "type": "string",
+                                        "example": "images.generations"
+                                    },
+                                    "model_slug": {
+                                        "type": "string",
+                                        "example": "Flux1schnell"
+                                    },
+                                    "image": {
+                                        "description": "Reference image. Required for images.edits/videos.animations. Supported formats: JPEG, PNG, BMP, GIF, WebP.",
+                                        "type": "string",
+                                        "format": "binary",
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Enhanced prompts returned successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "prompt": {
+                                            "type": "string"
+                                        },
+                                        "negative_prompt": {
+                                            "type": "string",
+                                            "nullable": true
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation failed, insufficient balance, or no guide available",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/response_error_unprocessable_entity"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v2/prompts/enhancements/price": {
+            "post": {
+                "tags": [
+                    "Client API v2"
+                ],
+                "description": "Calculate the price for the unified prompt booster. Accepted `type` values (v2 noun-based dot notation): `images.generations`, `images.edits`, `videos.generations`, `videos.animations`, `audio.speech`, `audio.music`, etc.",
+                "operationId": "clientCalculateBoostPriceV2",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "properties": {
+                                    "prompt": {
+                                        "type": "string",
+                                        "minLength": 3,
+                                        "example": "A beautiful landscape"
+                                    },
+                                    "negative_prompt": {
+                                        "type": "string",
+                                        "minLength": 3,
+                                        "example": "blurry, low quality",
+                                        "nullable": true
+                                    },
+                                    "type": {
+                                        "description": "Inference type in v2 dot notation (e.g. images.generations, videos.animations, audio.speech)",
+                                        "type": "string",
+                                        "example": "images.generations"
+                                    },
+                                    "model_slug": {
+                                        "type": "string",
+                                        "example": "Flux1schnell"
+                                    },
+                                    "image": {
+                                        "description": "Reference image (for price estimation of image-based types).",
+                                        "type": "string",
+                                        "format": "binary",
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Price calculation returned successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "price": {
+                                            "type": "number",
+                                            "format": "float",
+                                            "example": 0.00012345
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation failed",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/response_error_unprocessable_entity"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
         "/api/v2/videos/audio-syncs": {
             "post": {
                 "tags": [
@@ -3557,7 +3721,7 @@
                         ],
                         "properties": {
                             "video": {
-                                "description": "Video file to remove background from. Supported formats: MP4, MPEG, QuickTime, AVI, WMV, OGG. Maximum file size: 50 MB.",
+                                "description": "Video file to remove background from. Supported formats: MP4, MPEG, QuickTime, AVI, WMV, OGG. Maximum file size: 10 MB.",
                                 "type": "string",
                                 "format": "binary"
                             },
@@ -3642,14 +3806,14 @@
                         ],
                         "properties": {
                             "video": {
-                                "description": "Video file to upscale. Supported formats: MP4, MPEG, QuickTime, AVI, WMV, OGG. Maximum file size: 50 MB.",
+                                "description": "Video file to upscale. Supported formats: MP4, MPEG, QuickTime, AVI, WMV, OGG. Maximum file size: 10 MB.",
                                 "type": "string",
                                 "format": "binary"
                             },
                             "model": {
                                 "description": "The upscaling model to use",
                                 "type": "string",
-                                "example": "RealESRGAN_Vid_x4"
+                                "example": "RealESRGAN_x4plus"
                             },
                             "scale": {
                                 "description": "Optional upscale factor. Only allowed for models that support a configurable scale.",
@@ -3690,7 +3854,7 @@
                             "model": {
                                 "description": "The upscaling model to use",
                                 "type": "string",
-                                "example": "RealESRGAN_Vid_x4"
+                                "example": "RealESRGAN_x4plus"
                             },
                             "scale": {
                                 "description": "Optional upscale factor. Only allowed for models that support a configurable scale.",
@@ -3799,6 +3963,14 @@
                         "format": "uri",
                         "maxLength": 2048,
                         "example": "https://your-server.com/webhooks/deapi",
+                        "nullable": true
+                    },
+                    "webhook_secret": {
+                        "description": "Optional per-request HMAC secret (min. 32 chars) used to sign the webhook callback. When present, overrides the account-default webhook secret. Requires `webhook_url` to also be set.",
+                        "type": "string",
+                        "maxLength": 255,
+                        "minLength": 32,
+                        "example": "a1b2c3d4e5f60708091a2b3c4d5e6f7081920a1b2c3d4e5f60708091a2b3c4d5",
                         "nullable": true
                     }
                 },
@@ -4052,7 +4224,7 @@
                         "example": 24000
                     },
                     "ref_audio": {
-                        "description": "Reference audio file for voice cloning. Supported formats: mp3, wav, flac, ogg, m4a. Max 15MB. Duration must be between 3-10 seconds (model-specific limits may apply). Required for voice_clone mode.",
+                        "description": "Reference audio file for voice cloning. Supported formats: mp3, wav, flac, ogg, m4a. Max 10MB. Duration must be between 3-10 seconds (model-specific limits may apply). Required for voice_clone mode.",
                         "type": "string",
                         "format": "binary",
                         "nullable": true
@@ -4073,6 +4245,14 @@
                         "format": "uri",
                         "maxLength": 2048,
                         "example": "https://your-server.com/webhooks/deapi",
+                        "nullable": true
+                    },
+                    "webhook_secret": {
+                        "description": "Optional per-request HMAC secret (min. 32 chars) used to sign the webhook callback. When present, overrides the account-default webhook secret. Requires `webhook_url` to also be set.",
+                        "type": "string",
+                        "maxLength": 255,
+                        "minLength": 32,
+                        "example": "a1b2c3d4e5f60708091a2b3c4d5e6f7081920a1b2c3d4e5f60708091a2b3c4d5",
                         "nullable": true
                     }
                 },
@@ -4122,6 +4302,14 @@
                         "format": "uri",
                         "maxLength": 2048,
                         "example": "https://your-server.com/webhooks/deapi",
+                        "nullable": true
+                    },
+                    "webhook_secret": {
+                        "description": "Optional per-request HMAC secret (min. 32 chars) used to sign the webhook callback. When present, overrides the account-default webhook secret. Requires `webhook_url` to also be set.",
+                        "type": "string",
+                        "maxLength": 255,
+                        "minLength": 32,
+                        "example": "a1b2c3d4e5f60708091a2b3c4d5e6f7081920a1b2c3d4e5f60708091a2b3c4d5",
                         "nullable": true
                     }
                 },
@@ -4210,6 +4398,14 @@
                         "maxLength": 2048,
                         "example": "https://your-server.com/webhooks/deapi",
                         "nullable": true
+                    },
+                    "webhook_secret": {
+                        "description": "Optional per-request HMAC secret (min. 32 chars) used to sign the webhook callback. When present, overrides the account-default webhook secret. Requires `webhook_url` to also be set.",
+                        "type": "string",
+                        "maxLength": 255,
+                        "minLength": 32,
+                        "example": "a1b2c3d4e5f60708091a2b3c4d5e6f7081920a1b2c3d4e5f60708091a2b3c4d5",
+                        "nullable": true
                     }
                 },
                 "type": "object"
@@ -4291,7 +4487,7 @@
                         "example": "flac"
                     },
                     "reference_audio": {
-                        "description": "Optional reference audio file for style transfer. Supported formats: mp3, wav, flac, ogg, m4a. Max size configurable (default 15MB). Duration must be within model-specific limits.",
+                        "description": "Optional reference audio file for style transfer. Supported formats: mp3, wav, flac, ogg, m4a. Max size configurable (default 10MB). Duration must be within model-specific limits.",
                         "type": "string",
                         "format": "binary",
                         "nullable": true
@@ -4377,6 +4573,14 @@
                         "maxLength": 2048,
                         "example": "https://your-server.com/webhooks/deapi",
                         "nullable": true
+                    },
+                    "webhook_secret": {
+                        "description": "Optional per-request HMAC secret (min. 32 chars) used to sign the webhook callback. When present, overrides the account-default webhook secret. Requires `webhook_url` to also be set.",
+                        "type": "string",
+                        "maxLength": 255,
+                        "minLength": 32,
+                        "example": "a1b2c3d4e5f60708091a2b3c4d5e6f7081920a1b2c3d4e5f60708091a2b3c4d5",
+                        "nullable": true
                     }
                 },
                 "type": "object"
@@ -4393,7 +4597,7 @@
                         "example": "https://www.youtube.com/watch?v=jNQXAC9IVRw"
                     },
                     "source_file": {
-                        "description": "Audio or video file to transcribe. Supported audio: aac, mpeg, ogg, wav, webm, flac (max 20 MB). Supported video: mp4, mpeg, quicktime, avi, wmv, ogg (max 50 MB). Total request body is capped at 75 MB. Mutually exclusive with source_url.",
+                        "description": "Audio or video file to transcribe. Supported audio: aac, mpeg, ogg, wav, webm, flac. Supported video: mp4, mpeg, quicktime, avi, wmv, ogg. Mutually exclusive with source_url.",
                         "type": "string",
                         "format": "binary"
                     },
@@ -4419,6 +4623,14 @@
                         "maxLength": 2048,
                         "example": "https://your-server.com/webhooks/deapi",
                         "nullable": true
+                    },
+                    "webhook_secret": {
+                        "description": "Optional per-request HMAC secret (min. 32 chars) used to sign the webhook callback. When present, overrides the account-default webhook secret. Requires `webhook_url` to also be set.",
+                        "type": "string",
+                        "maxLength": 255,
+                        "minLength": 32,
+                        "example": "a1b2c3d4e5f60708091a2b3c4d5e6f7081920a1b2c3d4e5f60708091a2b3c4d5",
+                        "nullable": true
                     }
                 },
                 "type": "object"
@@ -4430,7 +4642,7 @@
                 ],
                 "properties": {
                     "video": {
-                        "description": "Video file to remove background from. Supported formats: MP4, MPEG, QuickTime, AVI, WMV, OGG. Maximum file size: 50 MB.",
+                        "description": "Video file to remove background from. Supported formats: MP4, MPEG, QuickTime, AVI, WMV, OGG. Maximum file size: 10 MB.",
                         "type": "string",
                         "format": "binary"
                     },
@@ -4513,14 +4725,14 @@
                 ],
                 "properties": {
                     "video": {
-                        "description": "Video file to upscale. Supported formats: MP4, MPEG, QuickTime, AVI, WMV, OGG. Maximum file size: 50 MB.",
+                        "description": "Video file to upscale. Supported formats: MP4, MPEG, QuickTime, AVI, WMV, OGG. Maximum file size: 10 MB.",
                         "type": "string",
                         "format": "binary"
                     },
                     "model": {
                         "description": "The upscaling model to use",
                         "type": "string",
-                        "example": "RealESRGAN_Vid_x4"
+                        "example": "RealESRGAN_x4plus"
                     },
                     "scale": {
                         "description": "Optional upscale factor (e.g. 2, 4). Only allowed for models that support a configurable scale; fixed-scale models (e.g. x2/x4 only) reject this field. Validated against the per-model min/max scale defined in the admin panel.",
