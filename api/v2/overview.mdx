@@ -15,71 +15,68 @@ All endpoints use base URL `https://api.deapi.ai` and require authentication via
 
 ## Images
 
-| Method | Endpoint                                        | Description                          | Docs                                          |
-| ------ | ----------------------------------------------- | ------------------------------------ | --------------------------------------------- |
-| `POST` | `/api/v2/images/generations`                    | Generate image from text prompt      | [→](/api/v2/images/generations)               |
-| `POST` | `/api/v2/images/generations/price`              | Calculate image generation price     | [→](/api/v2/images/generations-price)         |
-| `POST` | `/api/v2/images/edits`                          | Edit/transform an image              | [→](/api/v2/images/edits)                     |
-| `POST` | `/api/v2/images/edits/price`                    | Calculate image edit price           | [→](/api/v2/images/edits-price)               |
-| `POST` | `/api/v2/images/ocr`                            | Extract text from image (OCR)        | [→](/api/v2/images/ocr)                       |
-| `POST` | `/api/v2/images/ocr/price`                      | Calculate OCR price                  | [→](/api/v2/images/ocr-price)                 |
-| `POST` | `/api/v2/images/background-removals`            | Remove image background              | [→](/api/v2/images/background-removals)       |
-| `POST` | `/api/v2/images/background-removals/price`      | Calculate bg removal price           | [→](/api/v2/images/background-removals-price) |
-| `POST` | `/api/v2/images/upscales`                       | Upscale image resolution             | [→](/api/v2/images/upscales)                  |
-| `POST` | `/api/v2/images/upscales/price`                 | Calculate image upscale price        | [→](/api/v2/images/upscales-price)            |
+| Method | Endpoint | Description | Docs |
+| --- | --- | --- | --- |
+| `POST` | `/api/v2/images/generations` | Generate image from text prompt | [→](/api/v2/images/generations) |
+| `POST` | `/api/v2/images/generations/price` | Calculate image generation price | [→](/api/v2/images/generations-price) |
+| `POST` | `/api/v2/images/edits` | Edit/transform an image | [→](/api/v2/images/edits) |
+| `POST` | `/api/v2/images/edits/price` | Calculate image edit price | [→](/api/v2/images/edits-price) |
+| `POST` | `/api/v2/images/ocr` | Extract text from image (OCR) | [→](/api/v2/images/ocr) |
+| `POST` | `/api/v2/images/ocr/price` | Calculate OCR price | [→](/api/v2/images/ocr-price) |
+| `POST` | `/api/v2/images/background-removals` | Remove image background | [→](/api/v2/images/background-removals) |
+| `POST` | `/api/v2/images/background-removals/price` | Calculate bg removal price | [→](/api/v2/images/background-removals-price) |
+| `POST` | `/api/v2/images/upscales` | Upscale image resolution | [→](/api/v2/images/upscales) |
+| `POST` | `/api/v2/images/upscales/price` | Calculate image upscale price | [→](/api/v2/images/upscales-price) |
 
 ## Videos
 
-| Method | Endpoint                                        | Description                          | Docs                                          |
-| ------ | ----------------------------------------------- | ------------------------------------ | --------------------------------------------- |
-| `POST` | `/api/v2/videos/generations`                    | Generate video from text prompt      | [→](/api/v2/videos/generations)               |
-| `POST` | `/api/v2/videos/generations/price`              | Calculate video generation price     | [→](/api/v2/videos/generations-price)         |
-| `POST` | `/api/v2/videos/animations`                     | Animate image into video             | [→](/api/v2/videos/animations)                |
-| `POST` | `/api/v2/videos/animations/price`               | Calculate animation price            | [→](/api/v2/videos/animations-price)          |
-| `POST` | `/api/v2/videos/audio-syncs`                    | Generate video from audio + prompt   | [→](/api/v2/videos/audio-syncs)               |
-| `POST` | `/api/v2/videos/audio-syncs/price`              | Calculate audio-sync price           | [→](/api/v2/videos/audio-syncs-price)         |
-| `POST` | `/api/v2/videos/replacements`                   | Replace character in video           | [→](/api/v2/videos/replacements)              |
-| `POST` | `/api/v2/videos/replacements/price`             | Calculate replacement price          | [→](/api/v2/videos/replacements-price)        |
-| `POST` | `/api/v2/videos/upscales`                       | Upscale video resolution             | [→](/api/v2/videos/upscales)                  |
-| `POST` | `/api/v2/videos/upscales/price`                 | Calculate video upscale price        | [→](/api/v2/videos/upscales-price)            |
+| Method | Endpoint | Description | Docs |
+| --- | --- | --- | --- |
+| `POST` | `/api/v2/videos/generations` | Generate video from text prompt | [→](/api/v2/videos/generations) |
+| `POST` | `/api/v2/videos/generations/price` | Calculate video generation price | [→](/api/v2/videos/generations-price) |
+| `POST` | `/api/v2/videos/animations` | Animate image into video | [→](/api/v2/videos/animations) |
+| `POST` | `/api/v2/videos/animations/price` | Calculate animation price | [→](/api/v2/videos/animations-price) |
+| `POST` | `/api/v2/videos/audio-syncs` | Generate video from audio \+ prompt | [→](/api/v2/videos/audio-syncs) |
+| `POST` | `/api/v2/videos/audio-syncs/price` | Calculate audio-sync price | [→](/api/v2/videos/audio-syncs-price) |
+| `POST` | `/api/v2/videos/replacements` | Replace character in video | [→](/api/v2/videos/replacements) |
+| `POST` | `/api/v2/videos/replacements/price` | Calculate replacement price | [→](/api/v2/videos/replacements-price) |
+| `POST` | `/api/v2/videos/upscales` | Upscale video resolution | [→](/api/v2/videos/upscales) |
+| `POST` | `/api/v2/videos/upscales/price` | Calculate video upscale price | [→](/api/v2/videos/upscales-price) |
 
 ## Audio
 
-| Method | Endpoint                                        | Description                          | Docs                                          |
-| ------ | ----------------------------------------------- | ------------------------------------ | --------------------------------------------- |
-| `POST` | `/api/v2/audio/speech`                          | Generate speech from text (TTS)      | [→](/api/v2/audio/speech)                     |
-| `POST` | `/api/v2/audio/speech/price`                    | Calculate TTS price                  | [→](/api/v2/audio/speech-price)               |
-| `POST` | `/api/v2/audio/music`                           | Generate music from text             | [→](/api/v2/audio/music)                      |
-| `POST` | `/api/v2/audio/music/price`                     | Calculate music price                | [→](/api/v2/audio/music-price)                |
-| `POST` | `/api/v2/audio/transcriptions`                  | Transcribe audio/video (unified)     | [→](/api/v2/audio/transcriptions)             |
-| `POST` | `/api/v2/audio/transcriptions/price`            | Calculate transcription price        | [→](/api/v2/audio/transcriptions-price)       |
+| Method | Endpoint | Description | Docs |
+| --- | --- | --- | --- |
+| `POST` | `/api/v2/audio/speech` | Generate speech from text (TTS) | [→](/api/v2/audio/speech) |
+| `POST` | `/api/v2/audio/speech/price` | Calculate TTS price | [→](/api/v2/audio/speech-price) |
+| `POST` | `/api/v2/audio/music` | Generate music from text | [→](/api/v2/audio/music) |
+| `POST` | `/api/v2/audio/music/price` | Calculate music price | [→](/api/v2/audio/music-price) |
+| `POST` | `/api/v2/audio/transcriptions` | Transcribe audio/video (unified) | [→](/api/v2/audio/transcriptions) |
+| `POST` | `/api/v2/audio/transcriptions/price` | Calculate transcription price | [→](/api/v2/audio/transcriptions-price) |
 
 ## Embeddings
 
-| Method | Endpoint                                        | Description                          | Docs                                          |
-| ------ | ----------------------------------------------- | ------------------------------------ | --------------------------------------------- |
-| `POST` | `/api/v2/embeddings`                            | Generate text embeddings             | [→](/api/v2/embeddings/embeddings)            |
-| `POST` | `/api/v2/embeddings/price`                      | Calculate embedding price            | [→](/api/v2/embeddings/embeddings-price)      |
+| Method | Endpoint | Description | Docs |
+| --- | --- | --- | --- |
+| `POST` | `/api/v2/embeddings` | Generate text embeddings | [→](/api/v2/embeddings/embeddings) |
+| `POST` | `/api/v2/embeddings/price` | Calculate embedding price | [→](/api/v2/embeddings/embeddings-price) |
 
 ## Prompt Enhancement
 
-AI-powered prompt optimization tools. These endpoints share the v1 URL path — v2 clients call them without any change in authentication or rate limits.
+AI-powered prompt boosters. In v2 all boosters use a single unified endpoint — select the booster with the `type` field (dot notation) and the target model via `model_slug`.
 
-| Method | Endpoint                                        | Description                          | Docs                                                           |
-| ------ | ----------------------------------------------- | ------------------------------------ | -------------------------------------------------------------- |
-| `POST` | `/api/v1/client/prompt/image`                   | Image prompt booster                 | [→](/api/v2/prompt-enhancement/image-prompt-booster)           |
-| `POST` | `/api/v1/client/prompt/video`                   | Video prompt booster                 | [→](/api/v2/prompt-enhancement/video-prompt-booster)           |
-| `POST` | `/api/v1/client/prompt/speech`                  | Speech prompt booster                | [→](/api/v2/prompt-enhancement/speech-prompt-booster)          |
-| `POST` | `/api/v1/client/prompt/image2image`             | Image-to-image prompt booster        | [→](/api/v2/prompt-enhancement/image-to-image-prompt-booster)  |
-| `GET`  | `/api/v1/client/prompts/samples`                | Generate sample prompts              | [→](/api/v2/prompt-enhancement/sample-prompts)                 |
+| Method | Endpoint | Description | Docs |
+| --- | --- | --- | --- |
+| `POST` | `/api/v2/prompts/enhancements` | Prompt booster (all types) | [→](/api/v2/prompt-enhancement/prompt-booster) |
+| `POST` | `/api/v2/prompts/enhancements/price` | Prompt booster price | [→](/api/v2/prompt-enhancement/prompt-booster-price) |
 
 ## Utilities
 
-| Method | Endpoint                                     | Description                          | Docs                                          |
-| ------ | -------------------------------------------- | ------------------------------------ | --------------------------------------------- |
-| `GET`  | `/api/v2/account/balance`                    | Get current account balance          | [→](/api/v2/utilities/balance)                |
-| `GET`  | `/api/v2/jobs/{job_request}`                 | Check job status and get results     | [→](/api/v2/utilities/jobs)                   |
-| `GET`  | `/api/v2/models`                             | List all available models            | [→](/api/v2/utilities/models)                 |
+| Method | Endpoint | Description | Docs |
+| --- | --- | --- | --- |
+| `GET` | `/api/v2/account/balance` | Get current account balance | [→](/api/v2/utilities/balance) |
+| `GET` | `/api/v2/jobs/{job_request}` | Check job status and get results | [→](/api/v2/utilities/jobs) |
+| `GET` | `/api/v2/models` | List all available models | [→](/api/v2/utilities/models) |
 
 ## Workflow
 
@@ -115,7 +112,6 @@ Typical API usage follows this pattern:
 }
 ```
 
-
 ```json Job Status (GET /api/v2/jobs/{id})
 {
   "data": {
@@ -128,13 +124,11 @@ Typical API usage follows this pattern:
 }
 ```
 
-
 ```json Balance
 {
   "balance": 19.72
 }
 ```
-
 
 ```json Models List
 {
@@ -150,7 +144,6 @@ Typical API usage follows this pattern:
   }
 }
 ```
-
 
 ```json Error (4xx/5xx)
 {

@@ -24,7 +24,7 @@ Simply sign up or log in, then navigate to your Dashboard → Settings → API K
 
 Every API request requires an `Authorization` header with your personal token:
 
-```
+```text
 Authorization: Bearer YOUR_API_KEY
 ```
 
@@ -41,9 +41,7 @@ After submitting a task, you'll receive a `request_id`. Use this ID with the **G
 **Yes.** The limits depend on your account type:
 
 - **Basic (Free):** Designed for testing. Limits are restrictive, ranging from **1 to 10 RPM** (Requests Per Minute) depending on the endpoint, with daily caps.
-- **Premium:** Activated by any available payment. Offers a unified high limit of **300 RPM** across all endpoints with **unlimited daily requests**.
-
-  If you exceed these limits, you'll receive a `429 Too Many Requests` response. For High Volume Production requirements beyond Premium limits, please contact support.
+- **Premium:** Activated by any available payment. Offers a unified high limit of **300 RPM** across all endpoints with **unlimited daily requests**. If you exceed these limits, you'll receive a `429 Too Many Requests` response. For High Volume Production requirements beyond Premium limits, please contact support.
 
 ---
 
@@ -94,7 +92,7 @@ deAPI provides the following AI-powered services (v2 REST API):
 - **Text-to-Music** — `/api/v2/audio/music`
 - **Transcription** (unified audio/video) — `/api/v2/audio/transcriptions`
 - **Text-to-Embedding** — `/api/v2/embeddings`
-- **Prompt Enhancement** — `/api/v1/client/prompt/*` (shared with v1)
+- **Prompt Enhancement** — `/api/v2/prompts/enhancements`
 
 ---
 

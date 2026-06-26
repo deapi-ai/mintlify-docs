@@ -16,7 +16,7 @@ Create your free account at [deapi.ai](https://app.deapi.ai/register) to get sta
 
 deAPI uses token-based authentication. Every request must include your personal API key, provided via an HTTP header:
 
-```
+```text
 Authorization: Bearer YOUR_API_KEY
 ```
 
@@ -33,10 +33,10 @@ To get your API key:
 
 deAPI operates on a pay-as-you-go model.
 
-| Account Type | Description                                             |
-| ------------ | ------------------------------------------------------- |
-| **Basic**    | \$5 welcome bonus, conservative rate limits for testing |
-| **Premium**  | 300 RPM, unlimited daily requests across all endpoints  |
+| Account Type | Description |
+| --- | --- |
+| **Basic** | \$5 welcome bonus, conservative rate limits for testing |
+| **Premium** | 300 RPM, unlimited daily requests across all endpoints |
 
 Your **\$5 bonus** is available immediately upon registration for testing with Basic rate limits.
 
@@ -67,14 +67,14 @@ Once your API key is activated and your account has sufficient credits, you can 
 - **Image Upscale** — `POST /api/v2/images/upscales` — AI super-resolution for images.
 - **Video Generation** — `POST /api/v2/videos/generations` — Generate videos from text prompts.
 - **Video Animation (Image-to-Video)** — `POST /api/v2/videos/animations` — Animate still images.
-- **Video Audio Sync** — `POST /api/v2/videos/audio-syncs` — Generate video from audio + prompt.
+- **Video Audio Sync** — `POST /api/v2/videos/audio-syncs` — Generate video from audio \+ prompt.
 - **Video Replacement** — `POST /api/v2/videos/replacements` — Swap characters in videos.
 - **Video Upscale** — `POST /api/v2/videos/upscales` — AI super-resolution for videos.
 - **Text-to-Speech** — `POST /api/v2/audio/speech` — Preset voices, voice cloning, voice design.
 - **Text-to-Music** — `POST /api/v2/audio/music` — Tracks with lyrics, tempo, key, style control.
-- **Transcription** — `POST /api/v2/audio/transcriptions` — Unified audio + video (YouTube, X, Twitch, Kick, TikTok, X/Twitter Spaces, file uploads).
+- **Transcription** — `POST /api/v2/audio/transcriptions` — Unified audio \+ video (YouTube, X, Twitch, Kick, TikTok, X/Twitter Spaces, file uploads).
 - **Text-to-Embedding** — `POST /api/v2/embeddings` — Vector embeddings for semantic search and RAG.
-- **Prompt Enhancement** — `/api/v1/client/prompt/*` — AI-powered prompt boosters (shared with v1).
+- **Prompt Enhancement** — `POST /api/v2/prompts/enhancements` — AI-powered prompt boosters.
 
 ---
 

@@ -1,10 +1,10 @@
 ---
-title: "Prompt Enhancement"
+title: "Prompt Enhancement - Overview"
 description: "AI-powered prompt optimization tools for better generation results."
 ---
 
 <Info>
-  In v2 all prompt boosters use a **single unified endpoint** — `POST /api/v2/prompts/enhancements`. You select the booster with the **`type`** field (v2 dot notation) and the target model via **`model_slug`**. (Sample prompts remain on the stable `/api/v1/client/prompts/samples` path.)
+  In v2 all prompt boosters use a **single unified endpoint** — `POST /api/v2/prompts/enhancements`. You select the booster with the **`type`** field (v2 dot notation) and the target model via **`model_slug`**.
 </Info>
 
 ## Endpoints
@@ -13,7 +13,6 @@ description: "AI-powered prompt optimization tools for better generation results
 | --- | --- |
 | Prompt Booster | `POST /api/v2/prompts/enhancements` |
 | Booster Price | `POST /api/v2/prompts/enhancements/price` |
-| Sample Prompts | `GET  /api/v1/client/prompts/samples` |
 
 ## Request fields (`/api/v2/prompts/enhancements`)
 
