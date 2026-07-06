@@ -3203,6 +3203,12 @@
                         "type": "integer",
                         "example": 20
                     },
+                    "quality": {
+                        "description": "Quality tier, for models that support one (e.g. gpt-image: low/medium/high/auto). Only the values listed in that model's available options are accepted; ignored for models without a quality tier.",
+                        "type": "string",
+                        "example": "medium",
+                        "nullable": true
+                    },
                     "seed": {
                         "description": "Random seed for generation",
                         "type": "integer",
@@ -3499,6 +3505,12 @@
                         "description": "Number of inference steps",
                         "type": "integer",
                         "example": 20
+                    },
+                    "quality": {
+                        "description": "Quality tier, for models that support one (e.g. gpt-image: low/medium/high/auto). Only the values listed in that model's available options are accepted; ignored for models without a quality tier.",
+                        "type": "string",
+                        "example": "medium",
+                        "nullable": true
                     },
                     "seed": {
                         "description": "Random seed for generation",
@@ -3952,6 +3964,12 @@
                         "type": "integer",
                         "example": 20
                     },
+                    "quality": {
+                        "description": "Quality tier, for models that support one (e.g. gpt-image: low/medium/high/auto). Only the values listed in that model's available options are accepted; ignored for models without a quality tier.",
+                        "type": "string",
+                        "example": "medium",
+                        "nullable": true
+                    },
                     "seed": {
                         "description": "Random seed for generation",
                         "type": "integer",
@@ -4385,6 +4403,12 @@
                         "description": "Number of inference steps",
                         "type": "integer",
                         "example": 20
+                    },
+                    "quality": {
+                        "description": "Quality tier, for models that support one (e.g. gpt-image: low/medium/high/auto). Only the values listed in that model's available options are accepted; ignored for models without a quality tier.",
+                        "type": "string",
+                        "example": "medium",
+                        "nullable": true
                     },
                     "seed": {
                         "description": "Random seed for generation",
@@ -4873,6 +4897,27 @@
                     "inference_types": {
                         "description": "Available inference types for this model with their specific configurations",
                         "type": "object"
+                    },
+                    "tags": {
+                        "description": "Controlled labels for this model (e.g. test, experimental, new, beta).",
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "enum": [
+                                "test",
+                                "experimental",
+                                "new",
+                                "beta"
+                            ]
+                        }
+                    },
+                    "status": {
+                        "description": "Model maturity: test_model for externally-provided models, standard_model for native fleet models.",
+                        "type": "string",
+                        "enum": [
+                            "test_model",
+                            "standard_model"
+                        ]
                     },
                     "info": {
                         "description": "Model specifications including limits, features, and defaults. Structure varies by model type.",
