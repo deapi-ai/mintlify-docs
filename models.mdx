@@ -61,6 +61,20 @@ See the full endpoint spec → [Model Selection](/api/v2/utilities/models)
 
 ---
 
+## Partner (external) models (soon)
+
+Alongside the models running on deAPI's own decentralized GPU network, the model list also includes **partner models** — large, heavy models that run on our partners' infrastructure. These are typically models that can't run on consumer GPUs (very high VRAM requirements, proprietary weights, or specialized hardware), so we make them available through the same unified API.
+
+**Nothing changes on your side.** Partner models are returned by the same [Model Selection](/api/v2/utilities/models) endpoint, listed as external models with their own `slug`, `inference_types`, and `info` (limits, features, defaults). You discover and call them exactly like any other model — fetch the list, pick a `slug`, and pass it as the `model` parameter.
+
+<Info>
+  For partner models, **pricing, availability, and inference time are set by the partner**. deAPI acts as the provider (gateway) that routes your request and handles billing — it does not control the underlying infrastructure. As a result, response times and costs for these models can differ from the models running on deAPI's own network, and a partner model may occasionally be unavailable independently of the rest of the platform.
+</Info>
+
+Always read the information about limits and default values ​​for individual models from the model endpoint and check the current price in the endpoint price-calculation for the given model.
+
+---
+
 ## Supported tasks
 
 The table below shows which **task types** deAPI supports. To see which models are currently available for a given task, query the models endpoint with the corresponding `filter[inference_types]` value.

@@ -1,110 +1,27 @@
 ---
-title: "Prompt Enhancement"
-description: "AI-powered prompt optimization tools that transform basic ideas into detailed, professional prompts for better generation results."
+title: "Prompt Enhancement (Deprecated)"
+description: "The v1 prompt boosters are deprecated. Use the unified v2 Prompt Booster instead."
 ---
 
-## Overview
+<Warning>
+  **The v1 prompt boosters are deprecated and no longer documented.** The v1 booster endpoints (`/prompt/image`, `/prompt/video`, `/prompt/speech`, `/prompt/image2image`, `/prompts/samples`) have been replaced by a single unified endpoint in v2.
 
-Prompt Enhancement is a suite of AI-powered tools that optimize your prompts for better generation results. Whether you're creating images, videos, or speech, these endpoints analyze your input and return enhanced versions with improved detail, structure, and effectiveness.
+  Use the [**v2 Prompt Booster**](https://docs.deapi.ai/api/v2/prompt-enhancement/prompt-booster) — `POST /api/v2/prompts/enhancements`.
+</Warning>
 
-## Available Boosters
+## How it works
 
-| Booster | Endpoint | Use Case |
-|---------|----------|----------|
-| [Image Prompt Booster](/api/v1/prompt-enhancement/image-prompt-booster) | `POST /prompt/image` | Text-to-image generation |
-| [Video Prompt Booster](/api/v1/prompt-enhancement/video-prompt-booster) | `POST /prompt/video` | Text/image-to-video generation |
-| [Speech Prompt Booster](/api/v1/prompt-enhancement/speech-prompt-booster) | `POST /prompt/speech` | Text-to-speech synthesis |
-| [Image-to-Image Booster](/api/v1/prompt-enhancement/image-to-image-prompt-booster) | `POST /prompt/image2image` | Image transformation |
-| [Sample Prompts](/api/v1/prompt-enhancement/sample-prompts) | `GET /prompts/samples` | Generate creative ideas |
+Prompt Enhancement takes a basic idea and returns an optimized prompt — enriched with relevant detail, style keywords, and quality modifiers — that you then pass to a generation endpoint for better results.
 
-## How It Works
+In v2 this is a single endpoint for every booster type: you select the booster with the `type` field (e.g. `images.generations`, `videos.generations`, `audio.speech`, `images.edits`) and the target model with `model_slug`, instead of calling a separate per-type endpoint.
 
-<Steps>
-  <Step title="Send your basic prompt">
-    Submit your simple idea or concept to the appropriate booster endpoint.
-  </Step>
-  <Step title="AI enhancement">
-    Our AI analyzes your input and enriches it with relevant details, style keywords, and quality modifiers.
-  </Step>
-  <Step title="Use enhanced prompt">
-    Use the returned optimized prompt with any generation endpoint for improved results.
-  </Step>
-</Steps>
+## Migrating from v1
 
-## Example: Image Prompt Enhancement
+| v1 endpoint | v2 equivalent |
+| --- | --- |
+| `POST /prompt/image` | `POST /api/v2/prompts/enhancements` with `type: images.generations` |
+| `POST /prompt/video` | `POST /api/v2/prompts/enhancements` with `type: videos.generations` |
+| `POST /prompt/speech` | `POST /api/v2/prompts/enhancements` with `type: audio.speech` |
+| `POST /prompt/image2image` | `POST /api/v2/prompts/enhancements` with `type: images.edits` |
 
-### Request
-
-```bash
-curl -X POST https://api.deapi.ai/api/v1/client/prompt/image \
-  -H "Authorization: Bearer YOUR_API_KEY" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "prompt": "a cat in space"
-  }'
-```
-
-### Response
-
-```json
-{
-  "prompt": "A majestic cat floating gracefully in the depths of outer space, surrounded by glittering stars and distant galaxies, cosmic nebula colors reflecting in its curious eyes, cinematic lighting, ultra-detailed fur texture, 8K resolution, artstation trending",
-  "negative_prompt": "blurry, low quality, distorted, deformed"
-}
-```
-
-## Example: Video Prompt Enhancement
-
-### Request (with reference image)
-
-```bash
-curl -X POST https://api.deapi.ai/api/v1/client/prompt/video \
-  -H "Authorization: Bearer YOUR_API_KEY" \
-  -F "prompt=ocean waves at sunset" \
-  -F "image=@reference.jpg"
-```
-
-### Response
-
-```json
-{
-  "prompt": "Cinematic ocean waves crashing against rocky shores at golden hour, warm sunset colors reflecting on water surface, smooth camera pan following the wave motion, volumetric light rays through clouds, peaceful atmosphere, 4K quality, slow motion effect",
-  "negative_prompt": "static, choppy, low resolution, artificial looking"
-}
-```
-
-## Example: Sample Prompts Generator
-
-### Request
-
-```bash
-curl -X GET "https://api.deapi.ai/api/v1/client/prompts/samples?type=text2image&topic=cyberpunk" \
-  -H "Authorization: Bearer YOUR_API_KEY"
-```
-
-### Response
-
-```json
-{
-  "success": true,
-  "data": {
-    "type": "text2image",
-    "prompt": "A neon-lit cyberpunk street market at midnight, holographic advertisements floating above crowded alleyways, rain-slicked pavement reflecting pink and blue lights, vendors selling exotic tech gadgets, steam rising from food stalls, ultra-detailed, cinematic composition"
-  }
-}
-```
-
-## Pricing
-
-Each booster has a corresponding price calculation endpoint. Costs are minimal compared to generation itself but can significantly improve output quality.
-
-<Tip>
-  Always check costs with the price calculation endpoints before processing large batches. This helps you estimate total expenses accurately.
-</Tip>
-
-## Best Practices
-
-1. **Provide context** — The more specific your input, the better the enhancement
-2. **Use negative prompts** — Most boosters also optimize your negative prompt
-3. **Include reference images** — For video and image-to-image boosters, reference images dramatically improve results
-4. **Batch wisely** — Calculate prices first when processing multiple prompts
+See the [v2 Prompt Enhancement overview](/api/v2/prompt-enhancement/overview) for the full list of `type` values, and the [Prompt Booster](/api/v2/prompt-enhancement/prompt-booster) page for the request/response schema.

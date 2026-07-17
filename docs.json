@@ -251,17 +251,7 @@
           {
             "group": "Prompt Enhancement",
             "pages": [
-              "api/v1/prompt-enhancement/overview",
-              "api/v1/prompt-enhancement/image-prompt-booster",
-              "api/v1/prompt-enhancement/image-prompt-booster-price",
-              "api/v1/prompt-enhancement/video-prompt-booster",
-              "api/v1/prompt-enhancement/video-prompt-booster-price",
-              "api/v1/prompt-enhancement/speech-prompt-booster",
-              "api/v1/prompt-enhancement/speech-prompt-booster-price",
-              "api/v1/prompt-enhancement/image-to-image-prompt-booster",
-              "api/v1/prompt-enhancement/image-to-image-prompt-booster-price",
-              "api/v1/prompt-enhancement/sample-prompts",
-              "api/v1/prompt-enhancement/sample-prompts-price"
+              "api/v1/prompt-enhancement/overview"
             ]
           },
           {
