@@ -4,7 +4,7 @@ title: "Pricing"
 
 Example pricing is shown below for reference; exact, up-to-date rates are always available from the API.
 
-**deAPI** uses a **pay-as-you-go pricing model**, where costs are calculated dynamically per task based on the resource usage, such as resolution, steps, duration, or number of output characters. The pricing examples shown on the public site (https://deapi.ai/#pricing) serve as reference points; final cost is determined by the API at runtime depending on the selected model and parameters.
+**deAPI** uses a **pay-as-you-go pricing model**, where costs are calculated dynamically per task based on the resource usage, such as resolution, steps, duration, or number of output characters. The pricing examples shown on the public site ([https://deapi.ai/#pricing](https://deapi.ai/#pricing)) serve as reference points; final cost is determined by the API at runtime depending on the selected model and parameters.
 
 ### Pricing Overview
 
@@ -12,23 +12,23 @@ Example pricing is shown below for reference; exact, up-to-date rates are always
   Up-to-date prices are always available via the `/price` endpoint for the selected model (v2) or `/price` (v1).
 </Info>
 
-| Task Type                                         | Pricing Metric                      | Example Rate                                              | Endpoint (v2)                                |
-| ------------------------------------------------- | ----------------------------------- | --------------------------------------------------------- | -------------------------------------------- |
-| Image Generation (Flux.1 schnell)                 | resolution × steps                  | 0.00136 USD for 512x512, 4 steps                          | `POST /api/v2/images/generations`            |
-| Image Generation (Z-Image-Turbo INT8)             | resolution × steps                  | 0.00405 USD for 512x512, 4 steps                          | `POST /api/v2/images/generations`            |
-| Image Generation (Flux.2 Klein 4B BF16)           | resolution × steps                  | 0.00186 USD for 512x512, 4 steps                          | `POST /api/v2/images/generations`            |
-| Image Edit                                        | steps (style transfer)              | ~0.0132 USD for 512x512, 20 steps                         | `POST /api/v2/images/edits`                  |
-| Text-to-Speech (TTS)                              | number of characters                | 0.77 USD per 1 M characters                               | `POST /api/v2/audio/speech`                  |
-| Text-to-Music                                     | duration + inference steps          | Use `/price` endpoint                                     | `POST /api/v2/audio/music`                   |
-| Video Generation                                  | video duration + resolution         | 0.001737 USD for 2s, 256×256                              | `POST /api/v2/videos/generations`            |
-| Video Animation (Image-to-Video)                  | source image + motion interpolation | 0.001737 USD for 2s, 256×256                              | `POST /api/v2/videos/animations`             |
-| Transcription (URL + file, all sources)           | duration                            | from 0.021 USD per hour                                   | `POST /api/v2/audio/transcriptions`          |
-| Image OCR                                         | output characters                   | 0.00928 USD per 1,000 output chars (for 1024×1024 images) | `POST /api/v2/images/ocr`                    |
-| Embeddings                                        | number of tokens processed          | 0.000068 USD per 1,000 tokens                             | `POST /api/v2/embeddings`                    |
-| Image Background Removal                          | per image                           | Use `/price` endpoint                                     | `POST /api/v2/images/background-removals`    |
-| Image Upscale                                     | resolution × scale                  | Use `/price` endpoint                                     | `POST /api/v2/images/upscales`               |
-| Video Replacement                                 | duration × resolution × steps       | Use `/price` endpoint                                     | `POST /api/v2/videos/replacements`           |
-| Video Upscale                                     | resolution × duration × scale       | Use `/price` endpoint                                     | `POST /api/v2/videos/upscales`               |
+| Task Type | Pricing Metric | Example Rate | Endpoint (v2) |
+| --- | --- | --- | --- |
+| Image Generation (Flux.1 schnell) | resolution × steps | 0.00136 USD for 512x512, 4 steps | `POST /api/v2/images/generations` |
+| Image Generation (Z-Image-Turbo INT8) | resolution × steps | 0.00405 USD for 512x512, 4 steps | `POST /api/v2/images/generations` |
+| Image Generation (Flux.2 Klein 4B BF16) | resolution × steps | 0.00186 USD for 512x512, 4 steps | `POST /api/v2/images/generations` |
+| Image Edit | steps (style transfer) | ~0.0132 USD for 512x512, 20 steps | `POST /api/v2/images/edits` |
+| Text-to-Speech (TTS) | number of characters | 0.77 USD per 1 M characters | `POST /api/v2/audio/speech` |
+| Text-to-Music | duration \+ inference steps | Use `/price` endpoint | `POST /api/v2/audio/music` |
+| Video Generation | video duration \+ resolution | 0.001737 USD for 2s, 256×256 | `POST /api/v2/videos/generations` |
+| Video Animation (Image-to-Video) | source image \+ motion interpolation | 0.001737 USD for 2s, 256×256 | `POST /api/v2/videos/animations` |
+| Transcription (URL \+ file, all sources) | duration | from 0.05 USD per hour | `POST /api/v2/audio/transcriptions` |
+| Image OCR | output characters | 0.00928 USD per 1,000 output chars (for 1024×1024 images) | `POST /api/v2/images/ocr` |
+| Embeddings | number of tokens processed | 0.000068 USD per 1,000 tokens | `POST /api/v2/embeddings` |
+| Image Background Removal | per image | Use `/price` endpoint | `POST /api/v2/images/background-removals` |
+| Image Upscale | resolution × scale | Use `/price` endpoint | `POST /api/v2/images/upscales` |
+| Video Replacement | duration × resolution × steps | Use `/price` endpoint | `POST /api/v2/videos/replacements` |
+| Video Upscale | resolution × duration × scale | Use `/price` endpoint | `POST /api/v2/videos/upscales` |
 
 ---
 
@@ -49,12 +49,12 @@ Example pricing is shown below for reference; exact, up-to-date rates are always
   - Fast (2.0×): 0.5× the base cost
   - Slow (0.5×): 2.0× the base cost
 - Useful tip: using faster playback (2×) for drafts can reduce cost by ~50%.
-- All three TTS modes (custom_voice, voice_clone, voice_design) use the same per-character pricing model.
+- All three TTS modes (custom\_voice, voice\_clone, voice\_design) use the same per-character pricing model.
 
 **Text-to-Music (Music Generation)**
 
 - Price depends on track duration (10–600 seconds) and the number of inference steps.
-- Turbo models use fewer steps (e.g. 8) and are cheaper; base models use more steps (e.g. 32+) for higher quality.
+- Turbo models use fewer steps (e.g. 8) and are cheaper; base models use more steps (e.g. 32\+) for higher quality.
 - Use the `/price` endpoint with your `model`, `duration`, and `inference_steps` to get exact pricing before generation.
 
 **Text-to-Video**
@@ -80,8 +80,8 @@ Example pricing is shown below for reference; exact, up-to-date rates are always
 **Video-to-Text (Transcription)**
 
 - Billed per hour of video processed.
-- Sample public rate: **0.021 USD per hour**.
-- For 5 minutes, cost is estimated at **0.003613 USD**.
+- Sample public rate: **0.05 USD per hour**.
+- For 5 minutes, cost is estimated at **0.0075 USD**.
 - Supports timestamps, multilingual transcription, and batching for better throughput.
 
 **Image-to-Text (OCR / VLM)**
@@ -92,7 +92,7 @@ Example pricing is shown below for reference; exact, up-to-date rates are always
   - Single photo (≈20 chars) → **0.000186 USD**
   - Math expression (~350 chars) → **0.0032 USD**
   - Book page (~1,500 chars) → **0.0139 USD**
-- Volume discounts available for bulk processing (100k+ images)—contact sales.
+- Volume discounts available for bulk processing (100k\+ images)—contact sales.
 
 **Text-to-Embedding (Vector Representations)**
 
@@ -113,11 +113,12 @@ Example pricing is shown below for reference; exact, up-to-date rates are always
 - Increases video resolution (e.g. 2×, 4×) using AI super-resolution.
 - Price scales with input resolution, video duration, and the selected `scale` factor (only for models with configurable scale — fixed-scale models use their built-in factor).
 - Use the `/api/v2/videos/upscales/price` endpoint with your `model`, `width`, `height`, optional `duration`, and optional `scale` to get exact pricing before uploading the file.
+
 ---
 
 ### Best Practices & Guidance
 
-- Use the public calculator as a guide, but always rely on the API's final cost calculation (model + parameters).
+- Use the public calculator as a guide, but always rely on the API's final cost calculation (model \+ parameters).
 - Avoid hardcoding prices or cost assumptions—always fetch or compute cost based on actual model usage.
 - For reproducibility (e.g. in production or experiments), pin model versions and seeds so results are consistent across runs.
 - Prepare fallback options in your integration: if a model is deprecated or disabled, switch to a sensible alternative automatically.
@@ -125,4 +126,4 @@ Example pricing is shown below for reference; exact, up-to-date rates are always
 
 ---
 
-**Link to live pricing page for reference:** https://deapi.ai/pricing
+**Link to live pricing page for reference:** [https://deapi.ai/pricing](https://deapi.ai/pricing)
