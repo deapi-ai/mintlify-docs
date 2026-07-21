@@ -10,13 +10,13 @@ This guide explains how to integrate deAPI with a **self-hosted n8n instance** u
 
 The `n8n-nodes-deapi` community node offers several advantages over manually configuring HTTP Request nodes:
 
-| Feature              | Community Node                  | HTTP Request Approach             |
-| -------------------- | ------------------------------- | --------------------------------- |
-| **Setup Complexity** | One-time installation           | Manual configuration per workflow |
-| **Job Completion**   | Automatic webhook-based waiting | Manual polling loop required      |
-| **Binary Data**      | Auto-downloaded and attached    | Manual download step needed       |
-| **Error Handling**   | Built-in with clear messages    | Manual status checking            |
-| **Credential Reuse** | Shared across all operations    | Configure per node                |
+| Feature | Community Node | HTTP Request Approach |
+| --- | --- | --- |
+| **Setup Complexity** | One-time installation | Manual configuration per workflow |
+| **Job Completion** | Automatic webhook-based waiting | Manual polling loop required |
+| **Binary Data** | Auto-downloaded and attached | Manual download step needed |
+| **Error Handling** | Built-in with clear messages | Manual status checking |
+| **Credential Reuse** | Shared across all operations | Configure per node |
 
 ---
 
@@ -66,10 +66,10 @@ After installation, configure your deAPI credentials:
 2. Search for **deAPI API** and select it
 3. Fill in the required fields:
 
-| Field              | Description                             | Where to Get It                                                                  |
-| ------------------ | --------------------------------------- | -------------------------------------------------------------------------------- |
-| **API Key**        | Your deAPI API key for authentication   | [deAPI Quickstart Guide](https://docs.deapi.ai/quickstart#2-obtain-your-api-key) |
-| **Webhook Secret** | Secret for verifying webhook signatures | [deAPI Webhook Settings](https://app.deapi.ai/settings/webhooks)                     |
+| Field | Description | Where to Get It |
+| --- | --- | --- |
+| **API Key** | Your deAPI API key for authentication | [deAPI Quickstart Guide](https://docs.deapi.ai/quickstart#2-obtain-your-api-key) |
+| **Webhook Secret** | Secret for verifying webhook signatures | [deAPI Webhook Settings](https://app.deapi.ai/settings/webhooks) |
 
 4. Click **Save** to store the credentials
 
@@ -89,38 +89,38 @@ Use this node to perform AI operations within your workflow.
 
 ##### **Image Operations**
 
-| Operation             | Description                       | Models                                                   |
-| --------------------- | --------------------------------- | -------------------------------------------------------- |
-| **Generate**          | Generate images from text prompts | FLUX.1 Schnell, FLUX.2 Klein 4B BF16, Z-Image Turbo INT8 |
-| **Remove Background** | Remove background from images     | Ben2                                                     |
-| **Upscale**           | Increase image resolution by 4x   | RealESRGAN x4                                            |
+| Operation | Description | Models |
+| --- | --- | --- |
+| **Generate** | Generate images from text prompts | FLUX.1 Schnell, FLUX.2 Klein 4B BF16, Z-Image Turbo INT8 |
+| **Remove Background** | Remove background from images | Ben2 |
+| **Upscale** | Increase image resolution by 4x | RealESRGAN x4 |
 
 Image input operations (**Remove Background**, **Upscale**) accept JPG, JPEG, PNG, GIF, BMP, and WebP files up to 10 MB.
 
 ##### **Video Operations**
 
-| Operation              | Description                                                                     | Models                                       |
-| ---------------------- | ------------------------------------------------------------------------------- | -------------------------------------------- |
-| **Generate**           | Generate video from text or image(s)                                            | LTX-Video 0.9.8 13B, LTX-2 19B Distilled FP8 |
-| **Transcribe**         | Transcribe video to text (YouTube, Twitch, X, Kick, TikTok URLs or file upload) | Whisper Large V3                             |
-| **Upscale**            | Increase video resolution (2×–16×)                                              | RealESRGAN x4                                |
-| **Remove Background**  | Remove background from videos (v2 only)                                         | (see Model Selection)                        |
+| Operation | Description | Models |
+| --- | --- | --- |
+| **Generate** | Generate video from text or image(s) | LTX-Video 0.9.8 13B, LTX-2 19B Distilled FP8 |
+| **Transcribe** | Transcribe video to text (YouTube, Twitch, X, Kick, TikTok URLs or file upload) | Whisper Large V3 |
+| **Upscale** | Increase video resolution (2×–16×) | RealESRGAN x4 |
+| **Remove Background** | Remove background from videos (v2 only) | (see Model Selection) |
 
 Video file transcription accepts MP4, MPEG, MOV, AVI, WMV, and OGG files up to 50 MB.
 
 ##### **Audio Operations**
 
-| Operation      | Description                   | Models           |
-| -------------- | ----------------------------- | ---------------- |
+| Operation | Description | Models |
+| --- | --- | --- |
 | **Transcribe** | Transcribe audio file to text | Whisper Large V3 |
 
-Audio transcription accepts AAC, MP3, OGG, WAV, WebM, and FLAC files up to 20 MB.
+Audio transcription accepts AAC, MP3, OGG, WebM files up to 20 MB.
 
 ##### **Prompt Operations**
 
-| Operation                | Description                                         |
-| ------------------------ | --------------------------------------------------- |
-| **Image Prompt Booster** | Optimize prompts for text-to-image generation       |
+| Operation | Description |
+| --- | --- |
+| **Image Prompt Booster** | Optimize prompts for text-to-image generation |
 | **Video Prompt Booster** | Optimize prompts for text/image-to-video generation |
 
 #### DeapiTrigger Node (Webhook Trigger)
@@ -203,13 +203,13 @@ Add a **Manual Trigger** (or Schedule, Webhook, etc.) to start your workflow.
 2. Select your **deAPI API** credentials
 3. Configure the operation:
 
-| Setting          | Value                                  |
-| ---------------- | -------------------------------------- |
-| **Resource**     | Image                                  |
-| **Operation**    | Generate                               |
-| **Model**        | FLUX.2 Klain (or your preferred model) |
-| **Prompt**       | `Red Bull F1 car from 2025`            |
-| **Aspect Ratio** | Square, Landscape, or Portrait         |
+| Setting | Value |
+| --- | --- |
+| **Resource** | Image |
+| **Operation** | Generate |
+| **Model** | FLUX.2 Klain (or your preferred model) |
+| **Prompt** | `Red Bull F1 car from 2025` |
+| **Aspect Ratio** | Square, Landscape, or Portrait |
 
 4. Optionally configure:
    - **Negative Prompt** — Elements to exclude from the image
@@ -247,10 +247,10 @@ The **DeapiTrigger** node listens for webhook events from deAPI, enabling event-
 2. Select your **deAPI API** credentials
 3. Configure event filtering:
 
-| Setting                    | Description                                                             |
-| -------------------------- | ----------------------------------------------------------------------- |
-| **Events**                 | Select which events trigger the workflow: Processing, Completed, Failed |
-| **Download Binary Result** | Automatically download the result file for completed jobs               |
+| Setting | Description |
+| --- | --- |
+| **Events** | Select which events trigger the workflow: Processing, Completed, Failed |
+| **Download Binary Result** | Automatically download the result file for completed jobs |
 
 4. **Activate the workflow** to make the webhook URL live
 5. Copy the **Webhook URL** displayed in the node
@@ -258,25 +258,25 @@ The **DeapiTrigger** node listens for webhook events from deAPI, enabling event-
 
 #### Event Types
 
-| Event              | Description                | Typical Use                       |
-| ------------------ | -------------------------- | --------------------------------- |
-| **job.processing** | Job has started processing | Update status in external system  |
-| **job.completed**  | Job finished successfully  | Process the generated content     |
-| **job.failed**     | Job encountered an error   | Handle errors, send notifications |
+| Event | Description | Typical Use |
+| --- | --- | --- |
+| **job.processing** | Job has started processing | Update status in external system |
+| **job.completed** | Job finished successfully | Process the generated content |
+| **job.failed** | Job encountered an error | Handle errors, send notifications |
 
 ---
 
 ### Comparison: Community Node vs HTTP Request
 
-| Aspect                  | Community Node                | HTTP Request Approach                         |
-| ----------------------- | ----------------------------- | --------------------------------------------- |
-| **Nodes Required**      | 1 (Deapi node)                | 5+ (Submit, Poll loop, Check, Wait, Download) |
-| **Polling Logic**       | Automatic webhook             | Manual polling loop with Wait node            |
-| **Binary Handling**     | Auto-downloaded               | Manual HTTP Request to download               |
-| **Error Messages**      | Clear, contextual             | Raw API responses                             |
-| **Credential Setup**    | Once per n8n instance         | Once per n8n instance                         |
-| **Rate Limit Handling** | Built-in with helpful message | Manual detection and handling                 |
-| **Code Required**       | None                          | Expressions for URL templating                |
+| Aspect | Community Node | HTTP Request Approach |
+| --- | --- | --- |
+| **Nodes Required** | 1 (Deapi node) | 5\+ (Submit, Poll loop, Check, Wait, Download) |
+| **Polling Logic** | Automatic webhook | Manual polling loop with Wait node |
+| **Binary Handling** | Auto-downloaded | Manual HTTP Request to download |
+| **Error Messages** | Clear, contextual | Raw API responses |
+| **Credential Setup** | Once per n8n instance | Once per n8n instance |
+| **Rate Limit Handling** | Built-in with helpful message | Manual detection and handling |
+| **Code Required** | None | Expressions for URL templating |
 
 ---
 
@@ -304,10 +304,10 @@ If you see webhook signature verification errors:
 
 Operations have a configurable **Wait Timeout** with defaults that vary by type:
 
-| Operation Type               | Default Timeout | Max Timeout |
-| ---------------------------- | --------------- | ----------- |
-| Generation (image, video)    | 60 seconds      | 240 seconds |
-| Transcription (video, audio) | 120 seconds     | 600 seconds |
+| Operation Type | Default Timeout | Max Timeout |
+| --- | --- | --- |
+| Generation (image, video) | 60 seconds | 240 seconds |
+| Transcription (video, audio) | 120 seconds | 600 seconds |
 
 For long-running operations:
 
