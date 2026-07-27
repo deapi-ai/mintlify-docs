@@ -168,19 +168,24 @@ These caps apply to every endpoint regardless of media type. Exceeding them retu
 
 ### Per-Type Upload Limits
 
-| Cap | Limit | Scope |
-| --- | --- | --- |
-| Request body (input) | **75 MB** | Total size of any single API request (multipart upload \+ JSON fields combined) |
-| Job result (output) | **100 MB** | Maximum size of the generated artifact returned by a worker job |
-
-<Note>
-  Per-type caps below are always **≤ the global 75 MB request body cap**. If you send multiple files in one request, the sum must still fit within 75 MB.
-</Note>
-
 **1. Video** (Video-to-Text, Image-to-Video, Video Upscale, Video Replace, Video Background Removal)
 
 - Max size: **50 MB**
 - Supported Formats: MP4, MPEG, QuickTime (MOV), AVI, WMV, OGG
+
+**2. Audio** (Audio-to-Text, Voice Cloning reference audio, Audio-to-Video, Music reference audio)
+
+- Max size: **20 MB**
+- Supported Formats: AAC, MP3, OGG WebM
+- Voice Cloning reference audio: max **15 MB**, 3–10 seconds duration. Supported formats: MP3, OGG, M4A.
+- Audio-to-Video conditioning audio: max **20 MB**. Supported formats: MP3, OGG.
+- Music reference audio (style transfer): max **15 MB**. Supported formats: MP3, OGG, M4A.
+
+**3. Images** (Image-to-Image, OCR, Background Removal, Upscale, Image-to-Video first/last frame, Reference Character)
+
+- Max size: **10 MB**
+- Supported Formats: JPG, JPEG, PNG, GIF, BMP, WebP
+- Dimensions: **min 64 px**, **max 5000 px** per side
 
 <Tip>
   For larger source media that won't fit under the request body cap, prefer **URL-based inputs** (`source_url` / `video_url` / `audio_url`) where supported — they bypass the upload cap entirely and are subject only to the duration limits listed below.
@@ -208,6 +213,10 @@ For endpoints processing content via direct URLs (e.g., X Spaces), specific dura
 
 - Max Duration: 600 minutes
 - Note: Processing speeds for X Spaces may vary due to external bandwidth limits.
+
+**2. Video-to-Text** (X, Kick, Twitch)
+
+- Max Duration: 600 minutes
 
 ---
 
