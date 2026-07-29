@@ -9,6 +9,22 @@ Text-to-Music generates music tracks from text descriptions. You can control gen
   **Prerequisite:** To ensure a successful request, you must first consult the [Model Selection](/api/v1/utilities/model-selection) endpoint to identify a valid model `slug` and check specific **limits**.
 </Note>
 
+## Field values worth knowing
+
+These constraints are enforced by validation and are easy to trip over. They are identical on the v2 endpoint, [`POST /api/v2/audio/music`](/api/v2/audio/music).
+
+| Field | Constraint |
+| --- | --- |
+| `lyrics` | **Required and must be non-empty**, including for instrumental tracks. Omitting it or sending `""` returns `422 The lyrics field is required.` For an instrumental track, send `"[Instrumental]"`. |
+| `timesignature` | **Integer only**, and only `2`, `3`, `4` or `6` are accepted. A notation string such as `"4/4"` returns `422 The timesignature field must be an integer.` Map the numerator of an x/4 signature (4/4 → `4`, 3/4 → `3`, 2/4 → `2`, 6/8 → `6`); 5/4 and 7/8 cannot be expressed. Omit the field or send an empty value to let the model choose. |
+| `format` | One of `mp3`, `wav`, `flac`. Anything else returns `422 The selected format is invalid.` `wav` and `flac` are lossless and produce substantially larger result files than `mp3`. |
+| `keyscale` | Free-form string (`"C major"`, `"D minor"`, `"F# minor"`). Not validated against a fixed list — passed to the model as a hint. |
+| `vocal_language` | Free-form string. Both ISO codes (`"en"`) and language names (`"English"`) are accepted. Not validated against a fixed list. |
+
+<Warning>
+  `timesignature` is validated as an **integer**, not as musical notation. If you populate it from a UI dropdown offering values like `4/4` or `6/8`, convert to the integer before sending — otherwise only the requests that set the field fail, while the rest keep succeeding.
+</Warning>
+
 <Warning>
   **Reference audio requirements (optional):**
 

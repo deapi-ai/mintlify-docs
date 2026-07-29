@@ -6,5 +6,21 @@ openapi: "/openapi-v2.json POST /api/v2/audio/music"
 Generate music tracks from text with control over lyrics, tempo, key, and style. Returns a `request_id` for status polling.
 
 <Note>
-**Prerequisite:** Consult the [Model Selection](/api/v2/utilities/models) endpoint to identify a valid model `slug` and check its parameter limits.
+  **Prerequisite:** Consult the [Model Selection](/api/v2/utilities/models) endpoint to identify a valid model `slug` and check its parameter limits. Model slugs look like `AceStep_1_5_Turbo` — always take them from the models endpoint rather than hard-coding a display name.
 </Note>
+
+## Field values worth knowing
+
+These constraints are enforced by validation and are easy to trip over:
+
+| Field | Constraint |
+| --- | --- |
+| `lyrics` | **Required and must be non-empty**, including for instrumental tracks. Omitting it or sending `""` returns `422 The lyrics field is required.` For an instrumental track, send `"[Instrumental]"`. |
+| `timesignature` | **Integer only**, and only `2`, `3`, `4` or `6` are accepted. A notation string such as `"4/4"` returns `422 The timesignature field must be an integer.` Map the numerator of an x/4 signature (4/4 → `4`, 3/4 → `3`, 2/4 → `2`, 6/8 → `6`); 5/4 and 7/8 cannot be expressed. Omit the field or send an empty value to let the model choose. |
+| `format` | One of `mp3`, `wav`, `flac`. Anything else returns `422 The selected format is invalid.` `wav` and `flac` are lossless and produce substantially larger result files than `mp3`. |
+| `keyscale` | Free-form string (`"C major"`, `"D minor"`, `"F# minor"`). Not validated against a fixed list — passed to the model as a hint. |
+| `vocal_language` | Free-form string. Both ISO codes (`"en"`) and language names (`"English"`) are accepted. Not validated against a fixed list. |
+
+<Warning>
+  `timesignature` is validated as an **integer**, not as musical notation. If you populate it from a UI dropdown offering values like `4/4` or `6/8`, convert to the integer before sending — otherwise only the requests that set the field fail, while the rest keep succeeding.
+</Warning>

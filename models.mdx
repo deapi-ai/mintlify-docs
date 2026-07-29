@@ -5,7 +5,7 @@ description: "How to discover, select, and use models on deAPI"
 
 **deAPI** gives you a unified API across multiple open-source models running on a decentralized GPU cloud. We regularly expand the model lineup — new models, new capabilities, better performance — so your integration can always take advantage of the latest options.
 
-The [Model Selection](/api/v2/utilities/models) endpoint returns the live, authoritative list of all available models, their slugs, limits, and defaults. **Use it as the starting point for every integration.**
+The [Model Selection](/api/v2/utilities/models) endpoint returns the live, authoritative list of available models, their slugs, limits, and defaults. **Use it as the starting point for every integration.** The list is paginated — see [Fetching the live model list](#fetching-the-live-model-list) for how to read every page.
 
 <Tip>
   This page explains how model selection works and how to use the endpoint. For the actual list of models and their exact slugs, always refer to the [Model Selection](/api/v2/utilities/models) endpoint.
@@ -39,6 +39,18 @@ The response returns a paginated `data` array of model objects. Each object cont
 <Note>
   Not every model returns all fields. For example, a transcription model may return an empty `info`, while an image-generation model will include detailed `limits`, `features`, and `defaults`. Always check for the presence of fields before using them.
 </Note>
+
+<Warning>
+  **The response is paginated — one call is not the whole catalogue.** A single request returns at most **25** models, alongside `links` and `meta` objects. If `meta.last_page` is greater than `1`, request the remaining pages and concatenate the results; otherwise newer models are silently missing from your list. The `per_page` parameter is accepted but currently ignored — the page size stays at 25 whatever you send.
+</Warning>
+
+Keep requesting successive pages until `meta.current_page` equals `meta.last_page`:
+
+```bash
+curl -X GET "https://api.deapi.ai/api/v2/models?page=2" \
+  -H "Authorization: Bearer $DEAPI_API_KEY" \
+  -H "Accept: application/json"
+```
 
 You can filter the list by task type using the `filter[inference_types]` query parameter:
 
@@ -114,7 +126,7 @@ When the models endpoint returns several options for the same task, use these gu
 
 **Speech generation (TTS)** — Check the model's `languages` array for available languages and voices. Use `info.defaults` for recommended speed and format settings. The endpoint supports three modes: `custom_voice` (preset speakers), `voice_clone` (clone from reference audio), and `voice_design` (create voice from a text description). Not all models support all modes — check model capabilities before selecting a mode.
 
-**Music generation** — Provide a text description (`caption`) of the desired music style. Optionally include `lyrics` (use `"[Instrumental]"` for instrumental tracks), `bpm`, `keyscale`, and `timesignature` to fine-tune the output. You can also upload a `reference_audio` file for style transfer. Check `info.limits` for supported duration range and inference steps. Use fewer steps with turbo models (e.g. 8) and more steps with base models (e.g. 32\+).
+**Music generation** — Provide a text description (`caption`) of the desired music style. `lyrics` is **required and must be non-empty** — send `"[Instrumental]"` for instrumental tracks. Optionally include `bpm`, `keyscale`, and `timesignature` (an integer: `2`, `3`, `4` or `6` — not a notation string like `"4/4"`) to fine-tune the output. `format` accepts `mp3`, `wav` or `flac`. You can also upload a `reference_audio` file for style transfer. Check `info.limits` for supported duration range and inference steps. Use fewer steps with turbo models (e.g. 8) and more steps with base models (e.g. 32\+).
 
 **Transcription (Video/Audio-to-Text)** — Transcription models support both URL-based and file-upload transcription. For long content, enable timestamps (`include_ts: true`). URL-based transcription works with YouTube, Twitch, Kick, TikTok and X/Twitter.
 

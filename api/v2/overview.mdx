@@ -76,7 +76,11 @@ AI-powered prompt boosters. In v2 all boosters use a single unified endpoint —
 | --- | --- | --- | --- |
 | `GET` | `/api/v2/account/balance` | Get current account balance | [→](/api/v2/utilities/balance) |
 | `GET` | `/api/v2/jobs/{job_request}` | Check job status and get results | [→](/api/v2/utilities/jobs) |
-| `GET` | `/api/v2/models` | List all available models | [→](/api/v2/utilities/models) |
+| `GET` | `/api/v2/models` | List available models (paginated, 25 per page) | [→](/api/v2/utilities/models) |
+
+<Warning>
+  **Call the path in the "Endpoint" column, not the documentation URL.** The links in the "Docs" column are addresses on this documentation site and are grouped by topic — `/api/v2/utilities/balance`, `/api/v2/utilities/models`, `/api/v2/utilities/jobs` and `/api/v2/audio/music-price` are page URLs, not API routes, and calling them against `api.deapi.ai` returns `404 The route ... could not be found.` The real routes are `/api/v2/account/balance`, `/api/v2/models`, `/api/v2/jobs/{job_request}` and `/api/v2/audio/music/price`.
+</Warning>
 
 ## Workflow
 
@@ -84,7 +88,7 @@ Typical API usage follows this pattern:
 
 <Steps>
   <Step title="Check available models">
-    Call `GET /api/v2/models` to get current models and their parameters.
+    Call `GET /api/v2/models` to get current models and their parameters. The response is paginated at 25 models per page — keep requesting `?page=N` until `meta.current_page` equals `meta.last_page`.
   </Step>
   <Step title="Calculate price (optional)">
     Call the `/price` endpoint with your parameters to estimate cost.
@@ -118,6 +122,7 @@ Typical API usage follows this pattern:
     "status": "done",
     "progress": 100.0,
     "result_url": "https://...",
+    "results_alt_formats": null,
     "result": null,
     "preview": null
   }
@@ -126,21 +131,35 @@ Typical API usage follows this pattern:
 
 ```json Balance
 {
-  "balance": 19.72
+  "data": {
+    "balance": 19.72
+  }
 }
 ```
 
-```json Models List
+```json Models List (paginated — max 25 per page)
 {
-  "data": {
-    "data": [
-      {
-        "name": "Flux.1 schnell",
-        "slug": "Flux1schnell",
-        "inference_types": ["txt2img"],
-        "info": { }
-      }
-    ]
+  "data": [
+    {
+      "name": "FLUX.1 Schnell 12B NF4",
+      "slug": "Flux1schnell",
+      "inference_types": ["txt2img"],
+      "tags": [],
+      "status": "standard_model",
+      "info": { }
+    }
+  ],
+  "links": {
+    "first": "https://api.deapi.ai/api/v2/models?page=1",
+    "last": "https://api.deapi.ai/api/v2/models?page=2",
+    "prev": null,
+    "next": "https://api.deapi.ai/api/v2/models?page=2"
+  },
+  "meta": {
+    "current_page": 1,
+    "last_page": 2,
+    "per_page": 25,
+    "total": 28
   }
 }
 ```

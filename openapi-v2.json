@@ -148,15 +148,17 @@
                     {
                         "name": "per_page",
                         "in": "query",
+                        "description": "Accepted but currently ignored: the page size is fixed at 25 regardless of the value sent. Use `page` to retrieve the remaining results.",
                         "required": false,
                         "schema": {
                             "type": "integer",
-                            "default": 15
+                            "default": 25
                         }
                     },
                     {
                         "name": "page",
                         "in": "query",
+                        "description": "Page number, starting at 1. The response is paginated: a single call returns at most 25 models, so a client that reads only the first page will miss models when `meta.last_page` is greater than 1. Iterate until `meta.current_page` equals `meta.last_page` to obtain the full catalogue.",
                         "required": false,
                         "schema": {
                             "type": "integer",
@@ -166,7 +168,7 @@
                     {
                         "name": "filter[inference_types]",
                         "in": "query",
-                        "description": "Comma-separated list of inference types to filter by. Example: txt2img,txt2audio",
+                        "description": "Comma-separated list of inference types to filter by. Example: txt2img,txt2audio. Values must match the `inference_types` strings returned by this endpoint exactly — note that some of them use hyphens (`img-upscale`, `img-rmbg`, `vid-upscale`, `video-replace`). An unrecognised value is not rejected: the endpoint returns an empty `data` array.",
                         "required": false,
                         "style": "form",
                         "explode": false,
@@ -178,18 +180,20 @@
                                     "txt2img",
                                     "img2txt",
                                     "txt2audio",
-                                    "vid2txt",
-                                    "aud2txt",
+                                    "txt2music",
                                     "txt2video",
                                     "img2video",
                                     "img2img",
-                                    "img_upscale",
-                                    "img_rmbg",
-                                    "vid_upscale",
-                                    "vid_rmbg",
+                                    "audio2video",
+                                    "video-replace",
+                                    "img-upscale",
+                                    "img-rmbg",
+                                    "vid-upscale",
                                     "txt2embedding",
-                                    "videofile2txt",
-                                    "audiofile2txt"
+                                    "audio2text",
+                                    "video2text",
+                                    "audio_file2text",
+                                    "video_file2text"
                                 ]
                             }
                         }
@@ -3707,9 +3711,9 @@
                 ],
                 "properties": {
                     "model": {
-                        "description": "The model to use for music generation. Available models can be retrieved via the GET /api/v1/client/models endpoint.",
+                        "description": "The model to use for music generation. Available models can be retrieved via the GET /api/v2/models endpoint.",
                         "type": "string",
-                        "example": "ACE-Step-v1.5-turbo"
+                        "example": "AceStep_1_5_Turbo"
                     },
                     "duration": {
                         "description": "Duration in seconds (10-600)",
@@ -4454,11 +4458,12 @@
                     "model": {
                         "description": "The model to use for music generation. Available models can be retrieved via the GET /api/v2/models endpoint.",
                         "type": "string",
-                        "example": "ACE-Step-v1.5-turbo"
+                        "example": "AceStep_1_5_Turbo"
                     },
                     "lyrics": {
-                        "description": "Lyrics for the music. Use \"[Instrumental]\" for instrumental tracks without vocals.",
+                        "description": "Required, and must not be empty. Lyrics for the music. Use \"[Instrumental]\" for instrumental tracks without vocals — omitting the field or sending an empty string returns 422 \"The lyrics field is required.\"",
                         "type": "string",
+                        "minLength": 1,
                         "example": "[Instrumental]"
                     },
                     "duration": {
@@ -4473,19 +4478,25 @@
                         "nullable": true
                     },
                     "keyscale": {
-                        "description": "Musical key/scale (e.g. \"C major\", \"F# minor\")",
+                        "description": "Musical key/scale, as a free-form string (e.g. \"C major\", \"F# minor\", \"D minor\"). Not validated against a fixed list — the value is passed to the model as a hint.",
                         "type": "string",
                         "example": "C major",
                         "nullable": true
                     },
                     "timesignature": {
-                        "description": "Time signature. Must be 2, 3, 4, or 6.",
+                        "description": "Time signature, as the number of beats per bar. Integer only — one of 2, 3, 4 or 6. Musical notation strings such as \"4/4\" or \"3/4\" are rejected with 422 \"The timesignature field must be an integer.\" Map the numerator of a x/4 signature to this field (4/4 -> 4, 3/4 -> 3, 2/4 -> 2, 6/8 -> 6). Signatures that cannot be expressed as 2, 3, 4 or 6 (e.g. 5/4, 7/8) are not supported. Omit the field or send an empty value to let the model choose automatically.",
                         "type": "integer",
+                        "enum": [
+                            2,
+                            3,
+                            4,
+                            6
+                        ],
                         "example": 4,
                         "nullable": true
                     },
                     "vocal_language": {
-                        "description": "Language code for vocals (e.g. \"en\", \"es\", \"fr\")",
+                        "description": "Language for vocals, as a free-form string. Both ISO codes (\"en\", \"es\", \"fr\") and language names (\"English\") are accepted. Not validated against a fixed list — the value is passed to the model as a hint.",
                         "type": "string",
                         "example": "en",
                         "nullable": true
@@ -4506,8 +4517,13 @@
                         "example": -1
                     },
                     "format": {
-                        "description": "Audio output format",
+                        "description": "Audio output format. One of mp3, wav or flac. Any other value returns 422 \"The selected format is invalid.\" mp3 is recommended for size; wav and flac are lossless and produce much larger result files.",
                         "type": "string",
+                        "enum": [
+                            "mp3",
+                            "wav",
+                            "flac"
+                        ],
                         "example": "mp3"
                     },
                     "reference_audio": {
@@ -4991,10 +5007,17 @@
             },
             "ClientInfoResource": {
                 "properties": {
-                    "balance": {
-                        "description": "Current client balance",
-                        "type": "number",
-                        "format": "double"
+                    "data": {
+                        "description": "Account information",
+                        "properties": {
+                            "balance": {
+                                "description": "Current client balance, in USD",
+                                "type": "number",
+                                "format": "double",
+                                "example": 19.72
+                            }
+                        },
+                        "type": "object"
                     }
                 },
                 "type": "object"
