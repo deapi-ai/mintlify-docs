@@ -253,35 +253,75 @@
                     "content": {
                         "multipart/form-data": {
                             "schema": {
-                                "properties": {
-                                    "prompt": {
-                                        "type": "string",
-                                        "minLength": 3,
-                                        "example": "A beautiful landscape with mountains"
+                                "oneOf": [
+                                    {
+                                        "required": [
+                                            "prompt",
+                                            "type",
+                                            "model_slug"
+                                        ],
+                                        "properties": {
+                                            "prompt": {
+                                                "type": "string",
+                                                "minLength": 3,
+                                                "example": "A beautiful landscape with mountains"
+                                            },
+                                            "negative_prompt": {
+                                                "type": "string",
+                                                "minLength": 3,
+                                                "example": "blurry, low quality",
+                                                "nullable": true
+                                            },
+                                            "type": {
+                                                "description": "Inference type in v2 dot notation (e.g. images.generations, videos.animations, audio.speech)",
+                                                "type": "string",
+                                                "example": "images.generations"
+                                            },
+                                            "model_slug": {
+                                                "type": "string",
+                                                "example": "Flux1schnell"
+                                            }
+                                        },
+                                        "type": "object"
                                     },
-                                    "negative_prompt": {
-                                        "type": "string",
-                                        "minLength": 3,
-                                        "example": "blurry, low quality",
-                                        "nullable": true
-                                    },
-                                    "type": {
-                                        "description": "Inference type in v2 dot notation (e.g. images.generations, videos.animations, audio.speech)",
-                                        "type": "string",
-                                        "example": "images.generations"
-                                    },
-                                    "model_slug": {
-                                        "type": "string",
-                                        "example": "Flux1schnell"
-                                    },
-                                    "image": {
-                                        "description": "Reference image. Required for images.edits/videos.animations. Supported formats: JPEG, PNG, BMP, GIF, WebP.",
-                                        "type": "string",
-                                        "format": "binary",
-                                        "nullable": true
+                                    {
+                                        "required": [
+                                            "prompt",
+                                            "type",
+                                            "model_slug",
+                                            "image"
+                                        ],
+                                        "properties": {
+                                            "prompt": {
+                                                "type": "string",
+                                                "minLength": 3,
+                                                "example": "A beautiful landscape with mountains"
+                                            },
+                                            "negative_prompt": {
+                                                "type": "string",
+                                                "minLength": 3,
+                                                "example": "blurry, low quality",
+                                                "nullable": true
+                                            },
+                                            "type": {
+                                                "description": "Inference type in v2 dot notation (e.g. images.generations, videos.animations, audio.speech)",
+                                                "type": "string",
+                                                "example": "images.edits"
+                                            },
+                                            "model_slug": {
+                                                "type": "string",
+                                                "example": "QwenImageEdit_Plus_NF4"
+                                            },
+                                            "image": {
+                                                "description": "Reference image. Required for images.edits/videos.animations. Supported formats: JPEG, PNG, BMP, GIF, WebP.",
+                                                "type": "string",
+                                                "format": "binary",
+                                                "nullable": false
+                                            }
+                                        },
+                                        "type": "object"
                                     }
-                                },
-                                "type": "object"
+                                ]
                             }
                         }
                     }
@@ -3073,19 +3113,22 @@
                         "example": 7.5
                     },
                     "steps": {
-                        "description": "Number of inference steps",
+                        "description": "Number of inference steps. The accepted range is **model-specific** - read `info.limits.min_steps` / `info.limits.max_steps` for your `model` from the [Model Selection](/api/v2/utilities/models) endpoint before sending the request; a value outside that range is rejected with `422`.",
                         "type": "integer",
-                        "example": 20
+                        "example": 20,
+                        "minimum": 1
                     },
                     "frames": {
-                        "description": "Number of video frames to generate",
+                        "description": "Number of video frames to generate. The accepted range is **model-specific** - read `info.limits.min_frames` / `info.limits.max_frames` for your `model` from the [Model Selection](/api/v2/utilities/models) endpoint before sending the request; a value outside that range is rejected with `422`. For the example model `Ltx2_3_22B_Dist_INT8` the allowed range is **49-241** (default `120`).",
                         "type": "integer",
-                        "example": 97
+                        "example": 97,
+                        "minimum": 1
                     },
                     "fps": {
-                        "description": "FPS of generated video",
+                        "description": "FPS of generated video. The accepted range is **model-specific** - read `info.limits.min_fps` / `info.limits.max_fps` for your `model` from the [Model Selection](/api/v2/utilities/models) endpoint before sending the request; a value outside that range is rejected with `422`. For the example model `Ltx2_3_22B_Dist_INT8` the only accepted value is **24**.",
                         "type": "integer",
-                        "example": 24
+                        "example": 24,
+                        "minimum": 1
                     },
                     "seed": {
                         "description": "Random seed for generation",
@@ -3093,9 +3136,9 @@
                         "example": 42
                     },
                     "model": {
-                        "description": "The model to use for video generation. Available models can be retrieved via the GET /api/v1/client/models endpoint.",
+                        "description": "The model to use for video generation. Available models can be retrieved via the GET /api/v2/models endpoint.",
                         "type": "string",
-                        "example": "Ltx2_19B_Dist_FP8"
+                        "example": "Ltx2_3_22B_Dist_INT8"
                     },
                     "webhook_url": {
                         "description": "Optional HTTPS URL to receive webhook notifications for job status changes (processing, completed, failed). Must be HTTPS. Max 2048 characters. See [Webhook Documentation](/execution-modes-and-integrations/webhooks) for payload structure and authentication details.",
@@ -3127,24 +3170,27 @@
                         "example": 512
                     },
                     "steps": {
-                        "description": "Number of inference steps",
+                        "description": "Number of inference steps. The accepted range is **model-specific** - read `info.limits.min_steps` / `info.limits.max_steps` for your `model` from the [Model Selection](/api/v2/utilities/models) endpoint before sending the request; a value outside that range is rejected with `422`.",
                         "type": "integer",
-                        "example": 20
+                        "example": 20,
+                        "minimum": 1
                     },
                     "frames": {
-                        "description": "Number of video frames to generate",
+                        "description": "Number of video frames to generate. The accepted range is **model-specific** - read `info.limits.min_frames` / `info.limits.max_frames` for your `model` from the [Model Selection](/api/v2/utilities/models) endpoint before sending the request; a value outside that range is rejected with `422`. For the example model `Ltx2_3_22B_Dist_INT8` the allowed range is **49-241** (default `120`).",
                         "type": "integer",
-                        "example": 97
+                        "example": 97,
+                        "minimum": 1
                     },
                     "fps": {
-                        "description": "FPS of generated video",
+                        "description": "FPS of generated video. The accepted range is **model-specific** - read `info.limits.min_fps` / `info.limits.max_fps` for your `model` from the [Model Selection](/api/v2/utilities/models) endpoint before sending the request; a value outside that range is rejected with `422`. For the example model `Ltx2_3_22B_Dist_INT8` the only accepted value is **24**.",
                         "type": "integer",
-                        "example": 24
+                        "example": 24,
+                        "minimum": 1
                     },
                     "model": {
-                        "description": "The model to use for video generation. Available models can be retrieved via the GET /api/v1/client/models endpoint.",
+                        "description": "The model to use for video generation. Available models can be retrieved via the GET /api/v2/models endpoint.",
                         "type": "string",
-                        "example": "Ltx2_19B_Dist_FP8"
+                        "example": "Ltx2_3_22B_Dist_INT8"
                     }
                 },
                 "type": "object"
@@ -3203,9 +3249,10 @@
                         "example": 7.5
                     },
                     "steps": {
-                        "description": "Number of inference steps",
+                        "description": "Number of inference steps. The accepted range is **model-specific** - read `info.limits.min_steps` / `info.limits.max_steps` for your `model` from the [Model Selection](/api/v2/utilities/models) endpoint before sending the request; a value outside that range is rejected with `422`. For the example model `QwenImageEdit_Plus_NF4` the allowed range is **1-50** (default `40`).",
                         "type": "integer",
-                        "example": 20
+                        "example": 20,
+                        "minimum": 1
                     },
                     "quality": {
                         "description": "Quality tier, for models that support one (e.g. gpt-image: low/medium/high/auto). Only the values listed in that model's available options are accepted; ignored for models without a quality tier.",
@@ -3235,7 +3282,7 @@
                                 "format": "binary"
                             },
                             "model": {
-                                "description": "The OCR model to use for text extraction. Available models can be retrieved via the GET /api/v1/client/models endpoint.",
+                                "description": "The OCR model to use for text extraction. Available models can be retrieved via the GET /api/v2/models endpoint.",
                                 "type": "string",
                                 "example": "Nanonets_Ocr_S_F16"
                             },
@@ -3276,7 +3323,7 @@
                                 "example": 1080
                             },
                             "model": {
-                                "description": "The OCR model to use for text extraction. Available models can be retrieved via the GET /api/v1/client/models endpoint.",
+                                "description": "The OCR model to use for text extraction. Available models can be retrieved via the GET /api/v2/models endpoint.",
                                 "type": "string",
                                 "example": "Nanonets_Ocr_S_F16"
                             },
@@ -3321,22 +3368,25 @@
                         "example": 512
                     },
                     "steps": {
-                        "description": "Number of inference steps",
+                        "description": "Number of inference steps. The accepted range is **model-specific** - read `info.limits.min_steps` / `info.limits.max_steps` for your `model` from the [Model Selection](/api/v2/utilities/models) endpoint before sending the request; a value outside that range is rejected with `422`. For the example model `Ltxv_13B_0_9_8_Distilled_FP8` the only accepted value is **1**.",
                         "type": "integer",
-                        "example": 20
+                        "example": 1,
+                        "minimum": 1
                     },
                     "frames": {
-                        "description": "Number of video frames to generate",
+                        "description": "Number of video frames to generate. The accepted range is **model-specific** - read `info.limits.min_frames` / `info.limits.max_frames` for your `model` from the [Model Selection](/api/v2/utilities/models) endpoint before sending the request; a value outside that range is rejected with `422`. For the example model `Ltxv_13B_0_9_8_Distilled_FP8` the allowed range is **30-120** (default `120`).",
                         "type": "integer",
-                        "example": 20
+                        "example": 120,
+                        "minimum": 1
                     },
                     "fps": {
-                        "description": "FPS of generated video",
+                        "description": "FPS of generated video. The accepted range is **model-specific** - read `info.limits.min_fps` / `info.limits.max_fps` for your `model` from the [Model Selection](/api/v2/utilities/models) endpoint before sending the request; a value outside that range is rejected with `422`. For the example model `Ltxv_13B_0_9_8_Distilled_FP8` the only accepted value is **30**.",
                         "type": "integer",
-                        "example": 30
+                        "example": 30,
+                        "minimum": 1
                     },
                     "model": {
-                        "description": "The model to use for video generation. Available models can be retrieved via the GET /api/v1/client/models endpoint.",
+                        "description": "The model to use for video generation. Available models can be retrieved via the GET /api/v2/models endpoint.",
                         "type": "string",
                         "example": "Ltxv_13B_0_9_8_Distilled_FP8"
                     }
@@ -3359,7 +3409,7 @@
                             "model": {
                                 "description": "The background removal model to use",
                                 "type": "string",
-                                "example": "RMBG-1.4"
+                                "example": "Ben2"
                             }
                         },
                         "type": "object"
@@ -3384,7 +3434,7 @@
                             "model": {
                                 "description": "The background removal model to use",
                                 "type": "string",
-                                "example": "RMBG-1.4"
+                                "example": "Ben2"
                             }
                         },
                         "type": "object"
@@ -3407,7 +3457,7 @@
                             "model": {
                                 "description": "The upscaling model to use",
                                 "type": "string",
-                                "example": "RealESRGAN_x4plus"
+                                "example": "RealESRGAN_x4"
                             }
                         },
                         "type": "object"
@@ -3432,7 +3482,7 @@
                             "model": {
                                 "description": "The upscaling model to use",
                                 "type": "string",
-                                "example": "RealESRGAN_x4plus"
+                                "example": "RealESRGAN_x4"
                             }
                         },
                         "type": "object"
@@ -3462,9 +3512,9 @@
                         "nullable": true
                     },
                     "model": {
-                        "description": "The model to use for image generation. Available models can be retrieved via the GET /api/v1/client/models endpoint.",
+                        "description": "The model to use for image generation. Available models can be retrieved via the GET /api/v2/models endpoint.",
                         "type": "string",
-                        "example": "Flux1schnell"
+                        "example": "Flux_2_Klein_4B_BF16"
                     },
                     "loras": {
                         "description": "Array of LoRA models to apply",
@@ -3506,9 +3556,10 @@
                         "example": 7.5
                     },
                     "steps": {
-                        "description": "Number of inference steps",
+                        "description": "Number of inference steps. The accepted range is **model-specific** - read `info.limits.min_steps` / `info.limits.max_steps` for your `model` from the [Model Selection](/api/v2/utilities/models) endpoint before sending the request; a value outside that range is rejected with `422`. For the example model `Flux_2_Klein_4B_BF16` the only accepted value is **4**.",
                         "type": "integer",
-                        "example": 20
+                        "example": 4,
+                        "minimum": 1
                     },
                     "quality": {
                         "description": "Quality tier, for models that support one (e.g. gpt-image: low/medium/high/auto). Only the values listed in that model's available options are accepted; ignored for models without a quality tier.",
@@ -3546,7 +3597,7 @@
                         "nullable": true
                     },
                     "model": {
-                        "description": "The model to use for speech generation. Available models can be retrieved via the GET /api/v1/client/models endpoint.",
+                        "description": "The model to use for speech generation. Available models can be retrieved via the GET /api/v2/models endpoint.",
                         "type": "string",
                         "example": "Kokoro"
                     },
@@ -3621,7 +3672,7 @@
                         ]
                     },
                     "model": {
-                        "description": "The embedding model to use. Available models can be retrieved via the GET /api/v1/client/models endpoint.",
+                        "description": "The embedding model to use. Available models can be retrieved via the GET /api/v2/models endpoint.",
                         "type": "string",
                         "example": "Bge_M3_FP16"
                     }
@@ -3648,22 +3699,25 @@
                         "example": 512
                     },
                     "steps": {
-                        "description": "Number of inference steps",
+                        "description": "Number of inference steps. The accepted range is **model-specific** - read `info.limits.min_steps` / `info.limits.max_steps` for your `model` from the [Model Selection](/api/v2/utilities/models) endpoint before sending the request; a value outside that range is rejected with `422`. For the example model `Ltxv_13B_0_9_8_Distilled_FP8` the only accepted value is **1**.",
                         "type": "integer",
-                        "example": 20
+                        "example": 1,
+                        "minimum": 1
                     },
                     "frames": {
-                        "description": "Number of video frames to generate",
+                        "description": "Number of video frames to generate. The accepted range is **model-specific** - read `info.limits.min_frames` / `info.limits.max_frames` for your `model` from the [Model Selection](/api/v2/utilities/models) endpoint before sending the request; a value outside that range is rejected with `422`. For the example model `Ltxv_13B_0_9_8_Distilled_FP8` the allowed range is **30-120** (default `120`).",
                         "type": "integer",
-                        "example": 20
+                        "example": 120,
+                        "minimum": 1
                     },
                     "fps": {
-                        "description": "FPS of generated video",
+                        "description": "FPS of generated video. The accepted range is **model-specific** - read `info.limits.min_fps` / `info.limits.max_fps` for your `model` from the [Model Selection](/api/v2/utilities/models) endpoint before sending the request; a value outside that range is rejected with `422`. For the example model `Ltxv_13B_0_9_8_Distilled_FP8` the only accepted value is **30**.",
                         "type": "integer",
-                        "example": 30
+                        "example": 30,
+                        "minimum": 1
                     },
                     "model": {
-                        "description": "The model to use for video generation. Available models can be retrieved via the GET /api/v1/client/models endpoint.",
+                        "description": "The model to use for video generation. Available models can be retrieved via the GET /api/v2/models endpoint.",
                         "type": "string",
                         "example": "Ltxv_13B_0_9_8_Distilled_FP8"
                     }
@@ -3671,37 +3725,83 @@
                 "type": "object"
             },
             "TranscribePriceRequestBody": {
-                "required": [
-                    "include_ts",
-                    "model"
-                ],
-                "properties": {
-                    "source_url": {
-                        "description": "URL of video/audio to estimate price for. Mutually exclusive with source_file and duration_seconds.",
-                        "type": "string",
-                        "example": "https://www.youtube.com/watch?v=jNQXAC9IVRw"
+                "oneOf": [
+                    {
+                        "required": [
+                            "source_url",
+                            "include_ts",
+                            "model"
+                        ],
+                        "properties": {
+                            "source_url": {
+                                "description": "URL of video/audio to estimate price for. Mutually exclusive with source_file and duration_seconds.",
+                                "type": "string",
+                                "example": "https://www.youtube.com/watch?v=jNQXAC9IVRw"
+                            },
+                            "include_ts": {
+                                "description": "Should transcription include timestamps. **Required** - send `false` for plain text or `true` for timestamped segments.",
+                                "type": "boolean",
+                                "example": false
+                            },
+                            "model": {
+                                "description": "The model to use for transcription.",
+                                "type": "string",
+                                "example": "WhisperLargeV3"
+                            }
+                        },
+                        "type": "object"
                     },
-                    "source_file": {
-                        "description": "Audio or video file to estimate price for. Mutually exclusive with source_url and duration_seconds.",
-                        "type": "string",
-                        "format": "binary"
+                    {
+                        "required": [
+                            "source_file",
+                            "include_ts",
+                            "model"
+                        ],
+                        "properties": {
+                            "source_file": {
+                                "description": "Audio or video file to estimate price for. Mutually exclusive with source_url and duration_seconds.",
+                                "type": "string",
+                                "format": "binary"
+                            },
+                            "include_ts": {
+                                "description": "Should transcription include timestamps. **Required** - send `false` for plain text or `true` for timestamped segments.",
+                                "type": "boolean",
+                                "example": false
+                            },
+                            "model": {
+                                "description": "The model to use for transcription.",
+                                "type": "string",
+                                "example": "WhisperLargeV3"
+                            }
+                        },
+                        "type": "object"
                     },
-                    "duration_seconds": {
-                        "description": "Duration in seconds for direct price estimation. Mutually exclusive with source_url and source_file.",
-                        "type": "number",
-                        "example": 3600
-                    },
-                    "include_ts": {
-                        "description": "Should transcription include timestamps",
-                        "type": "boolean"
-                    },
-                    "model": {
-                        "description": "The model to use for transcription.",
-                        "type": "string",
-                        "example": "WhisperLargeV3"
+                    {
+                        "required": [
+                            "duration_seconds",
+                            "include_ts",
+                            "model"
+                        ],
+                        "properties": {
+                            "duration_seconds": {
+                                "description": "Duration in seconds for direct price estimation. Mutually exclusive with source_url and source_file.",
+                                "type": "number",
+                                "example": 3600
+                            },
+                            "include_ts": {
+                                "description": "Should transcription include timestamps. **Required** - send `false` for plain text or `true` for timestamped segments.",
+                                "type": "boolean",
+                                "example": false
+                            },
+                            "model": {
+                                "description": "The model to use for transcription.",
+                                "type": "string",
+                                "example": "WhisperLargeV3"
+                            }
+                        },
+                        "type": "object"
                     }
-                },
-                "type": "object"
+                ]
             },
             "Txt2MusicPriceRequestBody": {
                 "required": [
@@ -3716,12 +3816,12 @@
                         "example": "AceStep_1_5_Turbo"
                     },
                     "duration": {
-                        "description": "Duration in seconds (10-600)",
+                        "description": "Duration in seconds. The accepted range is **model-specific** - read `info.limits.min_duration` / `info.limits.max_duration` for your `model` from the [Model Selection](/api/v2/utilities/models) endpoint; a value outside that range is rejected with `422`. The turbo models accept **10-300**, `AceStep_1_5_Base` **30-300**.",
                         "type": "number",
                         "example": 30
                     },
                     "inference_steps": {
-                        "description": "Number of diffusion inference steps (1-100). Use 8 for turbo models, 32+ for base models.",
+                        "description": "Number of diffusion inference steps. The accepted range is **model-specific** - read `info.limits.min_steps` / `info.limits.max_steps` for your `model` from the [Model Selection](/api/v2/utilities/models) endpoint; a value outside that range is rejected with `422`. The turbo models only accept **8**; `AceStep_1_5_Base` accepts **5-100**.",
                         "type": "integer",
                         "example": 8
                     }
@@ -3807,8 +3907,9 @@
                         "nullable": true
                     },
                     "model": {
-                        "description": "The model to use for video replacement. Available models can be retrieved via the GET /api/v1/client/models endpoint.",
-                        "type": "string"
+                        "description": "The model to use for video replacement. Available models can be retrieved via the GET /api/v2/models endpoint.",
+                        "type": "string",
+                        "example": "Wan2_2_Animate_14B_INT8"
                     }
                 },
                 "type": "object"
@@ -3829,14 +3930,13 @@
                             "model": {
                                 "description": "The upscaling model to use",
                                 "type": "string",
-                                "example": "RealESRGAN_x4plus"
+                                "example": "RealESRGAN_Vid_x4"
                             },
                             "scale": {
                                 "description": "Optional upscale factor. Only allowed for models that support a configurable scale.",
                                 "type": "integer",
                                 "maximum": 16,
                                 "minimum": 1,
-                                "example": 4,
                                 "nullable": true
                             }
                         },
@@ -3852,12 +3952,12 @@
                             "width": {
                                 "description": "Width of video in pixels for price calculation",
                                 "type": "integer",
-                                "example": 1920
+                                "example": 1024
                             },
                             "height": {
                                 "description": "Height of video in pixels for price calculation",
                                 "type": "integer",
-                                "example": 1080
+                                "example": 576
                             },
                             "duration": {
                                 "description": "Optional video duration in seconds. Allows validating against the model's max allowed duration without uploading the file. Pricing itself is not duration-dependent for video upscaling.",
@@ -3870,14 +3970,13 @@
                             "model": {
                                 "description": "The upscaling model to use",
                                 "type": "string",
-                                "example": "RealESRGAN_x4plus"
+                                "example": "RealESRGAN_Vid_x4"
                             },
                             "scale": {
                                 "description": "Optional upscale factor. Only allowed for models that support a configurable scale.",
                                 "type": "integer",
                                 "maximum": 16,
                                 "minimum": 1,
-                                "example": 4,
                                 "nullable": true
                             }
                         },
@@ -3886,117 +3985,225 @@
                 ]
             },
             "Img2ImgRequestBody": {
-                "required": [
-                    "prompt",
-                    "model",
-                    "steps",
-                    "seed"
-                ],
-                "properties": {
-                    "prompt": {
-                        "description": "The main prompt for image generation",
-                        "type": "string",
-                        "example": "A beautiful sunset over mountains"
-                    },
-                    "negative_prompt": {
-                        "description": "Elements to avoid in the generated image",
-                        "type": "string",
-                        "example": "blur, darkness, noise",
-                        "nullable": true
-                    },
-                    "image": {
-                        "description": "Single source image to edit. Required if \"images[]\" is not provided. Mutually exclusive with \"images[]\". Supported formats: JPG, JPEG, PNG, GIF, BMP, WebP. Maximum file size: 10 MB.",
-                        "type": "string",
-                        "format": "binary"
-                    },
-                    "images[]": {
-                        "description": "Multiple source images for editing. Maximum count is model-dependent (see model specs max_input_images, defaults to 1). Required if \"image\" is not provided. Mutually exclusive with \"image\". Supported formats: JPG, JPEG, PNG, GIF, BMP, WebP. Maximum file size per image: 10 MB.",
-                        "type": "array",
-                        "items": {
-                            "type": "string",
-                            "format": "binary"
-                        }
-                    },
-                    "width": {
-                        "description": "Output image width in pixels. Optional - defaults to first input image width if not specified. Subject to model-specific min/max limits.",
-                        "type": "integer",
-                        "example": 512,
-                        "nullable": true
-                    },
-                    "height": {
-                        "description": "Output image height in pixels. Optional - defaults to first input image height if not specified. Subject to model-specific min/max limits.",
-                        "type": "integer",
-                        "example": 512,
-                        "nullable": true
-                    },
-                    "model": {
-                        "description": "The model to use for image editing. Available models can be retrieved via the GET /api/v1/client/models endpoint.",
-                        "type": "string",
-                        "example": "QwenImageEdit_Plus_NF4"
-                    },
-                    "loras": {
-                        "description": "Array of LoRA models to apply",
-                        "type": "array",
-                        "items": {
-                            "required": [
-                                "name",
-                                "weight"
-                            ],
-                            "properties": {
-                                "name": {
-                                    "description": "Name of the LoRA model",
-                                    "type": "string",
-                                    "example": "style_lora"
-                                },
-                                "weight": {
-                                    "description": "Weight of the LoRA model (must be non-negative)",
-                                    "type": "number",
-                                    "minimum": 0,
-                                    "example": 0.75
+                "oneOf": [
+                    {
+                        "required": [
+                            "image",
+                            "prompt",
+                            "model",
+                            "steps",
+                            "seed"
+                        ],
+                        "properties": {
+                            "image": {
+                                "description": "Single source image to edit. Required if \"images[]\" is not provided. Mutually exclusive with \"images[]\". Supported formats: JPG, JPEG, PNG, GIF, BMP, WebP. Maximum file size: 10 MB.",
+                                "type": "string",
+                                "format": "binary"
+                            },
+                            "prompt": {
+                                "description": "The main prompt for image generation",
+                                "type": "string",
+                                "example": "A beautiful sunset over mountains"
+                            },
+                            "negative_prompt": {
+                                "description": "Elements to avoid in the generated image",
+                                "type": "string",
+                                "example": "blur, darkness, noise",
+                                "nullable": true
+                            },
+                            "width": {
+                                "description": "Output image width in pixels. Optional - defaults to first input image width if not specified. Subject to model-specific min/max limits.",
+                                "type": "integer",
+                                "example": 512,
+                                "nullable": true
+                            },
+                            "height": {
+                                "description": "Output image height in pixels. Optional - defaults to first input image height if not specified. Subject to model-specific min/max limits.",
+                                "type": "integer",
+                                "example": 512,
+                                "nullable": true
+                            },
+                            "model": {
+                                "description": "The model to use for image editing. Available models can be retrieved via the GET /api/v2/models endpoint.",
+                                "type": "string",
+                                "example": "QwenImageEdit_Plus_NF4"
+                            },
+                            "loras": {
+                                "description": "Array of LoRA models to apply",
+                                "type": "array",
+                                "items": {
+                                    "required": [
+                                        "name",
+                                        "weight"
+                                    ],
+                                    "properties": {
+                                        "name": {
+                                            "description": "Name of the LoRA model",
+                                            "type": "string",
+                                            "example": "style_lora"
+                                        },
+                                        "weight": {
+                                            "description": "Weight of the LoRA model (must be non-negative)",
+                                            "type": "number",
+                                            "minimum": 0,
+                                            "example": 0.75
+                                        }
+                                    },
+                                    "type": "object"
                                 }
                             },
-                            "type": "object"
-                        }
+                            "guidance": {
+                                "description": "Guidance scale for the generation",
+                                "type": "number",
+                                "example": 7.5
+                            },
+                            "steps": {
+                                "description": "Number of inference steps. The accepted range is **model-specific** - read `info.limits.min_steps` / `info.limits.max_steps` for your `model` from the [Model Selection](/api/v2/utilities/models) endpoint before sending the request; a value outside that range is rejected with `422`. For the example model `QwenImageEdit_Plus_NF4` the allowed range is **1-50** (default `40`).",
+                                "type": "integer",
+                                "example": 20,
+                                "minimum": 1
+                            },
+                            "quality": {
+                                "description": "Quality tier, for models that support one (e.g. gpt-image: low/medium/high/auto). Only the values listed in that model's available options are accepted; ignored for models without a quality tier.",
+                                "type": "string",
+                                "example": "medium",
+                                "nullable": true
+                            },
+                            "seed": {
+                                "description": "Random seed for generation",
+                                "type": "integer",
+                                "example": 42
+                            },
+                            "webhook_url": {
+                                "description": "Optional HTTPS URL to receive webhook notifications for job status changes (processing, completed, failed). Must be HTTPS. Max 2048 characters. See [Webhook Documentation](/execution-modes-and-integrations/webhooks) for payload structure and authentication details.",
+                                "type": "string",
+                                "format": "uri",
+                                "maxLength": 2048,
+                                "example": "https://your-server.com/webhooks/deapi",
+                                "nullable": true
+                            },
+                            "webhook_secret": {
+                                "description": "Optional per-request HMAC secret (min. 32 chars) used to sign the webhook callback. When present, overrides the account-default webhook secret. Requires `webhook_url` to also be set.",
+                                "type": "string",
+                                "maxLength": 255,
+                                "minLength": 32,
+                                "example": "a1b2c3d4e5f60708091a2b3c4d5e6f7081920a1b2c3d4e5f60708091a2b3c4d5",
+                                "nullable": true
+                            }
+                        },
+                        "type": "object"
                     },
-                    "guidance": {
-                        "description": "Guidance scale for the generation",
-                        "type": "number",
-                        "example": 7.5
-                    },
-                    "steps": {
-                        "description": "Number of inference steps",
-                        "type": "integer",
-                        "example": 20
-                    },
-                    "quality": {
-                        "description": "Quality tier, for models that support one (e.g. gpt-image: low/medium/high/auto). Only the values listed in that model's available options are accepted; ignored for models without a quality tier.",
-                        "type": "string",
-                        "example": "medium",
-                        "nullable": true
-                    },
-                    "seed": {
-                        "description": "Random seed for generation",
-                        "type": "integer",
-                        "example": 42
-                    },
-                    "webhook_url": {
-                        "description": "Optional HTTPS URL to receive webhook notifications for job status changes (processing, completed, failed). Must be HTTPS. Max 2048 characters. See [Webhook Documentation](/execution-modes-and-integrations/webhooks) for payload structure and authentication details.",
-                        "type": "string",
-                        "format": "uri",
-                        "maxLength": 2048,
-                        "example": "https://your-server.com/webhooks/deapi",
-                        "nullable": true
-                    },
-                    "webhook_secret": {
-                        "description": "Optional per-request HMAC secret (min. 32 chars) used to sign the webhook callback. When present, overrides the account-default webhook secret. Requires `webhook_url` to also be set.",
-                        "type": "string",
-                        "maxLength": 255,
-                        "minLength": 32,
-                        "example": "a1b2c3d4e5f60708091a2b3c4d5e6f7081920a1b2c3d4e5f60708091a2b3c4d5",
-                        "nullable": true
+                    {
+                        "required": [
+                            "images[]",
+                            "prompt",
+                            "model",
+                            "steps",
+                            "seed"
+                        ],
+                        "properties": {
+                            "images[]": {
+                                "description": "Multiple source images for editing. Maximum count is model-dependent (see model specs max_input_images, defaults to 1). Required if \"image\" is not provided. Mutually exclusive with \"image\". Supported formats: JPG, JPEG, PNG, GIF, BMP, WebP. Maximum file size per image: 10 MB.",
+                                "type": "array",
+                                "items": {
+                                    "type": "string",
+                                    "format": "binary"
+                                }
+                            },
+                            "prompt": {
+                                "description": "The main prompt for image generation",
+                                "type": "string",
+                                "example": "A beautiful sunset over mountains"
+                            },
+                            "negative_prompt": {
+                                "description": "Elements to avoid in the generated image",
+                                "type": "string",
+                                "example": "blur, darkness, noise",
+                                "nullable": true
+                            },
+                            "width": {
+                                "description": "Output image width in pixels. Optional - defaults to first input image width if not specified. Subject to model-specific min/max limits.",
+                                "type": "integer",
+                                "example": 512,
+                                "nullable": true
+                            },
+                            "height": {
+                                "description": "Output image height in pixels. Optional - defaults to first input image height if not specified. Subject to model-specific min/max limits.",
+                                "type": "integer",
+                                "example": 512,
+                                "nullable": true
+                            },
+                            "model": {
+                                "description": "The model to use for image editing. Available models can be retrieved via the GET /api/v2/models endpoint.",
+                                "type": "string",
+                                "example": "QwenImageEdit_Plus_NF4"
+                            },
+                            "loras": {
+                                "description": "Array of LoRA models to apply",
+                                "type": "array",
+                                "items": {
+                                    "required": [
+                                        "name",
+                                        "weight"
+                                    ],
+                                    "properties": {
+                                        "name": {
+                                            "description": "Name of the LoRA model",
+                                            "type": "string",
+                                            "example": "style_lora"
+                                        },
+                                        "weight": {
+                                            "description": "Weight of the LoRA model (must be non-negative)",
+                                            "type": "number",
+                                            "minimum": 0,
+                                            "example": 0.75
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            },
+                            "guidance": {
+                                "description": "Guidance scale for the generation",
+                                "type": "number",
+                                "example": 7.5
+                            },
+                            "steps": {
+                                "description": "Number of inference steps. The accepted range is **model-specific** - read `info.limits.min_steps` / `info.limits.max_steps` for your `model` from the [Model Selection](/api/v2/utilities/models) endpoint before sending the request; a value outside that range is rejected with `422`. For the example model `QwenImageEdit_Plus_NF4` the allowed range is **1-50** (default `40`).",
+                                "type": "integer",
+                                "example": 20,
+                                "minimum": 1
+                            },
+                            "quality": {
+                                "description": "Quality tier, for models that support one (e.g. gpt-image: low/medium/high/auto). Only the values listed in that model's available options are accepted; ignored for models without a quality tier.",
+                                "type": "string",
+                                "example": "medium",
+                                "nullable": true
+                            },
+                            "seed": {
+                                "description": "Random seed for generation",
+                                "type": "integer",
+                                "example": 42
+                            },
+                            "webhook_url": {
+                                "description": "Optional HTTPS URL to receive webhook notifications for job status changes (processing, completed, failed). Must be HTTPS. Max 2048 characters. See [Webhook Documentation](/execution-modes-and-integrations/webhooks) for payload structure and authentication details.",
+                                "type": "string",
+                                "format": "uri",
+                                "maxLength": 2048,
+                                "example": "https://your-server.com/webhooks/deapi",
+                                "nullable": true
+                            },
+                            "webhook_secret": {
+                                "description": "Optional per-request HMAC secret (min. 32 chars) used to sign the webhook callback. When present, overrides the account-default webhook secret. Requires `webhook_url` to also be set.",
+                                "type": "string",
+                                "maxLength": 255,
+                                "minLength": 32,
+                                "example": "a1b2c3d4e5f60708091a2b3c4d5e6f7081920a1b2c3d4e5f60708091a2b3c4d5",
+                                "nullable": true
+                            }
+                        },
+                        "type": "object"
                     }
-                },
-                "type": "object"
+                ]
             },
             "Img2TxtRequestBody": {
                 "required": [
@@ -4099,19 +4306,22 @@
                         "example": 7.5
                     },
                     "steps": {
-                        "description": "Number of inference steps",
+                        "description": "Number of inference steps. The accepted range is **model-specific** - read `info.limits.min_steps` / `info.limits.max_steps` for your `model` from the [Model Selection](/api/v2/utilities/models) endpoint before sending the request; a value outside that range is rejected with `422`. For the example model `Ltxv_13B_0_9_8_Distilled_FP8` the only accepted value is **1**.",
                         "type": "integer",
-                        "example": 20
+                        "example": 1,
+                        "minimum": 1
                     },
                     "frames": {
-                        "description": "Number of video frames to generate",
+                        "description": "Number of video frames to generate. The accepted range is **model-specific** - read `info.limits.min_frames` / `info.limits.max_frames` for your `model` from the [Model Selection](/api/v2/utilities/models) endpoint before sending the request; a value outside that range is rejected with `422`. For the example model `Ltxv_13B_0_9_8_Distilled_FP8` the allowed range is **30-120** (default `120`).",
                         "type": "integer",
-                        "example": 20
+                        "example": 120,
+                        "minimum": 1
                     },
                     "fps": {
-                        "description": "FPS of generated video",
+                        "description": "FPS of generated video. The accepted range is **model-specific** - read `info.limits.min_fps` / `info.limits.max_fps` for your `model` from the [Model Selection](/api/v2/utilities/models) endpoint before sending the request; a value outside that range is rejected with `422`. For the example model `Ltxv_13B_0_9_8_Distilled_FP8` the only accepted value is **30**.",
                         "type": "integer",
-                        "example": 30
+                        "example": 30,
+                        "minimum": 1
                     },
                     "seed": {
                         "description": "Random seed for generation",
@@ -4119,7 +4329,7 @@
                         "example": 42
                     },
                     "model": {
-                        "description": "The model to use for video generation. Available models can be retrieved via the GET /api/v1/client/models endpoint.",
+                        "description": "The model to use for video generation. Available models can be retrieved via the GET /api/v2/models endpoint.",
                         "type": "string",
                         "example": "Ltxv_13B_0_9_8_Distilled_FP8"
                     },
@@ -4148,7 +4358,7 @@
                     "model": {
                         "description": "The background removal model to use",
                         "type": "string",
-                        "example": "RMBG-1.4"
+                        "example": "Ben2"
                     },
                     "webhook_url": {
                         "description": "Optional HTTPS URL to receive webhook notifications for job status changes (processing, completed, failed). Must be HTTPS. Max 2048 characters. See [Webhook Documentation](/execution-modes-and-integrations/webhooks) for payload structure and authentication details.",
@@ -4175,7 +4385,7 @@
                     "model": {
                         "description": "The upscaling model to use",
                         "type": "string",
-                        "example": "RealESRGAN_x4plus"
+                        "example": "RealESRGAN_x4"
                     },
                     "webhook_url": {
                         "description": "Optional HTTPS URL to receive webhook notifications for job status changes (processing, completed, failed). Must be HTTPS. Max 2048 characters. See [Webhook Documentation](/execution-modes-and-integrations/webhooks) for payload structure and authentication details.",
@@ -4204,7 +4414,7 @@
                         "example": "A beautiful sunset over mountains"
                     },
                     "model": {
-                        "description": "The model to use for speech generation. Available models can be retrieved via the GET /api/v1/client/models endpoint.",
+                        "description": "The model to use for speech generation. Available models can be retrieved via the GET /api/v2/models endpoint.",
                         "type": "string",
                         "example": "Kokoro"
                     },
@@ -4307,7 +4517,7 @@
                         ]
                     },
                     "model": {
-                        "description": "The embedding model to use. Available models can be retrieved via the GET /api/v1/client/models endpoint.",
+                        "description": "The embedding model to use. Available models can be retrieved via the GET /api/v2/models endpoint.",
                         "type": "string",
                         "example": "Bge_M3_FP16"
                     },
@@ -4360,9 +4570,9 @@
                         "nullable": true
                     },
                     "model": {
-                        "description": "The model to use for image generation. Available models can be retrieved via the GET /api/v1/client/models endpoint.",
+                        "description": "The model to use for image generation. Available models can be retrieved via the GET /api/v2/models endpoint.",
                         "type": "string",
-                        "example": "Flux1schnell"
+                        "example": "Flux_2_Klein_4B_BF16"
                     },
                     "loras": {
                         "description": "Array of LoRA models to apply",
@@ -4404,9 +4614,10 @@
                         "example": 7.5
                     },
                     "steps": {
-                        "description": "Number of inference steps",
+                        "description": "Number of inference steps. The accepted range is **model-specific** - read `info.limits.min_steps` / `info.limits.max_steps` for your `model` from the [Model Selection](/api/v2/utilities/models) endpoint before sending the request; a value outside that range is rejected with `422`. For the example model `Flux_2_Klein_4B_BF16` the only accepted value is **4**.",
                         "type": "integer",
-                        "example": 20
+                        "example": 4,
+                        "minimum": 1
                     },
                     "quality": {
                         "description": "Quality tier, for models that support one (e.g. gpt-image: low/medium/high/auto). Only the values listed in that model's available options are accepted; ignored for models without a quality tier.",
@@ -4467,12 +4678,12 @@
                         "example": "[Instrumental]"
                     },
                     "duration": {
-                        "description": "Duration in seconds (10-600)",
+                        "description": "Duration in seconds. The accepted range is **model-specific** - read `info.limits.min_duration` / `info.limits.max_duration` for your `model` from the [Model Selection](/api/v2/utilities/models) endpoint; a value outside that range is rejected with `422`. The turbo models accept **10-300**, `AceStep_1_5_Base` **30-300**.",
                         "type": "number",
                         "example": 30
                     },
                     "bpm": {
-                        "description": "Beats per minute (30-300)",
+                        "description": "Beats per minute. The accepted range is **model-specific** - read `info.limits.min_bpm` / `info.limits.max_bpm` for your `model` from the [Model Selection](/api/v2/utilities/models) endpoint. The ACE-Step models accept **50-200**.",
                         "type": "integer",
                         "example": 120,
                         "nullable": true
@@ -4502,14 +4713,14 @@
                         "nullable": true
                     },
                     "inference_steps": {
-                        "description": "Number of diffusion inference steps (1-100). Use 8 for turbo models, 32+ for base models.",
+                        "description": "Number of diffusion inference steps. The accepted range is **model-specific** - read `info.limits.min_steps` / `info.limits.max_steps` for your `model` from the [Model Selection](/api/v2/utilities/models) endpoint; a value outside that range is rejected with `422`. The turbo models only accept **8**; `AceStep_1_5_Base` accepts **5-100**.",
                         "type": "integer",
                         "example": 8
                     },
                     "guidance_scale": {
-                        "description": "Classifier-free guidance scale (0-20)",
+                        "description": "Classifier-free guidance scale. The accepted range is **model-specific** - read `info.limits.min_guidance` / `info.limits.max_guidance` for your `model` from the [Model Selection](/api/v2/utilities/models) endpoint; a value outside that range is rejected with `422`. The turbo models (`AceStep_1_5_Turbo`, `AceStep_1_5_XL_Turbo_INT8`) only accept **1**; `AceStep_1_5_Base` accepts **3-20**.",
                         "type": "number",
-                        "example": 7
+                        "example": 1
                     },
                     "seed": {
                         "description": "Random seed. Use -1 for random.",
@@ -4582,19 +4793,22 @@
                         "example": 7.5
                     },
                     "steps": {
-                        "description": "Number of inference steps",
+                        "description": "Number of inference steps. The accepted range is **model-specific** - read `info.limits.min_steps` / `info.limits.max_steps` for your `model` from the [Model Selection](/api/v2/utilities/models) endpoint before sending the request; a value outside that range is rejected with `422`. For the example model `Ltxv_13B_0_9_8_Distilled_FP8` the only accepted value is **1**.",
                         "type": "integer",
-                        "example": 20
+                        "example": 1,
+                        "minimum": 1
                     },
                     "frames": {
-                        "description": "Number of video frames to generate",
+                        "description": "Number of video frames to generate. The accepted range is **model-specific** - read `info.limits.min_frames` / `info.limits.max_frames` for your `model` from the [Model Selection](/api/v2/utilities/models) endpoint before sending the request; a value outside that range is rejected with `422`. For the example model `Ltxv_13B_0_9_8_Distilled_FP8` the allowed range is **30-120** (default `120`).",
                         "type": "integer",
-                        "example": 20
+                        "example": 120,
+                        "minimum": 1
                     },
                     "fps": {
-                        "description": "FPS of generated video",
+                        "description": "FPS of generated video. The accepted range is **model-specific** - read `info.limits.min_fps` / `info.limits.max_fps` for your `model` from the [Model Selection](/api/v2/utilities/models) endpoint before sending the request; a value outside that range is rejected with `422`. For the example model `Ltxv_13B_0_9_8_Distilled_FP8` the only accepted value is **30**.",
                         "type": "integer",
-                        "example": 30
+                        "example": 30,
+                        "minimum": 1
                     },
                     "seed": {
                         "description": "Random seed for generation",
@@ -4602,7 +4816,7 @@
                         "example": 42
                     },
                     "model": {
-                        "description": "The model to use for video generation. Available models can be retrieved via the GET /api/v1/client/models endpoint.",
+                        "description": "The model to use for video generation. Available models can be retrieved via the GET /api/v2/models endpoint.",
                         "type": "string",
                         "example": "Ltxv_13B_0_9_8_Distilled_FP8"
                     },
@@ -4626,54 +4840,102 @@
                 "type": "object"
             },
             "TranscribeRequestBody": {
-                "required": [
-                    "include_ts",
-                    "model"
-                ],
-                "properties": {
-                    "source_url": {
-                        "description": "URL of video/audio to transcribe (YouTube, Twitter/X, Twitch, Kick, TikTok, Twitter Spaces). Mutually exclusive with source_file.",
-                        "type": "string",
-                        "example": "https://www.youtube.com/watch?v=jNQXAC9IVRw"
+                "oneOf": [
+                    {
+                        "required": [
+                            "source_url",
+                            "include_ts",
+                            "model"
+                        ],
+                        "properties": {
+                            "source_url": {
+                                "description": "URL of video/audio to transcribe (YouTube, Twitter/X, Twitch, Kick, TikTok, Twitter Spaces). Mutually exclusive with source_file.",
+                                "type": "string",
+                                "example": "https://www.youtube.com/watch?v=jNQXAC9IVRw"
+                            },
+                            "include_ts": {
+                                "description": "Should transcription include timestamps. **Required** - send `false` for plain text or `true` for timestamped segments.",
+                                "type": "boolean",
+                                "example": false
+                            },
+                            "model": {
+                                "description": "The model to use for transcription. Available models can be retrieved via the GET /api/v2/models endpoint.",
+                                "type": "string",
+                                "example": "WhisperLargeV3"
+                            },
+                            "return_result_in_response": {
+                                "description": "If true, the result will be returned directly in the response instead of only download url.",
+                                "type": "boolean",
+                                "default": false,
+                                "nullable": true
+                            },
+                            "webhook_url": {
+                                "description": "Optional HTTPS URL to receive webhook notifications for job status changes.",
+                                "type": "string",
+                                "format": "uri",
+                                "maxLength": 2048,
+                                "example": "https://your-server.com/webhooks/deapi",
+                                "nullable": true
+                            },
+                            "webhook_secret": {
+                                "description": "Optional per-request HMAC secret (min. 32 chars) used to sign the webhook callback. When present, overrides the account-default webhook secret. Requires `webhook_url` to also be set.",
+                                "type": "string",
+                                "maxLength": 255,
+                                "minLength": 32,
+                                "example": "a1b2c3d4e5f60708091a2b3c4d5e6f7081920a1b2c3d4e5f60708091a2b3c4d5",
+                                "nullable": true
+                            }
+                        },
+                        "type": "object"
                     },
-                    "source_file": {
-                        "description": "Audio or video file to transcribe. Supported audio: aac, mpeg, ogg, webm. Supported video: mp4, mpeg, quicktime, avi, wmv, ogg. Mutually exclusive with source_url.",
-                        "type": "string",
-                        "format": "binary"
-                    },
-                    "include_ts": {
-                        "description": "Should transcription include timestamps",
-                        "type": "boolean"
-                    },
-                    "model": {
-                        "description": "The model to use for transcription. Available models can be retrieved via the GET /api/v1/client/models endpoint.",
-                        "type": "string",
-                        "example": "WhisperLargeV3"
-                    },
-                    "return_result_in_response": {
-                        "description": "If true, the result will be returned directly in the response instead of only download url.",
-                        "type": "boolean",
-                        "default": false,
-                        "nullable": true
-                    },
-                    "webhook_url": {
-                        "description": "Optional HTTPS URL to receive webhook notifications for job status changes.",
-                        "type": "string",
-                        "format": "uri",
-                        "maxLength": 2048,
-                        "example": "https://your-server.com/webhooks/deapi",
-                        "nullable": true
-                    },
-                    "webhook_secret": {
-                        "description": "Optional per-request HMAC secret (min. 32 chars) used to sign the webhook callback. When present, overrides the account-default webhook secret. Requires `webhook_url` to also be set.",
-                        "type": "string",
-                        "maxLength": 255,
-                        "minLength": 32,
-                        "example": "a1b2c3d4e5f60708091a2b3c4d5e6f7081920a1b2c3d4e5f60708091a2b3c4d5",
-                        "nullable": true
+                    {
+                        "required": [
+                            "source_file",
+                            "include_ts",
+                            "model"
+                        ],
+                        "properties": {
+                            "source_file": {
+                                "description": "Audio or video file to transcribe. Supported audio: aac, mpeg, ogg, webm. Supported video: mp4, mpeg, quicktime, avi, wmv, ogg. Mutually exclusive with source_url.",
+                                "type": "string",
+                                "format": "binary"
+                            },
+                            "include_ts": {
+                                "description": "Should transcription include timestamps. **Required** - send `false` for plain text or `true` for timestamped segments.",
+                                "type": "boolean",
+                                "example": false
+                            },
+                            "model": {
+                                "description": "The model to use for transcription. Available models can be retrieved via the GET /api/v2/models endpoint.",
+                                "type": "string",
+                                "example": "WhisperLargeV3"
+                            },
+                            "return_result_in_response": {
+                                "description": "If true, the result will be returned directly in the response instead of only download url.",
+                                "type": "boolean",
+                                "default": false,
+                                "nullable": true
+                            },
+                            "webhook_url": {
+                                "description": "Optional HTTPS URL to receive webhook notifications for job status changes.",
+                                "type": "string",
+                                "format": "uri",
+                                "maxLength": 2048,
+                                "example": "https://your-server.com/webhooks/deapi",
+                                "nullable": true
+                            },
+                            "webhook_secret": {
+                                "description": "Optional per-request HMAC secret (min. 32 chars) used to sign the webhook callback. When present, overrides the account-default webhook secret. Requires `webhook_url` to also be set.",
+                                "type": "string",
+                                "maxLength": 255,
+                                "minLength": 32,
+                                "example": "a1b2c3d4e5f60708091a2b3c4d5e6f7081920a1b2c3d4e5f60708091a2b3c4d5",
+                                "nullable": true
+                            }
+                        },
+                        "type": "object"
                     }
-                },
-                "type": "object"
+                ]
             },
             "VideoRemoveBgRequestBody": {
                 "required": [
@@ -4745,8 +5007,9 @@
                         "example": -1
                     },
                     "model": {
-                        "description": "The model to use for video replacement. Available models can be retrieved via the GET /api/v1/client/models endpoint.",
-                        "type": "string"
+                        "description": "The model to use for video replacement. Available models can be retrieved via the GET /api/v2/models endpoint.",
+                        "type": "string",
+                        "example": "Wan2_2_Animate_14B_INT8"
                     },
                     "webhook_url": {
                         "description": "Optional HTTPS URL to receive webhook notifications for job status changes. Must be HTTPS. Max 2048 characters.",
@@ -4772,14 +5035,13 @@
                     "model": {
                         "description": "The upscaling model to use",
                         "type": "string",
-                        "example": "RealESRGAN_x4plus"
+                        "example": "RealESRGAN_Vid_x4"
                     },
                     "scale": {
                         "description": "Optional upscale factor (e.g. 2, 4). Only allowed for models that support a configurable scale; fixed-scale models (e.g. x2/x4 only) reject this field. Validated against the per-model min/max scale defined in the admin panel.",
                         "type": "integer",
                         "maximum": 16,
                         "minimum": 1,
-                        "example": 4,
                         "nullable": true
                     },
                     "webhook_url": {
@@ -4893,8 +5155,9 @@
                                 "type": "string"
                             },
                             "include_ts": {
-                                "description": "Should transcription include timestamps",
-                                "type": "boolean"
+                                "description": "Should transcription include timestamps. **Required** - send `false` for plain text or `true` for timestamped segments.",
+                                "type": "boolean",
+                                "example": false
                             }
                         },
                         "type": "object"
@@ -5234,17 +5497,17 @@
                             "steps": {
                                 "description": "Number of inference steps",
                                 "type": "integer",
-                                "example": 20
+                                "example": 1
                             },
                             "frames": {
                                 "description": "Number of video frames to generate",
                                 "type": "integer",
-                                "example": 20
+                                "example": 120
                             },
                             "fps": {
                                 "description": "FPS of generated video",
                                 "type": "integer",
-                                "example": 20
+                                "example": 30
                             },
                             "seed": {
                                 "description": "Random seed for generation",
@@ -5395,17 +5658,17 @@
                             "steps": {
                                 "description": "Number of inference steps",
                                 "type": "integer",
-                                "example": 20
+                                "example": 1
                             },
                             "frames": {
                                 "description": "Number of video frames to generate",
                                 "type": "integer",
-                                "example": 20
+                                "example": 120
                             },
                             "fps": {
                                 "description": "FPS of generated video",
                                 "type": "integer",
-                                "example": 20
+                                "example": 30
                             },
                             "seed": {
                                 "description": "Random seed for generation",
@@ -5510,8 +5773,9 @@
                                 "type": "string"
                             },
                             "include_ts": {
-                                "description": "Should transcription include timestamps",
-                                "type": "boolean"
+                                "description": "Should transcription include timestamps. **Required** - send `false` for plain text or `true` for timestamped segments.",
+                                "type": "boolean",
+                                "example": false
                             }
                         },
                         "type": "object"

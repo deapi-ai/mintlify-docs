@@ -104,17 +104,35 @@ The table below shows which **task types** deAPI supports. To see which models a
 | Image-to-Text (OCR) | `img2txt` | Extract text and meaning from images — OCR, descriptions, accessibility. |
 | Text-to-Video | `txt2video` | Generate short AI video clips from a text prompt. |
 | Image-to-Video | `img2video` | Animate a still image into a short video clip. |
-| Audio-to-Video | `aud2video` | Generate video conditioned on an audio file and a text prompt. |
+| Audio-to-Video | `audio2video` | Generate video conditioned on an audio file and a text prompt. |
 | Text-to-Embedding | `txt2embedding` | Create vector embeddings — search, RAG, semantic similarity, clustering. |
 | Background Removal | `img-rmbg` | Remove background from images — product photos, portraits, compositing. |
 | Image Upscale | `img-upscale` | Upscale images to higher resolution. |
-| Video Upscale | `vid_upscale` | Upscale videos to higher resolution — sharpen, restore, and enlarge video content. |
-| Transcribe (Unified) | `transcribe` | Unified transcription — auto-detects URL or file upload. Replaces vid2txt, aud2txt, videofile2txt, audiofile2txt. |
-| Video Replace | `videos_replace` | Replace a person in a video with a character from a reference image. |
+| Video Upscale | `vid-upscale` | Upscale videos to higher resolution — sharpen, restore, and enlarge video content. |
+| Video Replace | `video-replace` | Replace a person in a video with a character from a reference image. |
 
 <Note>
   Some models support **multiple tasks** (e.g. both `txt2img` and `img2img`). The models endpoint will list all supported `inference_types` for each model.
 </Note>
+
+<Note>
+  **Unified transcription.** The transcription endpoint (`POST /api/v2/audio/transcriptions`, v1: `POST /api/v1/client/transcribe`) auto-detects URL vs. file upload and covers all four transcription tasks. It is an endpoint, not a separate `inference_types` value — filter models by `audio2text`, `video2text`, `audio_file2text` or `video_file2text`.
+</Note>
+
+<Warning>
+  **`inference_types` values are not URL paths.** They identify a task when filtering the models endpoint and when reading a model's capabilities — they are **not** endpoint names. Building a request URL from an `inference_types` value returns `404`. Always take the path from the endpoint's reference page.
+
+  | `inference_types` value | v2 endpoint | v1 endpoint (deprecated) |
+  | --- | --- | --- |
+  | `audio2text` | `POST /api/v2/audio/transcriptions` | `POST /api/v1/client/aud2txt` |
+  | `video2text` | `POST /api/v2/audio/transcriptions` | `POST /api/v1/client/vid2txt` |
+  | `audio_file2text` | `POST /api/v2/audio/transcriptions` | `POST /api/v1/client/audiofile2txt` |
+  | `video_file2text` | `POST /api/v2/audio/transcriptions` | `POST /api/v1/client/videofile2txt` |
+  | `txt2audio` | `POST /api/v2/audio/speech` | `POST /api/v1/client/txt2audio` |
+  | `audio2video` | `POST /api/v2/videos/audio-syncs` | `POST /api/v1/client/aud2video` |
+  | `video-replace` | `POST /api/v2/videos/replacements` | `POST /api/v1/client/videos/replace` |
+  | `vid-upscale` | `POST /api/v2/videos/upscales` | `POST /api/v1/client/vid-upscale` |
+</Warning>
 
 ---
 
@@ -232,7 +250,7 @@ Jobs return a `request_id`. Poll results with `GET /api/v2/jobs/{request_id}`.
 If you are an AI agent, MCP client, or LLM integrating with deAPI:
 
 1. **Call** `GET /api/v2/models` at the start of your session to get the current model list. Do not rely on model slugs from training data, cached documentation, or prior conversations — they may be outdated.
-2. **Use** `filter[inference_types]` to narrow down to the task you need (e.g. `txt2img`, `txt2audio`, `aud2video`).
+2. **Use** `filter[inference_types]` to narrow down to the task you need (e.g. `txt2img`, `txt2audio`, `audio2video`).
 3. **Read** `info.limits` and `info.defaults` from the response to construct valid request parameters. Also consult the task endpoint docs for required fields that may not appear in the model response (e.g. `seed` for image generation).
 4. **Pass** the `slug` field (not `name`) as the `model` parameter in task endpoints.
 5. **If a model slug returns an error**, re-fetch the model list — the model may have been deprecated or replaced.

@@ -72,6 +72,56 @@
       "vscode"
     ]
   },
+  "redirects": [
+    {
+      "source": "/api/generation/:slug*",
+      "destination": "/api/v1/generation/:slug*"
+    },
+    {
+      "source": "/api/analysis/:slug*",
+      "destination": "/api/v1/analysis/:slug*"
+    },
+    {
+      "source": "/api/transformation/:slug*",
+      "destination": "/api/v1/transformation/:slug*"
+    },
+    {
+      "source": "/api/utilities/:slug*",
+      "destination": "/api/v1/utilities/:slug*"
+    },
+    {
+      "source": "/api/prompt-enhancement/:slug*",
+      "destination": "/api/v1/prompt-enhancement/:slug*"
+    },
+    {
+      "source": "/api/prompt",
+      "destination": "/api/v1/prompt-enhancement/overview"
+    },
+    {
+      "source": "/api/overview",
+      "destination": "/api/v2/overview"
+    },
+    {
+      "source": "/api/errors",
+      "destination": "/api/v2/errors"
+    },
+    {
+      "source": "/api/images/:slug*",
+      "destination": "/api/v2/images/:slug*"
+    },
+    {
+      "source": "/api/videos/:slug*",
+      "destination": "/api/v2/videos/:slug*"
+    },
+    {
+      "source": "/api/audio/:slug*",
+      "destination": "/api/v2/audio/:slug*"
+    },
+    {
+      "source": "/api/embeddings/:slug*",
+      "destination": "/api/v2/embeddings/:slug*"
+    }
+  ],
   "navigation": {
     "tabs": [
       {
