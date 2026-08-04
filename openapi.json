@@ -42,7 +42,8 @@
                                     "width",
                                     "height",
                                     "seed",
-                                    "frames"
+                                    "frames",
+                                    "fps"
                                 ],
                                 "properties": {
                                     "prompt": {
@@ -197,7 +198,8 @@
                                     "model",
                                     "width",
                                     "height",
-                                    "frames"
+                                    "frames",
+                                    "fps"
                                 ],
                                 "properties": {
                                     "width": {
@@ -317,7 +319,8 @@
                             "schema": {
                                 "required": [
                                     "audio",
-                                    "include_ts"
+                                    "include_ts",
+                                    "model"
                                 ],
                                 "properties": {
                                     "audio": {
@@ -423,7 +426,8 @@
                                     {
                                         "required": [
                                             "audio",
-                                            "include_ts"
+                                            "include_ts",
+                                            "model"
                                         ],
                                         "properties": {
                                             "audio": {
@@ -447,7 +451,8 @@
                                     {
                                         "required": [
                                             "duration_seconds",
-                                            "include_ts"
+                                            "include_ts",
+                                            "model"
                                         ],
                                         "properties": {
                                             "duration_seconds": {
@@ -1487,7 +1492,8 @@
                                     "guidance",
                                     "steps",
                                     "seed",
-                                    "frames"
+                                    "frames",
+                                    "fps"
                                 ],
                                 "properties": {
                                     "prompt": {
@@ -1637,7 +1643,8 @@
                                     "width",
                                     "height",
                                     "frames",
-                                    "steps"
+                                    "steps",
+                                    "fps"
                                 ],
                                 "properties": {
                                     "width": {
@@ -3970,7 +3977,8 @@
                                     "guidance",
                                     "steps",
                                     "seed",
-                                    "frames"
+                                    "frames",
+                                    "fps"
                                 ],
                                 "properties": {
                                     "prompt": {
@@ -4109,7 +4117,8 @@
                                     "width",
                                     "height",
                                     "frames",
-                                    "steps"
+                                    "steps",
+                                    "fps"
                                 ],
                                 "properties": {
                                     "width": {
@@ -4786,7 +4795,8 @@
                             "schema": {
                                 "required": [
                                     "video",
-                                    "include_ts"
+                                    "include_ts",
+                                    "model"
                                 ],
                                 "properties": {
                                     "video": {
@@ -4892,7 +4902,8 @@
                                     {
                                         "required": [
                                             "video",
-                                            "include_ts"
+                                            "include_ts",
+                                            "model"
                                         ],
                                         "properties": {
                                             "video": {
@@ -4916,7 +4927,8 @@
                                     {
                                         "required": [
                                             "duration_seconds",
-                                            "include_ts"
+                                            "include_ts",
+                                            "model"
                                         ],
                                         "properties": {
                                             "duration_seconds": {
@@ -5476,7 +5488,8 @@
                             "schema": {
                                 "required": [
                                     "video_url",
-                                    "include_ts"
+                                    "include_ts",
+                                    "model"
                                 ],
                                 "properties": {
                                     "video_url": {
@@ -5580,7 +5593,8 @@
                             "schema": {
                                 "required": [
                                     "video_url",
-                                    "include_ts"
+                                    "include_ts",
+                                    "model"
                                 ],
                                 "properties": {
                                     "video_url": {

@@ -404,7 +404,12 @@
                                         "nullable": true
                                     }
                                 },
-                                "type": "object"
+                                "type": "object",
+                                "required": [
+                                    "prompt",
+                                    "type",
+                                    "model_slug"
+                                ]
                             }
                         }
                     }
@@ -3066,7 +3071,8 @@
                     "width",
                     "height",
                     "seed",
-                    "frames"
+                    "frames",
+                    "fps"
                 ],
                 "properties": {
                     "prompt": {
@@ -3156,7 +3162,8 @@
                     "model",
                     "width",
                     "height",
-                    "frames"
+                    "frames",
+                    "fps"
                 ],
                 "properties": {
                     "width": {
@@ -3354,7 +3361,8 @@
                     "width",
                     "height",
                     "frames",
-                    "steps"
+                    "steps",
+                    "fps"
                 ],
                 "properties": {
                     "width": {
@@ -3685,7 +3693,8 @@
                     "width",
                     "height",
                     "frames",
-                    "steps"
+                    "steps",
+                    "fps"
                 ],
                 "properties": {
                     "width": {
@@ -4265,7 +4274,8 @@
                     "guidance",
                     "steps",
                     "seed",
-                    "frames"
+                    "frames",
+                    "fps"
                 ],
                 "properties": {
                     "prompt": {
@@ -4763,7 +4773,8 @@
                     "guidance",
                     "steps",
                     "seed",
-                    "frames"
+                    "frames",
+                    "fps"
                 ],
                 "properties": {
                     "prompt": {
