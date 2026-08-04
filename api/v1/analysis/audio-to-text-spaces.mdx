@@ -3,8 +3,12 @@ title: "Audio-to-Text (X Spaces Transcription)"
 openapi: "/openapi.json POST /api/v1/client/aud2txt"
 ---
 
+<Warning>
+  **API v1 is deprecated.** This version is no longer being developed — new endpoints, parameters and models are added to v2 only. Use the v2 endpoints to stay current: [v2 API documentation](https://docs.deapi.ai/api/v2/overview).
+</Warning>
+
 <Note>
-**Prerequisite:** To ensure a successful request, you must first consult the [Model Selection](/api/v1/utilities/model-selection) endpoint to identify a valid model `slug`, check specific **limits** and **features**, and verify **LoRA** availability.
+  **Prerequisite:** To ensure a successful request, you must first consult the [Model Selection](/api/v1/utilities/model-selection) endpoint to identify a valid model `slug`, check specific **limits** and **features**, and verify **LoRA** availability.
 </Note>
 
 ## Technical Notes & Constraints
@@ -21,5 +25,5 @@ openapi: "/openapi.json POST /api/v1/client/aud2txt"
 - A prolonged 0% status is normal behavior for long X Spaces.
 
 <Info>
-Transcription for standard video posts on X is handled via the [Video-to-Text](/api/v1/analysis/video-to-text) endpoint.
+  Transcription for standard video posts on X is handled via the [Video-to-Text](/api/v1/analysis/video-to-text) endpoint.
 </Info>

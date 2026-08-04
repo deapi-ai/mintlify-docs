@@ -3,6 +3,10 @@ title: "Text-to-Speech (TTS)"
 openapi: "/openapi.json POST /api/v1/client/txt2audio"
 ---
 
+<Warning>
+  **API v1 is deprecated.** This version is no longer being developed — new endpoints, parameters and models are added to v2 only. Use the v2 endpoints to stay current: [v2 API documentation](https://docs.deapi.ai/api/v2/overview).
+</Warning>
+
 Text-to-Speech converts text into natural-sounding audio. The endpoint supports three TTS modes via the `mode` parameter:
 
 - **`custom_voice`** (default) — Use a preset voice from the model's voice library. Requires the `voice` parameter.
@@ -10,14 +14,15 @@ Text-to-Speech converts text into natural-sounding audio. The endpoint supports 
 - **`voice_design`** — Create a new voice from a natural language description. Requires the `instruct` parameter (e.g. `"A warm female voice with a British accent"`).
 
 <Note>
-**Prerequisite:** To ensure a successful request, you must first consult the [Model Selection](/api/v1/utilities/model-selection) endpoint to identify a valid model `slug`, check specific **limits** and **features**, and verify available **languages** and **voices**.
+  **Prerequisite:** To ensure a successful request, you must first consult the [Model Selection](/api/v1/utilities/model-selection) endpoint to identify a valid model `slug`, check specific **limits** and **features**, and verify available **languages** and **voices**.
 </Note>
 
 <Warning>
-**Mode-specific required fields:**
-- `custom_voice` — `voice` is required.
-- `voice_clone` — `ref_audio` is required. `ref_text` is optional but recommended.
-- `voice_design` — `instruct` is required.
+  **Mode-specific required fields:**
 
-If `mode` is omitted, the API defaults to `custom_voice`.
+  - `custom_voice` — `voice` is required.
+  - `voice_clone` — `ref_audio` is required. `ref_text` is optional but recommended.
+  - `voice_design` — `instruct` is required.
+
+  If `mode` is omitted, the API defaults to `custom_voice`.
 </Warning>

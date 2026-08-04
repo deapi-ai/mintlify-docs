@@ -3,6 +3,10 @@ title: "API Overview"
 description: "Complete reference of all deAPI endpoints"
 ---
 
+<Warning>
+  **API v1 is deprecated.** This version is no longer being developed — new endpoints, parameters and models are added to v2 only. Use the v2 endpoints to stay current: [v2 API documentation](https://docs.deapi.ai/api/v2/overview).
+</Warning>
+
 All endpoints use base URL `https://api.deapi.ai` and require authentication via `Authorization: Bearer <API_KEY>` header.
 
 <Note>
@@ -15,9 +19,11 @@ v1 and [v2](/api/v2/overview) are two request surfaces over the same inference b
 
 The practical differences are naming and grouping: v1 uses one flat `/api/v1/client/<task>` namespace with `/price-calculation` suffixes, while v2 groups endpoints by media type (`/api/v2/images/*`, `/api/v2/videos/*`, `/api/v2/audio/*`) with `/price` suffixes, and consolidates several v1 endpoints into unified ones (all transcription endpoints into `/api/v2/audio/transcriptions`, all prompt boosters into `/api/v2/prompts/enhancements`).
 
-<Note>
-  **v1 is currently supported, and no retirement date has been announced.** New integrations should use v2, which is where new endpoints and parameters are added first. If a v1 retirement date is set, it will be published here and in the changelog.
-</Note>
+<Warning>
+  **API v1 is deprecated.** v1 is no longer being developed — all new endpoints, parameters, models and fixes land in v2 first and are not backported. Existing v1 integrations keep working, but new integrations should be built on v2, and existing ones should plan a migration.
+
+  See the [v2 API documentation](https://docs.deapi.ai/api/v2/overview) for the current endpoint reference.
+</Warning>
 
 ## Generation
 
