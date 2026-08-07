@@ -166,10 +166,10 @@ Typical API usage follows this pattern:
 
 ```json Error (4xx/5xx)
 {
-  "data": null,
-  "message": "Error description",
-  "errors": [],
-  "statusCode": 401
+  "message": "The selected model does not exist.",
+  "errors": {
+    "model": ["The selected model does not exist."]
+  }
 }
 ```
 

@@ -7,43 +7,40 @@ deAPI uses conventional HTTP response codes to indicate the success or failure o
 
 ## HTTP Status Codes
 
-| Code  | Status                | Description                                                      |
-| ----- | --------------------- | ---------------------------------------------------------------- |
-| `200` | OK                    | Request succeeded. Response contains requested data.             |
-| `401` | Unauthorized          | Invalid or missing API key.                                      |
-| `404` | Not Found             | The requested resource (job, model) does not exist.              |
-| `422` | Unprocessable Entity  | Request validation failed. Check the `errors` array for details. |
-| `429` | Too Many Request      | Rate limit exceeded.                                             |
-| `500` | Internal Server Error | Something went wrong on our end. Try again later.                |
+| Code  | Status                | Description                                                       |
+| ----- | --------------------- | ----------------------------------------------------------------- |
+| `200` | OK                    | Request succeeded. Response contains requested data.              |
+| `401` | Unauthorized          | Invalid or missing API key.                                       |
+| `404` | Not Found             | The requested resource (job, route) does not exist.               |
+| `413` | Payload Too Large     | Request body exceeded the upload cap. See [Limits & Quotas](/limits-and-quotas#file-uploads). |
+| `422` | Unprocessable Entity  | Request validation failed. Check the `errors` object for details. |
+| `429` | Too Many Requests     | Rate limit exceeded.                                              |
+| `500` | Internal Server Error | Something went wrong on our end. Try again later.                 |
 
 ## Error Response Format
 
-All error responses follow a consistent JSON structure:
+Every error response carries a top-level `message`. Validation errors (`422`) additionally carry an `errors` object:
 
 ```json
 {
-  "data": null,
-  "message": "Error general message",
-  "errors": [],
-  "statusCode": 401
+  "message": "The selected model does not exist.",
+  "errors": {
+    "model": ["The selected model does not exist."]
+  }
 }
 ```
 
-<ResponseField name="data" type="object | null">
-  Always `null` for error responses.
-</ResponseField>
-
 <ResponseField name="message" type="string">
-  Human-readable error description.
+  Human-readable error description. Present on every error response. For a `422` with several failures it summarises the first one and counts the rest, e.g. `"The width field must be at least 512. (and 2 more errors)"`.
 </ResponseField>
 
-<ResponseField name="errors" type="array">
-  Additional error details. For validation errors (422), contains field-specific messages.
+<ResponseField name="errors" type="object">
+  **Only present on `422`.** A map of `field name → array of messages`, not an array. A single request can fail on several fields at once, and a single field can carry several messages.
 </ResponseField>
 
-<ResponseField name="statusCode" type="integer">
-  HTTP status code (matches the response status).
-</ResponseField>
+<Warning>
+  The error body has **no `data` and no `statusCode` field** — read the status from the HTTP response itself. Do not iterate `errors` as an array: it is an object keyed by field name (`errors.model[0]`, not `errors[0].field`).
+</Warning>
 
 ## Error Types
 
@@ -55,14 +52,11 @@ Returned when authentication fails.
 
 - Missing `Authorization` header
 - Invalid API key
-- Expired API key
+- Expired or revoked API key
 
 ```json
 {
-  "data": null,
-  "message": "Unauthorized user.",
-  "errors": [],
-  "statusCode": 401
+  "message": "Unauthenticated."
 }
 ```
 
@@ -72,56 +66,81 @@ Returned when authentication fails.
 
 ### 404 Not Found
 
-Returned when the requested resource doesn't exist.
+Returned when the requested resource doesn't exist. Two different bodies are possible.
 
-**Common causes:**
-
-- Invalid `request_id` when polling results
-- Model name doesn't exist
-- Request ID not found
+**Unknown job / resource** — e.g. an invalid `request_id` when polling results:
 
 ```json
 {
-  "data": null,
-  "message": "Request not found.",
-  "errors": [],
-  "statusCode": 404
+  "message": "No query results for the requested resource."
 }
 ```
 
-**Solution:** Verify the resource identifier (`request_id`, model name) is correct. Use the [Model Selection](/api/v2/utilities/models) endpoint to get valid model names.
+<Note>
+  Match on the **status code**, not on the message text. The wording of `404` messages is not part of the API contract and can change.
+</Note>
+
+**Unknown route** — e.g. calling a documentation URL instead of the API path:
+
+```json
+{
+  "message": "The route api/v2/utilities/balance could not be found."
+}
+```
+
+**Solution:** Verify the `request_id`, and take API paths from the [API Overview](/api/v2/overview) — documentation URLs such as `/api/v2/utilities/balance` are not API routes (the real one is `/api/v2/account/balance`).
+
+<Note>
+  An unknown **model** is not a `404` — it fails validation and returns `422` with `errors.model`.
+</Note>
 
 ---
 
 ### 422 Unprocessable Entity
 
-Returned when request validation fails. The `errors` array contains field-specific details.
+Returned when request validation fails. `errors` is an object keyed by field name.
 
 **Common causes:**
 
 - Missing required parameters
 - Invalid parameter values (out of range, wrong type)
+- A value outside the selected model's `info.limits`
 - Invalid image/video URL or format
 
 ```json
 {
-  "data": null,
-  "message": "Validation failed",
-  "errors": [
-    {
-      "field": "width",
-      "messages": ["The width must be between 64 and 2048."]
-    },
-    {
-      "field": "model",
-      "messages": ["The selected model does not exist."]
-    }
-  ],
-  "statusCode": 422
+  "message": "The width field must be at least 512. (and 2 more errors)",
+  "errors": {
+    "width": ["The width field must be at least 512."],
+    "height": ["The height field must be at least 512."],
+    "steps": ["The steps field must be at least 8."]
+  }
 }
 ```
 
-**Solution:** Check the `errors` array to identify which fields failed validation and correct them according to the API documentation.
+**Solution:** Iterate the keys of the `errors` object to identify which fields failed and correct them. Many limits are model-specific — read `info.limits` from the [Model Selection](/api/v2/utilities/models) endpoint for the model you are calling.
+
+---
+
+### 429 Too Many Requests
+
+Returned when you exceed your rate limit.
+
+```json
+{
+  "message": "Too Many Attempts."
+}
+```
+
+Every response carries the current allowance in headers:
+
+| Header | Meaning |
+| --- | --- |
+| `X-RateLimit-Limit` | Requests allowed in the current window |
+| `X-RateLimit-Remaining` | Requests left in the current window |
+| `X-RateLimit-Source` | Which limit bucket was applied |
+
+**Solution:** Back off and retry — see [Limits & Quotas](/limits-and-quotas#rate-limit-errors).
 
 ---
 
@@ -131,14 +150,15 @@ Returned when an unexpected error occurs on our servers.
 
 ```json
 {
-  "data": null,
-  "message": "Internal server error",
-  "errors": [],
-  "statusCode": 500
+  "message": "Server Error"
 }
 ```
 
 **Solution:** Wait a moment and retry your request. If the problem persists, check [status.deapi.ai](https://status.deapi.ai/) or contact support on [Discord](https://discord.com/invite/UFfK5YRBsr).
+
+<Note>
+  A job that fails **after** it was accepted does not produce an HTTP error. The submission returns `200` with a `request_id`, and the failure surfaces on the job status as `status: "error"` with `error_code`, `error_message`, `error_reason`, `retryable` and `refunded`. See [Webhooks](/execution-modes-and-integrations/webhooks) for the full value lists.
+</Note>
 
 ## Best Practices
 
@@ -146,8 +166,8 @@ Returned when an unexpected error occurs on our servers.
   <Card title="Handle all error codes" icon="shield-check">
     Implement error handling for all possible status codes in your application.
   </Card>
-  <Card title="Parse the errors array" icon="list-check">
-    For 422 responses, iterate through the `errors` array to display field-specific messages to users.
+  <Card title="Parse the errors object" icon="list-check">
+    For 422 responses, iterate the keys of the `errors` object to display field-specific messages to users.
   </Card>
   <Card title="Implement retry logic" icon="rotate">
     For 500 errors, implement exponential backoff retry (e.g., 1s, 2s, 4s delays).
@@ -191,8 +211,11 @@ elif response.status_code == 401:
 elif response.status_code == 422:
     error_data = response.json()
     print(f"Validation error: {error_data['message']}")
-    for error in error_data.get("errors", []):
-        print(f"  Field '{error['field']}': {error['messages']}")
+    # `errors` is an object: field name -> list of messages
+    for field, messages in error_data.get("errors", {}).items():
+        print(f"  Field '{field}': {messages}")
+elif response.status_code == 429:
+    print("Rate limited. Remaining:", response.headers.get("X-RateLimit-Remaining"))
 elif response.status_code == 500:
     print("Server error. Retrying...")
 else:
@@ -229,9 +252,12 @@ if (response.ok) {
 } else if (response.status === 422) {
   const errorData = await response.json();
   console.error(`Validation error: ${errorData.message}`);
-  errorData.errors?.forEach(err => {
-    console.error(`  Field '${err.field}': ${err.messages.join(", ")}`);
-  });
+  // `errors` is an object: field name -> array of messages
+  for (const [field, messages] of Object.entries(errorData.errors ?? {})) {
+    console.error(`  Field '${field}': ${messages.join(", ")}`);
+  }
+} else if (response.status === 429) {
+  console.error("Rate limited. Remaining:", response.headers.get("X-RateLimit-Remaining"));
 } else if (response.status === 500) {
   console.error("Server error. Retrying...");
 } else {

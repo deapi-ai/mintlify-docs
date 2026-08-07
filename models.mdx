@@ -144,7 +144,7 @@ When the models endpoint returns several options for the same task, use these gu
 
 **Speech generation (TTS)** — Check the model's `languages` array for available languages and voices. Use `info.defaults` for recommended speed and format settings. The endpoint supports three modes: `custom_voice` (preset speakers), `voice_clone` (clone from reference audio), and `voice_design` (create voice from a text description). Not all models support all modes — check model capabilities before selecting a mode.
 
-**Music generation** — Provide a text description (`caption`) of the desired music style. `lyrics` is **required and must be non-empty** — send `"[Instrumental]"` for instrumental tracks. Optionally include `bpm`, `keyscale`, and `timesignature` (an integer: `2`, `3`, `4` or `6` — not a notation string like `"4/4"`) to fine-tune the output. `format` accepts `mp3`, `wav` or `flac`. You can also upload a `reference_audio` file for style transfer. Check `info.limits` for supported duration range and inference steps. Use fewer steps with turbo models (e.g. 8) and more steps with base models (e.g. 32\+).
+**Music generation** — Provide a text description (`caption`) of the desired music style. `lyrics` is **required and must be non-empty** — send `"[Instrumental]"` for instrumental tracks. Optionally include `bpm`, `keyscale`, and `timesignature` (an integer: `2`, `3`, `4` or `6` — not a notation string like `"4/4"`) to fine-tune the output. `format` should be `mp3` — the only format the current models actually produce. You can also upload a `reference_audio` file for style transfer. Check `info.limits` for supported duration range and inference steps. Use fewer steps with turbo models (e.g. 8) and more steps with base models (e.g. 32\+).
 
 **Transcription (Video/Audio-to-Text)** — Transcription models support both URL-based and file-upload transcription. For long content, enable timestamps (`include_ts: true`). URL-based transcription works with YouTube, Twitch, Kick, TikTok and X/Twitter.
 
@@ -160,7 +160,7 @@ When the models endpoint returns several options for the same task, use these gu
 
 **Image upscale** — Check `info.limits` for input size constraints.
 
-**Video upscale** — Check `info.limits` for input size and duration constraints. Some models support a configurable `scale` factor (e.g. 2×–16×); others are fixed-scale (e.g. x2/x4 only) and reject the `scale` field. Check the per-model `min_scale`/`max_scale` in `info.limits` before sending the request.
+**Video upscale** — Check `info.limits` for input size and duration constraints. Some models support a configurable `scale` factor (currently only `FlashVSR_Tiny`, range 2–4); others are fixed-scale (`RealESRGAN_Vid_x2`, `RealESRGAN_Vid_x4`) and reject the `scale` field. Check the per-model `min_scale`/`max_scale` in `info.limits` before sending the request.
 
 ---
 
@@ -225,7 +225,7 @@ curl -X POST "https://api.deapi.ai/api/v2/audio/transcriptions" \
   -H "Content-Type: application/json" \
   -H "Accept: application/json" \
   -d '{
-    "video_url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+    "source_url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
     "include_ts": true,
     "model": "<MODEL_SLUG>"
   }'

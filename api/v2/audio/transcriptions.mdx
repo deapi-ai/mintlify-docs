@@ -7,7 +7,7 @@ description: "Unified transcription — auto-detects URL or file upload for audi
 Unified transcription endpoint that replaces the five v1 endpoints (`vid2txt`, `aud2txt`, `videofile2txt`, `audiofile2txt`, `transcribe`). Accepts URLs or multipart file uploads. Returns a `request_id` for status polling.
 
 <Info>
-  Source detection is automatic: pass a public `video_url` / `audio_url`, or upload a file via multipart form-data.
+  Source detection is automatic: pass a public URL in `source_url` (audio and video both use this one field), or upload a file via multipart `source_file`. There are no `video_url` / `audio_url` fields.
 </Info>
 
 <Note>

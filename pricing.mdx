@@ -55,13 +55,13 @@ Example pricing is shown below for reference; exact, up-to-date rates are always
 
 **Text-to-Music (Music Generation)**
 
-- Price depends on track duration (10–600 seconds) and the number of inference steps.
+- Price depends on track duration and the number of inference steps. Duration is model-specific: **10–300 s** on the turbo models, **30–300 s** on `AceStep_1_5_Base`.
 - Turbo models use fewer steps (e.g. 8) and are cheaper; base models use more steps (e.g. 32\+) for higher quality.
 - Use the `/price` endpoint with your `model`, `duration`, and `inference_steps` to get exact pricing before generation.
 
 **Text-to-Video**
 
-- Price depends on clip duration (2–5 seconds) and resolution.
+- Price depends on clip length (`frames / fps`) and resolution. Length is model-specific: **1–4 s** on `Ltxv_13B_0_9_8_Distilled_FP8` (30–120 frames @ 30 fps), **~2–10 s** on `Ltx2_3_22B_Dist_INT8` (49–241 frames @ 24 fps).
 - Example public rate: **0.001737 USD** for a 2-second clip at 256x256.
 - You can scale resolution or duration, but cost increases accordingly.
 
@@ -74,7 +74,7 @@ Example pricing is shown below for reference; exact, up-to-date rates are always
 
 **Image-to-Video**
 
-- Transform a static image into a motion clip (2–5 seconds) with interpolation.
+- Transform a static image into a motion clip with interpolation. Clip length follows the same per-model frame/fps limits as Text-to-Video above.
 - Example: 256x256 for 2 seconds costs **0.001737 USD**.
 - Use lower resolution or shorter duration to reduce cost.
 - Use motion parameters in prompts to guide movement.

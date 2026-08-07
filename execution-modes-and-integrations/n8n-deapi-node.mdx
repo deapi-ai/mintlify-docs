@@ -101,9 +101,9 @@ Image input operations (**Remove Background**, **Upscale**) accept JPG, JPEG, PN
 
 | Operation | Description | Models |
 | --- | --- | --- |
-| **Generate** | Generate video from text or image(s) | LTX-Video 0.9.8 13B, LTX-2 19B Distilled FP8 |
-| **Transcribe** | Transcribe video to text (YouTube, Twitch, X, Kick, TikTok URLs or file upload) | Whisper Large V3 |
-| **Upscale** | Increase video resolution (2×–16×) | RealESRGAN x4 |
+| **Generate** | Generate video from text or image(s) | LTX-Video 0.9.8 13B, LTX-2.3 22B Distilled INT8 |
+| **Transcribe** | Transcribe video to text (YouTube, Twitch, X, Kick, TikTok URLs or file upload) | Whisper Large V3, Whisper Large V3 Ct2 |
+| **Upscale** | Increase video resolution (2× or 4×) | RealESRGAN Video x2, RealESRGAN Video x4, FlashVSR Tiny |
 | **Remove Background** | Remove background from videos (v2 only) | (see Model Selection) |
 
 Video file transcription accepts MP4, MPEG, MOV, AVI, WMV, and OGG files up to 50 MB.
@@ -207,7 +207,7 @@ Add a **Manual Trigger** (or Schedule, Webhook, etc.) to start your workflow.
 | --- | --- |
 | **Resource** | Image |
 | **Operation** | Generate |
-| **Model** | FLUX.2 Klain (or your preferred model) |
+| **Model** | FLUX.2 Klein (or your preferred model) |
 | **Prompt** | `Red Bull F1 car from 2025` |
 | **Aspect Ratio** | Square, Landscape, or Portrait |
 

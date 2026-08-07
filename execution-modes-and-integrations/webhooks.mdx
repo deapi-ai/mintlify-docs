@@ -24,7 +24,7 @@ You can override the global webhook URL on any job request by including the `web
 ```json
 {
   "prompt": "a beautiful sunset over mountains",
-  "model": "flux-schnell",
+  "model": "Flux1schnell",
   "webhook_url": "https://your-server.com/webhooks/deapi",
   "webhook_secret": "your-per-job-secret-32-to-255-chars"
 }
@@ -77,14 +77,14 @@ All webhook requests include these headers:
     ```json
     {
       "event": "job.processing",
-      "delivery_id": "550e8400-e29b-41d4-a716-446655440000",
-      "timestamp": "2024-01-15T10:30:00.000Z",
+      "delivery_id": "9633a858-475f-45b0-98df-5fd7027cef2d",
+      "timestamp": "2026-08-07T11:43:14+00:00",
       "data": {
-        "job_request_id": "123e4567-e89b-12d3-a456-426614174000",
+        "job_request_id": "868543c4-9429-4434-972a-db27769c8a34",
         "status": "processing",
         "previous_status": "pending",
-        "job_type": "image_generation",
-        "started_at": "2024-01-15T10:30:00.000Z"
+        "job_type": "txt2img",
+        "started_at": "2026-08-07T11:43:14+00:00"
       }
     }
     ```
@@ -94,7 +94,7 @@ All webhook requests include these headers:
     | `data.job_request_id` | string (UUID) | Your job's unique identifier |
     | `data.status` | string | Current status: `processing` |
     | `data.previous_status` | string | Previous status: `pending` |
-    | `data.job_type` | string | Type of job (e.g., `image_generation`, `video_upscale`, `transcription`) |
+    | `data.job_type` | string | The job's **inference type slug** — the same value the models endpoint reports in `inference_types` (e.g. `txt2img`, `img2img`, `txt2video`, `vid-upscale`, `video2text`). Not the endpoint name. |
     | `data.started_at` | string (ISO 8601) | When processing began |
   </Tab>
   <Tab title="job.completed">
@@ -103,16 +103,16 @@ All webhook requests include these headers:
     ```json
     {
       "event": "job.completed",
-      "delivery_id": "550e8400-e29b-41d4-a716-446655440001",
-      "timestamp": "2024-01-15T10:30:45.000Z",
+      "delivery_id": "c4d543d8-b52b-4f62-a6c1-5605111dd830",
+      "timestamp": "2026-08-07T11:43:26+00:00",
       "data": {
-        "job_request_id": "123e4567-e89b-12d3-a456-426614174000",
+        "job_request_id": "868543c4-9429-4434-972a-db27769c8a34",
         "status": "done",
         "previous_status": "processing",
-        "job_type": "image_generation",
-        "completed_at": "2024-01-15T10:30:45.000Z",
-        "result_url": "https://storage.deapi.ai/results/.../output.png",
-        "processing_time_ms": 45000
+        "job_type": "txt2img",
+        "completed_at": "2026-08-07T11:43:26+00:00",
+        "result_url": "https://results.deapi.ai/19315424/....png?X-Amz-Signature=...",
+        "processing_time_ms": 12000
       }
     }
     ```
@@ -122,10 +122,14 @@ All webhook requests include these headers:
     | `data.job_request_id` | string (UUID) | Your job's unique identifier |
     | `data.status` | string | Current status: `done` |
     | `data.previous_status` | string | Previous status: `processing` |
-    | `data.job_type` | string | Type of job |
+    | `data.job_type` | string | The job's inference type slug (see the `job.processing` tab) |
     | `data.completed_at` | string (ISO 8601) | When job completed |
-    | `data.result_url` | string (URL) | URL to download the result |
+    | `data.result_url` | string (URL) | **Pre-signed, expiring** URL to download the result. Fetch it promptly, or re-read a fresh URL from `GET /api/v2/jobs/{request_id}`. |
     | `data.processing_time_ms` | integer | Processing time in milliseconds |
+
+    <Note>
+      The webhook payload carries only `result_url`. Alternative renditions (`results_alt_formats`, e.g. `jpg` / `webp` for images) and inline results are available from `GET /api/v2/jobs/{request_id}`.
+    </Note>
   </Tab>
   <Tab title="job.failed">
     Sent when your job fails during processing.
@@ -134,13 +138,13 @@ All webhook requests include these headers:
     {
       "event": "job.failed",
       "delivery_id": "550e8400-e29b-41d4-a716-446655440002",
-      "timestamp": "2024-01-15T10:30:45.000Z",
+      "timestamp": "2026-08-07T11:43:45+00:00",
       "data": {
-        "job_request_id": "123e4567-e89b-12d3-a456-426614174000",
+        "job_request_id": "868543c4-9429-4434-972a-db27769c8a34",
         "status": "error",
         "previous_status": "processing",
-        "job_type": "image_generation",
-        "failed_at": "2024-01-15T10:30:45.000Z",
+        "job_type": "txt2img",
+        "failed_at": "2026-08-07T11:43:45+00:00",
         "error_code": "WORKER_TIMEOUT",
         "error_message": "Worker failed to respond within the allowed time",
         "error_reason": "TIMEOUT",
@@ -155,7 +159,7 @@ All webhook requests include these headers:
     | `data.job_request_id` | string (UUID) | Your job's unique identifier |
     | `data.status` | string | Current status: `error` |
     | `data.previous_status` | string | Previous status: `processing` |
-    | `data.job_type` | string | Type of job |
+    | `data.job_type` | string | The job's inference type slug (see the `job.processing` tab) |
     | `data.failed_at` | string (ISO 8601) | When the job failed |
     | `data.error_code` | string | Coarse failure category |
     | `data.error_message` | string | Human-readable error description |

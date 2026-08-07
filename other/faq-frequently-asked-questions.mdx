@@ -116,10 +116,10 @@ Yes. deAPI exposes an **OpenAI-compatible** endpoint at `https://oai.deapi.ai/v1
 
 #### 13. **What's the difference between v1 and v2?**
 
-- **v2** (default, REST-style) — Resource-based URLs (`/api/v2/images/generations`, `/api/v2/videos/upscales`), unified transcription (`/audio/transcriptions` replaces 5 separate v1 endpoints), new video background removal endpoint.
-- **v1** (stable, task-style) — Task-based URLs (`/api/v1/client/txt2img`, `/api/v1/client/vid-upscale`). Fully supported for existing integrations.
+- **v2** (current) — Resource-based URLs (`/api/v2/images/generations`, `/api/v2/videos/upscales`), unified transcription (`/api/v2/audio/transcriptions` replaces 5 separate v1 endpoints) and a unified prompt booster (`/api/v2/prompts/enhancements` replaces the per-type v1 boosters).
+- **v1** (**deprecated**) — Task-based URLs (`/api/v1/client/txt2img`, `/api/v1/client/vid-upscale`). Existing integrations keep working, but v1 is no longer developed: new endpoints, parameters, models and fixes land in v2 only. Plan a migration.
 
-Both versions share authentication, rate limits, webhooks, and the same model catalog. Prompt Enhancement endpoints remain under the v1 path and are accessible from both. Switch docs version using the dropdown in the top-right corner.
+Both versions share authentication, rate limits, webhooks, and the same model catalog, and jobs live in one namespace — a `request_id` from a v1 call can be polled with `GET /api/v2/jobs/{request_id}` and vice versa. Switch between them using the **API v2 (Latest)** and **API v1 (Deprecated)** tabs at the top of this site.
 
 ---
 

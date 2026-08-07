@@ -57,8 +57,8 @@ curl -X POST https://api.deapi.ai/api/v2/images/generations \
   "data": {
     "job_request_id": "123e4567-e89b-12d3-a456-426614174000",
     "status": "done",
-    "job_type": "image_generation",
-    "result_url": "https://storage.deapi.ai/results/.../output.png",
+    "job_type": "txt2img",
+    "result_url": "https://results.deapi.ai/.../output.png",
     "processing_time_ms": 45000
   }
 }
@@ -155,7 +155,7 @@ curl https://api.deapi.ai/api/v2/jobs/abc123 \
 | `status`     | `pending`, `processing`, `done`, or `error` |
 | `progress`   | Progress percentage (when available)        |
 | `result_url` | Download URL (when `done`)                  |
-| `error`      | Error details (when `error`)                |
+| `error_code`, `error_message`, `error_reason`, `retryable`, `refunded` | Error details (when `error`) |
 
 <Warning>
   Polling adds latency, wastes resources with unnecessary requests, and provides no live previews. Use webhooks or WebSockets when possible.

@@ -23,7 +23,7 @@ pip install deapi-python-sdk
 ```python
 from deapi import DeapiClient
 
-client = DeapiClient(api_key="sk-your-api-key")
+client = DeapiClient(api_key="YOUR_API_KEY")  # raw deAPI key, e.g. "1234|AbCdEf..."
 
 # Generate an image
 job = client.images.generate(
@@ -64,7 +64,7 @@ deAPI also exposes an OpenAI-compatible endpoint at `https://oai.deapi.ai/v1`. I
 from openai import OpenAI
 
 client = OpenAI(
-    api_key="dpn-sk-your-token-here",
+    api_key="dpn-sk-YOUR_API_KEY",  # note the dpn-sk- prefix, required only on this gateway
     base_url="https://oai.deapi.ai/v1",
 )
 
