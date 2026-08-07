@@ -55,3 +55,24 @@ description: "AI-powered prompt optimization tools for better generation results
 </Steps>
 
 See the [Prompt Booster](/api/v2/prompt-enhancement/prompt-booster) page for the full request/response schema.
+
+## Inline boosting (`enhance_prompt`)
+
+Instead of calling the booster first and passing the result on yourself, you can set **`enhance_prompt: true`** directly on a generation request. The boost then runs as an async pre-step inside the job, and the boosted prompt is what gets generated.
+
+Supported on `POST /api/v2/images/generations`, `POST /api/v2/images/edits`, `POST /api/v2/videos/generations` and `POST /api/v2/videos/animations`.
+
+|  | Two-step (`/prompts/enhancements`) | Inline (`enhance_prompt: true`) |
+| --- | --- | --- |
+| Round trips | Two | One |
+| You see the boosted prompt before generating | Yes | No — it comes back on the job |
+| Billing | Boost billed separately | Boost fee billed on the job |
+
+The job status response reports what happened:
+
+- `prompt_boosted` — whether the boost actually ran.
+- `prompt_boost` — the boosted and original prompts. Non-null only once `prompt_boosted` is true; it stays `null` while the boost is still queued, and when no boost was requested.
+
+<Warning>
+  Inline boosting requires a prompt-booster guide configured for the target model. The request is rejected with **422** if no guide exists for that model, or if your account balance cannot cover the boost fee on top of the generation.
+</Warning>

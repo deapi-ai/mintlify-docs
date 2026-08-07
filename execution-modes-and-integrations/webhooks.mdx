@@ -30,10 +30,10 @@ You can override the global webhook URL on any job request by including the `web
 }
 ```
 
-| Parameter        | Type            | Required | Description                                                                                                                                           |
-| ---------------- | --------------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `webhook_url`    | string (HTTPS)  | No       | Overrides the global webhook URL for this job only.                                                                                                   |
-| `webhook_secret` | string (32–255) | No       | Overrides the global webhook secret for this job only. Used to compute the `X-DeAPI-Signature` HMAC-SHA256. Must be sent together with `webhook_url`. |
+| Parameter | Type | Required | Description |
+| --- | --- | --- | --- |
+| `webhook_url` | string (HTTPS) | No | Overrides the global webhook URL for this job only. |
+| `webhook_secret` | string (32–255) | No | Overrides the global webhook secret for this job only. Used to compute the `X-DeAPI-Signature` HMAC-SHA256. Must be sent together with `webhook_url`. |
 
 <Warning>
   Only HTTPS URLs are accepted. HTTP URLs will be rejected for security. `webhook_secret` must always be sent together with `webhook_url` — it cannot be used to override the secret for the globally configured URL.
@@ -47,11 +47,11 @@ You can override the global webhook URL on any job request by including the `web
 
 Webhooks are sent on the following status transitions:
 
-| Event            | Trigger                | Description                                   |
-| ---------------- | ---------------------- | --------------------------------------------- |
-| `job.processing` | `pending → processing` | Job assigned to a worker, processing started  |
-| `job.completed`  | `processing → done`    | Job completed successfully, results available |
-| `job.failed`     | `processing → error`   | Job failed during processing                  |
+| Event | Trigger | Description |
+| --- | --- | --- |
+| `job.processing` | `pending → processing` | Job assigned to a worker, processing started |
+| `job.completed` | `processing → done` | Job completed successfully, results available |
+| `job.failed` | `processing → error` | Job failed during processing |
 
 ## Request Format
 
@@ -59,14 +59,14 @@ Webhooks are sent on the following status transitions:
 
 All webhook requests include these headers:
 
-| Header                | Description                            | Example                                      |
-| --------------------- | -------------------------------------- | -------------------------------------------- |
-| `X-DeAPI-Signature`   | HMAC-SHA256 signature for verification | `sha256=5d41402abc4b2a76b9719d911017c592...` |
-| `X-DeAPI-Timestamp`   | Unix timestamp when webhook was sent   | `1705315800`                                 |
-| `X-DeAPI-Event`       | Event type that triggered the webhook  | `job.completed`                              |
-| `X-DeAPI-Delivery-Id` | Unique identifier for this delivery    | `550e8400-e29b-41d4-a716-446655440001`       |
-| `Content-Type`        | Always `application/json`              | `application/json`                           |
-| `User-Agent`          | Identifies the sender                  | `DeAPI-Webhook/1.0`                          |
+| Header | Description | Example |
+| --- | --- | --- |
+| `X-DeAPI-Signature` | HMAC-SHA256 signature for verification | `sha256=5d41402abc4b2a76b9719d911017c592...` |
+| `X-DeAPI-Timestamp` | Unix timestamp when webhook was sent | `1705315800` |
+| `X-DeAPI-Event` | Event type that triggered the webhook | `job.completed` |
+| `X-DeAPI-Delivery-Id` | Unique identifier for this delivery | `550e8400-e29b-41d4-a716-446655440001` |
+| `Content-Type` | Always `application/json` | `application/json` |
+| `User-Agent` | Identifies the sender | `DeAPI-Webhook/1.0` |
 
 ### Payload Structure
 
@@ -89,13 +89,13 @@ All webhook requests include these headers:
     }
     ```
 
-    | Field                  | Type              | Description                              |
-    | ---------------------- | ----------------- | ---------------------------------------- |
-    | `data.job_request_id`  | string (UUID)     | Your job's unique identifier             |
-    | `data.status`          | string            | Current status: `processing`             |
-    | `data.previous_status` | string            | Previous status: `pending`               |
-    | `data.job_type`        | string            | Type of job (e.g., `image_generation`, `video_upscale`, `transcription`) |
-    | `data.started_at`      | string (ISO 8601) | When processing began                    |
+    | Field | Type | Description |
+    | --- | --- | --- |
+    | `data.job_request_id` | string (UUID) | Your job's unique identifier |
+    | `data.status` | string | Current status: `processing` |
+    | `data.previous_status` | string | Previous status: `pending` |
+    | `data.job_type` | string | Type of job (e.g., `image_generation`, `video_upscale`, `transcription`) |
+    | `data.started_at` | string (ISO 8601) | When processing began |
   </Tab>
   <Tab title="job.completed">
     Sent when your job completes successfully.
@@ -117,15 +117,15 @@ All webhook requests include these headers:
     }
     ```
 
-    | Field                     | Type              | Description                     |
-    | ------------------------- | ----------------- | ------------------------------- |
-    | `data.job_request_id`     | string (UUID)     | Your job's unique identifier    |
-    | `data.status`             | string            | Current status: `done`          |
-    | `data.previous_status`    | string            | Previous status: `processing`   |
-    | `data.job_type`           | string            | Type of job                     |
-    | `data.completed_at`       | string (ISO 8601) | When job completed              |
-    | `data.result_url`         | string (URL)      | URL to download the result      |
-    | `data.processing_time_ms` | integer           | Processing time in milliseconds |
+    | Field | Type | Description |
+    | --- | --- | --- |
+    | `data.job_request_id` | string (UUID) | Your job's unique identifier |
+    | `data.status` | string | Current status: `done` |
+    | `data.previous_status` | string | Previous status: `processing` |
+    | `data.job_type` | string | Type of job |
+    | `data.completed_at` | string (ISO 8601) | When job completed |
+    | `data.result_url` | string (URL) | URL to download the result |
+    | `data.processing_time_ms` | integer | Processing time in milliseconds |
   </Tab>
   <Tab title="job.failed">
     Sent when your job fails during processing.
@@ -142,31 +142,55 @@ All webhook requests include these headers:
         "job_type": "image_generation",
         "failed_at": "2024-01-15T10:30:45.000Z",
         "error_code": "WORKER_TIMEOUT",
-        "error_message": "Worker failed to respond within the allowed time"
+        "error_message": "Worker failed to respond within the allowed time",
+        "error_reason": "TIMEOUT",
+        "retryable": true,
+        "refunded": true
       }
     }
     ```
 
-    | Field                  | Type              | Description                      |
-    | ---------------------- | ----------------- | -------------------------------- |
-    | `data.job_request_id`  | string (UUID)     | Your job's unique identifier     |
-    | `data.status`          | string            | Current status: `error`          |
-    | `data.previous_status` | string            | Previous status: `processing`    |
-    | `data.job_type`        | string            | Type of job                      |
-    | `data.failed_at`       | string (ISO 8601) | When the job failed              |
-    | `data.error_code`      | string            | Machine-readable error code      |
-    | `data.error_message`   | string            | Human-readable error description |
+    | Field | Type | Description |
+    | --- | --- | --- |
+    | `data.job_request_id` | string (UUID) | Your job's unique identifier |
+    | `data.status` | string | Current status: `error` |
+    | `data.previous_status` | string | Previous status: `processing` |
+    | `data.job_type` | string | Type of job |
+    | `data.failed_at` | string (ISO 8601) | When the job failed |
+    | `data.error_code` | string | Coarse failure category |
+    | `data.error_message` | string | Human-readable error description |
+    | `data.error_reason` | string | Actionable failure reason — **open list**, see below |
+    | `data.retryable` | boolean | Whether resubmitting the identical request could succeed |
+    | `data.refunded` | boolean | Whether the upfront charge was returned |
 
-    **Error Codes:**
+    **`error_code` — coarse category:**
 
-    | Code                      | Description                          |
-    | ------------------------- | ------------------------------------ |
-    | `WORKER_TIMEOUT`          | Worker didn't respond in time        |
-    | `PROCESSING_ERROR`        | Error during inference               |
-    | `AGE_RESTRICTED`          | Content flagged as age-restricted    |
-    | `CONTEXT_LENGTH_EXCEEDED` | Input exceeded model's context limit |
-    | `INVALID_INPUT`           | Invalid input data                   |
-    | `UNKNOWN_ERROR`           | Unexpected error                     |
+    | Code | Description |
+    | --- | --- |
+    | `WORKER_TIMEOUT` | Worker didn't respond in time |
+    | `WORKER_ERROR` | The worker itself failed |
+    | `PROCESSING_ERROR` | Error during inference |
+
+    **`error_reason` — actionable reason:**
+
+    | Reason | Description |
+    | --- | --- |
+    | `SOURCE_PRIVATE` | The source is private, deleted or otherwise unavailable to us |
+    | `SOURCE_RESTRICTED` | An age or region gate blocks it |
+    | `SOURCE_UNPROCESSABLE` | Fetched, but the media is unusable (e.g. no audio track) |
+    | `SOURCE_DOWNLOAD_FAILED` | The source could not be downloaded |
+    | `INPUT_TOO_LARGE` | Input exceeded the model's limits |
+    | `TIMEOUT` | The job exceeded its time budget |
+    | `CAPACITY_UNAVAILABLE` | No capacity was available for the model |
+    | `PROCESSING_FAILED` | Inference failed for another reason |
+
+    <Warning>
+      **`error_reason` is an open list.** New values can be added without a major version bump, so treat any unrecognised value as a generic failure rather than crashing. Branch your retry logic on `data.retryable`, not on `error_reason` — `retryable` stays correct as new reasons are added.
+    </Warning>
+
+    <Note>
+      `refunded: false` covers two different situations: a charge that was deliberately kept, and a job that failed before it was ever charged. It does not by itself mean you were billed.
+    </Note>
   </Tab>
 </Tabs>
 
@@ -221,7 +245,6 @@ function verifyWebhook(req, secret) {
 }
 ```
 
-
 ```python Python
 import hmac
 import hashlib
@@ -248,7 +271,6 @@ def verify_webhook(headers, body, secret):
     return hmac.compare_digest(signature, expected)
 ```
 
-
 ```php PHP
 function verifyWebhook(array $headers, string $body, string $secret): bool
 {
@@ -268,7 +290,6 @@ function verifyWebhook(array $headers, string $body, string $secret): bool
     return hash_equals($expected, $signature);
 }
 ```
-
 
 ```go Go
 package main
@@ -310,12 +331,15 @@ func verifyWebhook(signature, timestamp, body, secret string) bool {
   <Card title="Always verify signatures" icon="shield-check">
     Never process webhooks without verifying the HMAC signature first.
   </Card>
+
   <Card title="Check timestamps" icon="clock">
     Reject webhooks with timestamps older than 5 minutes to prevent replay attacks.
   </Card>
+
   <Card title="Use HTTPS" icon="lock">
     Only configure HTTPS endpoints. HTTP is rejected automatically.
   </Card>
+
   <Card title="Handle idempotency" icon="arrows-rotate">
     Use `delivery_id` to detect and handle duplicate deliveries.
   </Card>
@@ -325,18 +349,18 @@ func verifyWebhook(signature, timestamp, body, secret string) bool {
 
 If your endpoint fails to respond with a `2xx` status code, we'll retry delivery with exponential backoff:
 
-| Attempt | Delay      | Cumulative Time |
-| ------- | ---------- | --------------- |
-| 1       | Immediate  | 0               |
-| 2       | 1 minute   | 1 min           |
-| 3       | 2 minutes  | 3 min           |
-| 4       | 5 minutes  | 8 min           |
-| 5       | 10 minutes | 18 min          |
-| 6       | 30 minutes | 48 min          |
-| 7       | 1 hour     | 1h 48min        |
-| 8       | 3 hours    | 4h 48min        |
-| 9       | 6 hours    | 10h 48min       |
-| 10      | 12 hours   | 22h 48min       |
+| Attempt | Delay | Cumulative Time |
+| --- | --- | --- |
+| 1 | Immediate | 0 |
+| 2 | 1 minute | 1 min |
+| 3 | 2 minutes | 3 min |
+| 4 | 5 minutes | 8 min |
+| 5 | 10 minutes | 18 min |
+| 6 | 30 minutes | 48 min |
+| 7 | 1 hour | 1h 48min |
+| 8 | 3 hours | 4h 48min |
+| 9 | 6 hours | 10h 48min |
+| 10 | 12 hours | 22h 48min |
 
 After 10 failed attempts (~24 hours), the webhook is marked as failed.
 

@@ -4,3 +4,37 @@ openapi: "/openapi-v2.json POST /api/v2/audio/transcriptions/price"
 ---
 
 Estimate the cost of an audio/video transcription job before submitting it.
+
+Quote from one of three inputs: `source_url`, `source_file`, or a bare `duration_seconds`.
+
+<Warning>
+  **Pass the same flags you will pass to the job.** `include_ts`, `diarize` (which implies `include_ts`) and `include_metadata` can all raise the price. A quote that omits them comes in **under** what you are actually charged.
+</Warning>
+
+### Quoting from `duration_seconds`
+
+This mode never fetches the source, so it cannot see which platform the media comes from. On models that price per platform — and on TikTok, which is priced from a fixed [length-band card](/pricing) rather than by the hour — pass `platform` alongside the duration:
+
+```bash
+curl -X POST "https://api.deapi.ai/api/v2/audio/transcriptions/price" \
+  -H "Authorization: Bearer $DEAPI_API_KEY" \
+  -H "Content-Type: application/json" \
+  -H "Accept: application/json" \
+  -d '{
+    "duration_seconds": 240,
+    "platform": "tiktok",
+    "model": "WhisperLargeV3Ct2",
+    "include_ts": true,
+    "include_metadata": true
+  }'
+```
+
+Without `platform`, the quote uses the model base rate with no duration-band rounding.
+
+## What `WhisperLargeV3Ct2` costs
+
+The quote is built in three steps, in this order:
+
+1. **Base amount** — the TikTok [length band](/pricing) for TikTok sources, otherwise the duration rate.
+2. **Timestamps** — if `include_ts` or `diarize` is set, the base amount is multiplied by 1.5. Granularity is free.
+3. **Metadata** — if `include_metadata` is set on a source that can return it, a flat `0.005` is added _after_ the multiplication.

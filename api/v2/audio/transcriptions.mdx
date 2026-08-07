@@ -7,13 +7,46 @@ description: "Unified transcription — auto-detects URL or file upload for audi
 Unified transcription endpoint that replaces the five v1 endpoints (`vid2txt`, `aud2txt`, `videofile2txt`, `audiofile2txt`, `transcribe`). Accepts URLs or multipart file uploads. Returns a `request_id` for status polling.
 
 <Info>
-Source detection is automatic: pass a public `video_url` / `audio_url`, or upload a file via multipart form-data.
+  Source detection is automatic: pass a public `video_url` / `audio_url`, or upload a file via multipart form-data.
 </Info>
 
 <Note>
-**Prerequisite:** Consult the [Model Selection](/api/v2/utilities/models) endpoint to identify a valid model `slug` and check supported languages.
+  **Prerequisite:** Consult the [Model Selection](/api/v2/utilities/models) endpoint to identify a valid model `slug` and check supported languages.
 </Note>
 
 <Tip>
-**OpenAI SDK users:** This endpoint is also available via the OpenAI-compatible surface as `POST /v1/audio/transcriptions` at `https://oai.deapi.ai/v1`. Maximum file size per upload is **20 MB for audio** and **50 MB for video**, subject to a global **75 MB** request body cap. See [OpenAI Compatibility](/openai-compatibility) and [Limits & Quotas](/limits-and-quotas#file-uploads).
+  **OpenAI SDK users:** This endpoint is also available via the OpenAI-compatible surface as `POST /v1/audio/transcriptions` at `https://oai.deapi.ai/v1`. Maximum file size per upload is **20 MB for audio** and **50 MB for video**, subject to a global **75 MB** request body cap. See [OpenAI Compatibility](/openai-compatibility) and [Limits & Quotas](/limits-and-quotas#file-uploads).
 </Tip>
+
+`WhisperLargeV3` supports `segment` timestamps only and does not support diarization. `WhisperLargeV3Ct2` adds `word`-level timestamps, per-segment confidence scores and speaker labels.
+
+**On `WhisperLargeV3Ct2`, timestamps cost 1.5×.** Setting `include_ts` — or `diarize`, which implies it — multiplies the duration-based price by 1.5. Granularity is free: `ts_level: "word"` costs the same as `"segment"`. `WhisperLargeV3` does not charge for timestamps. See [Pricing](/pricing).
+
+**A source with no speech returns an empty result, not an error.** If the video or audio carries no recognisable words — silence, music only, ambient noise — the job still completes with `status: "done"` and the transcript comes back empty: no segments, no words, no speakers. Treat an empty transcript as a valid outcome and branch on it explicitly, rather than assuming the job failed. A job that genuinely failed reports `status: "error"` with an `error_reason` instead.
+
+## Source metadata
+
+Set `include_metadata: true` to have the job-status response carry a `metadata` object describing the source — title, channel, uploader, upload date and engagement counts.
+
+<Warning>
+  Metadata is a **paid add-on: 0.005 USD per request**. It is charged only on sources that can actually return it, so an uploaded file — which has no source to describe — returns `null` and is never charged. See [Pricing](/pricing).
+</Warning>
+
+Only URL sources have metadata, and how much you get depends on the platform. The field names are the same either way, and anything a platform does not expose comes back as `null` rather than being omitted.
+
+| Metadata | TikTok | YouTube |
+| --- | :-: | :-: |
+| `id`, `title`, `description`, `channel` | ✅ | ✅ |
+| `duration_seconds`, `extractor` | ✅ | ✅ |
+| `view_count`, `like_count` | ✅ | ✅ |
+| `comment_count` | ✅ | ❌ |
+| `repost_count`, `save_count` | ✅ | ❌ |
+| `uploader`, `uploader_url` | ✅ | ❌ |
+| `channel_id`, `channel_url` | ✅ | ❌ |
+| `webpage_url` | ✅ | ❌ |
+| `timestamp`, `upload_date` | ✅ | ❌ |
+| `thumbnails[]` | ✅ | ❌ |
+| `fulltitle`, `has_audio`, `is_live` | ✅ | ❌ |
+| `tags`, `categories`, `chapters`, `heatmap`, `availability`, `channel_follower_count` | ✅\* | ❌ |
+
+\* Present in the response schema, but may come back `null` depending on the individual TikTok video.

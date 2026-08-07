@@ -23,6 +23,8 @@ Example pricing is shown below for reference; exact, up-to-date rates are always
 | Video Generation | video duration \+ resolution | 0.001737 USD for 2s, 256×256 | `POST /api/v2/videos/generations` |
 | Video Animation (Image-to-Video) | source image \+ motion interpolation | 0.001737 USD for 2s, 256×256 | `POST /api/v2/videos/animations` |
 | Transcription (URL \+ file, all sources) | duration | from 0.05 USD per hour | `POST /api/v2/audio/transcriptions` |
+| Transcription — TikTok (WhisperLargeV3Ct2) | video length band | 0.015–0.105 USD per video | `POST /api/v2/audio/transcriptions` |
+| Source metadata add-on (YouTube / TikTok) | per request | 0.005 USD | `include_metadata: true` |
 | Image OCR | output characters | 0.00928 USD per 1,000 output chars (for 1024×1024 images) | `POST /api/v2/images/ocr` |
 | Embeddings | number of tokens processed | 0.000068 USD per 1,000 tokens | `POST /api/v2/embeddings` |
 | Image Background Removal | per image | Use `/price` endpoint | `POST /api/v2/images/background-removals` |
@@ -83,6 +85,29 @@ Example pricing is shown below for reference; exact, up-to-date rates are always
 - Sample public rate: **0.05 USD per hour**.
 - For 5 minutes, cost is estimated at **0.0075 USD**.
 - Supports timestamps, multilingual transcription, and batching for better throughput.
+
+**Transcription — WhisperLargeV3Ct2 (TikTok length bands)**
+
+`WhisperLargeV3Ct2` adds word-level timestamps, per-segment confidence scores and speaker diarization. <br />The price list for TikTok transcription depends on the video length and is as follows:
+
+| Video length | Price per video |
+| --- | --- |
+| up to 1 min | 0.015 USD |
+| up to 2 min | 0.0225 USD |
+| up to 3 min | 0.030 USD |
+| up to 5 min | 0.045 USD |
+| up to 10 min | 0.0825 USD |
+| over 10 min | 0.105 USD |
+
+- The band is selected from the **whole video length, rounded up**: a 1:05 clip falls into the _up to 2 min_ band and costs 0.0225 USD.
+- The _over 10 min_ band is flat — a 12-minute and a 30-minute TikTok both cost 0.105 USD.
+
+**Timestamps are charged extra on this model.** Every other source — YouTube, X, Twitch, Kick, uploaded files — is billed by duration, and on `WhisperLargeV3Ct2, requesting timestamps increases this price by +50% to the transcription price.`
+
+**Source metadata add-on (YouTube & TikTok)**
+
+- Setting `include_metadata: true` adds a flat **0.005 USD per request** on top of the transcription price.
+- The surcharge applies only to sources that can actually return metadata. An uploaded file has no source to describe, always returns `null`, and is never charged for the flag.
 
 **Image-to-Text (OCR / VLM)**
 
