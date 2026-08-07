@@ -15,9 +15,9 @@ Example pricing is shown below for reference; exact, up-to-date rates are always
 | Task Type | Pricing Metric | Example Rate | Endpoint (v2) |
 | --- | --- | --- | --- |
 | Image Generation (Flux.1 schnell) | resolution × steps | 0.00136 USD for 512x512, 4 steps | `POST /api/v2/images/generations` |
-| Image Generation (Z-Image-Turbo INT8) | resolution × steps | 0.00405 USD for 512x512, 4 steps | `POST /api/v2/images/generations` |
+| Image Generation (Z-Image-Turbo INT8) | resolution × steps | 0.0034 USD for 512x512, 4 steps | `POST /api/v2/images/generations` |
 | Image Generation (Flux.2 Klein 4B BF16) | resolution × steps | 0.00186 USD for 512x512, 4 steps | `POST /api/v2/images/generations` |
-| Image Edit | steps (style transfer) | ~0.0132 USD for 512x512, 20 steps | `POST /api/v2/images/edits` |
+| Image Edit | steps (style transfer) | ~0.0179 USD for 512x512, 20 steps | `POST /api/v2/images/edits` |
 | Text-to-Speech (TTS) | number of characters | 0.77 USD per 1 M characters | `POST /api/v2/audio/speech` |
 | Text-to-Music | duration \+ inference steps | Use `/price` endpoint | `POST /api/v2/audio/music` |
 | Video Generation | video duration \+ resolution | 0.001737 USD for 2s, 256×256 | `POST /api/v2/videos/generations` |
@@ -26,7 +26,7 @@ Example pricing is shown below for reference; exact, up-to-date rates are always
 | Transcription — TikTok (WhisperLargeV3Ct2) | video length band | 0.015–0.105 USD per video | `POST /api/v2/audio/transcriptions` |
 | Source metadata add-on (YouTube / TikTok) | per request | 0.005 USD | `include_metadata: true` |
 | Image OCR | output characters | 0.00928 USD per 1,000 output chars (for 1024×1024 images) | `POST /api/v2/images/ocr` |
-| Embeddings | number of tokens processed | 0.000068 USD per 1,000 tokens | `POST /api/v2/embeddings` |
+| Embeddings | number of tokens processed | 0.000084 USD per 1,000 tokens | `POST /api/v2/embeddings` |
 | Image Background Removal | per image | Use `/price` endpoint | `POST /api/v2/images/background-removals` |
 | Image Upscale | resolution × scale | Use `/price` endpoint | `POST /api/v2/images/upscales` |
 | Video Replacement | duration × resolution × steps | Use `/price` endpoint | `POST /api/v2/videos/replacements` |
@@ -39,7 +39,7 @@ Example pricing is shown below for reference; exact, up-to-date rates are always
 **Image Generation**
 
 - Users define width, height, steps via the API or UI.
-- Public example: Flux Schnell model is used to estimate cost in the UI; for example, 512x512 at 4 steps gives **0.00136 USD**. For the Z-Image-Turbo INT8 model with the same parameters, the price is **0.00405 USD**, but the advantage is very realistic images.
+- Public example: Flux Schnell model is used to estimate cost in the UI; for example, 512x512 at 4 steps gives **0.00136 USD**. For the Z-Image-Turbo INT8 model with the same parameters, the price is **0.0034 USD**, but the advantage is very realistic images.
 - Higher resolutions and more steps yield better quality but incur higher cost.
 - Important: For models other than Flux Schnell, pricing is model-specific and calculated on the server side.
 
@@ -83,10 +83,10 @@ Example pricing is shown below for reference; exact, up-to-date rates are always
 
 - Billed per hour of video processed.
 - Sample public rate: **0.05 USD per hour**.
-- For 5 minutes, cost is estimated at **0.0075 USD**.
+- For 5 minutes, cost is estimated at **0.0089 USD**.
 - Supports timestamps, multilingual transcription, and batching for better throughput.
 
-**Transcription — WhisperLargeV3Ct2 (TikTok length bands)**
+**Transcription — WhisperLargeV3Ct2 & WhisperLargeV3 (TikTok length bands)**
 
 `WhisperLargeV3Ct2` adds word-level timestamps, per-segment confidence scores and speaker diarization. <br />The price list for TikTok transcription depends on the video length and is as follows:
 
@@ -122,7 +122,7 @@ Example pricing is shown below for reference; exact, up-to-date rates are always
 **Text-to-Embedding (Vector Representations)**
 
 - Pricing is based on the number of tokens processed.
-- Sample public rate: **0.000093 USD** per 1,000 tokens (client-side pricing).
+- Sample public rate: **0.000084 USD** per 1,000 tokens (client-side pricing).
 - Embeddings are typically used for semantic search, retrieval-augmented generation (RAG), clustering, and similarity matching.
 - Costs scale linearly with token count, making it efficient even at large volumes.
 - Important: Different embedding models may have varying dimensionality (e.g. 768 vs. 1024), but pricing is standardized per token for simplicity.
