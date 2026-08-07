@@ -2,7 +2,7 @@
     "openapi": "3.0.0",
     "info": {
         "title": "deAPI REST API",
-        "description": "Decentralized AI inference API for image generation, video processing, audio transcription, and more.",
+        "description": "Decentralized AI inference API for image generation, video processing, audio transcription, and more.\n\n## Webhooks\n\nEvery generation endpoint accepts an optional `webhook_url` (HTTPS only) and an optional\n`webhook_secret` (min. 32 chars). We then call you back on each status change instead of you polling.\n\n**Events:** `job.processing`, `job.completed`, `job.failed`.\n\n**Headers we send:** `X-DeAPI-Signature`, `X-DeAPI-Timestamp`, `X-DeAPI-Event`, `X-DeAPI-Delivery-Id`.\nPayload and header shapes are documented under `components.schemas`:\n`WebhookHeaders`, `WebhookProcessingPayload`, `WebhookCompletedPayload`, `WebhookFailedPayload`.\n\n**Verifying the signature:**\n\n```\nX-DeAPI-Signature = \"sha256=\" + HMAC_SHA256(secret, X-DeAPI-Timestamp + \".\" + raw_request_body)\n```\n\nHash the **raw** body exactly as received (escaped slashes and all) — re-serializing the parsed JSON\nyields a different signature. Reject timestamps older than 5 minutes (replay protection).\n\n**Which secret signs the call:** the per-request `webhook_secret` if you sent one, otherwise your\naccount-default secret. If neither exists, the call is still delivered but **UNSIGNED** —\n`X-DeAPI-Signature` is empty. If you require authenticity, reject an empty signature.\n\n**A per-request `webhook_url` is self-contained:** it is delivered even when your account has no\nwebhook configuration, or the account webhook is disabled. Failed deliveries are retried\n(10 attempts over ~24h).",
         "contact": {
             "name": "deAPI Support",
             "url": "https://deapi.ai",
@@ -3044,11 +3044,8 @@
                                 "type": "string",
                                 "enum": [
                                     "WORKER_TIMEOUT",
-                                    "PROCESSING_ERROR",
-                                    "AGE_RESTRICTED",
-                                    "CONTEXT_LENGTH_EXCEEDED",
-                                    "INVALID_INPUT",
-                                    "UNKNOWN_ERROR"
+                                    "WORKER_ERROR",
+                                    "PROCESSING_ERROR"
                                 ],
                                 "example": "WORKER_TIMEOUT"
                             },
@@ -3056,6 +3053,21 @@
                                 "description": "Human-readable error description",
                                 "type": "string",
                                 "example": "Worker failed to respond within the allowed time"
+                            },
+                            "error_reason": {
+                                "description": "Bounded, actionable failure reason: SOURCE_PRIVATE, SOURCE_RESTRICTED, SOURCE_UNPROCESSABLE, SOURCE_DOWNLOAD_FAILED, INPUT_TOO_LARGE, TIMEOUT, CAPACITY_UNAVAILABLE or PROCESSING_FAILED. THIS LIST IS OPEN — new values may be added without a major version, so treat any unrecognised value as PROCESSING_FAILED. Prefer branching on `retryable`.",
+                                "type": "string",
+                                "example": "SOURCE_DOWNLOAD_FAILED"
+                            },
+                            "retryable": {
+                                "description": "Whether resubmitting the identical request could plausibly succeed. Branch on this rather than on error_reason — it stays correct as new reasons are added.",
+                                "type": "boolean",
+                                "example": true
+                            },
+                            "refunded": {
+                                "description": "Whether the upfront charge for this job was returned. False covers both a charge deliberately kept and a job that failed before it was ever charged.",
+                                "type": "boolean",
+                                "example": true
                             }
                         },
                         "type": "object"
@@ -3153,6 +3165,14 @@
                         "maxLength": 2048,
                         "example": "https://your-server.com/webhooks/deapi",
                         "nullable": true
+                    },
+                    "webhook_secret": {
+                        "description": "Optional per-request HMAC secret (min. 32 chars) used to sign the webhook callback. Overrides the account-default secret for this job only. If omitted, the account-default secret signs the callback; if no secret exists at all, the callback is still delivered but UNSIGNED (empty X-DeAPI-Signature header). Requires `webhook_url` to also be set.",
+                        "type": "string",
+                        "example": "a1b2c3d4e5f60708091a2b3c4d5e6f7081920a1b2c3d4e5f60708091a2b3c4d5",
+                        "nullable": true,
+                        "maxLength": 255,
+                        "minLength": 32
                     }
                 },
                 "type": "object"
@@ -3752,6 +3772,36 @@
                                 "type": "boolean",
                                 "example": false
                             },
+                            "ts_level": {
+                                "description": "Timestamp granularity. Validated against the model exactly as on POST /api/v2/audio/transcriptions, so a price quote is never returned for a combination the job request would reject. Granularity itself does not change the price; requesting timestamps at all may.",
+                                "type": "string",
+                                "enum": [
+                                    "segment",
+                                    "word",
+                                    "char"
+                                ],
+                                "default": "segment",
+                                "nullable": true
+                            },
+                            "diarize": {
+                                "description": "Label each timed unit with a detected speaker. Requires a model that supports diarization. Implies `include_ts`, so it carries the same surcharge.",
+                                "type": "boolean",
+                                "default": false,
+                                "nullable": true
+                            },
+                            "lang": {
+                                "description": "Language hint for the transcription. Does not affect the price, but is validated against the model the same way as on the job request: a language outside a model's published `info.limits.languages` is rejected.",
+                                "type": "string",
+                                "maxLength": 16,
+                                "example": "en",
+                                "nullable": true
+                            },
+                            "include_metadata": {
+                                "description": "Whether the job will be asked to attach source metadata. Carries a flat surcharge on models that price it, so pass it exactly as you will pass it to POST /api/v2/audio/transcriptions or the quote will come in under the amount charged. The surcharge applies only to sources that can actually return metadata: uploads always return null and are never charged for it. Every recognised platform, YouTube included, does return metadata and is charged the surcharge.",
+                                "type": "boolean",
+                                "default": false,
+                                "nullable": true
+                            },
                             "model": {
                                 "description": "The model to use for transcription.",
                                 "type": "string",
@@ -3768,7 +3818,7 @@
                         ],
                         "properties": {
                             "source_file": {
-                                "description": "Audio or video file to estimate price for. Mutually exclusive with source_url and duration_seconds.",
+                                "description": "Audio or video file to estimate price for. Supported audio: aac, mpeg, ogg, wav, webm, flac. Supported video: mp4, mpeg, quicktime, avi, wmv, ogg. Mutually exclusive with source_url and duration_seconds.",
                                 "type": "string",
                                 "format": "binary"
                             },
@@ -3776,6 +3826,36 @@
                                 "description": "Should transcription include timestamps. **Required** - send `false` for plain text or `true` for timestamped segments.",
                                 "type": "boolean",
                                 "example": false
+                            },
+                            "ts_level": {
+                                "description": "Timestamp granularity. Validated against the model exactly as on POST /api/v2/audio/transcriptions, so a price quote is never returned for a combination the job request would reject. Granularity itself does not change the price; requesting timestamps at all may.",
+                                "type": "string",
+                                "enum": [
+                                    "segment",
+                                    "word",
+                                    "char"
+                                ],
+                                "default": "segment",
+                                "nullable": true
+                            },
+                            "diarize": {
+                                "description": "Label each timed unit with a detected speaker. Requires a model that supports diarization. Implies `include_ts`, so it carries the same surcharge.",
+                                "type": "boolean",
+                                "default": false,
+                                "nullable": true
+                            },
+                            "lang": {
+                                "description": "Language hint for the transcription. Does not affect the price, but is validated against the model the same way as on the job request: a language outside a model's published `info.limits.languages` is rejected.",
+                                "type": "string",
+                                "maxLength": 16,
+                                "example": "en",
+                                "nullable": true
+                            },
+                            "include_metadata": {
+                                "description": "Whether the job will be asked to attach source metadata. Carries a flat surcharge on models that price it, so pass it exactly as you will pass it to POST /api/v2/audio/transcriptions or the quote will come in under the amount charged. The surcharge applies only to sources that can actually return metadata: uploads always return null and are never charged for it. Every recognised platform, YouTube included, does return metadata and is charged the surcharge.",
+                                "type": "boolean",
+                                "default": false,
+                                "nullable": true
                             },
                             "model": {
                                 "description": "The model to use for transcription.",
@@ -3801,6 +3881,49 @@
                                 "description": "Should transcription include timestamps. **Required** - send `false` for plain text or `true` for timestamped segments.",
                                 "type": "boolean",
                                 "example": false
+                            },
+                            "ts_level": {
+                                "description": "Timestamp granularity. Validated against the model exactly as on POST /api/v2/audio/transcriptions, so a price quote is never returned for a combination the job request would reject. Granularity itself does not change the price; requesting timestamps at all may.",
+                                "type": "string",
+                                "enum": [
+                                    "segment",
+                                    "word",
+                                    "char"
+                                ],
+                                "default": "segment",
+                                "nullable": true
+                            },
+                            "diarize": {
+                                "description": "Label each timed unit with a detected speaker. Requires a model that supports diarization. Implies `include_ts`, so it carries the same surcharge.",
+                                "type": "boolean",
+                                "default": false,
+                                "nullable": true
+                            },
+                            "lang": {
+                                "description": "Language hint for the transcription. Does not affect the price, but is validated against the model the same way as on the job request: a language outside a model's published `info.limits.languages` is rejected.",
+                                "type": "string",
+                                "maxLength": 16,
+                                "example": "en",
+                                "nullable": true
+                            },
+                            "include_metadata": {
+                                "description": "Whether the job will be asked to attach source metadata. Carries a flat surcharge on models that price it, so pass it exactly as you will pass it to POST /api/v2/audio/transcriptions or the quote will come in under the amount charged. The surcharge applies only to sources that can actually return metadata: uploads always return null and are never charged for it. Every recognised platform, YouTube included, does return metadata and is charged the surcharge.",
+                                "type": "boolean",
+                                "default": false,
+                                "nullable": true
+                            },
+                            "platform": {
+                                "description": "The platform the source comes from. Only valid together with `duration_seconds`, where there is no URL to derive it from — with `source_url` or `source_file` it is rejected, because the platform is taken from the source itself. Some models price per platform, and TikTok is priced from a length-band card, so a duration-only quote that omits this is priced at the model base rate and can come in under the amount charged. Pass the platform you will actually submit.",
+                                "type": "string",
+                                "enum": [
+                                    "youtube",
+                                    "twitter",
+                                    "twitch",
+                                    "kick",
+                                    "tiktok"
+                                ],
+                                "example": "tiktok",
+                                "nullable": true
                             },
                             "model": {
                                 "description": "The model to use for transcription.",
@@ -4083,6 +4206,12 @@
                                 "type": "integer",
                                 "example": 42
                             },
+                            "enhance_prompt": {
+                                "description": "When true, the prompt is boosted by the inline prompt booster before generation (async pre-step). Requires a prompt-booster guide configured for the model; the boost fee is billed on the job. Rejected with 422 if no guide exists for the model or the account balance cannot cover the boost fee.",
+                                "type": "boolean",
+                                "nullable": true,
+                                "default": false
+                            },
                             "webhook_url": {
                                 "description": "Optional HTTPS URL to receive webhook notifications for job status changes (processing, completed, failed). Must be HTTPS. Max 2048 characters. See [Webhook Documentation](/execution-modes-and-integrations/webhooks) for payload structure and authentication details.",
                                 "type": "string",
@@ -4193,6 +4322,12 @@
                                 "type": "integer",
                                 "example": 42
                             },
+                            "enhance_prompt": {
+                                "description": "When true, the prompt is boosted by the inline prompt booster before generation (async pre-step). Requires a prompt-booster guide configured for the model; the boost fee is billed on the job. Rejected with 422 if no guide exists for the model or the account balance cannot cover the boost fee.",
+                                "type": "boolean",
+                                "nullable": true,
+                                "default": false
+                            },
                             "webhook_url": {
                                 "description": "Optional HTTPS URL to receive webhook notifications for job status changes (processing, completed, failed). Must be HTTPS. Max 2048 characters. See [Webhook Documentation](/execution-modes-and-integrations/webhooks) for payload structure and authentication details.",
                                 "type": "string",
@@ -4260,6 +4395,14 @@
                         "maxLength": 2048,
                         "example": "https://your-server.com/webhooks/deapi",
                         "nullable": true
+                    },
+                    "webhook_secret": {
+                        "description": "Optional per-request HMAC secret (min. 32 chars) used to sign the webhook callback. Overrides the account-default secret for this job only. If omitted, the account-default secret signs the callback; if no secret exists at all, the callback is still delivered but UNSIGNED (empty X-DeAPI-Signature header). Requires `webhook_url` to also be set.",
+                        "type": "string",
+                        "example": "a1b2c3d4e5f60708091a2b3c4d5e6f7081920a1b2c3d4e5f60708091a2b3c4d5",
+                        "nullable": true,
+                        "maxLength": 255,
+                        "minLength": 32
                     }
                 },
                 "type": "object"
@@ -4338,6 +4481,12 @@
                         "type": "integer",
                         "example": 42
                     },
+                    "enhance_prompt": {
+                        "description": "When true, the prompt is boosted by the inline prompt booster before generation (async pre-step). Requires a prompt-booster guide configured for the model; the boost fee is billed on the job. Rejected with 422 if no guide exists for the model or the account balance cannot cover the boost fee.",
+                        "type": "boolean",
+                        "nullable": true,
+                        "default": false
+                    },
                     "model": {
                         "description": "The model to use for video generation. Available models can be retrieved via the GET /api/v2/models endpoint.",
                         "type": "string",
@@ -4350,6 +4499,14 @@
                         "maxLength": 2048,
                         "example": "https://your-server.com/webhooks/deapi",
                         "nullable": true
+                    },
+                    "webhook_secret": {
+                        "description": "Optional per-request HMAC secret (min. 32 chars) used to sign the webhook callback. Overrides the account-default secret for this job only. If omitted, the account-default secret signs the callback; if no secret exists at all, the callback is still delivered but UNSIGNED (empty X-DeAPI-Signature header). Requires `webhook_url` to also be set.",
+                        "type": "string",
+                        "example": "a1b2c3d4e5f60708091a2b3c4d5e6f7081920a1b2c3d4e5f60708091a2b3c4d5",
+                        "nullable": true,
+                        "maxLength": 255,
+                        "minLength": 32
                     }
                 },
                 "type": "object"
@@ -4377,6 +4534,14 @@
                         "maxLength": 2048,
                         "example": "https://your-server.com/webhooks/deapi",
                         "nullable": true
+                    },
+                    "webhook_secret": {
+                        "description": "Optional per-request HMAC secret (min. 32 chars) used to sign the webhook callback. Overrides the account-default secret for this job only. If omitted, the account-default secret signs the callback; if no secret exists at all, the callback is still delivered but UNSIGNED (empty X-DeAPI-Signature header). Requires `webhook_url` to also be set.",
+                        "type": "string",
+                        "example": "a1b2c3d4e5f60708091a2b3c4d5e6f7081920a1b2c3d4e5f60708091a2b3c4d5",
+                        "nullable": true,
+                        "maxLength": 255,
+                        "minLength": 32
                     }
                 },
                 "type": "object"
@@ -4404,6 +4569,14 @@
                         "maxLength": 2048,
                         "example": "https://your-server.com/webhooks/deapi",
                         "nullable": true
+                    },
+                    "webhook_secret": {
+                        "description": "Optional per-request HMAC secret (min. 32 chars) used to sign the webhook callback. Overrides the account-default secret for this job only. If omitted, the account-default secret signs the callback; if no secret exists at all, the callback is still delivered but UNSIGNED (empty X-DeAPI-Signature header). Requires `webhook_url` to also be set.",
+                        "type": "string",
+                        "example": "a1b2c3d4e5f60708091a2b3c4d5e6f7081920a1b2c3d4e5f60708091a2b3c4d5",
+                        "nullable": true,
+                        "maxLength": 255,
+                        "minLength": 32
                     }
                 },
                 "type": "object"
@@ -4640,6 +4813,12 @@
                         "type": "integer",
                         "example": 42
                     },
+                    "enhance_prompt": {
+                        "description": "When true, the prompt is boosted by the inline prompt booster before generation (async pre-step). Requires a prompt-booster guide configured for the model; the boost fee is billed on the job. Rejected with 422 if no guide exists for the model or the account balance cannot cover the boost fee.",
+                        "type": "boolean",
+                        "nullable": true,
+                        "default": false
+                    },
                     "webhook_url": {
                         "description": "Optional HTTPS URL to receive webhook notifications for job status changes (processing, completed, failed). Must be HTTPS. Max 2048 characters. See [Webhook Documentation](/execution-modes-and-integrations/webhooks) for payload structure and authentication details.",
                         "type": "string",
@@ -4760,6 +4939,14 @@
                         "maxLength": 2048,
                         "example": "https://your-server.com/webhooks/deapi",
                         "nullable": true
+                    },
+                    "webhook_secret": {
+                        "description": "Optional per-request HMAC secret (min. 32 chars) used to sign the webhook callback. Overrides the account-default secret for this job only. If omitted, the account-default secret signs the callback; if no secret exists at all, the callback is still delivered but UNSIGNED (empty X-DeAPI-Signature header). Requires `webhook_url` to also be set.",
+                        "type": "string",
+                        "example": "a1b2c3d4e5f60708091a2b3c4d5e6f7081920a1b2c3d4e5f60708091a2b3c4d5",
+                        "nullable": true,
+                        "maxLength": 255,
+                        "minLength": 32
                     }
                 },
                 "type": "object"
@@ -4826,6 +5013,12 @@
                         "type": "integer",
                         "example": 42
                     },
+                    "enhance_prompt": {
+                        "description": "When true, the prompt is boosted by the inline prompt booster before generation (async pre-step). Requires a prompt-booster guide configured for the model; the boost fee is billed on the job. Rejected with 422 if no guide exists for the model or the account balance cannot cover the boost fee.",
+                        "type": "boolean",
+                        "nullable": true,
+                        "default": false
+                    },
                     "model": {
                         "description": "The model to use for video generation. Available models can be retrieved via the GET /api/v2/models endpoint.",
                         "type": "string",
@@ -4869,10 +5062,41 @@
                                 "type": "boolean",
                                 "example": false
                             },
+                            "ts_level": {
+                                "description": "Timestamp granularity. Only applies when `include_ts` is true, otherwise ignored. The levels a model offers are published as `info.limits.timestamp_levels` by GET /api/v2/models; requesting an unsupported level is rejected.",
+                                "type": "string",
+                                "enum": [
+                                    "segment",
+                                    "word",
+                                    "char"
+                                ],
+                                "default": "segment",
+                                "example": "word",
+                                "nullable": true
+                            },
+                            "diarize": {
+                                "description": "Label each timed unit with a detected speaker (`SPEAKER_00`, `SPEAKER_01`, …). Requires a model whose `info.features.supports_diarization` is true, and implies `include_ts`.",
+                                "type": "boolean",
+                                "default": false,
+                                "nullable": true
+                            },
+                            "lang": {
+                                "description": "Language hint for the transcription, e.g. `en` or `pl`. Region subtags are stripped (`en-us` becomes `en`), and `auto` means auto-detect. Omit to auto-detect. When a model publishes `info.limits.languages` via GET /api/v2/models, requesting a language outside that list is rejected; a model publishing no such list accepts any value.",
+                                "type": "string",
+                                "maxLength": 16,
+                                "example": "en",
+                                "nullable": true
+                            },
                             "model": {
                                 "description": "The model to use for transcription. Available models can be retrieved via the GET /api/v2/models endpoint.",
                                 "type": "string",
                                 "example": "WhisperLargeV3"
+                            },
+                            "include_metadata": {
+                                "description": "If true, the job-status response carries a `metadata` object describing the source — title, channel, uploader, upload date and engagement counts such as views, likes and comments. Only URL sources have any; an uploaded file returns null. YouTube resolves through the official Data API and returns a smaller block — `id`, `title`, `channel`, `description`, `duration_seconds`, `extractor`, `view_count`, `like_count` — because that API has no equivalent for the rest; the field names match the other platforms. Fields absent on a platform are null rather than omitted. On models that price metadata this carries a flat surcharge, charged only on sources that can return it — an upload, which has no source to describe, is never charged for the flag.",
+                                "type": "boolean",
+                                "default": false,
+                                "nullable": true
                             },
                             "return_result_in_response": {
                                 "description": "If true, the result will be returned directly in the response instead of only download url.",
@@ -4907,7 +5131,7 @@
                         ],
                         "properties": {
                             "source_file": {
-                                "description": "Audio or video file to transcribe. Supported audio: aac, mpeg, ogg, webm. Supported video: mp4, mpeg, quicktime, avi, wmv, ogg. Mutually exclusive with source_url.",
+                                "description": "Audio or video file to transcribe. Supported audio: aac, mpeg, ogg, wav, webm, flac. Supported video: mp4, mpeg, quicktime, avi, wmv, ogg. Mutually exclusive with source_url.",
                                 "type": "string",
                                 "format": "binary"
                             },
@@ -4916,10 +5140,41 @@
                                 "type": "boolean",
                                 "example": false
                             },
+                            "ts_level": {
+                                "description": "Timestamp granularity. Only applies when `include_ts` is true, otherwise ignored. The levels a model offers are published as `info.limits.timestamp_levels` by GET /api/v2/models; requesting an unsupported level is rejected.",
+                                "type": "string",
+                                "enum": [
+                                    "segment",
+                                    "word",
+                                    "char"
+                                ],
+                                "default": "segment",
+                                "example": "word",
+                                "nullable": true
+                            },
+                            "diarize": {
+                                "description": "Label each timed unit with a detected speaker (`SPEAKER_00`, `SPEAKER_01`, …). Requires a model whose `info.features.supports_diarization` is true, and implies `include_ts`.",
+                                "type": "boolean",
+                                "default": false,
+                                "nullable": true
+                            },
+                            "lang": {
+                                "description": "Language hint for the transcription, e.g. `en` or `pl`. Region subtags are stripped (`en-us` becomes `en`), and `auto` means auto-detect. Omit to auto-detect. When a model publishes `info.limits.languages` via GET /api/v2/models, requesting a language outside that list is rejected; a model publishing no such list accepts any value.",
+                                "type": "string",
+                                "maxLength": 16,
+                                "example": "en",
+                                "nullable": true
+                            },
                             "model": {
                                 "description": "The model to use for transcription. Available models can be retrieved via the GET /api/v2/models endpoint.",
                                 "type": "string",
                                 "example": "WhisperLargeV3"
+                            },
+                            "include_metadata": {
+                                "description": "If true, the job-status response carries a `metadata` object describing the source — title, channel, uploader, upload date and engagement counts such as views, likes and comments. Only URL sources have any; an uploaded file returns null. YouTube resolves through the official Data API and returns a smaller block — `id`, `title`, `channel`, `description`, `duration_seconds`, `extractor`, `view_count`, `like_count` — because that API has no equivalent for the rest; the field names match the other platforms. Fields absent on a platform are null rather than omitted. On models that price metadata this carries a flat surcharge, charged only on sources that can return it — an upload, which has no source to describe, is never charged for the flag.",
+                                "type": "boolean",
+                                "default": false,
+                                "nullable": true
                             },
                             "return_result_in_response": {
                                 "description": "If true, the result will be returned directly in the response instead of only download url.",
@@ -4971,6 +5226,14 @@
                         "maxLength": 2048,
                         "example": "https://your-server.com/webhooks/deapi",
                         "nullable": true
+                    },
+                    "webhook_secret": {
+                        "description": "Optional per-request HMAC secret (min. 32 chars) used to sign the webhook callback. Overrides the account-default secret for this job only. If omitted, the account-default secret signs the callback; if no secret exists at all, the callback is still delivered but UNSIGNED (empty X-DeAPI-Signature header). Requires `webhook_url` to also be set.",
+                        "type": "string",
+                        "example": "a1b2c3d4e5f60708091a2b3c4d5e6f7081920a1b2c3d4e5f60708091a2b3c4d5",
+                        "nullable": true,
+                        "maxLength": 255,
+                        "minLength": 32
                     }
                 },
                 "type": "object"
@@ -5028,6 +5291,14 @@
                         "format": "uri",
                         "maxLength": 2048,
                         "nullable": true
+                    },
+                    "webhook_secret": {
+                        "description": "Optional per-request HMAC secret (min. 32 chars) used to sign the webhook callback. Overrides the account-default secret for this job only. If omitted, the account-default secret signs the callback; if no secret exists at all, the callback is still delivered but UNSIGNED (empty X-DeAPI-Signature header). Requires `webhook_url` to also be set.",
+                        "type": "string",
+                        "example": "a1b2c3d4e5f60708091a2b3c4d5e6f7081920a1b2c3d4e5f60708091a2b3c4d5",
+                        "nullable": true,
+                        "maxLength": 255,
+                        "minLength": 32
                     }
                 },
                 "type": "object"
@@ -5062,6 +5333,14 @@
                         "maxLength": 2048,
                         "example": "https://your-server.com/webhooks/deapi",
                         "nullable": true
+                    },
+                    "webhook_secret": {
+                        "description": "Optional per-request HMAC secret (min. 32 chars) used to sign the webhook callback. Overrides the account-default secret for this job only. If omitted, the account-default secret signs the callback; if no secret exists at all, the callback is still delivered but UNSIGNED (empty X-DeAPI-Signature header). Requires `webhook_url` to also be set.",
+                        "type": "string",
+                        "example": "a1b2c3d4e5f60708091a2b3c4d5e6f7081920a1b2c3d4e5f60708091a2b3c4d5",
+                        "nullable": true,
+                        "maxLength": 255,
+                        "minLength": 32
                     }
                 },
                 "type": "object"
@@ -5148,7 +5427,7 @@
                 },
                 "type": "object"
             },
-            "AudioFileToTextInferenceJobResource": {
+            "TranscriptionInferenceJobResource": {
                 "properties": {
                     "data": {
                         "description": "Job settings data",
@@ -5158,17 +5437,59 @@
                                 "type": "string"
                             },
                             "model": {
-                                "description": "Model name used for generation",
+                                "description": "Model slug the job must be run with",
+                                "type": "string"
+                            },
+                            "video_url": {
+                                "description": "URL of the video to transcribe. Present for URL-sourced video jobs only.",
+                                "type": "string"
+                            },
+                            "audio_url": {
+                                "description": "URL of the audio to transcribe. Present for URL-sourced audio jobs only.",
                                 "type": "string"
                             },
                             "file_url": {
-                                "description": "URL of audio file to transcribe",
+                                "description": "Presigned download for the uploaded media. Present for file-sourced jobs only.",
                                 "type": "string"
                             },
                             "include_ts": {
-                                "description": "Should transcription include timestamps. **Required** - send `false` for plain text or `true` for timestamped segments.",
-                                "type": "boolean",
-                                "example": false
+                                "description": "Whether the transcription should carry timestamps",
+                                "type": "boolean"
+                            },
+                            "ts_level": {
+                                "description": "Timestamp granularity: segment, word or char. Omitted on jobs predating this field, in which case the inference server default applies.",
+                                "type": "string",
+                                "enum": [
+                                    "segment",
+                                    "word",
+                                    "char"
+                                ]
+                            },
+                            "diarize": {
+                                "description": "Whether speaker labels were requested",
+                                "type": "boolean"
+                            },
+                            "lang": {
+                                "description": "Requested source language, or null to auto-detect",
+                                "type": "string",
+                                "nullable": true
+                            },
+                            "download": {
+                                "description": "A ready-to-fetch CDN link, present when the source was extracted through a proxy (TikTok). When present, fetch this URL with these cookies and do NOT run yt-dlp — for TikTok the yt-dlp path is what gets worker IPs banned, and a failed fetch must be reported rather than retried that way. Absent for every other source.",
+                                "properties": {
+                                    "url": {
+                                        "type": "string"
+                                    },
+                                    "cookies": {
+                                        "description": "Send all of these. The CDN gates the link on them, and the set is bound to this exact URL.",
+                                        "type": "object",
+                                        "additionalProperties": {
+                                            "type": "string"
+                                        }
+                                    }
+                                },
+                                "type": "object",
+                                "nullable": true
                             }
                         },
                         "type": "object"
@@ -5225,7 +5546,10 @@
                                 "min_duration": 0.5,
                                 "max_duration": 10,
                                 "min_fps": 8,
-                                "max_fps": 30
+                                "max_fps": 30,
+                                "output_formats": [
+                                    "mp3"
+                                ]
                             },
                             "features": {
                                 "supports_last_frame": true,
@@ -5243,7 +5567,8 @@
                                 "negative_prompt": "no disfigurations",
                                 "fps": 24,
                                 "duration": 4,
-                                "voice": "alloy"
+                                "voice": "alloy",
+                                "format": "mp3"
                             }
                         },
                         "additionalProperties": true
@@ -5600,6 +5925,217 @@
                                 "example": "https://example.com/results/image.jpg",
                                 "nullable": true
                             },
+                            "metadata": {
+                                "description": "Source metadata, present only when the job was submitted with `include_metadata: true`. Null for uploaded files, which have no source to describe. Every field a platform does not expose is null rather than omitted, so the shape is stable across platforms. YouTube resolves through the official Data API and populates only `id`, `title`, `description`, `channel`, `duration_seconds`, `extractor`, `view_count` and `like_count`; the remaining fields are TikTok-only. Some TikTok fields may still be null depending on the individual video.",
+                                "type": "object",
+                                "properties": {
+                                    "id": {
+                                        "description": "Platform-native identifier of the source.",
+                                        "type": "string",
+                                        "example": "7312345678901234567",
+                                        "nullable": true
+                                    },
+                                    "title": {
+                                        "description": "Title of the source.",
+                                        "type": "string",
+                                        "example": "How we shipped it in a week",
+                                        "nullable": true
+                                    },
+                                    "description": {
+                                        "description": "Description or caption of the source.",
+                                        "type": "string",
+                                        "example": "Behind the scenes of the launch #build",
+                                        "nullable": true
+                                    },
+                                    "channel": {
+                                        "description": "Channel or account display name.",
+                                        "type": "string",
+                                        "example": "deAPI",
+                                        "nullable": true
+                                    },
+                                    "duration_seconds": {
+                                        "description": "Duration of the source media in seconds.",
+                                        "type": "number",
+                                        "example": 87,
+                                        "nullable": true
+                                    },
+                                    "extractor": {
+                                        "description": "Which extractor resolved the source, e.g. `youtube` or `tiktok`.",
+                                        "type": "string",
+                                        "example": "tiktok",
+                                        "nullable": true
+                                    },
+                                    "view_count": {
+                                        "description": "Number of views.",
+                                        "type": "integer",
+                                        "example": 154302,
+                                        "nullable": true
+                                    },
+                                    "like_count": {
+                                        "description": "Number of likes.",
+                                        "type": "integer",
+                                        "example": 12045,
+                                        "nullable": true
+                                    },
+                                    "comment_count": {
+                                        "description": "Number of comments. TikTok only — null on YouTube.",
+                                        "type": "integer",
+                                        "example": 318,
+                                        "nullable": true
+                                    },
+                                    "repost_count": {
+                                        "description": "Number of reposts/shares. TikTok only.",
+                                        "type": "integer",
+                                        "example": 96,
+                                        "nullable": true
+                                    },
+                                    "save_count": {
+                                        "description": "Number of saves/favourites. TikTok only.",
+                                        "type": "integer",
+                                        "example": 2411,
+                                        "nullable": true
+                                    },
+                                    "uploader": {
+                                        "description": "Uploader handle. TikTok only.",
+                                        "type": "string",
+                                        "example": "deapi",
+                                        "nullable": true
+                                    },
+                                    "uploader_url": {
+                                        "description": "URL of the uploader profile. TikTok only.",
+                                        "type": "string",
+                                        "example": "https://www.tiktok.com/@deapi",
+                                        "nullable": true
+                                    },
+                                    "channel_id": {
+                                        "description": "Platform-native channel identifier. TikTok only.",
+                                        "type": "string",
+                                        "example": "MS4wLjABAAAA",
+                                        "nullable": true
+                                    },
+                                    "channel_url": {
+                                        "description": "URL of the channel. TikTok only.",
+                                        "type": "string",
+                                        "example": "https://www.tiktok.com/@deapi",
+                                        "nullable": true
+                                    },
+                                    "webpage_url": {
+                                        "description": "Canonical URL of the source page. TikTok only.",
+                                        "type": "string",
+                                        "example": "https://www.tiktok.com/@deapi/video/7312345678901234567",
+                                        "nullable": true
+                                    },
+                                    "timestamp": {
+                                        "description": "Unix timestamp of publication. TikTok only.",
+                                        "type": "integer",
+                                        "example": 1764499200,
+                                        "nullable": true
+                                    },
+                                    "upload_date": {
+                                        "description": "Publication date as `YYYYMMDD`. TikTok only.",
+                                        "type": "string",
+                                        "example": "20251130",
+                                        "nullable": true
+                                    },
+                                    "thumbnails": {
+                                        "description": "Available thumbnail images. TikTok only.",
+                                        "type": "array",
+                                        "items": {
+                                            "type": "object",
+                                            "properties": {
+                                                "url": {
+                                                    "type": "string",
+                                                    "example": "https://p16.tiktokcdn.com/thumb.jpeg"
+                                                },
+                                                "width": {
+                                                    "type": "integer",
+                                                    "example": 720,
+                                                    "nullable": true
+                                                },
+                                                "height": {
+                                                    "type": "integer",
+                                                    "example": 1280,
+                                                    "nullable": true
+                                                }
+                                            }
+                                        },
+                                        "nullable": true
+                                    },
+                                    "fulltitle": {
+                                        "description": "Untruncated title. TikTok only.",
+                                        "type": "string",
+                                        "example": "Behind the scenes of the launch #build",
+                                        "nullable": true
+                                    },
+                                    "has_audio": {
+                                        "description": "Whether the source carries an audio track. TikTok only.",
+                                        "type": "boolean",
+                                        "example": true,
+                                        "nullable": true
+                                    },
+                                    "is_live": {
+                                        "description": "Whether the source is a live stream. TikTok only.",
+                                        "type": "boolean",
+                                        "example": false,
+                                        "nullable": true
+                                    },
+                                    "language": {
+                                        "description": "Language declared by the platform. TikTok only — this is the source's own label, not the language detected during transcription.",
+                                        "type": "string",
+                                        "example": "en",
+                                        "nullable": true
+                                    },
+                                    "tags": {
+                                        "description": "Hashtags on the source. TikTok only; may be null for an individual video.",
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string"
+                                        },
+                                        "example": [
+                                            "build",
+                                            "launch"
+                                        ],
+                                        "nullable": true
+                                    },
+                                    "categories": {
+                                        "description": "Platform categories. TikTok only; may be null for an individual video.",
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string"
+                                        },
+                                        "nullable": true
+                                    },
+                                    "chapters": {
+                                        "description": "Chapter markers. TikTok only; may be null for an individual video.",
+                                        "type": "array",
+                                        "items": {
+                                            "type": "object"
+                                        },
+                                        "nullable": true
+                                    },
+                                    "heatmap": {
+                                        "description": "Engagement heatmap over the timeline. TikTok only; may be null for an individual video.",
+                                        "type": "array",
+                                        "items": {
+                                            "type": "object"
+                                        },
+                                        "nullable": true
+                                    },
+                                    "availability": {
+                                        "description": "Visibility of the source, e.g. `public`. TikTok only; may be null for an individual video.",
+                                        "type": "string",
+                                        "example": "public",
+                                        "nullable": true
+                                    },
+                                    "channel_follower_count": {
+                                        "description": "Follower count of the channel. TikTok only; may be null for an individual video.",
+                                        "type": "integer",
+                                        "example": 48210,
+                                        "nullable": true
+                                    }
+                                },
+                                "nullable": true
+                            },
                             "progress": {
                                 "description": "Current progress of the job (0.0 to 100.0)",
                                 "type": "number",
@@ -5607,6 +6143,83 @@
                                 "maximum": 100,
                                 "minimum": 0,
                                 "example": 45.5
+                            },
+                            "error_code": {
+                                "description": "Category of the failure. Only present when status is error.",
+                                "type": "string",
+                                "nullable": true,
+                                "enum": [
+                                    "WORKER_TIMEOUT",
+                                    "WORKER_ERROR",
+                                    "PROCESSING_ERROR"
+                                ]
+                            },
+                            "error_message": {
+                                "description": "A short, stable reason for the failure (e.g. \"age-restricted\", \"context-exceeded\", \"worker-error\"). Only present when status is error.",
+                                "type": "string",
+                                "example": "age-restricted",
+                                "nullable": true
+                            },
+                            "error_reason": {
+                                "description": "Bounded, actionable failure reason. Only present when status is error. SOURCE_PRIVATE: the source is private, deleted or otherwise unavailable to us. SOURCE_RESTRICTED: an age or region gate blocks it. SOURCE_UNPROCESSABLE: the source was fetched but the media is unusable (no audio track, corrupt, unsupported codec). SOURCE_DOWNLOAD_FAILED: the source should be reachable but this attempt failed to fetch it — frequently transient. INPUT_TOO_LARGE: the request exceeds the model limits. TIMEOUT: the job exceeded its time budget. CAPACITY_UNAVAILABLE: our fleet failed to complete it; not your request. PROCESSING_FAILED: ran and failed for a reason we could not classify. THIS LIST IS OPEN — new values may be added without a major version, so treat any value you do not recognise as PROCESSING_FAILED. Prefer branching on `retryable` over matching these individually.",
+                                "type": "string",
+                                "example": "SOURCE_DOWNLOAD_FAILED",
+                                "nullable": true
+                            },
+                            "retryable": {
+                                "description": "Whether resubmitting the identical request could plausibly succeed. Only present when status is error. Branch on this rather than on `error_reason` — it stays correct as new reasons are added.",
+                                "type": "boolean",
+                                "example": true,
+                                "nullable": true
+                            },
+                            "refunded": {
+                                "description": "Whether the upfront charge for this job was returned. Only present when status is error. False means no refund was issued, which covers both a charge deliberately kept and a job that failed before it was ever charged.",
+                                "type": "boolean",
+                                "example": true,
+                                "nullable": true
+                            },
+                            "failed_at": {
+                                "description": "ISO 8601 timestamp of when the job terminally failed, mirroring the webhook. Only present when status is error.",
+                                "type": "string",
+                                "format": "date-time",
+                                "example": "2026-06-16T09:30:00+00:00",
+                                "nullable": true
+                            },
+                            "prompt_boosted": {
+                                "description": "Whether the prompt was enhanced by the inline prompt booster (enhance_prompt)",
+                                "type": "boolean",
+                                "example": true
+                            },
+                            "prompt_boost": {
+                                "description": "Boosted and original prompts. Non-null only when prompt_boosted is true (i.e. the boost actually ran); null while the boost is still queued or if it was not requested",
+                                "properties": {
+                                    "prompt": {
+                                        "description": "Effective (boosted) prompt used for generation",
+                                        "type": "string",
+                                        "example": "Serene mountain lake at sunrise, 85mm lens, f/2.8, tranquil atmosphere",
+                                        "nullable": true
+                                    },
+                                    "prompt_original": {
+                                        "description": "Original prompt supplied by the client",
+                                        "type": "string",
+                                        "example": "a serene mountain lake at sunrise",
+                                        "nullable": true
+                                    },
+                                    "negative_prompt": {
+                                        "description": "Effective (boosted) negative prompt",
+                                        "type": "string",
+                                        "example": "blurry, low quality",
+                                        "nullable": true
+                                    },
+                                    "negative_prompt_original": {
+                                        "description": "Original negative prompt supplied by the client",
+                                        "type": "string",
+                                        "example": "ugly",
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object",
+                                "nullable": true
                             }
                         },
                         "type": "object"
@@ -5759,34 +6372,6 @@
                                 "description": "Presigned URL for reference audio file (when provided)",
                                 "type": "string",
                                 "nullable": true
-                            }
-                        },
-                        "type": "object"
-                    }
-                },
-                "type": "object"
-            },
-            "VideoFileToTextInferenceJobResource": {
-                "properties": {
-                    "data": {
-                        "description": "Job settings data",
-                        "properties": {
-                            "job_id": {
-                                "description": "Unique job identifier",
-                                "type": "string"
-                            },
-                            "model": {
-                                "description": "Model name used for generation",
-                                "type": "string"
-                            },
-                            "file_url": {
-                                "description": "URL of video file to transcribe",
-                                "type": "string"
-                            },
-                            "include_ts": {
-                                "description": "Should transcription include timestamps. **Required** - send `false` for plain text or `true` for timestamped segments.",
-                                "type": "boolean",
-                                "example": false
                             }
                         },
                         "type": "object"
