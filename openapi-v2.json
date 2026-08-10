@@ -3768,12 +3768,12 @@
                                 "example": "https://www.youtube.com/watch?v=jNQXAC9IVRw"
                             },
                             "include_ts": {
-                                "description": "Should transcription include timestamps. **Required** - send `false` for plain text or `true` for timestamped segments.",
+                                "description": "Should transcription include timestamps. **Required** - send `false` for plain text or `true` for timestamped segments. Whether it raises the quote depends on `ts_level`: segment-level timing is included in the base price. Pass it exactly as you will pass it to POST /api/v2/audio/transcriptions.",
                                 "type": "boolean",
                                 "example": false
                             },
                             "ts_level": {
-                                "description": "Timestamp granularity. Validated against the model exactly as on POST /api/v2/audio/transcriptions, so a price quote is never returned for a combination the job request would reject. Granularity itself does not change the price; requesting timestamps at all may.",
+                                "description": "Timestamp granularity. Validated against the model exactly as on POST /api/v2/audio/transcriptions, so a price quote is never returned for a combination the job request would reject. Granularity affects the price on models that price timestamps separately: `segment` is included in the base price, while `word` and `char` carry a surcharge.",
                                 "type": "string",
                                 "enum": [
                                     "segment",
@@ -3784,7 +3784,7 @@
                                 "nullable": true
                             },
                             "diarize": {
-                                "description": "Label each timed unit with a detected speaker. Requires a model that supports diarization. Implies `include_ts`, so it carries the same surcharge.",
+                                "description": "Label each timed unit with a detected speaker. Requires a model that supports diarization. Implies `include_ts` and carries the timestamp surcharge at ANY granularity, including `segment`.",
                                 "type": "boolean",
                                 "default": false,
                                 "nullable": true
@@ -3823,12 +3823,12 @@
                                 "format": "binary"
                             },
                             "include_ts": {
-                                "description": "Should transcription include timestamps. **Required** - send `false` for plain text or `true` for timestamped segments.",
+                                "description": "Should transcription include timestamps. **Required** - send `false` for plain text or `true` for timestamped segments. Whether it raises the quote depends on `ts_level`: segment-level timing is included in the base price. Pass it exactly as you will pass it to POST /api/v2/audio/transcriptions.",
                                 "type": "boolean",
                                 "example": false
                             },
                             "ts_level": {
-                                "description": "Timestamp granularity. Validated against the model exactly as on POST /api/v2/audio/transcriptions, so a price quote is never returned for a combination the job request would reject. Granularity itself does not change the price; requesting timestamps at all may.",
+                                "description": "Timestamp granularity. Validated against the model exactly as on POST /api/v2/audio/transcriptions, so a price quote is never returned for a combination the job request would reject. Granularity affects the price on models that price timestamps separately: `segment` is included in the base price, while `word` and `char` carry a surcharge.",
                                 "type": "string",
                                 "enum": [
                                     "segment",
@@ -3839,7 +3839,7 @@
                                 "nullable": true
                             },
                             "diarize": {
-                                "description": "Label each timed unit with a detected speaker. Requires a model that supports diarization. Implies `include_ts`, so it carries the same surcharge.",
+                                "description": "Label each timed unit with a detected speaker. Requires a model that supports diarization. Implies `include_ts` and carries the timestamp surcharge at ANY granularity, including `segment`.",
                                 "type": "boolean",
                                 "default": false,
                                 "nullable": true
@@ -3878,12 +3878,12 @@
                                 "example": 3600
                             },
                             "include_ts": {
-                                "description": "Should transcription include timestamps. **Required** - send `false` for plain text or `true` for timestamped segments.",
+                                "description": "Should transcription include timestamps. **Required** - send `false` for plain text or `true` for timestamped segments. Whether it raises the quote depends on `ts_level`: segment-level timing is included in the base price. Pass it exactly as you will pass it to POST /api/v2/audio/transcriptions.",
                                 "type": "boolean",
                                 "example": false
                             },
                             "ts_level": {
-                                "description": "Timestamp granularity. Validated against the model exactly as on POST /api/v2/audio/transcriptions, so a price quote is never returned for a combination the job request would reject. Granularity itself does not change the price; requesting timestamps at all may.",
+                                "description": "Timestamp granularity. Validated against the model exactly as on POST /api/v2/audio/transcriptions, so a price quote is never returned for a combination the job request would reject. Granularity affects the price on models that price timestamps separately: `segment` is included in the base price, while `word` and `char` carry a surcharge.",
                                 "type": "string",
                                 "enum": [
                                     "segment",
@@ -3894,7 +3894,7 @@
                                 "nullable": true
                             },
                             "diarize": {
-                                "description": "Label each timed unit with a detected speaker. Requires a model that supports diarization. Implies `include_ts`, so it carries the same surcharge.",
+                                "description": "Label each timed unit with a detected speaker. Requires a model that supports diarization. Implies `include_ts` and carries the timestamp surcharge at ANY granularity, including `segment`.",
                                 "type": "boolean",
                                 "default": false,
                                 "nullable": true
@@ -5058,12 +5058,12 @@
                                 "example": "https://www.youtube.com/watch?v=jNQXAC9IVRw"
                             },
                             "include_ts": {
-                                "description": "Should transcription include timestamps. **Required** - send `false` for plain text or `true` for timestamped segments.",
+                                "description": "Should transcription include timestamps. **Required** - send `false` for plain text or `true` for timestamped segments. Implied when `diarize` is true. Segment-level timestamps are included in the base price — see `ts_level`.",
                                 "type": "boolean",
                                 "example": false
                             },
                             "ts_level": {
-                                "description": "Timestamp granularity. Only applies when `include_ts` is true, otherwise ignored. The levels a model offers are published as `info.limits.timestamp_levels` by GET /api/v2/models; requesting an unsupported level is rejected.",
+                                "description": "Timestamp granularity. Only applies when `include_ts` is true, otherwise ignored. Granularity affects the price on models that price timestamps separately: `segment` is included in the base price, while `word` and `char` carry a surcharge. The levels a model offers are published as `info.limits.timestamp_levels` by GET /api/v2/models; requesting an unsupported level is rejected with `422` and an `errors.ts_level` entry.",
                                 "type": "string",
                                 "enum": [
                                     "segment",
@@ -5075,7 +5075,7 @@
                                 "nullable": true
                             },
                             "diarize": {
-                                "description": "Label each timed unit with a detected speaker (`SPEAKER_00`, `SPEAKER_01`, …). Requires a model whose `info.features.supports_diarization` is true, and implies `include_ts`.",
+                                "description": "Label each timed unit with a detected speaker (`SPEAKER_00`, `SPEAKER_01`, …). Requires a model whose `info.features.supports_diarization` is true, and implies `include_ts`. Carries the timestamp surcharge at ANY granularity, including `segment`. Setting it on a model that does not support diarization is rejected with `422` and an `errors.diarize` entry.",
                                 "type": "boolean",
                                 "default": false,
                                 "nullable": true
@@ -5136,12 +5136,12 @@
                                 "format": "binary"
                             },
                             "include_ts": {
-                                "description": "Should transcription include timestamps. **Required** - send `false` for plain text or `true` for timestamped segments.",
+                                "description": "Should transcription include timestamps. **Required** - send `false` for plain text or `true` for timestamped segments. Implied when `diarize` is true. Segment-level timestamps are included in the base price — see `ts_level`.",
                                 "type": "boolean",
                                 "example": false
                             },
                             "ts_level": {
-                                "description": "Timestamp granularity. Only applies when `include_ts` is true, otherwise ignored. The levels a model offers are published as `info.limits.timestamp_levels` by GET /api/v2/models; requesting an unsupported level is rejected.",
+                                "description": "Timestamp granularity. Only applies when `include_ts` is true, otherwise ignored. Granularity affects the price on models that price timestamps separately: `segment` is included in the base price, while `word` and `char` carry a surcharge. The levels a model offers are published as `info.limits.timestamp_levels` by GET /api/v2/models; requesting an unsupported level is rejected with `422` and an `errors.ts_level` entry.",
                                 "type": "string",
                                 "enum": [
                                     "segment",
@@ -5153,7 +5153,7 @@
                                 "nullable": true
                             },
                             "diarize": {
-                                "description": "Label each timed unit with a detected speaker (`SPEAKER_00`, `SPEAKER_01`, …). Requires a model whose `info.features.supports_diarization` is true, and implies `include_ts`.",
+                                "description": "Label each timed unit with a detected speaker (`SPEAKER_00`, `SPEAKER_01`, …). Requires a model whose `info.features.supports_diarization` is true, and implies `include_ts`. Carries the timestamp surcharge at ANY granularity, including `segment`. Setting it on a model that does not support diarization is rejected with `422` and an `errors.diarize` entry.",
                                 "type": "boolean",
                                 "default": false,
                                 "nullable": true
