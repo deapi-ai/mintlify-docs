@@ -26,7 +26,7 @@ Example pricing is shown below for reference; exact, up-to-date rates are always
 | Transcription — TikTok (WhisperLargeV3Ct2) | video length band | 0.015–0.105 USD per video | `POST /api/v2/audio/transcriptions` |
 | Source metadata add-on (YouTube / TikTok) | per request | 0.005 USD | `include_metadata: true` |
 | Word/char timestamps \+ diarization add-on (WhisperLargeV3Ct2) | \+50% of transcription price | segment timestamps are free | `ts_level: "word"` / `"char"`, `diarize: true` |
-| Image OCR | output characters | 0.00928 USD per 1,000 output chars (for 1024×1024 images) | `POST /api/v2/images/ocr` |
+| Image OCR | input resolution | 0.00928 USD per image at 1024×1024 | `POST /api/v2/images/ocr` |
 | Embeddings | number of tokens processed | 0.000084 USD per 1,000 tokens | `POST /api/v2/embeddings` |
 | Image Background Removal | per image | Use `/price` endpoint | `POST /api/v2/images/background-removals` |
 | Image Upscale | resolution × scale | Use `/price` endpoint | `POST /api/v2/images/upscales` |
@@ -114,12 +114,16 @@ Every other source — YouTube, X, Twitch, Kick, uploaded files — is billed by
 
 **Image-to-Text (OCR / VLM)**
 
-- Charged based on number of characters recognized in output.
-- Baseline rate: **0.00928 USD** per 1,000 output characters (for 1024×1024 images).
-- Example outputs:
-  - Single photo (≈20 chars) → **0.000186 USD**
-  - Math expression (~350 chars) → **0.0032 USD**
-  - Book page (~1,500 chars) → **0.0139 USD**
+- Charged **per image, based on input resolution**. The number of characters returned does not affect the price — a blank image and a dense document page of the same size cost exactly the same.
+- Baseline rate: **0.00928 USD** per image at 1024×1024.
+- Example rates (read back from `POST /api/v2/images/ocr/price`):
+  - 256×256 → **0.00101 USD**
+  - 512×512 → **0.00266 USD**
+  - 1024×1024 → **0.00928 USD**
+  - 1920×1080 / 1080×1920 → **0.01791 USD**
+  - 4096×4096 → **0.14168 USD**
+- Price scales with pixel count: ≈ **0.00045 USD + 0.0000000084 USD per pixel**. Downscaling source images before OCR reduces cost proportionally — useful when running OCR across many video frames.
+- `language` and `format` do not affect the price.
 - Volume discounts available for bulk processing (100k\+ images)—contact sales.
 
 **Text-to-Embedding (Vector Representations)**
