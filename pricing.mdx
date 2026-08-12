@@ -25,7 +25,7 @@ Example pricing is shown below for reference; exact, up-to-date rates are always
 | Transcription (URL \+ file, all sources) | duration | from 0.05 USD per hour | `POST /api/v2/audio/transcriptions` |
 | Transcription — TikTok (WhisperLargeV3Ct2) | video length band | 0.015–0.105 USD per video | `POST /api/v2/audio/transcriptions` |
 | Source metadata add-on (YouTube / TikTok) | per request | 0.005 USD | `include_metadata: true` |
-| Word/char timestamps \+ diarization add-on (WhisperLargeV3Ct2) | \+50% of transcription price | segment timestamps are free | `ts_level: "word"` / `"char"`, `diarize: true` |
+| Word timestamps \+ diarization add-on (WhisperLargeV3Ct2) | \+50% of transcription price | segment timestamps are free | `ts_level: "word"`, `diarize: true` |
 | Image OCR | input resolution | 0.00928 USD per image at 1024×1024 | `POST /api/v2/images/ocr` |
 | Embeddings | number of tokens processed | 0.000084 USD per 1,000 tokens | `POST /api/v2/embeddings` |
 | Image Background Removal | per image | Use `/price` endpoint | `POST /api/v2/images/background-removals` |
@@ -105,7 +105,7 @@ Example pricing is shown below for reference; exact, up-to-date rates are always
 
 Every other source — YouTube, X, Twitch, Kick, uploaded files — is billed by duration.
 
-**Segment timestamps are free.** `include_ts: true` with the default `ts_level: "segment"` costs the same as a plain transcription. On `WhisperLargeV3Ct2` only word- and char-level timestamps (`ts_level: "word"` / `"char"`) and speaker diarization (`diarize: true`) add **+50%** to the transcription price — diarization carries that surcharge at any granularity, `segment` included. `WhisperLargeV3` does not charge for timestamps at all.
+**Segment timestamps are free.** `include_ts: true` with the default `ts_level: "segment"` costs the same as a plain transcription. On `WhisperLargeV3Ct2` only word-level timestamps (`ts_level: "word"`) and speaker diarization (`diarize: true`) add **+50%** to the transcription price — diarization carries that surcharge at any granularity, `segment` included. `WhisperLargeV3` does not charge for timestamps at all.
 
 **Source metadata add-on (YouTube & TikTok)**
 

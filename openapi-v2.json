@@ -3773,12 +3773,11 @@
                                 "example": false
                             },
                             "ts_level": {
-                                "description": "Timestamp granularity. Validated against the model exactly as on POST /api/v2/audio/transcriptions, so a price quote is never returned for a combination the job request would reject. Granularity affects the price on models that price timestamps separately: `segment` is included in the base price, while `word` and `char` carry a surcharge.",
+                                "description": "Timestamp granularity. Validated against the model exactly as on POST /api/v2/audio/transcriptions, so a price quote is never returned for a combination the job request would reject. Granularity affects the price on models that price timestamps separately: `segment` is included in the base price, while `word` carries a surcharge.",
                                 "type": "string",
                                 "enum": [
                                     "segment",
-                                    "word",
-                                    "char"
+                                    "word"
                                 ],
                                 "default": "segment",
                                 "nullable": true
@@ -3828,12 +3827,11 @@
                                 "example": false
                             },
                             "ts_level": {
-                                "description": "Timestamp granularity. Validated against the model exactly as on POST /api/v2/audio/transcriptions, so a price quote is never returned for a combination the job request would reject. Granularity affects the price on models that price timestamps separately: `segment` is included in the base price, while `word` and `char` carry a surcharge.",
+                                "description": "Timestamp granularity. Validated against the model exactly as on POST /api/v2/audio/transcriptions, so a price quote is never returned for a combination the job request would reject. Granularity affects the price on models that price timestamps separately: `segment` is included in the base price, while `word` carries a surcharge.",
                                 "type": "string",
                                 "enum": [
                                     "segment",
-                                    "word",
-                                    "char"
+                                    "word"
                                 ],
                                 "default": "segment",
                                 "nullable": true
@@ -3883,12 +3881,11 @@
                                 "example": false
                             },
                             "ts_level": {
-                                "description": "Timestamp granularity. Validated against the model exactly as on POST /api/v2/audio/transcriptions, so a price quote is never returned for a combination the job request would reject. Granularity affects the price on models that price timestamps separately: `segment` is included in the base price, while `word` and `char` carry a surcharge.",
+                                "description": "Timestamp granularity. Validated against the model exactly as on POST /api/v2/audio/transcriptions, so a price quote is never returned for a combination the job request would reject. Granularity affects the price on models that price timestamps separately: `segment` is included in the base price, while `word` carries a surcharge.",
                                 "type": "string",
                                 "enum": [
                                     "segment",
-                                    "word",
-                                    "char"
+                                    "word"
                                 ],
                                 "default": "segment",
                                 "nullable": true
@@ -5063,12 +5060,11 @@
                                 "example": false
                             },
                             "ts_level": {
-                                "description": "Timestamp granularity. Only applies when `include_ts` is true, otherwise ignored. Granularity affects the price on models that price timestamps separately: `segment` is included in the base price, while `word` and `char` carry a surcharge. The levels a model offers are published as `info.limits.timestamp_levels` by GET /api/v2/models; requesting an unsupported level is rejected with `422` and an `errors.ts_level` entry.",
+                                "description": "Timestamp granularity. Only applies when `include_ts` is true, otherwise ignored. Granularity affects the price on models that price timestamps separately: `segment` is included in the base price, while `word` carries a surcharge. The levels a model offers are published as `info.limits.timestamp_levels` by GET /api/v2/models; requesting an unsupported level is rejected with `422` and an `errors.ts_level` entry.",
                                 "type": "string",
                                 "enum": [
                                     "segment",
-                                    "word",
-                                    "char"
+                                    "word"
                                 ],
                                 "default": "segment",
                                 "example": "word",
@@ -5141,12 +5137,11 @@
                                 "example": false
                             },
                             "ts_level": {
-                                "description": "Timestamp granularity. Only applies when `include_ts` is true, otherwise ignored. Granularity affects the price on models that price timestamps separately: `segment` is included in the base price, while `word` and `char` carry a surcharge. The levels a model offers are published as `info.limits.timestamp_levels` by GET /api/v2/models; requesting an unsupported level is rejected with `422` and an `errors.ts_level` entry.",
+                                "description": "Timestamp granularity. Only applies when `include_ts` is true, otherwise ignored. Granularity affects the price on models that price timestamps separately: `segment` is included in the base price, while `word` carries a surcharge. The levels a model offers are published as `info.limits.timestamp_levels` by GET /api/v2/models; requesting an unsupported level is rejected with `422` and an `errors.ts_level` entry.",
                                 "type": "string",
                                 "enum": [
                                     "segment",
-                                    "word",
-                                    "char"
+                                    "word"
                                 ],
                                 "default": "segment",
                                 "example": "word",
@@ -5457,12 +5452,11 @@
                                 "type": "boolean"
                             },
                             "ts_level": {
-                                "description": "Timestamp granularity: segment, word or char. Omitted on jobs predating this field, in which case the inference server default applies.",
+                                "description": "Timestamp granularity: segment or word. Omitted on jobs predating this field, in which case the inference server default applies.",
                                 "type": "string",
                                 "enum": [
                                     "segment",
-                                    "word",
-                                    "char"
+                                    "word"
                                 ]
                             },
                             "diarize": {
