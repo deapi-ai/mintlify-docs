@@ -97,7 +97,7 @@ The table below shows which **task types** deAPI supports. To see which models a
 | Image-to-Image | `img2img` | Transform existing images — style transfer, edits, inpainting, outpainting. |
 | Text-to-Speech | `txt2audio` | Turn text into natural voice — narration, accessibility, product voices. Supports voice cloning and voice design. |
 | Text-to-Music | `txt2music` | Generate music tracks from text — background music, jingles, songs with vocals. |
-| Video-to-Text | `video2text` | Transcribe video by URL (YouTube, Twitch, Kick, X , TikTok) into text. |
+| Video-to-Text | `video2text` | Transcribe video by URL (YouTube, Twitch, Kick, X , TikTok) into text. TikTok requires `WhisperLargeV3Ct2`. |
 | Audio-to-Text | `audio2text` | Transcribe audio by URL into text — subtitles, notes, search, accessibility. |
 | Video File-to-Text | `video_file2text` | Transcribe an uploaded video file into text. |
 | Audio File-to-Text | `audio_file2text` | Transcribe an uploaded audio file into text. |
@@ -146,7 +146,7 @@ When the models endpoint returns several options for the same task, use these gu
 
 **Music generation** — Provide a text description (`caption`) of the desired music style. `lyrics` is **required and must be non-empty** — send `"[Instrumental]"` for instrumental tracks. Optionally include `bpm`, `keyscale`, and `timesignature` (an integer: `2`, `3`, `4` or `6` — not a notation string like `"4/4"`) to fine-tune the output. `format` should be `mp3` — the only format the current models actually produce. You can also upload a `reference_audio` file for style transfer. Check `info.limits` for supported duration range and inference steps. Use fewer steps with turbo models (e.g. 8) and more steps with base models (e.g. 32\+).
 
-**Transcription (Video/Audio-to-Text)** — Transcription models support both URL-based and file-upload transcription. For long content, enable timestamps (`include_ts: true`). URL-based transcription works with YouTube, Twitch, Kick, TikTok and X/Twitter.
+**Transcription (Video/Audio-to-Text)** — Transcription models support both URL-based and file-upload transcription. For long content, enable timestamps (`include_ts: true`). URL-based transcription works with YouTube, Twitch, Kick, TikTok and X/Twitter — but TikTok is served by `WhisperLargeV3Ct2` only, and a TikTok URL sent with any other model is rejected with `422`.
 
 **OCR (Image-to-Text)** — Check `info.limits` for the maximum supported image dimensions. For complex layouts, consider multiple passes or post-processing.
 

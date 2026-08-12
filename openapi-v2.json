@@ -2408,7 +2408,7 @@
                 "tags": [
                     "Client API v2"
                 ],
-                "description": "Transcribe audio or video to text. Accepts either a source URL (YouTube, Twitter, Twitch, Kick, TikTok, Twitter Spaces) or a file upload (audio/video). The job type is auto-detected from the input.",
+                "description": "Transcribe audio or video to text. Accepts either a source URL (YouTube, Twitter, Twitch, Kick, TikTok, Twitter Spaces) or a file upload (audio/video). The job type is auto-detected from the input. TikTok sources are served by `WhisperLargeV3Ct2` only; every other source runs on any transcription model.",
                 "operationId": "createTranscription",
                 "parameters": [
                     {
@@ -3763,7 +3763,7 @@
                         ],
                         "properties": {
                             "source_url": {
-                                "description": "URL of video/audio to estimate price for. Mutually exclusive with source_file and duration_seconds.",
+                                "description": "URL of video/audio to estimate price for. Mutually exclusive with source_file and duration_seconds. A TikTok URL is only accepted with `model: WhisperLargeV3Ct2` — paired with any other model it is rejected with `422`, exactly as the job would be.",
                                 "type": "string",
                                 "example": "https://www.youtube.com/watch?v=jNQXAC9IVRw"
                             },
@@ -3802,7 +3802,7 @@
                                 "nullable": true
                             },
                             "model": {
-                                "description": "The model to use for transcription.",
+                                "description": "The model to use for transcription. TikTok is served by `WhisperLargeV3Ct2` only; a TikTok source paired with any other model is rejected with `422`.",
                                 "type": "string",
                                 "example": "WhisperLargeV3"
                             }
@@ -3910,7 +3910,7 @@
                                 "nullable": true
                             },
                             "platform": {
-                                "description": "The platform the source comes from. Only valid together with `duration_seconds`, where there is no URL to derive it from — with `source_url` or `source_file` it is rejected, because the platform is taken from the source itself. Some models price per platform, and TikTok is priced from a length-band card, so a duration-only quote that omits this is priced at the model base rate and can come in under the amount charged. Pass the platform you will actually submit.",
+                                "description": "The platform the source comes from. Only valid together with `duration_seconds`, where there is no URL to derive it from — with `source_url` or `source_file` it is rejected, because the platform is taken from the source itself. Some models price per platform, and TikTok is priced from a length-band card, so a duration-only quote that omits this is priced at the model base rate and can come in under the amount charged. Pass the platform you will actually submit. `tiktok` is only valid with `model: WhisperLargeV3Ct2`, the sole model that transcribes TikTok; any other pairing is rejected with `422`, exactly as the job would be.",
                                 "type": "string",
                                 "enum": [
                                     "youtube",
@@ -3923,7 +3923,7 @@
                                 "nullable": true
                             },
                             "model": {
-                                "description": "The model to use for transcription.",
+                                "description": "The model to use for transcription. With `platform: tiktok` this must be `WhisperLargeV3Ct2` — no other model transcribes TikTok, and the pair is rejected with `422`.",
                                 "type": "string",
                                 "example": "WhisperLargeV3"
                             }
@@ -5050,7 +5050,7 @@
                         ],
                         "properties": {
                             "source_url": {
-                                "description": "URL of video/audio to transcribe (YouTube, Twitter/X, Twitch, Kick, TikTok, Twitter Spaces). Mutually exclusive with source_file.",
+                                "description": "URL of video/audio to transcribe (YouTube, Twitter/X, Twitch, Kick, TikTok, Twitter Spaces). Mutually exclusive with source_file. A TikTok URL is only accepted with `model: WhisperLargeV3Ct2` — paired with any other model it is rejected with `422` and the job is never queued.",
                                 "type": "string",
                                 "example": "https://www.youtube.com/watch?v=jNQXAC9IVRw"
                             },
@@ -5084,7 +5084,7 @@
                                 "nullable": true
                             },
                             "model": {
-                                "description": "The model to use for transcription. Available models can be retrieved via the GET /api/v2/models endpoint.",
+                                "description": "The model to use for transcription. Available models can be retrieved via the GET /api/v2/models endpoint. TikTok is served by `WhisperLargeV3Ct2` only; a TikTok source paired with any other model is rejected with `422`.",
                                 "type": "string",
                                 "example": "WhisperLargeV3"
                             },

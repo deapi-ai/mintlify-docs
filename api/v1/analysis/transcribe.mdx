@@ -21,6 +21,10 @@ Provide exactly **one** of:
 
 The endpoint auto-detects the source type and routes the job accordingly. All existing transcription features (timestamps, webhook notifications) are fully supported.
 
+<Warning>
+  **TikTok requires `WhisperLargeV3Ct2`.** A TikTok `source_url` sent with any other model — `WhisperLargeV3` included — is rejected with `422` and nothing is charged. Every other source runs on either model. Note that the v1 [Model Selection](/api/v1/utilities/model-selection) endpoint does not list `WhisperLargeV3Ct2`, but v1 accepts the slug; v2 lists it normally.
+</Warning>
+
 ### Supported file formats
 
 | Type | Formats |

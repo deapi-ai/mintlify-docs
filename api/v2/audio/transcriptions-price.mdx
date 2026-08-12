@@ -32,6 +32,10 @@ curl -X POST "https://api.deapi.ai/api/v2/audio/transcriptions/price" \
 
 Without `platform`, the quote uses the model base rate with no duration-band rounding.
 
+<Note>
+  `platform: "tiktok"` is only valid with `model: "WhisperLargeV3Ct2"` — that is the only model that transcribes TikTok. Paired with any other model it is rejected with `422`, the same way the job itself would be. See [Audio/Video Transcription](/api/v2/audio/transcriptions).
+</Note>
+
 ## What `WhisperLargeV3Ct2` costs
 
 The quote is built in three steps, in this order:

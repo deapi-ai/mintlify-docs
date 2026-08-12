@@ -102,11 +102,13 @@ Image input operations (**Remove Background**, **Upscale**) accept JPG, JPEG, PN
 | Operation | Description | Models |
 | --- | --- | --- |
 | **Generate** | Generate video from text or image(s) | LTX-Video 0.9.8 13B, LTX-2.3 22B Distilled INT8 |
-| **Transcribe** | Transcribe video to text (YouTube, Twitch, X, Kick, TikTok URLs or file upload) | Whisper Large V3, Whisper Large V3 Ct2 |
+| **Transcribe** | Transcribe video to text (YouTube, Twitch, X, Kick, TikTok URLs or file upload) | Whisper Large V3, Whisper Large V3 Ct2 — TikTok URLs only on Whisper Large V3 Ct2 |
 | **Upscale** | Increase video resolution (2× or 4×) | RealESRGAN Video x2, RealESRGAN Video x4, FlashVSR Tiny |
 | **Remove Background** | Remove background from videos (v2 only) | (see Model Selection) |
 
 Video file transcription accepts MP4, MPEG, MOV, AVI, WMV, and OGG files up to 50 MB.
+
+Select **Whisper Large V3 Ct2** for TikTok URLs — it is the only model that transcribes them, and the node returns a `422` from the API if a TikTok URL is submitted with Whisper Large V3.
 
 ##### **Audio Operations**
 
