@@ -26,22 +26,16 @@ description: "AI-powered prompt optimization tools for better generation results
 
 ### `type` values
 
+Only prompt-driven inference types have a booster. Types that take no meaningful prompt — upscaling, background removal, OCR, transcription, embeddings — are not supported and are rejected with **422**.
+
 | `type` | Use case |
 | --- | --- |
 | `images.generations` | Text-to-image |
 | `images.edits` | Image-to-image / edit (requires `image`) |
-| `images.upscales` | Image upscaling |
-| `images.background-removals` | Image background removal |
-| `images.ocr` | Image OCR |
 | `videos.generations` | Text/image-to-video |
 | `videos.animations` | Character animation (requires `image`) |
-| `videos.upscales` | Video upscaling |
-| `videos.background-removals` | Video background removal |
-| `videos.transcriptions` | Video transcription |
 | `audio.speech` | Text-to-speech |
 | `audio.music` | Text-to-music |
-| `audio.transcriptions` | Audio transcription |
-| `embeddings` | Embeddings |
 
 ## Workflow
 

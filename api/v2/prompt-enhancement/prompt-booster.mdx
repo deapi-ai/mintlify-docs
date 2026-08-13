@@ -15,7 +15,9 @@ Enhance a raw user prompt into a detailed, model-friendly prompt using the AI gu
 
 ### Accepted `type` values
 
-`images.generations`, `images.edits`, `images.upscales`, `images.background-removals`, `images.ocr`, `videos.generations`, `videos.animations`, `videos.upscales`, `videos.background-removals`, `videos.transcriptions`, `audio.speech`, `audio.music`, `audio.transcriptions`, `embeddings`
+`images.generations`, `images.edits`, `videos.generations`, `videos.animations`, `audio.speech`, `audio.music`
+
+Only prompt-driven inference types have a booster. Upscaling, background removal, OCR, transcription and embeddings are not supported and are rejected with **422**.
 
 ### Example (image-to-image)
 

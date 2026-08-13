@@ -246,7 +246,7 @@
                 "tags": [
                     "Client API v2"
                 ],
-                "description": "Unified prompt booster — enhance prompts for any model and type using AI-powered guide system. Accepted `type` values (v2 noun-based dot notation): `images.generations`, `images.edits`, `images.upscales`, `images.background-removals`, `images.ocr`, `videos.generations`, `videos.animations`, `videos.upscales`, `videos.background-removals`, `videos.transcriptions`, `audio.speech`, `audio.music`, `audio.transcriptions`, `embeddings`.",
+                "description": "Unified prompt booster — enhance prompts for any model and type using AI-powered guide system. Accepted `type` values (v2 noun-based dot notation): `images.generations`, `images.edits`, `videos.generations`, `videos.animations`, `audio.speech`, `audio.music`. Only prompt-driven inference types have a booster; upscaling, background removal, OCR, transcription and embeddings are rejected with 422.",
                 "operationId": "clientBoostPromptV2",
                 "requestBody": {
                     "required": true,
@@ -369,7 +369,7 @@
                 "tags": [
                     "Client API v2"
                 ],
-                "description": "Calculate the price for the unified prompt booster. Accepted `type` values (v2 noun-based dot notation): `images.generations`, `images.edits`, `videos.generations`, `videos.animations`, `audio.speech`, `audio.music`, etc.",
+                "description": "Calculate the price for the unified prompt booster. Accepted `type` values (v2 noun-based dot notation): `images.generations`, `images.edits`, `videos.generations`, `videos.animations`, `audio.speech`, `audio.music`. Only prompt-driven inference types have a booster; upscaling, background removal, OCR, transcription and embeddings are rejected with 422.",
                 "operationId": "clientCalculateBoostPriceV2",
                 "requestBody": {
                     "required": true,

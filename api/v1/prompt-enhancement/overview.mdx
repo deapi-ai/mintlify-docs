@@ -1,27 +1,25 @@
 ---
-title: "Prompt Enhancement (Deprecated)"
-description: "The v1 prompt boosters are deprecated. Use the unified v2 Prompt Booster instead."
+title: "Prompt Enhancement (Removed)"
+description: "The v1 prompt boosters have been removed. Use the unified v2 Prompt Booster instead."
 ---
 
 <Warning>
-  **The v1 prompt boosters are deprecated and no longer documented.** The v1 booster endpoints (`/prompt/image`, `/prompt/video`, `/prompt/speech`, `/prompt/image2image`, `/prompts/samples`) have been replaced by a single unified endpoint in v2.
+  **The v1 prompt boosters have been removed.** They return **410 Gone** with a `Deprecation: true` header and a `Link` header pointing at the successor. There is no automatic redirect — you must update both the URL and the request fields.
 
-  Use the [**v2 Prompt Booster**](https://docs.deapi.ai/api/v2/prompt-enhancement/prompt-booster) — `POST /api/v2/prompts/enhancements`.
+  Use the [**v2 Prompt Booster**](/api/v2/prompt-enhancement/prompt-booster) — `POST /api/v2/prompts/enhancements`.
 </Warning>
 
-## How it works
+## Migrating
 
-Prompt Enhancement takes a basic idea and returns an optimized prompt — enriched with relevant detail, style keywords, and quality modifiers — that you then pass to a generation endpoint for better results.
+v2 replaces all four boosters with one endpoint. Select the booster with `type` and the target model with `model_slug`.
 
-In v2 this is a single endpoint for every booster type: you select the booster with the `type` field (e.g. `images.generations`, `videos.generations`, `audio.speech`, `images.edits`) and the target model with `model_slug`, instead of calling a separate per-type endpoint.
-
-## Migrating from v1
-
-| v1 endpoint | v2 equivalent |
+| v1 endpoint (410 Gone) | v2 replacement |
 | --- | --- |
-| `POST /prompt/image` | `POST /api/v2/prompts/enhancements` with `type: images.generations` |
-| `POST /prompt/video` | `POST /api/v2/prompts/enhancements` with `type: videos.generations` |
-| `POST /prompt/speech` | `POST /api/v2/prompts/enhancements` with `type: audio.speech` |
-| `POST /prompt/image2image` | `POST /api/v2/prompts/enhancements` with `type: images.edits` |
+| `POST /api/v1/client/prompt/image` | `type: images.generations` |
+| `POST /api/v1/client/prompt/image2image` | `type: images.edits` |
+| `POST /api/v1/client/prompt/video` | `type: videos.generations` |
+| `POST /api/v1/client/prompt/speech` | `type: audio.speech` |
 
-See the [v2 Prompt Enhancement overview](/api/v2/prompt-enhancement/overview) for the full list of `type` values, and the [Prompt Booster](/api/v2/prompt-enhancement/prompt-booster) page for the request/response schema.
+The four `/price-calculation` variants map the same way to `POST /api/v2/prompts/enhancements/price`.
+
+See the [v2 Prompt Enhancement overview](/api/v2/prompt-enhancement/overview) for the full field reference.
