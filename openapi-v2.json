@@ -1647,7 +1647,7 @@
                 "tags": [
                     "Client API v2"
                 ],
-                "description": "Estimate the price of a video upscale request. Two mutually exclusive variants: upload the `video`, or send `width` + `height` + `duration`. The price is proportional to duration, so on the second variant `duration` (spelled exactly that way — not `duration_seconds`) must always be included; the server currently accepts a request without it and answers `200` with `price: 0`, which is never a real quote.",
+                "description": "Estimate the price of a video upscale request.",
                 "operationId": "estimateVideoUpscalePrice",
                 "parameters": [
                     {
@@ -4044,7 +4044,6 @@
                 "type": "object"
             },
             "VideoUpscalePriceRequestBody": {
-                "description": "Exactly one of two request variants. **A** — upload the file: `video` + `model` (+ `scale`); duration and dimensions are read from the upload. **B** — quote without uploading: `width` + `height` + `duration` + `model` (+ `scale`). On variant B `duration` is what drives the price and must always be sent, even though the server does not yet enforce it; omitting it returns `200` with `price: 0`. Never mix fields from the two variants.",
                 "oneOf": [
                     {
                         "required": [
@@ -4053,7 +4052,7 @@
                         ],
                         "properties": {
                             "video": {
-                                "description": "Video file to upscale. Supported formats: MP4, MPEG, QuickTime, AVI, WMV, OGG. Maximum file size: 10 MB. Duration and dimensions are read from the file, so do not send `duration`, `width` or `height` alongside it — that switches the request to the other variant and returns `422`.",
+                                "description": "Video file to upscale. Supported formats: MP4, MPEG, QuickTime, AVI, WMV, OGG. Maximum file size: 10 MB.",
                                 "type": "string",
                                 "format": "binary"
                             },
@@ -4063,7 +4062,7 @@
                                 "example": "RealESRGAN_Vid_x4"
                             },
                             "scale": {
-                                "description": "Upscale factor. Send it only for models that expose `min_scale`/`max_scale` in `GET /api/v2/models`; fixed-scale models (e.g. `RealESRGAN_Vid_x4`) return `422 \"The selected model does not support a configurable scale.\"`, and models that require it (e.g. `FlashVSR_Tiny`) return `422 \"The scale parameter is required for the selected model.\"` when it is missing. Check the model before deciding whether to send this field.",
+                                "description": "Optional upscale factor. Only allowed for models that support a configurable scale.",
                                 "type": "integer",
                                 "maximum": 16,
                                 "minimum": 1,
@@ -4076,7 +4075,6 @@
                         "required": [
                             "width",
                             "height",
-                            "duration",
                             "model"
                         ],
                         "properties": {
@@ -4091,11 +4089,12 @@
                                 "example": 576
                             },
                             "duration": {
-                                "description": "Video duration in seconds. The field is named `duration` — NOT `duration_seconds`. (`duration_seconds` is the field name used by `/api/v2/audio/transcriptions/price`; sent here it is silently ignored.) Price is directly proportional to duration, so this field is mandatory on this variant even though the server does not currently reject a request that omits it: a request without `duration` — or with `duration: null`, or with a misspelled field name — returns `200 {\"data\":{\"price\":0}}` instead of a validation error, and `0` is not the real price. Always send the actual duration and treat a returned price of `0` as a bug in your request, never as a free job. Also validated against the model's `max_video_duration_seconds` (`422` if exceeded). Do not send `duration` together with a `video` upload — the two request variants are mutually exclusive and combining them returns `422`.",
+                                "description": "Video duration in seconds. The price is proportional to duration, so this field must always be sent — a request without it returns `price: 0`. Also validated against the model's max allowed duration.",
                                 "type": "number",
                                 "format": "float",
                                 "minimum": 0.1,
-                                "example": 12.5
+                                "example": 12.5,
+                                "nullable": true
                             },
                             "model": {
                                 "description": "The upscaling model to use",
@@ -4103,7 +4102,7 @@
                                 "example": "RealESRGAN_Vid_x4"
                             },
                             "scale": {
-                                "description": "Upscale factor. Send it only for models that expose `min_scale`/`max_scale` in `GET /api/v2/models`; fixed-scale models (e.g. `RealESRGAN_Vid_x4`) return `422 \"The selected model does not support a configurable scale.\"`, and models that require it (e.g. `FlashVSR_Tiny`) return `422 \"The scale parameter is required for the selected model.\"` when it is missing. Check the model before deciding whether to send this field.",
+                                "description": "Optional upscale factor. Only allowed for models that support a configurable scale.",
                                 "type": "integer",
                                 "maximum": 16,
                                 "minimum": 1,

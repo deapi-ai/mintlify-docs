@@ -144,8 +144,7 @@ Every other source — YouTube, X, Twitch, Kick, uploaded files — is billed by
 
 - Increases video resolution (e.g. 2×, 4×) using AI super-resolution.
 - Price scales with input resolution, video duration, and the selected `scale` factor (only for models with configurable scale — fixed-scale models use their built-in factor).
-- Use the `/api/v2/videos/upscales/price` endpoint with your `model`, `width`, `height`, `duration`, and optional `scale` to get exact pricing before uploading the file.
-- **`duration` is not optional in practice.** The endpoint still returns `200` when you leave it out, but the quote is then `price: 0` — the price is proportional to duration, so a missing duration means no price at all. The field is spelled `duration`; `duration_seconds` (the transcription field name) is ignored here and produces the same `0`. See [Video Upscale Price Calculation](/api/v2/videos/upscales-price).
+- Use the `/api/v2/videos/upscales/price` endpoint with your `model`, `width`, `height`, `duration`, and optional `scale` to get exact pricing before uploading the file. Always send `duration` — the price is proportional to it, and a request without it returns `price: 0`.
 
 ---
 
