@@ -4,3 +4,50 @@ openapi: "/openapi-v2.json POST /api/v2/videos/upscales/price"
 ---
 
 Estimate the cost of a video upscale job before submitting it.
+
+## Two request variants
+
+Pick one — never mix fields from both.
+
+| Variant | Send | Notes |
+| --- | --- | --- |
+| **A — with the file** | `video` + `model` (+ `scale`) | Duration and dimensions are read from the upload. Do not add `duration`, `width` or `height`. |
+| **B — without the file** | `width` + `height` + `duration` + `model` (+ `scale`) | Quote before uploading. `duration` is what drives the price. |
+
+<Warning>
+  **On variant B, always send `duration`.** The price is directly proportional to duration, but
+  the endpoint does not yet reject a request that leaves it out — it answers `200` with
+  `{"data":{"price":0}}`. A quote of `0` is never a real price; it means the duration did not
+  reach the pricing logic.
+
+  The field is named **`duration`**, not `duration_seconds`. `duration_seconds` is the field
+  name used by [`/api/v2/audio/transcriptions/price`](/api/v2/audio/transcriptions-price); sent
+  here it is silently ignored and you get the same `price: 0`. The same applies to
+  `duration: null`.
+</Warning>
+
+```bash Variant B — correct
+curl -X POST https://api.deapi.ai/api/v2/videos/upscales/price \
+  -H "Authorization: Bearer $DEAPI_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"model":"RealESRGAN_Vid_x4","width":1024,"height":576,"duration":12.5}'
+# {"data":{"price":0.07007109}}
+```
+
+```bash Variant B — silently wrong
+curl -X POST https://api.deapi.ai/api/v2/videos/upscales/price \
+  -H "Authorization: Bearer $DEAPI_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"model":"RealESRGAN_Vid_x4","width":1024,"height":576,"duration_seconds":12.5}'
+# {"data":{"price":0}}   <-- wrong field name, no error raised
+```
+
+`duration` is also checked against the model's `max_video_duration_seconds` (from
+[`GET /api/v2/models`](/api/v2/utilities/models)), so omitting it skips that limit check too.
+
+## `scale`
+
+Send `scale` only for models that expose `min_scale`/`max_scale` in `GET /api/v2/models`.
+Fixed-scale models such as `RealESRGAN_Vid_x4` reject it with `422 "The selected model does not
+support a configurable scale."`, while models like `FlashVSR_Tiny` require it and return
+`422 "The scale parameter is required for the selected model."` when it is missing.

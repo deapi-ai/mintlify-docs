@@ -5013,7 +5013,7 @@
                 "tags": [
                     "Client API"
                 ],
-                "description": "Endpoint for calculating price for video upscaling inference",
+                "description": "Endpoint for calculating price for video upscaling inference. Two mutually exclusive variants: upload the `video`, or send `width` + `height` + `duration`. The price is proportional to duration, so on the second variant `duration` (spelled exactly that way — not `duration_seconds`) must always be included; the server currently accepts a request without it and answers `200` with `price: 0`, which is never a real quote.",
                 "operationId": "requestPriceForVidUpscale",
                 "parameters": [
                     {
@@ -5057,6 +5057,7 @@
                                         "required": [
                                             "width",
                                             "height",
+                                            "duration",
                                             "model"
                                         ],
                                         "properties": {
@@ -5071,12 +5072,11 @@
                                                 "example": 576
                                             },
                                             "duration": {
-                                                "description": "Optional video duration in seconds. Allows validating against the model's max allowed duration without uploading the file. Pricing itself is not duration-dependent for video upscaling.",
+                                                "description": "Video duration in seconds. The field is named `duration` — NOT `duration_seconds`. Price is directly proportional to duration, so this field is mandatory on this variant even though the server does not currently reject a request that omits it: a request without `duration` — or with `duration: null`, or with a misspelled field name — returns `200 {\"data\":{\"price\":0}}` instead of a validation error, and `0` is not the real price. Always send the actual duration and treat a returned price of `0` as a bug in your request, never as a free job. Also validated against the model's `max_video_duration_seconds` (`422` if exceeded). Do not send `duration` together with a `video` upload — the two request variants are mutually exclusive.",
                                                 "type": "number",
                                                 "format": "float",
                                                 "minimum": 0.1,
-                                                "example": 12.5,
-                                                "nullable": true
+                                                "example": 12.5
                                             },
                                             "model": {
                                                 "description": "The upscaling model to use",
