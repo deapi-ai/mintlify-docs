@@ -90,7 +90,7 @@ Account management and job status tracking.
 | --- | --- | --- | --- |
 | `GET` | `/api/v1/client/balance` | Get current account balance | [→](/api/v1/utilities/check-balance) |
 | `GET` | `/api/v1/client/request-status/{request_id}` | Check job status and get results | [→](/api/v1/utilities/get-results) |
-| `GET` | `/api/v1/client/models` | List available models (paginated, 25 per page) | [→](/api/v1/utilities/model-selection) |
+| `GET` | `/api/v1/client/models` | List available models — send `?limit=50` for the full list | [→](/api/v1/utilities/model-selection) |
 
 ## Workflow
 
@@ -98,7 +98,7 @@ Typical API usage follows this pattern:
 
 <Steps>
   <Step title="Check available models">
-    Call `GET /api/v1/client/models` to get current models and their parameters. The response is paginated at 25 models per page — keep requesting `?page=N` until `meta.current_page` equals `meta.last_page`.
+    Call `GET /api/v1/client/models?limit=50` to get current models and their parameters. `limit=50` is the maximum page size and returns the whole catalogue in one call — without it you get only the first 25 models and no error to tell you the rest are missing.
   </Step>
   <Step title="Calculate price (optional)">
     Call the `/price-calculation` endpoint with your parameters to estimate cost.

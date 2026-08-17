@@ -2408,9 +2408,23 @@
                         "$ref": "#/components/parameters/AcceptHeader"
                     },
                     {
+                        "name": "limit",
+                        "in": "query",
+                        "description": "Page size: how many models a single call returns. **Always send `limit=50`** — it is the maximum page size and returns the whole catalogue in one call. Omit it and the endpoint falls back to 25 models and gives no indication that the rest are missing. A value above 50 is clamped to 50, not rejected. This is the parameter that widens the page; `per_page` does not work.",
+                        "required": false,
+                        "example": 50,
+                        "schema": {
+                            "type": "integer",
+                            "default": 25,
+                            "minimum": 1,
+                            "maximum": 50,
+                            "example": 50
+                        }
+                    },
+                    {
                         "name": "per_page",
                         "in": "query",
-                        "description": "Accepted but currently ignored: the page size is fixed at 25 regardless of the value sent. Use `page` to retrieve the remaining results.",
+                        "description": "Accepted but currently ignored: it does not change the page size regardless of the value sent. Use `limit` to widen the page and `page` to retrieve the remaining results.",
                         "required": false,
                         "schema": {
                             "type": "integer",
@@ -2420,7 +2434,7 @@
                     {
                         "name": "page",
                         "in": "query",
-                        "description": "Page number, starting at 1. The response is paginated: a single call returns at most 25 models, so a client that reads only the first page will miss models when `meta.last_page` is greater than 1. Iterate until `meta.current_page` equals `meta.last_page` to obtain the full catalogue.",
+                        "description": "Page number, starting at 1. Rarely needed: with `limit=50` the whole catalogue is returned on page 1 and `meta.last_page` reads 1. Should the catalogue ever outgrow 50 entries, `meta.last_page` becomes greater than 1 and you fetch the remaining pages with this parameter.",
                         "required": false,
                         "schema": {
                             "type": "integer",

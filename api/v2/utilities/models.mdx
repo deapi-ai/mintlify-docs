@@ -6,5 +6,9 @@ openapi: "/openapi-v2.json GET /api/v2/models"
 List every available model with `slug`, supported `inference_types`, per-model limits (resolution, duration, steps), and feature flags (e.g., LoRA support).
 
 <Tip>
-Call `GET /api/v2/models` once at session start, cache the result, and use the returned `slug` values in your generation/edit requests. Filter with `?filter[inference_types]=txt2img` to narrow results by task.
+Call `GET /api/v2/models?limit=50` once at session start, cache the result, and use the returned `slug` values in your generation/edit requests. Filter with `&filter[inference_types]=txt2img` to narrow results by task.
 </Tip>
+
+<Warning>
+**Always send `limit=50`.** It is the maximum page size and returns the whole catalogue in one call. Omit it and you get only the first 25 models — a valid-looking response that is silently missing the rest. `per_page` does not work for this; it is accepted and ignored.
+</Warning>

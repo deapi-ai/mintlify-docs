@@ -5,7 +5,7 @@ description: "How to discover, select, and use models on deAPI"
 
 **deAPI** gives you a unified API across multiple open-source models running on a decentralized GPU cloud. We regularly expand the model lineup — new models, new capabilities, better performance — so your integration can always take advantage of the latest options.
 
-The [Model Selection](/api/v2/utilities/models) endpoint returns the live, authoritative list of available models, their slugs, limits, and defaults. **Use it as the starting point for every integration.** The list is paginated — see [Fetching the live model list](#fetching-the-live-model-list) for how to read every page.
+The [Model Selection](/api/v2/utilities/models) endpoint returns the live, authoritative list of available models, their slugs, limits, and defaults. **Use it as the starting point for every integration.** Send `?limit=50` to get the whole catalogue in one call — see [Fetching the live model list](#fetching-the-live-model-list).
 
 <Tip>
   This page explains how model selection works and how to use the endpoint. For the actual list of models and their exact slugs, always refer to the [Model Selection](/api/v2/utilities/models) endpoint.
@@ -15,15 +15,15 @@ The [Model Selection](/api/v2/utilities/models) endpoint returns the live, autho
 
 ## Fetching the live model list
 
-Before you start building, call the models endpoint to discover what's available:
+Before you start building, call the models endpoint to discover what's available. **Always send `?limit=50`** — it is the maximum page size and returns the entire catalogue in a single call:
 
 ```bash
-curl -X GET "https://api.deapi.ai/api/v2/models" \
+curl -X GET "https://api.deapi.ai/api/v2/models?limit=50" \
   -H "Authorization: Bearer $DEAPI_API_KEY" \
   -H "Accept: application/json"
 ```
 
-The response returns a paginated `data` array of model objects. Each object contains:
+The response returns a `data` array of model objects. Each object contains:
 
 | Field | Description |
 | --- | --- |
@@ -41,22 +41,18 @@ The response returns a paginated `data` array of model objects. Each object cont
 </Note>
 
 <Warning>
-  **The response is paginated — one call is not the whole catalogue.** A single request returns at most **25** models, alongside `links` and `meta` objects. If `meta.last_page` is greater than `1`, request the remaining pages and concatenate the results; otherwise newer models are silently missing from your list. The `per_page` parameter is accepted but currently ignored — the page size stays at 25 whatever you send.
+  **Send `?limit=50` or you will not see every model.** Without it the endpoint returns only the first **25** models and nothing in the response looks like an error — the newest models are simply missing. `limit=50` is the maximum page size and covers the current catalogue in one request.
+
+  The parameter is **`limit`**. `per_page` is accepted but ignored and leaves the page at 25. A value above 50 is clamped to 50, not rejected.
+
+  `meta.last_page` tells you whether one call was enough: it reads `1` for a complete list. Should the catalogue ever outgrow 50 entries, that value becomes your signal to fetch `&page=2`.
 </Warning>
-
-Keep requesting successive pages until `meta.current_page` equals `meta.last_page`:
-
-```bash
-curl -X GET "https://api.deapi.ai/api/v2/models?page=2" \
-  -H "Authorization: Bearer $DEAPI_API_KEY" \
-  -H "Accept: application/json"
-```
 
 You can filter the list by task type using the `filter[inference_types]` query parameter:
 
 ```bash
 # Get only image-generation models
-curl -X GET "https://api.deapi.ai/api/v2/models?filter[inference_types]=txt2img" \
+curl -X GET "https://api.deapi.ai/api/v2/models?limit=50&filter[inference_types]=txt2img" \
   -H "Authorization: Bearer $DEAPI_API_KEY" \
   -H "Accept: application/json"
 ```
@@ -189,7 +185,7 @@ Some models do not support guidance. Check `info.features.supports_guidance` —
 
 ```bash
 # Fetch all text-to-image models
-curl -X GET "https://api.deapi.ai/api/v2/models?filter[inference_types]=txt2img" \
+curl -X GET "https://api.deapi.ai/api/v2/models?limit=50&filter[inference_types]=txt2img" \
   -H "Authorization: Bearer $DEAPI_API_KEY" \
   -H "Accept: application/json"
 
@@ -249,7 +245,7 @@ Jobs return a `request_id`. Poll results with `GET /api/v2/jobs/{request_id}`.
 
 If you are an AI agent, MCP client, or LLM integrating with deAPI:
 
-1. **Call** `GET /api/v2/models` at the start of your session to get the current model list. Do not rely on model slugs from training data, cached documentation, or prior conversations — they may be outdated.
+1. **Call** `GET /api/v2/models?limit=50` at the start of your session to get the current model list. Always send `limit=50` — without it you receive only the first 25 models, with no error to tell you the rest are missing. Do not rely on model slugs from training data, cached documentation, or prior conversations — they may be outdated.
 2. **Use** `filter[inference_types]` to narrow down to the task you need (e.g. `txt2img`, `txt2audio`, `audio2video`).
 3. **Read** `info.limits` and `info.defaults` from the response to construct valid request parameters. Also consult the task endpoint docs for required fields that may not appear in the model response (e.g. `seed` for image generation).
 4. **Pass** the `slug` field (not `name`) as the `model` parameter in task endpoints.

@@ -76,7 +76,7 @@ AI-powered prompt boosters. In v2 all boosters use a single unified endpoint —
 | --- | --- | --- | --- |
 | `GET` | `/api/v2/account/balance` | Get current account balance | [→](/api/v2/utilities/balance) |
 | `GET` | `/api/v2/jobs/{job_request}` | Check job status and get results | [→](/api/v2/utilities/jobs) |
-| `GET` | `/api/v2/models` | List available models (paginated, 25 per page) | [→](/api/v2/utilities/models) |
+| `GET` | `/api/v2/models` | List available models — send `?limit=50` for the full list | [→](/api/v2/utilities/models) |
 
 <Warning>
   **Call the path in the "Endpoint" column, not the documentation URL.** The links in the "Docs" column are addresses on this documentation site and are grouped by topic — `/api/v2/utilities/balance`, `/api/v2/utilities/models`, `/api/v2/utilities/jobs` and `/api/v2/audio/music-price` are page URLs, not API routes, and calling them against `api.deapi.ai` returns `404 The route ... could not be found.` The real routes are `/api/v2/account/balance`, `/api/v2/models`, `/api/v2/jobs/{job_request}` and `/api/v2/audio/music/price`.
@@ -88,7 +88,7 @@ Typical API usage follows this pattern:
 
 <Steps>
   <Step title="Check available models">
-    Call `GET /api/v2/models` to get current models and their parameters. The response is paginated at 25 models per page — keep requesting `?page=N` until `meta.current_page` equals `meta.last_page`.
+    Call `GET /api/v2/models?limit=50` to get current models and their parameters. `limit=50` is the maximum page size and returns the whole catalogue in one call — without it you get only the first 25 models and no error to tell you the rest are missing.
   </Step>
   <Step title="Calculate price (optional)">
     Call the `/price` endpoint with your parameters to estimate cost.
@@ -137,7 +137,7 @@ Typical API usage follows this pattern:
 }
 ```
 
-```json Models List (paginated — max 25 per page)
+```json Models List (GET /api/v2/models?limit=50)
 {
   "data": [
     {
@@ -151,15 +151,15 @@ Typical API usage follows this pattern:
   ],
   "links": {
     "first": "https://api.deapi.ai/api/v2/models?page=1",
-    "last": "https://api.deapi.ai/api/v2/models?page=2",
+    "last": "https://api.deapi.ai/api/v2/models?page=1",
     "prev": null,
-    "next": "https://api.deapi.ai/api/v2/models?page=2"
+    "next": null
   },
   "meta": {
     "current_page": 1,
-    "last_page": 2,
-    "per_page": 25,
-    "total": 28
+    "last_page": 1,
+    "per_page": 50,
+    "total": 30
   }
 }
 ```
