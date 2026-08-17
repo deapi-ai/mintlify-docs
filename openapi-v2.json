@@ -3966,7 +3966,7 @@
                         ],
                         "properties": {
                             "video": {
-                                "description": "Video file to remove background from. Supported formats: MP4, MPEG, QuickTime, AVI, WMV, OGG. Maximum file size: 10 MB.",
+                                "description": "Video file to remove background from. Supported formats: MP4, MPEG, QuickTime, AVI, WMV, OGG. Maximum file size: 50 MB.",
                                 "type": "string",
                                 "format": "binary"
                             },
@@ -4052,7 +4052,7 @@
                         ],
                         "properties": {
                             "video": {
-                                "description": "Video file to upscale. Supported formats: MP4, MPEG, QuickTime, AVI, WMV, OGG. Maximum file size: 10 MB.",
+                                "description": "Video file to upscale. Supported formats: MP4, MPEG, QuickTime, AVI, WMV, OGG. Maximum file size: 50 MB.",
                                 "type": "string",
                                 "format": "binary"
                             },
@@ -5205,7 +5205,7 @@
                 ],
                 "properties": {
                     "video": {
-                        "description": "Video file to remove background from. Supported formats: MP4, MPEG, QuickTime, AVI, WMV, OGG. Maximum file size: 10 MB.",
+                        "description": "Video file to remove background from. Supported formats: MP4, MPEG, QuickTime, AVI, WMV, OGG. Maximum file size: 50 MB.",
                         "type": "string",
                         "format": "binary"
                     },
@@ -5305,7 +5305,7 @@
                 ],
                 "properties": {
                     "video": {
-                        "description": "Video file to upscale. Supported formats: MP4, MPEG, QuickTime, AVI, WMV, OGG. Maximum file size: 10 MB.",
+                        "description": "Video file to upscale. Supported formats: MP4, MPEG, QuickTime, AVI, WMV, OGG. Maximum file size: 50 MB.",
                         "type": "string",
                         "format": "binary"
                     },
