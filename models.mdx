@@ -156,7 +156,7 @@ When the models endpoint returns several options for the same task, use these gu
 
 **Image upscale** — Check `info.limits` for input size constraints.
 
-**Video upscale** — Check `info.limits` for input size and duration constraints. Some models support a configurable `scale` factor (currently only `FlashVSR_Tiny`, range 2–4); others are fixed-scale (`RealESRGAN_Vid_x2`, `RealESRGAN_Vid_x4`) and reject the `scale` field. Check the per-model `min_scale`/`max_scale` in `info.limits` before sending the request.
+**Video upscale** — `RealESRGAN_Vid_x2` / `_x4` are the fast, low-cost option and deliver a mild sharpen, while `FlashVSR_Tiny` reconstructs detail that is not resolvable in the source — at roughly an order of magnitude more processing time and cost, so pick it per job rather than as a default. Check `info.limits` for input size and duration constraints. Some models support a configurable `scale` factor (currently only `FlashVSR_Tiny`, range 2–4); others are fixed-scale (`RealESRGAN_Vid_x2`, `RealESRGAN_Vid_x4`) and reject the `scale` field. Check the per-model `min_scale`/`max_scale` in `info.limits` before sending the request.
 
 ---
 
