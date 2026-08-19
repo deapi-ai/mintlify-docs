@@ -69,17 +69,46 @@ See the full endpoint spec → [Model Selection](/api/v2/utilities/models)
 
 ---
 
-## Partner (external) models (soon)
+## Partner (external) models
 
 Alongside the models running on deAPI's own decentralized GPU network, the model list also includes **partner models** — large, heavy models that run on our partners' infrastructure. These are typically models that can't run on consumer GPUs (very high VRAM requirements, proprietary weights, or specialized hardware), so we make them available through the same unified API.
 
 **Nothing changes on your side.** Partner models are returned by the same [Model Selection](/api/v2/utilities/models) endpoint, listed as external models with their own `slug`, `inference_types`, and `info` (limits, features, defaults). You discover and call them exactly like any other model — fetch the list, pick a `slug`, and pass it as the `model` parameter.
 
+**How to identify one.** A partner model carries the `experimental` tag in its `tags` array, and its `status` is `test_model` (native fleet models are `standard_model`):
+
+```json
+{
+  "name": "GPT Image 2",
+  "slug": "gpt-image-2",
+  "inference_types": ["img2img", "txt2img"],
+  "tags": ["experimental"],
+  "status": "test_model"
+}
+```
+
 <Info>
   For partner models, **pricing, availability, and inference time are set by the partner**. deAPI acts as the provider (gateway) that routes your request and handles billing — it does not control the underlying infrastructure. As a result, response times and costs for these models can differ from the models running on deAPI's own network, and a partner model may occasionally be unavailable independently of the rest of the platform.
 </Info>
 
-Always read the information about limits and default values ​​for individual models from the model endpoint and check the current price in the endpoint price-calculation for the given model.
+Always read the information about limits and default values ​​for individual models from the model endpoint and check the current price in the endpoint price-calculation for the given model. Their price is quoted as an estimate and settled after the job completes — see [Partner (external) model pricing](/pricing#partner-external-model-pricing).
+
+### Availability requires a Premium account
+
+Partner models are **not available on the free tier**. To unlock them, make at least one payment to deAPI — this moves your account to Premium, and the models then appear in the `/models` endpoint response.
+
+Until then they are absent from your model list entirely, and calling one by its `slug` is rejected:
+
+```json
+{
+  "message": "This model is not available on your plan. Please upgrade to access it.",
+  "errors": {
+    "model": ["This model is not available on your plan. Please upgrade to access it."]
+  }
+}
+```
+
+This is why the model catalogue is **account-scoped**: two keys on different plans legitimately see different model lists and different totals. Discover models at runtime rather than hardcoding them.
 
 ---
 

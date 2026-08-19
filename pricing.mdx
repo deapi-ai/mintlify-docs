@@ -35,6 +35,27 @@ Example pricing is shown below for reference; exact, up-to-date rates are always
 
 ---
 
+### Partner (external) model pricing
+
+Some models in the catalogue run on our partners' infrastructure rather than on deAPI's own GPU network — see [Partner (external) models](/models#partner-external-models). You can recognise them by the `experimental` tag and `status: test_model` in the model list. They are billed differently from native fleet models.
+
+<Warning>
+  For partner models, `/price` returns an **estimate, not a fixed rate**. The response carries `is_estimated: true`, and the amount you are finally charged is settled **after** the job completes.
+</Warning>
+
+Native fleet models are priced from a formula over your request parameters, so the quote is exact. Partner models are priced by the partner, so deAPI quotes an estimate up front and reconciles it once the partner reports the actual cost.
+
+What this means in practice:
+
+- **Read `is_estimated` on every `/price` response.** When it is `true`, treat the number as indicative and budget some headroom.
+- **The final amount lands on the job, not on the quote.** Poll `GET /api/v2/jobs/{request_id}` — while the job runs, `price` is `null`; once it finishes, `price.amount` first appears with `is_estimated: true`, and switches to `is_estimated: false` once settled. Your balance is charged at that point.
+- **Only the settled figure is authoritative.** Do not reconcile your own accounting against the estimate or against the unsettled amount on a freshly finished job.
+- Estimate accuracy is best for the model's default resolution and lower for unusual sizes or quality tiers.
+
+Failed jobs are not charged: they report `price.amount: 0` and your balance is untouched.
+
+---
+
 ### Pricing by Task
 
 **Image Generation**
