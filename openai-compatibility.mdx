@@ -207,7 +207,7 @@ Three parameters change. Everything else — request format, response schema, er
 | `tts-1`, `tts-1-hd`, `gpt-4o-mini-tts` | `Kokoro`, `Chatterbox`, `Qwen3_TTS_12Hz_1_7B_CustomVoice` |
 | `whisper-1`, `gpt-4o-transcribe` | `WhisperLargeV3`, `WhisperLargeV3Ct2` |
 | `text-embedding-3-small` | `Bge_M3_FP16` |
-| `sora-2` | `Ltx2_3_22B_Dist_INT8`, `Ltx2_19B_Dist_FP8`, `MiniMaxH3_33B_Turbo_INT8`, `Ltxv_13B_0_9_8_Distilled_FP8` |
+| `sora-2` | `Ltx2_3_22B_Dist_INT8`, `MiniMaxH3_33B_Turbo_INT8`, `Ltxv_13B_0_9_8_Distilled_FP8` |
 
 ---
 
@@ -422,7 +422,7 @@ speech.write_to_file("out.mp3")
 
 | Model | Voices | Speed | Max input | Languages |
 | --- | --- | --- | --- | --- |
-| `Kokoro` | 28 named voices (`af_*`, `am_*`, `bf_*`, `bm_*`) | 0.5 – 2.0 | 10 000 chars | Language comes from the voice prefix |
+| `Kokoro` | 41 named voices across 7 languages | 0.5 – 2.0 | 10 000 chars | Language comes from the voice prefix |
 | `Chatterbox` | Default only | Pinned at 1.0 | 2 000 chars | 23 |
 | `Qwen3_TTS_12Hz_1_7B_CustomVoice` | `Vivian`, `Serena`, `Uncle_Fu`, `Dylan`, `Eric`, `Ryan`, `Aiden`, `Ono_Anna`, `Sohee` | Pinned at 1.0 | 5 000 chars | 10 |
 | `Qwen3_TTS_12Hz_1_7B_VoiceDesign` | None — the voice is described in `instructions` | Pinned at 1.0 | 5 000 chars | 10 |
@@ -478,12 +478,23 @@ client.audio.speech.create(
 The OpenAI spec has no `language` field for speech, and our backend needs one. The first rule that yields a value wins:
 
 1. An explicit `language` in the request (our extension).
-2. The voice slug prefix, where the model publishes a mapping — `af_`/`am_` → `en-us`, `bf_`/`bm_` → `en-gb`, `ef_`/`em_` → `es`, `ff_` → `fr-fr`, `hf_`/`hm_` → `hi`, `if_`/`im_` → `it`, `pf_`/`pm_` → `pt-br`.
+2. The voice slug prefix, where the model publishes a mapping. `Kokoro`:
+
+   | Prefix | Language | Voices |
+   | --- | --- | --- |
+   | `af_`, `am_` | `en-us` | 20 |
+   | `bf_`, `bm_` | `en-gb` | 8 |
+   | `ef_`, `em_` | `es` | 3 |
+   | `ff_` | `fr-fr` | 1 |
+   | `hf_`, `hm_` | `hi` | 4 |
+   | `if_`, `im_` | `it` | 2 |
+   | `pf_`, `pm_` | `pt-br` | 3 |
+
 3. The model's default language.
 4. `en-us`.
 
 <Warning>
-  **No language auto-detection.** `Kokoro` voices are hard-wired to a language and the model does not detect language from the text — today it exposes the English voice families (`af_`, `am_`, `bf_`, `bm_`). The OpenAI voice aliases all map to English voices, so non-English text needs an explicit `voice` or `language`. Drop-in compatibility is incomplete here.
+  **No language auto-detection.** `Kokoro` voices are hard-wired to a language and the model does not detect language from the text. All six OpenAI voice aliases map to English voices, so non-English text needs an explicit `voice` from the right family — or an explicit `language`. Drop-in compatibility is incomplete here.
 </Warning>
 
 ### Rejected fields on speech
@@ -636,7 +647,6 @@ The only family that is asynchronous for the client as well: `POST` returns imme
 | Model | Durations (s) | Sizes | fps | Image-to-video |
 | --- | --- | --- | --- | --- |
 | `Ltxv_13B_0_9_8_Distilled_FP8` | 1, 2, 3, 4 | `512x512`, `512x768`, `768x512`, `768x768` | 30 | No |
-| `Ltx2_19B_Dist_FP8` | 3, 4, 5, 6, 8, 10 | `768x768`, `768x1024`, `1024x768`, `1024x1024` | 24 | Yes |
 | `Ltx2_3_22B_Dist_INT8` | 3, 4, 5, 6, 8, 10 | `768x768`, `768x1024`, `1024x768`, `1024x1024` | 24 | Yes |
 | `MiniMaxH3_33B_Turbo_INT8` | 8 | `1344x768` | 24 | Yes |
 
@@ -1055,7 +1065,7 @@ deAPI also runs models with no OpenAI counterpart at all — image and video ups
 - **Native word-level timestamps** — `timestamp_granularities=["word"]` uses the model's own word timings where available, instead of always interpolating them across the segment.
 - **`instructions` for text-to-speech** — describe a voice in words on `Qwen3_TTS_12Hz_1_7B_VoiceDesign`.
 - **`application/json` on `/v1/images/edits`** — the second content type the spec defines; images are passed as `images: [{"image_url": …}]`.
-- **New models:** `ZAnimeDistill_8Step_INT8`, `WhisperLargeV3Ct2`, `MiniMaxH3_33B_Turbo_INT8`, `Qwen3_TTS_12Hz_1_7B_VoiceDesign`, `Ltx2_19B_Dist_FP8`.
+- **New models:** `ZAnimeDistill_8Step_INT8`, `WhisperLargeV3Ct2`, `MiniMaxH3_33B_Turbo_INT8`, `Qwen3_TTS_12Hz_1_7B_VoiceDesign`.
 
 ### Fixed
 
