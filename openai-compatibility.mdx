@@ -1,11 +1,20 @@
 ---
 title: "OpenAI Compatibility"
-description: "Use deAPI as a drop-in replacement for OpenAI SDK — change two parameters, keep all your existing code."
+description: "Point the official OpenAI SDK at deAPI — images, audio, embeddings and video with the request and response shapes you already know."
 ---
 
-deAPI's OpenAI-compatible API gives you access to image generation, speech synthesis, transcription, video generation, and embeddings — at lower cost, on decentralized GPU infrastructure. Switch from OpenAI by changing two parameters. Your existing code stays unchanged.
+deAPI exposes an OpenAI-compatible `/v1/*` API. Point the official OpenAI SDK (Python, Node, or plain cURL) at our base URL, use your deAPI token as the API key, and call our models with the request and response shapes you already know.
 
-This is the same approach used by Groq, Together AI, Fireworks AI, and other leading inference providers.
+This is a translation layer over the deAPI inference network — not a rebrand of OpenAI's models. Everything below documents exactly where the two contracts match and where they deliberately differ. It is the same approach used by Groq, Together AI, and Fireworks AI.
+
+**Base URL:** `https://oai.deapi.ai/v1`
+
+| Area | Where we stand |
+| --- | --- |
+| **Works today** | Models, embeddings, image generation, image editing, text-to-speech, transcription, video generation |
+| **Not available** | `/v1/chat/completions`, `/v1/files`, voice cloning, moderation, translations |
+| **Model IDs** | Native only — `Flux1schnell`, `Kokoro`, `WhisperLargeV3Ct2`, … There are no `dall-e-3` / `tts-1` / `whisper-1` aliases |
+| **Streaming** | Not supported on any endpoint |
 
 ---
 
@@ -13,54 +22,51 @@ This is the same approach used by Groq, Together AI, Fireworks AI, and other lea
 
 <Tabs>
   <Tab title="Python">
+    ```bash
+    pip install openai
+    export OPENAI_API_KEY="dpn-sk-1234|AbCdEf..."
+    export OPENAI_BASE_URL="https://oai.deapi.ai/v1"
+    ```
+
     ```python
     from openai import OpenAI
-    
-    client = OpenAI(
-        api_key="dpn-sk-your-token-here",
-        base_url="https://oai.deapi.ai/v1"
-    )
-    
-    # Generate an image — same call as OpenAI
-    response = client.images.generate(
+
+    client = OpenAI()   # reads OPENAI_API_KEY and OPENAI_BASE_URL from the env
+
+    img = client.images.generate(
         model="Flux1schnell",
-        prompt="A futuristic city at sunset, cinematic lighting",
+        prompt="a red fox in a snowy forest, cinematic lighting",
         size="1024x1024",
-        n=1
     )
-    print(response.data[0].url)
+    print(img.data[0].url)
     ```
   </Tab>
   <Tab title="Node.js / TypeScript">
+    ```bash
+    npm install openai
+    export OPENAI_API_KEY="dpn-sk-1234|AbCdEf..."
+    export OPENAI_BASE_URL="https://oai.deapi.ai/v1"
+    ```
+
     ```typescript
     import OpenAI from "openai";
-    
-    const client = new OpenAI({
-      apiKey: "dpn-sk-your-token-here",
-      baseURL: "https://oai.deapi.ai/v1",
-    });
-    
-    // Generate an image — same call as OpenAI
-    const response = await client.images.generate({
+
+    const client = new OpenAI();
+
+    const img = await client.images.generate({
       model: "Flux1schnell",
-      prompt: "A futuristic city at sunset, cinematic lighting",
+      prompt: "a red fox in a snowy forest, cinematic lighting",
       size: "1024x1024",
-      n: 1,
     });
-    console.log(response.data[0].url);
+    console.log(img.data[0].url);
     ```
   </Tab>
   <Tab title="cURL">
     ```bash
-    curl -X POST "https://oai.deapi.ai/v1/images/generations" \
-      -H "Authorization: Bearer dpn-sk-your-token-here" \
+    curl -s https://oai.deapi.ai/v1/images/generations \
+      -H "Authorization: Bearer dpn-sk-1234|AbCdEf..." \
       -H "Content-Type: application/json" \
-      -d '{
-        "model": "Flux1schnell",
-        "prompt": "A futuristic city at sunset, cinematic lighting",
-        "size": "1024x1024",
-        "n": 1
-      }'
+      -d '{"model":"Flux1schnell","prompt":"a red fox in a snowy forest","size":"1024x1024"}'
     ```
   </Tab>
 </Tabs>
@@ -71,208 +77,863 @@ This is the same approach used by Groq, Together AI, Fireworks AI, and other lea
 
 ---
 
-## What changes vs OpenAI
+## Authentication
 
-| Parameter | OpenAI | deAPI |
-| --- | --- | --- |
-| `base_url` / `baseURL` | `https://api.openai.com/v1` | `https://oai.deapi.ai/v1` |
-| `api_key` / `apiKey` | `sk-...` | Your deAPI key (starts with `dpn-sk-`) |
-| `model` | e.g. `dall-e-3` | deAPI model ID (e.g. `Flux1schnell`) |
+Generate an API token in the deAPI panel. It looks like `dpn-sk-<id>|<token>` and goes into the standard OpenAI `Authorization` header:
 
-Your full API key looks like `dpn-sk-<id>|<secret>` — the `dpn-sk-` prefix is required by the gateway, and applies only here (the native API at `https://api.deapi.ai` takes the raw key). You can find it in your [Dashboard → Settings → API Keys](https://app.deapi.ai/dashboard).
+```http
+Authorization: Bearer dpn-sk-<id>|<token>
+```
 
-Everything else — request format, response schema, error envelope — follows the OpenAI specification.
+The `dpn-sk-` prefix is required by this gateway and applies only here — the native API at `https://api.deapi.ai` takes the raw key without it. Note the literal `|` in the value: in a shell it must be quoted.
+
+Every request validates the token against your deAPI account, so a revoked token stops working immediately.
+
+| Response | Meaning |
+| --- | --- |
+| `401` without `code` | No `Authorization: Bearer …` header, or the header is empty |
+| `401` `invalid_api_key` — "Invalid API key format" | The header is present but the token prefix is not one we recognise |
+| `401` `invalid_api_key` — "Invalid API key provided" | The token was rejected by deAPI |
 
 ---
 
-## Available models
+## Timeouts
 
-deAPI runs open-source models, not OpenAI's proprietary ones. Model IDs are native slugs (e.g. `Flux1schnell`, `Kokoro`, `WhisperLargeV3`) — not OpenAI model names. This is by design.
+Image, audio and edit jobs run on a distributed GPU network and the gateway holds the HTTP connection until the job finishes. A request may legitimately take up to 10 minutes, which is exactly where the OpenAI SDK's own 600 s default sits. For heavy work (image edits, long transcriptions, `n > 1`) raise it:
 
-Use `GET /v1/models` to fetch the current list:
+<Tabs>
+  <Tab title="Python">
+    ```python
+    client = OpenAI(timeout=900.0)   # seconds
+    ```
+  </Tab>
+  <Tab title="Node.js / TypeScript">
+    ```typescript
+    const client = new OpenAI({ timeout: 900_000 });  // milliseconds
+    ```
+  </Tab>
+</Tabs>
 
-```bash
-curl "https://oai.deapi.ai/v1/models" \
-  -H "Authorization: Bearer dpn-sk-your-token-here"
-```
-
-Response follows the OpenAI format:
-
-```json
-{
-  "object": "list",
-  "data": [
-    { "id": "Flux1schnell", "object": "model", "created": 1700000000, "owned_by": "deapi" },
-    { "id": "Kokoro", "object": "model", "created": 1700000000, "owned_by": "deapi" }
-  ]
-}
-```
-
-Models are added and updated regularly. For the full, always-current list with capabilities, limits, and defaults, see the [Model Selection endpoint](/api/v2/utilities/models) and the [Models guide](/models).
+Video generation is the exception — it is asynchronous by design and returns immediately. See [Video](#video).
 
 ---
 
 ## Supported endpoints
 
-| Endpoint | Status | Description |
+| Endpoint | Method | Mode |
 | --- | --- | --- |
-| `GET /v1/models` | ✅ | List available models |
-| `POST /v1/images/generations` | ✅ | Text-to-image |
-| `POST /v1/images/edits` | ✅ | Image editing (img2img) |
-| `POST /v1/audio/speech` | ✅ | Text-to-speech |
-| `POST /v1/audio/transcriptions` | ✅ | Audio & video transcription |
-| `POST /v1/embeddings` | ✅ | Text embeddings |
-| `POST /v1/videos` | ✅ | Video generation |
-| `POST /v1/chat/completions` | ❌ | Not in scope — deAPI does not serve LLMs |
-| `POST /v1/images/edits` with `mask` | ❌ | Inpainting not supported — returns 400 |
-| `POST /v1/files` | 🔜 | Coming soon — files are sent inline (multipart) for now |
-
----
-
-## Migration examples
-
-### Image generation (DALL-E → deAPI)
-
-**Before (OpenAI):**
-
-```python
-from openai import OpenAI
-
-client = OpenAI(api_key="sk-...")
-
-response = client.images.generate(
-    model="dall-e-3",
-    prompt="A cozy cabin in the woods",
-    size="1024x1024",
-    n=1
-)
-```
-
-**After (deAPI) — change `api_key`, `base_url`, and `model`:**
-
-```python
-from openai import OpenAI
-
-client = OpenAI(
-    api_key="dpn-sk-your-token-here",       # ← changed
-    base_url="https://oai.deapi.ai/v1"   # ← changed
-)
-
-response = client.images.generate(
-    model="Flux1schnell",                 # ← deAPI model ID
-    prompt="A cozy cabin in the woods",
-    size="1024x1024",
-    n=1
-)
-```
-
----
-
-### Text-to-speech (OpenAI TTS → deAPI)
-
-**Before (OpenAI):**
-
-```python
-audio = client.audio.speech.create(
-    model="tts-1",
-    voice="alloy",
-    input="Hello world"
-)
-```
-
-**After (deAPI):**
-
-```python
-from openai import OpenAI
-
-client = OpenAI(
-    api_key="dpn-sk-your-token-here",
-    base_url="https://oai.deapi.ai/v1"
-)
-
-audio = client.audio.speech.create(
-    model="Kokoro",
-    voice="alloy",   # OpenAI voice aliases supported: alloy, echo, fable, onyx, nova, shimmer
-    input="Hello world"
-)
-```
-
-Supported output format: `mp3` only. Any other `response_format` is rejected with `400`.
+| `/v1/models` | `GET` | Synchronous |
+| `/v1/models/{model}` | `GET` | Synchronous |
+| `/v1/embeddings` | `POST` | Synchronous |
+| `/v1/images/generations` | `POST` | Job — the connection is held until it completes |
+| `/v1/images/edits` | `POST` | Job — the connection is held until it completes |
+| `/v1/audio/speech` | `POST` | Job — the connection is held until it completes |
+| `/v1/audio/transcriptions` | `POST` | Job — the connection is held until it completes |
+| `/v1/videos`, `/v1/videos/{id}`, `/v1/videos/{id}/content` | `POST`, `GET` | Natively asynchronous |
 
 <Note>
-  `Kokoro` supports the same six OpenAI voice aliases (`alloy`, `echo`, `fable`, `onyx`, `nova`, `shimmer`). Voice language is determined by the voice prefix, not the input text: `af_`/`am_` → US English, `bf_`/`bm_` → British English. See the [TTS endpoint docs](/api/v2/audio/speech) for the full voice list.
+  **Paths that return 501.** `POST /v1/videos/edits`, `POST /v1/videos/extensions`, `POST /v1/videos/characters`, `GET /v1/videos/characters/{id}`, `GET /v1/videos` (list), `DELETE /v1/videos/{id}`, `POST /v1/videos/{id}/remix`.
+
+  These exist in the OpenAI spec but have no counterpart in our backend. They answer `501 not_implemented` rather than `404`, so you know the path was recognised and there is no typo on your side. Any other unknown path under `/v1/*` answers `501 endpoint_not_implemented`.
 </Note>
 
 ---
 
-### Transcription (Whisper → deAPI)
+## Models
 
-**Before (OpenAI):**
-
-```python
-with open("audio.mp3", "rb") as f:
-    transcript = client.audio.transcriptions.create(
-        model="whisper-1",
-        file=f
-    )
-print(transcript.text)
-```
-
-**After (deAPI):**
+`GET /v1/models` returns the models available to your account. The catalog is plan-dependent, so two accounts can legitimately see different lists.
 
 ```python
-from openai import OpenAI
-
-client = OpenAI(
-    api_key="dpn-sk-your-token-here",
-    base_url="https://oai.deapi.ai/v1"
-)
-
-with open("audio.mp3", "rb") as f:
-    transcript = client.audio.transcriptions.create(
-        model="WhisperLargeV3",
-        file=f
-    )
-print(transcript.text)
+for m in client.models.list().data:
+    print(m.id)
 ```
 
-Supported `response_format` values: `"json"` (default), `"text"`, `"verbose_json"`.
+`GET /v1/models/{model}` (`client.models.retrieve(...)`) returns a single entry in the same shape. Unknown, hidden, or out-of-plan models answer `404 model_not_found`.
 
-The maximum audio file size is **20 MB**, subject to a global **75 MB** request body cap. See [Limits & Quotas → File Uploads](/limits-and-quotas#file-uploads) for the full breakdown.
+The response shape is standard: `{id, object, created, owned_by}`, where `owned_by` is always `depin`. `created` is **not** a release date — models without a published date report `0`. Do not sort on it.
+
+Catalog reads are cached for 5 minutes, so a model added or removed on the deAPI side appears (or disappears) within that window.
+
+<CodeGroup>
+```json GET /v1/models → 200
+{
+  "object": "list",
+  "data": [
+    {"id": "Bge_M3_FP16", "object": "model", "created": 1730000000, "owned_by": "depin"},
+    {"id": "Flux1schnell", "object": "model", "created": 1730000000, "owned_by": "depin"},
+    {"id": "QwenImageEdit_Plus_NF4", "object": "model", "created": 1730000000, "owned_by": "depin"},
+    {"id": "Kokoro", "object": "model", "created": 0, "owned_by": "depin"},
+    {"id": "WhisperLargeV3Ct2", "object": "model", "created": 0, "owned_by": "depin"},
+    {"id": "Ltx2_3_22B_Dist_INT8", "object": "model", "created": 1730000000, "owned_by": "depin"}
+  ]
+}
+```
+
+```json GET /v1/models/Flux1schnell → 200
+{"id": "Flux1schnell", "object": "model", "created": 1730000000, "owned_by": "depin"}
+```
+
+```json GET /v1/models/dall-e-3 → 404
+{
+  "error": {
+    "message": "Model \"dall-e-3\" is not available on this gateway.",
+    "type": "not_found_error",
+    "code": "model_not_found"
+  }
+}
+```
+</CodeGroup>
+
+For the full native catalog with capabilities, limits, defaults and LoRAs, use the [Model Selection endpoint](/api/v2/utilities/models) or the [Models guide](/models).
+
+### Why there are no OpenAI model aliases
+
+We publish native model IDs only. Aliasing `dall-e-3` onto `Flux1schnell` would promise an OpenAI parameter contract — its sizes, qualities and defaults — that our models do not implement. A wrong picture is worse than an explicit model name, so `model="dall-e-3"` returns `400 model_not_found` on POST endpoints.
+
+### Migrating from OpenAI
+
+Three parameters change. Everything else — request format, response schema, error envelope — follows the OpenAI specification.
+
+| Parameter | OpenAI | deAPI |
+| --- | --- | --- |
+| `base_url` / `baseURL` | `https://api.openai.com/v1` | `https://oai.deapi.ai/v1` |
+| `api_key` / `apiKey` | `sk-...` | `dpn-sk-<id>\|<token>` |
+| `model` | `dall-e-3`, `tts-1`, … | Native model ID (see below) |
+
+| If you were calling | Use instead |
+| --- | --- |
+| `dall-e-3`, `gpt-image-1` (generations) | `Flux1schnell`, `ZImageTurbo_INT8`, `ZAnimeDistill_8Step_INT8` |
+| `gpt-image-1` (edits) | `QwenImageEdit_Plus_NF4`, `Flux_2_Klein_4B_BF16` |
+| `tts-1`, `tts-1-hd`, `gpt-4o-mini-tts` | `Kokoro`, `Chatterbox`, `Qwen3_TTS_12Hz_1_7B_CustomVoice` |
+| `whisper-1`, `gpt-4o-transcribe` | `WhisperLargeV3`, `WhisperLargeV3Ct2` |
+| `text-embedding-3-small` | `Bge_M3_FP16` |
+| `sora-2` | `Ltx2_3_22B_Dist_INT8`, `Ltx2_19B_Dist_FP8`, `MiniMaxH3_33B_Turbo_INT8`, `Ltxv_13B_0_9_8_Distilled_FP8` |
 
 ---
 
-### Embeddings
-
-**Before (OpenAI):**
+## Embeddings
 
 ```python
-response = client.embeddings.create(
-    model="text-embedding-3-small",
-    input="The quick brown fox"
+r = client.embeddings.create(model="Bge_M3_FP16", input=["first", "second"])
+print(len(r.data), len(r.data[0].embedding))
+```
+
+| Model | Dimensions |
+| --- | --- |
+| `Bge_M3_FP16` | 1024 |
+
+| Field | Behaviour |
+| --- | --- |
+| `input` | String or array of strings |
+| `encoding_format` | `float` (default) or `base64` |
+| `dimensions` | Accepted, ignored — you always get the model's native width |
+| `user` | Accepted, not forwarded |
+
+<Warning>
+  `dimensions` does not resize the vector. `Bge_M3_FP16` always returns 1024 floats, whatever you pass. Size your index from the response, not from the request.
+</Warning>
+
+<CodeGroup>
+```json encoding_format: "float" (default) → 200
+{
+  "object": "list",
+  "data": [
+    {"object": "embedding", "index": 0, "embedding": [-0.0234, 0.1187, -0.0051, "… 1024 floats total"]},
+    {"object": "embedding", "index": 1, "embedding": [0.0412, -0.0776, 0.0093, "… 1024 floats total"]}
+  ],
+  "model": "Bge_M3_FP16",
+  "usage": {"prompt_tokens": 0, "total_tokens": 0}
+}
+```
+
+```json encoding_format: "base64" → 200
+{
+  "object": "list",
+  "data": [
+    {"object": "embedding", "index": 0, "embedding": "2S6XvPmRND2Ln6a8…"}
+  ],
+  "model": "Bge_M3_FP16",
+  "usage": {"prompt_tokens": 0, "total_tokens": 0}
+}
+```
+</CodeGroup>
+
+Array inputs are capped at **100 items** per request; above that you get `400 input_too_large`. The batch is all-or-nothing: the first failure cancels the rest, so you receive either every vector or a single error — never a partially filled `data[]`.
+
+`usage.prompt_tokens` is always `0`. The backend does not report token counts and inventing one would be worse than reporting zero. `total_tokens` mirrors it.
+
+---
+
+## Image generation
+
+```python
+img = client.images.generate(
+    model="Flux1schnell",
+    prompt="an isometric city block at golden hour",
+    size="1024x1024",
+    quality="high",
+    n=2,
+    response_format="b64_json",
 )
 ```
 
-**After (deAPI):**
+| Model | Sizes | `n` max | Notes |
+| --- | --- | --- | --- |
+| `Flux1schnell` | `512x512`, `768x768`, `1024x1024`, `1024x1536`, `1536x1024` | 4 | Distilled: quality maps to 2 / 4 / 8 steps — not 50 |
+| `ZImageTurbo_INT8` | `512x512`, `768x768`, `1024x1024` | 4 | 6 / 8 / 16 steps |
+| `ZAnimeDistill_8Step_INT8` | `512x512`, `768x768`, `1024x1024` | 4 | Anime-oriented variant, 6 / 8 / 16 steps |
 
-```python
-from openai import OpenAI
+| Field | Behaviour |
+| --- | --- |
+| `model`, `prompt` | Required |
+| `n` | Fans out into `n` parallel jobs, capped per model |
+| `size` | Validated against the model's list |
+| `quality` | `low`, `medium`, `high`, `standard`, `hd`, `auto` → a per-model step preset |
+| `response_format` | `url` (default) or `b64_json` |
+| `user` | Accepted, not forwarded |
 
-client = OpenAI(
-    api_key="dpn-sk-your-token-here",
-    base_url="https://oai.deapi.ai/v1"
-)
-
-response = client.embeddings.create(
-    model="Bge_M3_FP16",
-    input="The quick brown fox"
-)
-
-# Vector dimension: 1024
-print(len(response.data[0].embedding))  # → 1024
+<CodeGroup>
+```json response_format: "url" (default) → 200
+{
+  "created": 1755691200,
+  "data": [
+    {"url": "https://storage.deapi.ai/results/9f2c…/image-0.png"},
+    {"url": "https://storage.deapi.ai/results/9f2c…/image-1.png"}
+  ]
+}
 ```
 
-Supports single string and array input. Supports `encoding_format: "base64"`.
+```json response_format: "b64_json" → 200
+{
+  "created": 1755691200,
+  "data": [
+    {"b64_json": "iVBORw0KGgoAAAANSUhEUgAABAAAAAQACAIAAAB…"},
+    {"b64_json": "iVBORw0KGgoAAAANSUhEUgAABAAAAAQACAIAAAB…"}
+  ]
+}
+```
+</CodeGroup>
+
+`revised_prompt` is part of the OpenAI shape but is never populated here, so the key is absent — none of our models rewrites your prompt.
+
+`quality="auto"` is the SDK default and means "pick the best setting for this model" — identical to omitting the field. Quality presets are defined per model because distilled models (Flux Schnell: 2–8 steps) and full models operate in disjoint ranges. A generic "high = 50 steps" rule would silently produce garbage on distilled models.
+
+### Rejected fields
+
+| Field | Error | Why |
+| --- | --- | --- |
+| `stream=true`, `partial_images > 0` | `stream_not_supported` | The response is a single body, not a stream |
+| `background="transparent"` | `param_not_supported` | Output is PNG without an alpha channel — measured, not assumed |
+| `output_format="jpeg"` \| `"webp"` | `param_not_supported` | Output is always PNG; we do not transcode in the proxy |
+| `output_compression` | `param_not_supported` | Applies to JPEG/WebP, which we do not produce (including value `0`) |
+
+Accepted with no change in behaviour: `stream=false`, `partial_images=0`, `background="opaque"` \| `"auto"`, `output_format="png"` — these describe what we already do. `moderation` and `style` are accepted and explicitly declared as not affecting the image.
+
+<Note>
+  Output is PNG, RGB, no alpha. With `response_format="url"` the link points at deAPI storage and expires (assume ~24 h). The response carries no expiry field — download promptly or request `b64_json`.
+</Note>
+
+---
+
+## Image editing
+
+Both content types from the spec are supported.
+
+| Model | Input images | Max file | `n` max |
+| --- | --- | --- | --- |
+| `QwenImageEdit_Plus_NF4` | 1 | 10 MB | 2 |
+| `Flux_2_Klein_4B_BF16` | Up to 3 (combine) | 10 MB | 2 |
+
+Both are instruction-following editors, not inpainting models. The gateway itself accepts a multipart body up to 50 MiB, but the platform caps a single image at **10 MB** — see [Limits & Quotas → File Uploads](/limits-and-quotas#file-uploads).
+
+### multipart/form-data
+
+```bash
+curl -s https://oai.deapi.ai/v1/images/edits \
+  -H "Authorization: Bearer dpn-sk-1234|AbCdEf..." \
+  -F model=QwenImageEdit_Plus_NF4 \
+  -F image=@source.png \
+  -F prompt="make the sky stormy"
+```
+
+Fields: `image` (one or more files), `prompt`, `model`, `n`, `size`, `quality`, `response_format`, `user`. File type is detected from the bytes, not from the declared part header.
+
+### application/json
+
+```json
+{
+  "model": "Flux_2_Klein_4B_BF16",
+  "prompt": "combine these into one poster",
+  "images": [
+    {"image_url": "https://example.com/a.png"},
+    {"image_url": "data:image/png;base64,iVBORw0KGgo..."}
+  ]
+}
+```
+
+- `data:` URLs are decoded locally, with no outbound traffic.
+- Plain URLs are fetched by the gateway: 10 MB limit, publicly reachable addresses only.
+- `file_id` → `400 file_id_not_supported` (there is no Files API here).
+- A bare string instead of an object → `400`. We do not reinterpret it.
+
+Images are fetched **after** the model and all fields are accepted, so a request we would reject anyway never causes us to call the address you supplied.
+
+### Response
+
+Identical envelope to `/v1/images/generations` — the two endpoints share a shape on the wire.
+
+```json
+{
+  "created": 1755691200,
+  "data": [
+    {"url": "https://storage.deapi.ai/results/4b81…/edit-0.png"}
+  ]
+}
+```
+
+With `response_format="b64_json"` each element carries `b64_json` instead of `url`. With `n=2` you get two elements, one per job.
+
+### Rejected fields on edits
+
+Everything from [image generation](#rejected-fields), plus:
+
+| Field | Error | Why |
+| --- | --- | --- |
+| `mask` | `mask_not_supported` | No inpainting model on the backend — a deliberate gap, not an oversight |
+| `input_fidelity` | `param_not_supported` | Our edit models have no fidelity control |
+
+One deviation in your favour: we accept `quality="hd"` here, even though the spec restricts `hd` to `/images/generations`. The alias is defined per model and produces a sensible preset, so rejecting it would break working integrations.
+
+---
+
+## Text-to-speech
+
+Returns raw audio bytes, not JSON.
+
+```python
+speech = client.audio.speech.create(
+    model="Kokoro",
+    voice="af_nova",
+    input="Hello from the deAPI network.",
+    response_format="mp3",
+)
+speech.write_to_file("out.mp3")
+```
+
+| Model | Voices | Speed | Max input | Languages |
+| --- | --- | --- | --- | --- |
+| `Kokoro` | 28 named voices (`af_*`, `am_*`, `bf_*`, `bm_*`) | 0.5 – 2.0 | 10 000 chars | Language comes from the voice prefix |
+| `Chatterbox` | Default only | Pinned at 1.0 | 2 000 chars | 23 |
+| `Qwen3_TTS_12Hz_1_7B_CustomVoice` | `Vivian`, `Serena`, `Uncle_Fu`, `Dylan`, `Eric`, `Ryan`, `Aiden`, `Ono_Anna`, `Sohee` | Pinned at 1.0 | 5 000 chars | 10 |
+| `Qwen3_TTS_12Hz_1_7B_VoiceDesign` | None — the voice is described in `instructions` | Pinned at 1.0 | 5 000 chars | 10 |
+
+| Field | Behaviour |
+| --- | --- |
+| `model`, `input` | Required; `input` capped per model |
+| `voice` | Validated against the model's voice list |
+| `response_format` | `mp3` only |
+| `speed` | Validated against the model's range |
+| `instructions` | Only on the voice-design model — see below |
+| `language` | Our extension, not in the OpenAI spec |
+
+The body is the audio file itself, not JSON:
+
+```http
+HTTP/1.1 200 OK
+Content-Type: audio/mpeg
+Content-Length: 41328
+X-Request-Id: 4f8c1d2e-9b07-4a51-a6b1-2f0d9c3e77aa
+X-DeAPI-Request-Id: 1f4ba0d2-58c7-4a1e-9c33-7de6f0b21a84
+
+<mp3 bytes>
+```
+
+<Warning>
+  Errors on this endpoint still come back as the usual JSON envelope with `Content-Type: application/json`, so branch on the status code before reading the body as audio.
+</Warning>
+
+Speed is pinned at `1.0` on `Chatterbox` and the whole Qwen3 family — any other value returns `400 speed_out_of_range`. Those models have no tempo control, and pretending otherwise would bill you for a request executed against your instructions.
+
+OpenAI voice names work on `Kokoro` through aliases: `alloy` → `af_alloy`, `echo` → `am_echo`, `fable` → `bm_fable`, `onyx` → `am_onyx`, `nova` → `af_nova`, `shimmer` → `af_sky`. On `Chatterbox` and Qwen3 they map to that model's own voices.
+
+### Describing a voice instead of picking one
+
+`Qwen3_TTS_12Hz_1_7B_VoiceDesign` takes a natural-language voice description:
+
+```python
+client.audio.speech.create(
+    model="Qwen3_TTS_12Hz_1_7B_VoiceDesign",
+    input="Chapter one.",
+    voice="alloy",                       # accepted and ignored on this model
+    instructions="a low-pitched, calm male narrator",
+)
+```
+
+- `instructions` on a model with a voice list → `400 instructions_not_supported`, and the message names the model that does support it. We refuse instead of ignoring, because a silently dropped field means paying for half of what you asked for.
+- The voice-design model without `instructions` → `400 instructions_required`.
+- `voice` is accepted and ignored on that model — OpenAI types the field as required, but this model has no voice list.
+
+### How the language is chosen
+
+The OpenAI spec has no `language` field for speech, and our backend needs one. The first rule that yields a value wins:
+
+1. An explicit `language` in the request (our extension).
+2. The voice slug prefix, where the model publishes a mapping — `af_`/`am_` → `en-us`, `bf_`/`bm_` → `en-gb`, `ef_`/`em_` → `es`, `ff_` → `fr-fr`, `hf_`/`hm_` → `hi`, `if_`/`im_` → `it`, `pf_`/`pm_` → `pt-br`.
+3. The model's default language.
+4. `en-us`.
+
+<Warning>
+  **No language auto-detection.** `Kokoro` voices are hard-wired to a language and the model does not detect language from the text — today it exposes the English voice families (`af_`, `am_`, `bf_`, `bm_`). The OpenAI voice aliases all map to English voices, so non-English text needs an explicit `voice` or `language`. Drop-in compatibility is incomplete here.
+</Warning>
+
+### Rejected fields on speech
+
+| Field | Error |
+| --- | --- |
+| `stream_format="sse"` | `stream_not_supported` — audio arrives as one body when synthesis completes |
+| `response_format` ≠ `mp3` | `format_not_supported` |
+| Unknown `stream_format` value | `param_not_supported` |
+
+`stream_format="audio"` is accepted — it describes the current behaviour.
+
+---
+
+## Transcription
+
+```python
+with open("meeting.mp3", "rb") as f:
+    r = client.audio.transcriptions.create(
+        model="WhisperLargeV3Ct2",
+        file=f,
+        response_format="verbose_json",
+        timestamp_granularities=["word"],
+        language="en",
+    )
+```
+
+| Model | Formats | Timestamps | Diarization |
+| --- | --- | --- | --- |
+| `WhisperLargeV3` | `json`, `text`, `verbose_json` | Segment | No |
+| `WhisperLargeV3Ct2` | `json`, `text`, `verbose_json`, `diarized_json` | Segment + native word-level | Yes |
+
+| Field | Behaviour |
+| --- | --- |
+| `file`, `model` | Required |
+| `language` | Forwarded to the backend and affects the result; region subtags are trimmed (`en-US` → `en`) |
+| `response_format` | `json` (default), `text`, `verbose_json`, `diarized_json` |
+| `timestamp_granularities[]` | `word` uses native word timings on models that publish support |
+
+The gateway accepts a multipart body up to 50 MiB, but the platform caps a single audio file at **20 MB** and a single video file at **50 MB**, within a global 75 MB request body cap. See [Limits & Quotas → File Uploads](/limits-and-quotas#file-uploads).
+
+### Response formats
+
+<CodeGroup>
+```json response_format: "json" (default) → 200
+{"text": "Good morning. Let's start with the quarterly numbers."}
+```
+
+```text response_format: "text" → 200 (Content-Type: text/plain)
+Good morning. Let's start with the quarterly numbers.
+```
+
+```json verbose_json + timestamp_granularities: ["word"] → 200
+{
+  "task": "transcribe",
+  "language": "english",
+  "duration": 5.24,
+  "text": "Good morning. Let's start with the quarterly numbers.",
+  "words": [
+    {"word": "Good", "start": 0.12, "end": 0.38},
+    {"word": "morning", "start": 0.38, "end": 0.91}
+  ],
+  "segments": [
+    {
+      "id": 0,
+      "seek": 0,
+      "start": 0.0,
+      "end": 5.24,
+      "text": "Good morning. Let's start with the quarterly numbers.",
+      "tokens": [],
+      "temperature": 0.0,
+      "avg_logprob": -0.2431,
+      "compression_ratio": 1.372,
+      "no_speech_prob": 0.0
+    }
+  ]
+}
+```
+
+```json diarized_json → 200 (WhisperLargeV3Ct2 only)
+{
+  "task": "transcribe",
+  "duration": 9.87,
+  "text": "Good morning. Morning — shall we start?",
+  "segments": [
+    {
+      "type": "transcript.text.segment",
+      "id": "0",
+      "start": 0.0,
+      "end": 4.12,
+      "text": "Good morning.",
+      "speaker": "A"
+    },
+    {
+      "type": "transcript.text.segment",
+      "id": "1",
+      "start": 4.12,
+      "end": 9.87,
+      "text": "Morning — shall we start?",
+      "speaker": "B"
+    }
+  ],
+  "usage": {"type": "duration", "seconds": 9.87}
+}
+```
+</CodeGroup>
+
+`srt` and `vtt` return `400 format_not_supported` — the backend returns text and we do not synthesise subtitle files.
+
+Speakers in `diarized_json` are numbered by first appearance (`A`, `B`, …) and are stable within one response, **not** across calls — the same person may be `A` in one recording and `B` in the next. This matches OpenAI's behaviour without speaker references.
+
+Diarization is available on exactly one model (`WhisperLargeV3Ct2`). Requesting it elsewhere returns `400` before a billable job is created, and the message names the model that can do it.
+
+### Fields in `verbose_json` that carry no real measurement
+
+The shape is always complete so drop-in clients see a stable set of keys, but some values are placeholders rather than measurements:
+
+| Field | Value |
+| --- | --- |
+| `start`, `end`, `text` | Real |
+| `compression_ratio` | Computed locally |
+| `avg_logprob` | Real on `WhisperLargeV3Ct2`, `0` otherwise |
+| `seek`, `temperature`, `no_speech_prob` | Always `0` |
+| `tokens` | Always an empty array |
+
+The `language` field in the response is a real detection on `WhisperLargeV3Ct2` (the model's own detection wins over your hint, returned as a Whisper-style name such as `english`). On `WhisperLargeV3` it echoes your request instead.
+
+### Rejected fields on transcription
+
+| Field | Error | Why |
+| --- | --- | --- |
+| `stream=true` | `stream_not_supported` | The response is a single body |
+| `include[]` | `param_not_supported` | Asks for logprobs the backend does not return |
+| `languages[]` | `param_not_supported` | Use the single `language` field |
+| `chunking_strategy` | `param_not_supported` | The backend decides how long audio is split |
+| `known_speaker_names[]`, `known_speaker_references[]` | `param_not_supported` | No reference-sample support; returning A/B anyway would be answering a different question |
+
+<Warning>
+  **Accepted, but with no effect on the transcript:** `prompt`, `temperature`, `keywords[]`. These are best-effort hints at OpenAI too, and we accept them so that existing code keeps working — but they do not change the transcript. If you are counting on `prompt` to force terminology or `temperature=0` to give determinism, it will not happen here.
+</Warning>
+
+`stream=false` is accepted; it describes what we already do.
+
+---
+
+## Video
+
+The only family that is asynchronous for the client as well: `POST` returns immediately and you poll for the result.
+
+| Model | Durations (s) | Sizes | fps | Image-to-video |
+| --- | --- | --- | --- | --- |
+| `Ltxv_13B_0_9_8_Distilled_FP8` | 1, 2, 3, 4 | `512x512`, `512x768`, `768x512`, `768x768` | 30 | No |
+| `Ltx2_19B_Dist_FP8` | 3, 4, 5, 6, 8, 10 | `768x768`, `768x1024`, `1024x768`, `1024x1024` | 24 | Yes |
+| `Ltx2_3_22B_Dist_INT8` | 3, 4, 5, 6, 8, 10 | `768x768`, `768x1024`, `1024x768`, `1024x1024` | 24 | Yes |
+| `MiniMaxH3_33B_Turbo_INT8` | 8 | `1344x768` | 24 | Yes |
+
+Each model validates `seconds` and `size` against its own list — the table is a union, not a menu that applies everywhere.
+
+```python
+import time
+
+job = client.videos.create(
+    model="Ltx2_3_22B_Dist_INT8",
+    prompt="a paper boat drifting down a rain-soaked street",
+    seconds="5",
+    size="768x768",
+)
+
+while True:
+    job = client.videos.retrieve(job.id)
+    if job.status in ("completed", "failed"):
+        break
+    time.sleep(5)
+
+content = client.videos.download_content(job.id)
+content.write_to_file("clip.mp4")
+```
+
+| Route | Purpose |
+| --- | --- |
+| `POST /v1/videos` | Creates the job, returns `{id, status: "queued", …}` |
+| `GET /v1/videos/{id}` | `status`: `queued` → `in_progress` → `completed` / `failed` |
+| `GET /v1/videos/{id}/content` | Downloads the finished file |
+
+<CodeGroup>
+```json POST /v1/videos → 200
+{
+  "id": "c08a339c-73e5-4d67-a4d5-231302fbff9a",
+  "object": "video",
+  "status": "queued",
+  "created_at": 1755691200,
+  "expires_at": 1755777600,
+  "model": "Ltx2_3_22B_Dist_INT8",
+  "prompt": "a paper boat drifting down a rain-soaked street",
+  "seconds": "5",
+  "size": "768x768",
+  "progress": 0
+}
+```
+
+```json GET — running → 200
+{
+  "id": "c08a339c-73e5-4d67-a4d5-231302fbff9a",
+  "object": "video",
+  "status": "in_progress",
+  "created_at": 1755691200,
+  "expires_at": 1755777600,
+  "model": "Ltx2_3_22B_Dist_INT8",
+  "prompt": "a paper boat drifting down a rain-soaked street",
+  "seconds": "5",
+  "size": "768x768",
+  "progress": 50
+}
+```
+
+```json GET — finished → 200
+{
+  "id": "c08a339c-73e5-4d67-a4d5-231302fbff9a",
+  "object": "video",
+  "status": "completed",
+  "created_at": 1755691200,
+  "completed_at": 1755691436,
+  "expires_at": 1755777600,
+  "model": "Ltx2_3_22B_Dist_INT8",
+  "prompt": "a paper boat drifting down a rain-soaked street",
+  "seconds": "5",
+  "size": "768x768",
+  "progress": 100
+}
+```
+
+```json GET — failed → 200
+{
+  "id": "c08a339c-73e5-4d67-a4d5-231302fbff9a",
+  "object": "video",
+  "status": "failed",
+  "created_at": 1755691200,
+  "expires_at": 1755777600,
+  "model": "Ltx2_3_22B_Dist_INT8",
+  "seconds": "5",
+  "size": "768x768",
+  "progress": 0,
+  "error": {
+    "code": "job_failed",
+    "message": "Job failed during rendering."
+  }
+}
+```
+</CodeGroup>
+
+<Note>
+  A failed job carries an `error` object inside the video object and the `GET` itself still returns **200** — the request succeeded, the job did not. Branch on `status`, not on the status code.
+</Note>
+
+`GET /v1/videos/{id}/content` returns the file:
+
+```http
+HTTP/1.1 200 OK
+Content-Type: video/mp4
+X-Request-Id: 7a3e05b1-64c2-4d90-9a11-8c5be0f4d233
+
+<mp4 bytes>
+```
+
+Before the job completes the same route answers `409 video_not_ready`, and `502 video_failed` if it failed:
+
+```json
+{
+  "error": {
+    "message": "Video c08a339c-73e5-4d67-a4d5-231302fbff9a is not ready (status=in_progress). Poll /v1/videos/c08a339c-73e5-4d67-a4d5-231302fbff9a until status=completed.",
+    "type": "invalid_request_error",
+    "code": "video_not_ready"
+  }
+}
+```
+
+`?variant=` accepts `video` only; anything else (`thumbnail`, `spritesheet`, …) returns `501 variant_not_supported` rather than quietly handing you the main file.
+
+### Image-to-video
+
+```json
+{
+  "model": "Ltx2_3_22B_Dist_INT8",
+  "prompt": "the camera pushes in slowly",
+  "input_reference": {"image_url": "https://example.com/first-frame.png"}
+}
+```
+
+`input_reference` is an object, exactly as in the spec — `image_url` accepts a public URL or a base64 `data:` URL (10 MB limit; `data:` URLs are decoded locally). `file_id` returns `400`, since there is no Files API here. A bare string returns `400` rather than being reinterpreted.
+
+Requires a model with image-to-video support (`Ltx2_*`, `MiniMaxH3_*`); anything else returns `400 input_reference_not_supported` before any other validation.
+
+### Fields not to take literally
+
+- `progress` is mostly synthetic: `0` when queued, `100` when completed, `50` in between. It is not a render progress meter.
+- `expires_at` is `created_at` + 24 h computed on our side. `/content` re-resolves a fresh download link on every call, so the window is real — but it is our promise, not a backend guarantee.
+- `model`, `prompt`, `size`, `seconds`, `created_at` in the `GET` response come from in-memory state recorded when the job was created. After a gateway restart they come back empty; `/content` keeps working.
+- An unrecognised backend status is reported as `in_progress`, so your polling loop keeps going instead of failing on a transient mismatch.
+
+<Warning>
+  **Enum mismatch — read before integrating.** The OpenAI spec allows `seconds` ∈ `{4, 8, 12}` and four fixed resolutions. Our models publish `1 | 2 | 3 | 4 | 5 | 6 | 8 | 10` seconds and eight sizes (`512x512`, `512x768`, `768x512`, `768x768`, `768x1024`, `1024x768`, `1024x1024`, `1344x768`).
+
+  A strictly typed TypeScript client will not compile `"512x512"`, and Python type checkers will warn. This is the direct consequence of exposing our own models with their own parameters; it cannot be "fixed" without pretending to be OpenAI models. Cast or bypass the enum on the client side.
+</Warning>
+
+---
+
+## Errors
+
+Every error under `/v1/*` uses the OpenAI envelope:
+
+```json
+{
+  "error": {
+    "message": "Size \"2048x2048\" is not supported by Flux1schnell. Supported: [512x512 768x768 1024x1024 1024x1536 1536x1024].",
+    "type": "invalid_request_error",
+    "param": "size",
+    "code": "size_not_supported"
+  }
+}
+```
+
+Build your handling on `code`, not on `message`. `param` and `code` are omitted entirely when they do not apply, so treat them as optional keys rather than expecting empty strings. Some responses — notably `401` for a missing header and every `429` — carry no `code` at all; for those, `type` plus the HTTP status is the stable signal.
+
+| HTTP | `type` |
+| --- | --- |
+| `400` | `invalid_request_error` |
+| `401` | `authentication_error` |
+| `404` | `not_found_error` |
+| `405`, `409` | `invalid_request_error` |
+| `422` | `idempotency_error` |
+| `429` | `rate_limit_exceeded` |
+| `501` | `not_implemented` |
+| `503` | `overloaded_error` |
+| `504` | `timeout_error` |
+| `500`, `502`, other | `api_error` |
+
+`not_implemented` and `timeout_error` are our extensions to OpenAI's vocabulary: the first means "this surface will not work this way", the second "retry with a longer deadline".
+
+### Common codes
+
+| Code | HTTP | Meaning |
+| --- | --- | --- |
+| `missing_required_parameter` | 400 | A field the spec requires is missing |
+| `model_not_found` | 400 / 404 | Model outside your account's catalog — 400 on POST endpoints, 404 on `GET /v1/models/{model}` |
+| `model_wrong_endpoint` | 400 | The model exists but does not serve this endpoint |
+| `param_not_supported` | 400 | Legal in the spec, no counterpart on our backend |
+| `stream_not_supported` | 400 | Streaming was requested; we do not open streams |
+| `idempotency_key_reuse` | 422 | Same `Idempotency-Key`, different request body |
+| `upstream_validation_error` | 400 / 401 / 403 / 404 / 409 | The backend rejected the request; `message` explains |
+| `upstream_unavailable` | 503 | A retryable failure — capacity, not your request |
+| `upstream_job_failed` | 502 | The job failed permanently; `message` carries the reason |
+| `upstream_timeout` | 504 | The job did not finish within the wait window |
+| `internal_error` | 500 | Unexpected failure on our side |
+
+Endpoint-specific codes are listed in the sections above.
+
+### Retry guidance
+
+- `503 upstream_unavailable` — retry with backoff; this is our capacity, not your payload.
+- `504 upstream_timeout` — the job exceeded the wait window; retry, ideally with an [`Idempotency-Key`](#idempotency) so you are not billed twice.
+- `502 upstream_job_failed` — do not blindly retry; read `message` first.
+- `429` — see [Rate limits](#rate-limits).
+
+<CodeGroup>
+```json 503 — retryable capacity failure
+{
+  "error": {
+    "message": "Upstream job failed: no worker available for this model.",
+    "type": "overloaded_error",
+    "code": "upstream_unavailable"
+  }
+}
+```
+
+```json 504 — the job outlived the wait window
+{
+  "error": {
+    "message": "Job did not complete within the wait window.",
+    "type": "timeout_error",
+    "code": "upstream_timeout"
+  }
+}
+```
+</CodeGroup>
+
+### Request IDs
+
+Every response, including errors, carries an `X-Request-Id` header. Quote it in support tickets — it is how we find your request in the logs. Request bodies are never logged.
+
+Endpoints that enqueue work also return `X-DeAPI-Request-Id` with the backend job identifier — one value for single-job endpoints (`audio/speech`, `audio/transcriptions`, `videos`), or a comma-separated list where the request fans out (`embeddings`, `images/generations`, `images/edits`). It is set before the status code, so it is present on error responses too.
+
+---
+
+## Rate limits
+
+Rate limiting is enforced by your deAPI plan and passed through unmodified. On `429` you get the OpenAI envelope:
+
+```json
+{"error": {"message": "Rate limit exceeded (per-minute). Retry after 60 seconds.", "type": "rate_limit_exceeded"}}
+```
+
+Note there is no `code` field on this one — `type` is the stable signal.
+
+Headers travel through verbatim:
+
+```http
+X-RateLimit-Type: minute
+X-RateLimit-Limit: 3
+X-RateLimit-Remaining: 0
+X-RateLimit-Daily-Limit: 1000
+X-RateLimit-Daily-Remaining: 947
+Retry-After: 60
+```
+
+The OpenAI Python and Node SDKs parse `Retry-After` and back off on their own. For the per-plan numbers, see [Limits & Quotas](/limits-and-quotas).
+
+---
+
+## Idempotency
+
+Send `Idempotency-Key: <uuid>` on a `POST` and a repeated request with the same key and the same body returns the stored response plus `Idempotent-Replayed: true` — no second job, no second charge.
+
+```python
+import uuid
+
+key = str(uuid.uuid4())
+r1 = client.embeddings.create(
+    model="Bge_M3_FP16", input="hello",
+    extra_headers={"Idempotency-Key": key},
+)
+r2 = client.embeddings.create(          # same key, same body → replayed
+    model="Bge_M3_FP16", input="hello",
+    extra_headers={"Idempotency-Key": key},
+)
+```
+
+What you should know about the mechanics:
+
+- **`POST` only.** `GET`/`HEAD` and requests without the header pass through untouched.
+- **Scoped per caller and per endpoint.** The same key on `/v1/embeddings` and `/v1/images/generations` are two independent entries, and two accounts never share one.
+- **Rotating your token invalidates in-flight keys.**
+- **Only `2xx` responses are stored.** After a `4xx` you are free to fix the request and retry with the same key instead of being served a stale error.
+- **Same key, different body → `422 idempotency_key_reuse`.** We never quietly serve the previous response.
+- **Bodies over 1 MiB bypass the mechanism entirely** — in practice, multipart uploads (`images/edits`, `audio/transcriptions`). Responses over 1 MiB are not stored either: the request runs normally, it simply cannot be replayed.
+- **Two concurrent requests with the same key both execute.** There is no in-flight lock; the last one to finish wins. Sequential SDK retries — the common case — are protected.
+- **A replayed response carries a fresh `X-Request-Id`**, not the original one.
+- **`POST /v1/videos` is covered too.** A retried create would otherwise produce a second job whose `id` you never learn, orphaned and billed. With a key, the same `id` comes back.
+
+Entries live for one hour.
 
 ---
 
@@ -280,47 +941,45 @@ Supports single string and array input. Supports `encoding_format: "base64"`.
 
 Because deAPI uses the OpenAI API format, it works with any framework that accepts a `base_url` / `api_base` parameter.
 
-### LangChain
+<Tabs>
+  <Tab title="LangChain">
+    ```python
+    from langchain_openai import OpenAIEmbeddings
 
-```python
-from langchain_openai import OpenAIEmbeddings
+    embeddings = OpenAIEmbeddings(
+        openai_api_key="dpn-sk-1234|AbCdEf...",
+        openai_api_base="https://oai.deapi.ai/v1",
+        model="Bge_M3_FP16",
+    )
+    ```
+  </Tab>
+  <Tab title="LlamaIndex">
+    ```python
+    from llama_index.embeddings.openai import OpenAIEmbedding
 
-embeddings = OpenAIEmbeddings(
-    openai_api_key="dpn-sk-your-token-here",
-    openai_api_base="https://oai.deapi.ai/v1",
-    model="Bge_M3_FP16"
-)
-```
+    embed_model = OpenAIEmbedding(
+        api_key="dpn-sk-1234|AbCdEf...",
+        api_base="https://oai.deapi.ai/v1",
+        model="Bge_M3_FP16",
+    )
+    ```
+  </Tab>
+  <Tab title="Vercel AI SDK">
+    ```typescript
+    import { createOpenAI } from "@ai-sdk/openai";
 
-### LlamaIndex
-
-```python
-from llama_index.embeddings.openai import OpenAIEmbedding
-
-embed_model = OpenAIEmbedding(
-    api_key="dpn-sk-your-token-here",
-    api_base="https://oai.deapi.ai/v1",
-    model="Bge_M3_FP16"
-)
-```
-
-### Vercel AI SDK
-
-```typescript
-import { createOpenAI } from "@ai-sdk/openai";
-
-const deapi = createOpenAI({
-  apiKey: "dpn-sk-your-token-here",
-  baseURL: "https://oai.deapi.ai/v1",
-});
-```
-
-### Environment variables
+    const deapi = createOpenAI({
+      apiKey: "dpn-sk-1234|AbCdEf...",
+      baseURL: "https://oai.deapi.ai/v1",
+    });
+    ```
+  </Tab>
+</Tabs>
 
 If your codebase already uses the standard OpenAI environment variables, override them at the process level — zero code changes required:
 
 ```bash
-export OPENAI_API_KEY="dpn-sk-your-token-here"
+export OPENAI_API_KEY="dpn-sk-1234|AbCdEf..."
 export OPENAI_BASE_URL="https://oai.deapi.ai/v1"
 ```
 
@@ -343,24 +1002,84 @@ deapi_client = OpenAI(
 
 ---
 
-## Known differences
+## Deliberate differences from OpenAI
 
-| Feature | OpenAI | deAPI |
-| --- | --- | --- |
-| Chat completions | ✅ | ❌ Out of scope |
-| Inpainting (`mask` in `/v1/images/edits`) | ✅ | ❌ Returns 400 |
-| Model IDs | `dall-e-3`, `tts-1`, `whisper-1` | Native slugs (e.g. `Flux1schnell`, `Kokoro`) |
-| Image `size` values | OpenAI fixed set | Model-specific — check [Models](/models) |
-| Max `n` (images) | 10 | 4 |
-| Audio file size limit | 25 MB | 20 MB (per-file) — total request body capped at 75 MB |
-| Embedding dimensions | 1536 (ada-002) | Model-specific (e.g. 1024 for `Bge_M3_FP16`) |
-| `style: "vivid"` | Controls image style | Accepted but ignored |
-| Video generation | ❌ | ✅ `POST /v1/videos` |
-| `/v1/files` | ✅ | 🔜 Coming soon |
+A single list of everything that will not behave the way the OpenAI docs describe.
 
-For the full list of models, supported parameters, and limits, see the [Model Selection endpoint](/api/v2/utilities/models).
+| Area | Difference |
+| --- | --- |
+| Model IDs | Native only. No `dall-e-3`, `tts-1`, `whisper-1` aliases |
+| Model catalog | Plan-dependent — two accounts can see different lists |
+| Streaming | Not supported anywhere: `stream=true`, `partial_images`, `stream_format=sse` are rejected |
+| Image output | Always PNG without alpha; `output_format`, `output_compression`, `background=transparent` rejected |
+| Image edits | `mask` rejected — no inpainting model. `quality=hd` accepted although the spec restricts it to generations |
+| `n` (images) | 4 on generations, 2 on edits — OpenAI allows 10 |
+| TTS formats | `mp3` only; `opus`, `aac`, `flac`, `wav`, `pcm` rejected |
+| TTS language | No auto-detection — non-English text needs an explicit `voice` or `language` |
+| Transcription | `srt`/`vtt` rejected; `prompt`, `temperature`, `keywords[]` accepted but inert; `include[]`, `languages[]`, `chunking_strategy` rejected |
+| Speaker labels | Sequential letters only; speaker references not supported |
+| Embeddings | `dimensions` ignored; `usage.prompt_tokens` always `0`; array cap 100 |
+| Video enums | Our `seconds` and `size` values differ from the spec enums — typed clients will complain |
+| Video history | `GET /v1/videos` and `DELETE /v1/videos/{id}` return `501` — we keep no per-user history |
+| Files | No `/v1/files`; `file_id` is rejected wherever the spec allows it |
+
+<Note>
+  A field we cannot honour gets an answer, not silence. Where dropping a field would change the response shape or the product you pay for, we return `400` instead of accepting the request. Where a field is a best-effort hint (and is one at OpenAI too), we accept it and say plainly that it does not change the result. That rule is why several fields that used to pass silently now return `400` — you were paying for requests that did something other than what you asked.
+</Note>
 
 ---
+
+## Not available yet
+
+| Surface | Status |
+| --- | --- |
+| `POST /v1/chat/completions`, `/v1/responses` | Planned. Not an LLM endpoint here — it will dispatch to image / TTS / STT / vision models |
+| `/v1/files`, `/v1/uploads` | Planned. Until then, `file_id` is rejected and you send bytes or URLs |
+| `POST /v1/audio/voices`, `/v1/audio/voice_consents` | Voice cloning — planned |
+| `POST /v1/audio/translations` | No translate mode on the backend |
+| `POST /v1/images/variations` | No variations model |
+| `POST /v1/moderations` | No moderation model |
+| `/v1/videos/edits`, `/extensions`, `/{id}/remix`, `/characters` | No backend equivalent |
+| Assistants, threads, vector stores, fine-tuning, batches, realtime | Out of scope — this is an inference proxy, not a platform clone |
+
+deAPI also runs models with no OpenAI counterpart at all — image and video upscaling, background removal, music generation, OCR, character replacement in video. Those stay on the [native deAPI API](/api/v2/overview) rather than being forced into a foreign contract.
+
+---
+
+## Recent changes
+
+### Added
+
+- **`GET /v1/models/{model}`** — `client.models.retrieve(...)` now works instead of returning `501`.
+- **Speaker diarization** — `response_format="diarized_json"` on `WhisperLargeV3Ct2`, with sequential speaker labels.
+- **Native word-level timestamps** — `timestamp_granularities=["word"]` uses the model's own word timings where available, instead of always interpolating them across the segment.
+- **`instructions` for text-to-speech** — describe a voice in words on `Qwen3_TTS_12Hz_1_7B_VoiceDesign`.
+- **`application/json` on `/v1/images/edits`** — the second content type the spec defines; images are passed as `images: [{"image_url": …}]`.
+- **New models:** `ZAnimeDistill_8Step_INT8`, `WhisperLargeV3Ct2`, `MiniMaxH3_33B_Turbo_INT8`, `Qwen3_TTS_12Hz_1_7B_VoiceDesign`, `Ltx2_19B_Dist_FP8`.
+
+### Fixed
+
+- **Image-to-video now works.** `input_reference` used to be silently dropped: the job succeeded, you were billed, and the clip was generated from the prompt alone. It is now an object, routed to the correct backend endpoint.
+- **Models no longer disappear from `/v1/models`.** The catalog is paginated and only the first page was read, so correctly configured models were missing from the list with no error.
+- `response_format="text"` on CTranslate2 models returned a raw JSON document, and `verbose_json` returned an empty `segments` array.
+- `POST /v1/videos/edits`, `/extensions` and `/characters` answered `405` instead of `501`, telling you the path existed and the method was wrong — both untrue.
+- `language` in transcription is no longer an echo — it reaches the model and affects the transcript.
+
+### Changed — may affect existing integrations
+
+<Warning>
+  **Fields that used to be accepted and silently dropped now return `400`:** `stream=true`, `partial_images`, `background=transparent`, `output_format=jpeg|webp`, `output_compression`, `input_fidelity` (image endpoints); `stream_format=sse` (speech); `stream=true`, `include[]`, `languages[]`, `chunking_strategy` (transcription).
+</Warning>
+
+- `quality="auto"` no longer returns `400`. It is the SDK's default value and now maps to the model's default quality.
+- **Job failures return a real reason.** Retryable failures come back as `503`, permanent ones as `502` with a message — previously every failure was an empty `502`.
+- **TTS is `mp3`-only.** `wav` and `flac` were withdrawn from the TTS family on the backend and are now rejected locally with `400 format_not_supported`.
+
+---
+
+## Support
+
+Include the `X-Request-Id` from the failing response (and `X-DeAPI-Request-Id` if present) in any report — with those we can trace the request end to end.
 
 ## Next steps
 
