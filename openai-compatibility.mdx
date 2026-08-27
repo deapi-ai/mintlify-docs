@@ -132,9 +132,11 @@ Video generation is the exception — it is asynchronous by design and returns i
 | `/v1/videos`, `/v1/videos/{id}`, `/v1/videos/{id}/content` | `POST`, `GET` | Natively asynchronous |
 
 <Note>
-  **Paths that return 501.** `POST /v1/videos/edits`, `POST /v1/videos/extensions`, `POST /v1/videos/characters`, `GET /v1/videos/characters/{id}`, `GET /v1/videos` (list), `DELETE /v1/videos/{id}`, `POST /v1/videos/{id}/remix`.
+  **Paths that are recognised but not implemented.** `POST /v1/videos/edits`, `POST /v1/videos/extensions`, `POST /v1/videos/characters`, `GET /v1/videos/characters/{id}`, `GET /v1/videos` (list), `DELETE /v1/videos/{id}`, `POST /v1/videos/{id}/remix`.
 
-  These exist in the OpenAI spec but have no counterpart in our backend. They answer `501 not_implemented` rather than `404`, so you know the path was recognised and there is no typo on your side. Any other unknown path under `/v1/*` answers `501 endpoint_not_implemented`.
+  These exist in the OpenAI spec but have no counterpart in our backend. They answer `404` with `code: "endpoint_not_implemented"` — the code, not the status, is what tells you the path was understood and there is no typo on your side. Every other unknown path under `/v1/*` answers the same way. Branch on `code`; a plain `404` from a real endpoint carries a different code (`model_not_found`, `video_not_found`).
+
+  Calling a real endpoint with the wrong verb is different again: `405 method_not_allowed`, and the message names the verb to use.
 </Note>
 
 ---
@@ -150,7 +152,7 @@ for m in client.models.list().data:
 
 `GET /v1/models/{model}` (`client.models.retrieve(...)`) returns a single entry in the same shape. Unknown, hidden, or out-of-plan models answer `404 model_not_found`.
 
-The response shape is standard: `{id, object, created, owned_by}`, where `owned_by` is always `depin`. `created` is **not** a release date — models without a published date report `0`. Do not sort on it.
+The response shape is standard: `{id, object, created, owned_by}`, where `owned_by` is always `depin`. `created` is **not** a release date: it is a coarse catalogue timestamp, and whole cohorts of models share the same value. Do not sort on it and do not read a launch date out of it.
 
 Catalog reads are cached for 5 minutes, so a model added or removed on the deAPI side appears (or disappears) within that window.
 
@@ -159,18 +161,18 @@ Catalog reads are cached for 5 minutes, so a model added or removed on the deAPI
 {
   "object": "list",
   "data": [
-    {"id": "Bge_M3_FP16", "object": "model", "created": 1730000000, "owned_by": "depin"},
-    {"id": "Flux1schnell", "object": "model", "created": 1730000000, "owned_by": "depin"},
-    {"id": "QwenImageEdit_Plus_NF4", "object": "model", "created": 1730000000, "owned_by": "depin"},
-    {"id": "Kokoro", "object": "model", "created": 0, "owned_by": "depin"},
-    {"id": "WhisperLargeV3Ct2", "object": "model", "created": 0, "owned_by": "depin"},
-    {"id": "Ltx2_3_22B_Dist_INT8", "object": "model", "created": 1730000000, "owned_by": "depin"}
+    {"id": "Flux1schnell", "object": "model", "created": 1776902400, "owned_by": "depin"},
+    {"id": "Kokoro", "object": "model", "created": 1776902400, "owned_by": "depin"},
+    {"id": "Bge_M3_FP16", "object": "model", "created": 1776902400, "owned_by": "depin"},
+    {"id": "QwenImageEdit_Plus_NF4", "object": "model", "created": 1776902400, "owned_by": "depin"},
+    {"id": "Ltx2_3_22B_Dist_INT8", "object": "model", "created": 1777334400, "owned_by": "depin"},
+    {"id": "WhisperLargeV3Ct2", "object": "model", "created": 1787011200, "owned_by": "depin"}
   ]
 }
 ```
 
 ```json GET /v1/models/Flux1schnell → 200
-{"id": "Flux1schnell", "object": "model", "created": 1730000000, "owned_by": "depin"}
+{"id": "Flux1schnell", "object": "model", "created": 1776902400, "owned_by": "depin"}
 ```
 
 ```json GET /v1/models/dall-e-3 → 404
@@ -186,9 +188,15 @@ Catalog reads are cached for 5 minutes, so a model added or removed on the deAPI
 
 For the full native catalog with capabilities, limits, defaults and LoRAs, use the [Model Selection endpoint](/api/v2/utilities/models) or the [Models guide](/models).
 
+<Warning>
+  **Partner models are native-only.** deAPI's catalog includes hosted partner models whose IDs look like the ones you already type — `gpt-image-1.5`, `gpt-image-2`, `nano-banana-2`, `flux-2-klein-9b`. **None of them is routable through this gateway.** They are absent from `GET /v1/models` and every call naming one answers `404 model_not_found`, on `/v1/models/{model}` and on POST alike.
+
+  This trips people up in exactly one way: `gpt-image-2` is a real deAPI model *and* the natural thing to send to an OpenAI-shaped endpoint, so the `404` reads like an outage rather than a routing rule. Reach partner models through the [native API](/api/v2/overview); they are billed differently from the network models, which is the reason they are not folded in here.
+</Warning>
+
 ### Why there are no OpenAI model aliases
 
-We publish native model IDs only. Aliasing `dall-e-3` onto `Flux1schnell` would promise an OpenAI parameter contract — its sizes, qualities and defaults — that our models do not implement. A wrong picture is worse than an explicit model name, so `model="dall-e-3"` returns `400 model_not_found` on POST endpoints.
+We publish native model IDs only. Aliasing `dall-e-3` onto `Flux1schnell` would promise an OpenAI parameter contract — its sizes, qualities and defaults — that our models do not implement. A wrong picture is worse than an explicit model name, so `model="dall-e-3"` returns `404 model_not_found` — on POST endpoints as well as on `GET /v1/models/{model}`.
 
 ### Migrating from OpenAI
 
@@ -297,8 +305,8 @@ img = client.images.generate(
 {
   "created": 1755691200,
   "data": [
-    {"url": "https://storage.deapi.ai/results/9f2c…/image-0.png"},
-    {"url": "https://storage.deapi.ai/results/9f2c…/image-1.png"}
+    {"url": "https://results.deapi.ai/20297698/kxEJhkVUciFCT9fah9YT4h….png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Expires=18000&X-Amz-Signature=…"},
+    {"url": "https://results.deapi.ai/20297699/Nz8c3sQ6CokrLyD7habNz8c…png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Expires=18000&X-Amz-Signature=…"}
   ]
 }
 ```
@@ -330,7 +338,7 @@ img = client.images.generate(
 Accepted with no change in behaviour: `stream=false`, `partial_images=0`, `background="opaque"` \| `"auto"`, `output_format="png"` — these describe what we already do. `moderation` and `style` are accepted and explicitly declared as not affecting the image.
 
 <Note>
-  Output is PNG, RGB, no alpha. With `response_format="url"` the link points at deAPI storage and expires (assume ~24 h). The response carries no expiry field — download promptly or request `b64_json`.
+  Output is PNG, RGB, no alpha — measured on the bytes, not assumed. With `response_format="url"` you get a pre-signed `results.deapi.ai` link valid for **5 hours** (`X-Amz-Expires` ≈ `18000`, counted from the `X-Amz-Date` in the same query string). There is no expiry field in the JSON body, and unlike a video there is no route that re-signs the link — once it lapses the image is gone from your side. Download promptly, or request `b64_json` and skip the question.
 </Note>
 
 ---
@@ -376,7 +384,7 @@ Fields: `image` (one or more files), `prompt`, `model`, `n`, `size`, `quality`, 
 - `file_id` → `400 file_id_not_supported` (there is no Files API here).
 - A bare string instead of an object → `400`. We do not reinterpret it.
 
-Images are fetched **after** the model and all fields are accepted, so a request we would reject anyway never causes us to call the address you supplied.
+Ordering, if you care what the gateway touches before it gives up: the model, the required fields and every unsupported-parameter check (`stream`, `output_format`, `mask`, `input_fidelity`, …) are settled **before** any address is fetched. The two per-model limits — `size` and `n` — are checked **after**, so an oversized `n` on an otherwise valid request will still have cost you one outbound fetch of the URL you supplied. A `data:` URL is decoded locally and never leaves the gateway either way.
 
 ### Response
 
@@ -386,7 +394,7 @@ Identical envelope to `/v1/images/generations` — the two endpoints share a sha
 {
   "created": 1755691200,
   "data": [
-    {"url": "https://storage.deapi.ai/results/4b81…/edit-0.png"}
+    {"url": "https://results.deapi.ai/20297704/4b81ZKcq5fhd1wclfGAi…png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Expires=18000&X-Amz-Signature=…"}
   ]
 }
 ```
@@ -442,8 +450,8 @@ The body is the audio file itself, not JSON:
 HTTP/1.1 200 OK
 Content-Type: audio/mpeg
 Content-Length: 41328
-X-Request-Id: 4f8c1d2e-9b07-4a51-a6b1-2f0d9c3e77aa
-X-DeAPI-Request-Id: 1f4ba0d2-58c7-4a1e-9c33-7de6f0b21a84
+X-Request-Id: 08100094961504aa5352ce5f8a9367cb
+X-DeAPI-Request-Id: 9cef6c98-5a55-48c5-854d-420fd5bb7993
 
 <mp3 bytes>
 ```
@@ -532,7 +540,7 @@ with open("meeting.mp3", "rb") as f:
 | `file`, `model` | Required |
 | `language` | Forwarded to the backend and affects the result; region subtags are trimmed (`en-US` → `en`) |
 | `response_format` | `json` (default), `text`, `verbose_json`, `diarized_json` |
-| `timestamp_granularities[]` | `word` uses native word timings on models that publish support |
+| `timestamp_granularities[]` | `word` requires a model that publishes word-level support; on `WhisperLargeV3` it is `400 timestamp_level_not_supported` rather than a silent fallback to segment timings |
 
 The gateway accepts a multipart body up to 50 MiB, but the platform caps a single audio file at **20 MB** and a single video file at **50 MB**, within a global 75 MB request body cap. See [Limits & Quotas → File Uploads](/limits-and-quotas#file-uploads).
 
@@ -646,7 +654,7 @@ The only family that is asynchronous for the client as well: `POST` returns imme
 
 | Model | Durations (s) | Sizes | fps | Image-to-video |
 | --- | --- | --- | --- | --- |
-| `Ltxv_13B_0_9_8_Distilled_FP8` | 1, 2, 3, 4 | `512x512`, `512x768`, `768x512`, `768x768` | 30 | No |
+| `Ltxv_13B_0_9_8_Distilled_FP8` | 1, 2, 3, 4 | `512x512`, `512x768`, `768x512`, `768x768` | 30 | Yes |
 | `Ltx2_3_22B_Dist_INT8` | 3, 4, 5, 6, 8, 10 | `768x768`, `768x1024`, `1024x768`, `1024x1024` | 24 | Yes |
 | `MiniMaxH3_33B_Turbo_INT8` | 8 | `1344x768` | 24 | Yes |
 
@@ -753,7 +761,7 @@ content.write_to_file("clip.mp4")
 ```http
 HTTP/1.1 200 OK
 Content-Type: video/mp4
-X-Request-Id: 7a3e05b1-64c2-4d90-9a11-8c5be0f4d233
+X-Request-Id: fe5c29e21216dae7f60a9733b4d7faf3
 
 <mp4 bytes>
 ```
@@ -784,7 +792,9 @@ Before the job completes the same route answers `409 video_not_ready`, and `502 
 
 `input_reference` is an object, exactly as in the spec — `image_url` accepts a public URL or a base64 `data:` URL (10 MB limit; `data:` URLs are decoded locally). `file_id` returns `400`, since there is no Files API here. A bare string returns `400` rather than being reinterpreted.
 
-Requires a model with image-to-video support (`Ltx2_*`, `MiniMaxH3_*`); anything else returns `400 input_reference_not_supported` before any other validation.
+All three video models accept `input_reference` — there is currently no video model on this gateway that takes a prompt but refuses a first frame.
+
+The reference is fetched while the request is being validated, so an unreachable or oversized address fails the call with `400 input_reference_unreadable` and the message carries the status we got. A `data:` URL is decoded locally and never leaves the gateway.
 
 ### Fields not to take literally
 
@@ -826,21 +836,23 @@ Build your handling on `code`, not on `message`. `param` and `code` are omitted 
 | `405`, `409` | `invalid_request_error` |
 | `422` | `idempotency_error` |
 | `429` | `rate_limit_exceeded` |
-| `501` | `not_implemented` |
+| `501` | `not_implemented` — only `variant_not_supported` on `/v1/videos/{id}/content` |
 | `503` | `overloaded_error` |
 | `504` | `timeout_error` |
 | `500`, `502`, other | `api_error` |
 
-`not_implemented` and `timeout_error` are our extensions to OpenAI's vocabulary: the first means "this surface will not work this way", the second "retry with a longer deadline".
+`not_implemented` and `timeout_error` are our extensions to OpenAI's vocabulary: the first means "this surface will not work this way", the second "retry with a longer deadline". Unimplemented *paths* are `404 endpoint_not_implemented`, not `501` — `501` is reserved for a recognised route asked for something it cannot produce.
 
 ### Common codes
 
 | Code | HTTP | Meaning |
 | --- | --- | --- |
 | `missing_required_parameter` | 400 | A field the spec requires is missing |
-| `model_not_found` | 400 / 404 | Model outside your account's catalog — 400 on POST endpoints, 404 on `GET /v1/models/{model}` |
+| `model_not_found` | 404 | Model outside your account's catalog, on every endpoint including POST |
 | `model_wrong_endpoint` | 400 | The model exists but does not serve this endpoint |
 | `param_not_supported` | 400 | Legal in the spec, no counterpart on our backend |
+| `method_not_allowed` | 405 | Right path, wrong verb; the message names the verb to use |
+| `endpoint_not_implemented` | 404 | The path is understood but this gateway does not serve it |
 | `stream_not_supported` | 400 | Streaming was requested; we do not open streams |
 | `idempotency_key_reuse` | 422 | Same `Idempotency-Key`, different request body |
 | `upstream_validation_error` | 400 / 401 / 403 / 404 / 409 | The backend rejected the request; `message` explains |
@@ -898,7 +910,7 @@ Rate limiting is enforced by your deAPI plan and passed through unmodified. On `
 
 Note there is no `code` field on this one — `type` is the stable signal.
 
-Headers travel through verbatim:
+A `429` carries the accounting headers:
 
 ```http
 X-RateLimit-Type: minute
@@ -910,6 +922,10 @@ Retry-After: 60
 ```
 
 The OpenAI Python and Node SDKs parse `Retry-After` and back off on their own. For the per-plan numbers, see [Limits & Quotas](/limits-and-quotas).
+
+<Warning>
+  **You cannot track headroom from a successful response here.** The native API returns `X-RateLimit-Limit` and `X-RateLimit-Remaining` on `200`s, so you can throttle before you are throttled. This gateway does not: a successful `/v1/*` response carries `X-Request-Id` and nothing else about limits (measured over 351 consecutive calls — no `X-RateLimit-*` header on any of them). If you need to watch the counter, read it from the [native API](/api/v2/overview); here, handle the `429` when it arrives.
+</Warning>
 
 ---
 
@@ -1030,7 +1046,7 @@ A single list of everything that will not behave the way the OpenAI docs describ
 | Speaker labels | Sequential letters only; speaker references not supported |
 | Embeddings | `dimensions` ignored; `usage.prompt_tokens` always `0`; array cap 100 |
 | Video enums | Our `seconds` and `size` values differ from the spec enums — typed clients will complain |
-| Video history | `GET /v1/videos` and `DELETE /v1/videos/{id}` return `501` — we keep no per-user history |
+| Video history | `GET /v1/videos` and `DELETE /v1/videos/{id}` answer `404 endpoint_not_implemented` — we keep no per-user history |
 | Files | No `/v1/files`; `file_id` is rejected wherever the spec allows it |
 
 <Note>
@@ -1058,11 +1074,19 @@ deAPI also runs models with no OpenAI counterpart at all — image and video ups
 
 ## Recent changes
 
+### Changed — unimplemented paths answer `404`, not `501`
+
+Every path this gateway does not serve — `GET /v1/videos`, `DELETE /v1/videos/{id}`, `/v1/videos/edits`, `/extensions`, `/{id}/remix`, `/characters`, `/v1/chat/completions`, `/v1/responses`, `/v1/files`, `/v1/moderations`, `/v1/audio/translations`, `/v1/images/variations`, and anything unrecognised under `/v1/*` — now answers **`404`** with `code: "endpoint_not_implemented"`. It used to answer `501`.
+
+If you branched on the status code, that branch is now dead. Branch on `code` instead: it is the part that distinguishes "this gateway does not serve this path" from an ordinary `404` such as `model_not_found` or `video_not_found`. `501` survives in one place only — `variant_not_supported` on `/v1/videos/{id}/content`.
+
+`model_not_found` moved the same way: **`404` on POST endpoints too**, where it used to be `400`.
+
 ### Added
 
-- **`GET /v1/models/{model}`** — `client.models.retrieve(...)` now works instead of returning `501`.
+- **`GET /v1/models/{model}`** — `client.models.retrieve(...)` now works instead of refusing the path.
 - **Speaker diarization** — `response_format="diarized_json"` on `WhisperLargeV3Ct2`, with sequential speaker labels.
-- **Native word-level timestamps** — `timestamp_granularities=["word"]` uses the model's own word timings where available, instead of always interpolating them across the segment.
+- **Native word-level timestamps** — `timestamp_granularities=["word"]` returns the model's own word timings on `WhisperLargeV3Ct2`, instead of interpolating them across the segment. Models that publish no word-level support reject the field outright rather than handing back invented offsets.
 - **`instructions` for text-to-speech** — describe a voice in words on `Qwen3_TTS_12Hz_1_7B_VoiceDesign`.
 - **`application/json` on `/v1/images/edits`** — the second content type the spec defines; images are passed as `images: [{"image_url": …}]`.
 - **New models:** `ZAnimeDistill_8Step_INT8`, `WhisperLargeV3Ct2`, `MiniMaxH3_33B_Turbo_INT8`, `Qwen3_TTS_12Hz_1_7B_VoiceDesign`.
@@ -1072,13 +1096,16 @@ deAPI also runs models with no OpenAI counterpart at all — image and video ups
 - **Image-to-video now works.** `input_reference` used to be silently dropped: the job succeeded, you were billed, and the clip was generated from the prompt alone. It is now an object, routed to the correct backend endpoint.
 - **Models no longer disappear from `/v1/models`.** The catalog is paginated and only the first page was read, so correctly configured models were missing from the list with no error.
 - `response_format="text"` on CTranslate2 models returned a raw JSON document, and `verbose_json` returned an empty `segments` array.
-- `POST /v1/videos/edits`, `/extensions` and `/characters` answered `405` instead of `501`, telling you the path existed and the method was wrong — both untrue.
+- `POST /v1/videos/edits`, `/extensions` and `/characters` answered `405`, telling you the path existed and the method was wrong — both untrue. They now answer `404 endpoint_not_implemented`.
 - `language` in transcription is no longer an echo — it reaches the model and affects the transcript.
 
 ### Changed — may affect existing integrations
 
+- **`Ltxv_13B_0_9_8_Distilled_FP8` accepts `input_reference`.** Image-to-video is not limited to the `Ltx2_*` and `MiniMaxH3_*` families; all three video models take a first frame.
+- **Partner models (`gpt-image-1.5`, `gpt-image-2`, `nano-banana-2`, `flux-2-klein-9b`) are not routable here.** They are in the native catalog and answer `404 model_not_found` on this gateway.
+
 <Warning>
-  **Fields that used to be accepted and silently dropped now return `400`:** `stream=true`, `partial_images`, `background=transparent`, `output_format=jpeg|webp`, `output_compression`, `input_fidelity` (image endpoints); `stream_format=sse` (speech); `stream=true`, `include[]`, `languages[]`, `chunking_strategy` (transcription).
+  **Fields that used to be accepted and silently dropped now return `400`:** `stream=true`, `partial_images`, `background=transparent`, `output_format=jpeg|webp`, `output_compression` (both image endpoints); `input_fidelity` (edits — on `/v1/images/generations` the spec does not define it and it is accepted and ignored); `stream_format=sse` (speech); `stream=true`, `include[]`, `languages[]`, `chunking_strategy` (transcription).
 </Warning>
 
 - `quality="auto"` no longer returns `400`. It is the SDK's default value and now maps to the model's default quality.
