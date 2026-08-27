@@ -226,9 +226,9 @@ A name your account cannot use fails in one of three ways, and the code says whi
 | --- | --- | --- |
 | The gateway does not know the name at all | `404 model_not_found` | A typo, an OpenAI alias, or a native-only model such as a partner model |
 | It knows the name, but not on this endpoint | `400 model_wrong_endpoint` | The message names the endpoint type it does serve, e.g. `endpoint_type=video_generation` |
-| It knows the name and the endpoint, but your plan does not include it | `400 invalid_value` — *"This model is not available on your plan."* | Upgrade, or pick a model from your own `GET /v1/models` |
+| It knows the name and the endpoint, but does not run it for your account | `400 invalid_value` | `message` carries the reason |
 
-The last case is why `GET /v1/models` is the list to build against: it is already filtered to your plan, so anything in it will resolve on the endpoint it belongs to.
+Build your integration against `GET /v1/models`. It is already filtered to your account, so every name in it resolves on the endpoint it belongs to — which makes it the list to check first when a model name is refused.
 
 ### Why there are no OpenAI model aliases
 
