@@ -95,6 +95,24 @@ Every request validates the token against your deAPI account, so a revoked token
 | `401` `invalid_api_key` — "Invalid API key format" | The header is present but the token prefix is not one we recognise |
 | `401` `invalid_api_key` — "Invalid API key provided" | The token was rejected by deAPI |
 
+### Calling from a browser
+
+`/v1/*` sends CORS headers, so `openai-node` works in the browser with `dangerouslyAllowBrowser: true`, as does a plain `fetch` from any origin. Preflight is answered without authentication (`204`, `Access-Control-Max-Age: 86400`), every header the SDK sends is accepted, and these are exposed to scripts:
+
+```http
+Access-Control-Allow-Origin: *
+Access-Control-Allow-Methods: GET, POST, DELETE, OPTIONS
+Access-Control-Allow-Headers: authorization,content-type,idempotency-key
+Access-Control-Expose-Headers: X-Request-Id, X-DeAPI-Request-Id, Retry-After,
+  X-Should-Retry, X-RateLimit-Type, X-RateLimit-Limit, X-RateLimit-Remaining, X-RateLimit-Reset
+```
+
+So a failure in the browser still gives you the id to quote in a support ticket.
+
+<Warning>
+  **Read the flag name before you use it.** Anything you put in browser JavaScript is readable by everyone who loads the page, and that includes your deAPI token — which is a billing credential, not a session cookie. This is a viable path for a demo, an internal tool behind your own auth, or a prototype. It is not one for a public site. For anything user-facing, keep the token on your server and proxy the calls.
+</Warning>
+
 ---
 
 ## Timeouts
@@ -134,7 +152,11 @@ Video generation is the exception — it is asynchronous by design and returns i
 <Note>
   **Paths that are recognised but not implemented.** `POST /v1/videos/edits`, `POST /v1/videos/extensions`, `POST /v1/videos/characters`, `GET /v1/videos/characters/{id}`, `GET /v1/videos` (list), `DELETE /v1/videos/{id}`, `POST /v1/videos/{id}/remix`.
 
-  These exist in the OpenAI spec but have no counterpart in our backend. They answer `404` with `code: "endpoint_not_implemented"` — the code, not the status, is what tells you the path was understood and there is no typo on your side. Every other unknown path under `/v1/*` answers the same way. Branch on `code`; a plain `404` from a real endpoint carries a different code (`model_not_found`, `video_not_found`).
+  These exist in the OpenAI spec but have no counterpart in our backend. They answer `404` with `code: "endpoint_not_implemented"` — the code, not the status, is what tells you the path was understood and there is no typo on your side. Branch on `code`; a plain `404` from a real endpoint carries a different one (`model_not_found`, `video_not_found`).
+
+  **They used to answer `501`, and the reason we changed it is worth knowing.** Both official SDKs retry every response with status `>= 500`. A mistyped URL therefore cost you four requests with backoff and surfaced as `InternalServerError` — your monitoring reported an outage that was not happening. `404` maps to `NotFoundError` and is not retried, so a typo now fails once, immediately, with a message that names the path.
+
+  Two codes share the `404`, and the difference is only diagnostic: an unrecognised path answers `endpoint_not_implemented`, while extra segments below a route we do own (`/v1/videos/foo/bar`) answer `endpoint_not_found`. Treat them the same way — you have the wrong URL.
 
   Calling a real endpoint with the wrong verb is different again: `405 method_not_allowed`, and the message names the verb to use.
 </Note>
@@ -152,7 +174,9 @@ for m in client.models.list().data:
 
 `GET /v1/models/{model}` (`client.models.retrieve(...)`) returns a single entry in the same shape. Unknown, hidden, or out-of-plan models answer `404 model_not_found`.
 
-The response shape is standard: `{id, object, created, owned_by}`, where `owned_by` is always `depin`. `created` is **not** a release date: it is a coarse catalogue timestamp, and whole cohorts of models share the same value. Do not sort on it and do not read a launch date out of it.
+The response shape is standard: `{id, object, created, owned_by}`, where `owned_by` is always `depin`. **`created` is the date the model first became available on this gateway**, not the date the model itself was built — the inference backend publishes no such date, and this is the only one we can state truthfully. Cohorts that arrived together share a timestamp, so it does not order models within a release.
+
+Entries used to report `0` unless the model was also listed on OpenRouter. Every model now carries a real timestamp.
 
 Catalog reads are cached for 5 minutes, so a model added or removed on the deAPI side appears (or disappears) within that window.
 
@@ -193,6 +217,18 @@ For the full native catalog with capabilities, limits, defaults and LoRAs, use t
 
   This trips people up in exactly one way: `gpt-image-2` is a real deAPI model *and* the natural thing to send to an OpenAI-shaped endpoint, so the `404` reads like an outage rather than a routing rule. Reach partner models through the [native API](/api/v2/overview); they are billed differently from the network models, which is the reason they are not folded in here.
 </Warning>
+
+### When a model name is refused
+
+A name your account cannot use fails in one of three ways, and the code says which:
+
+| Outcome | Answer | What it means |
+| --- | --- | --- |
+| The gateway does not know the name at all | `404 model_not_found` | A typo, an OpenAI alias, or a native-only model such as a partner model |
+| It knows the name, but not on this endpoint | `400 model_wrong_endpoint` | The message names the endpoint type it does serve, e.g. `endpoint_type=video_generation` |
+| It knows the name and the endpoint, but your plan does not include it | `400 invalid_value` — *"This model is not available on your plan."* | Upgrade, or pick a model from your own `GET /v1/models` |
+
+The last case is why `GET /v1/models` is the list to build against: it is already filtered to your plan, so anything in it will resolve on the endpoint it belongs to.
 
 ### Why there are no OpenAI model aliases
 
@@ -267,6 +303,10 @@ print(len(r.data), len(r.data[0].embedding))
 </CodeGroup>
 
 Array inputs are capped at **100 items** per request; above that you get `400 input_too_large`. The batch is all-or-nothing: the first failure cancels the rest, so you receive either every vector or a single error — never a partially filled `data[]`.
+
+<Warning>
+  **The cap is not your rate limit, and batching does not shelter you from it.** The backend embeds one string per call, so an array of N strings is N jobs and counts as **N requests** against your account's allowance. On a plan with a small per-minute bucket a large array can exhaust it, return `429` for the whole request, and still have spent the allowance on the items already dispatched. Size your arrays against your plan's rate limit, not against the 100-item cap.
+</Warning>
 
 `usage.prompt_tokens` is always `0`. The backend does not report token counts and inventing one would be worse than reporting zero. `total_tokens` mirrors it.
 
@@ -616,6 +656,23 @@ Speakers in `diarized_json` are numbered by first appearance (`A`, `B`, …) and
 
 Diarization is available on exactly one model (`WhisperLargeV3Ct2`). Requesting it elsewhere returns `400` before a billable job is created, and the message names the model that can do it.
 
+### Word timings come from the model, never from us
+
+`timestamp_granularities=["word"]` is served only by models that publish word-level support — today `WhisperLargeV3Ct2`. On `WhisperLargeV3` it is a `400`:
+
+```json
+{
+  "error": {
+    "message": "Model WhisperLargeV3 does not produce word-level timestamps — it reports [segment] granularity. Models with word timestamps: WhisperLargeV3Ct2.",
+    "type": "invalid_request_error",
+    "param": "timestamp_granularities[]",
+    "code": "timestamp_level_not_supported"
+  }
+}
+```
+
+We used to answer `200` here and build `words[]` by splitting each segment's duration evenly across its words. In a 3-second, 9-word clip every single word came back as exactly 0.333 s — numbers you had no way of telling apart from a measurement. Since a model that does the job properly sits in the same catalog, refusing and naming it is the honest answer.
+
 ### Fields in `verbose_json` that carry no real measurement
 
 The shape is always complete so drop-in clients see a stable set of keys, but some values are placeholders rather than measurements:
@@ -794,6 +851,8 @@ Before the job completes the same route answers `409 video_not_ready`, and `502 
 
 All three video models accept `input_reference` — there is currently no video model on this gateway that takes a prompt but refuses a first frame.
 
+**`Ltxv_13B_0_9_8_Distilled_FP8` is by far the cheapest of them** and used to reject `input_reference` even though it supports the mode natively. If you built around `Ltx2_3_22B_Dist_INT8` or `MiniMaxH3_33B_Turbo_INT8` only because of that rejection, it is worth re-measuring.
+
 The reference is fetched while the request is being validated, so an unreachable or oversized address fails the call with `400 input_reference_unreadable` and the message carries the status we got. A `data:` URL is decoded locally and never leaves the gateway.
 
 ### Fields not to take literally
@@ -835,13 +894,15 @@ Build your handling on `code`, not on `message`. `param` and `code` are omitted 
 | `404` | `not_found_error` |
 | `405`, `409` | `invalid_request_error` |
 | `422` | `idempotency_error` |
-| `429` | `rate_limit_exceeded` |
+| `429` | `rate_limit_exceeded` or `insufficient_quota` |
 | `501` | `not_implemented` — only `variant_not_supported` on `/v1/videos/{id}/content` |
 | `503` | `overloaded_error` |
 | `504` | `timeout_error` |
 | `500`, `502`, other | `api_error` |
 
-`not_implemented` and `timeout_error` are our extensions to OpenAI's vocabulary: the first means "this surface will not work this way", the second "retry with a longer deadline". Unimplemented *paths* are `404 endpoint_not_implemented`, not `501` — `501` is reserved for a recognised route asked for something it cannot produce.
+`not_implemented` and `timeout_error` are our extensions to OpenAI's vocabulary: the first means "this surface will not work this way", the second "retry with a longer deadline". Unimplemented *paths* are `404 endpoint_not_implemented`, not `501` — `501` is reserved for a recognised route asked for something it cannot produce, which today is only `variant_not_supported`.
+
+**`429` carries two different meanings and `type` tells them apart:** `rate_limit_exceeded` means *too fast*, `insufficient_quota` means *out of credit*. The second is not solved by waiting.
 
 ### Common codes
 
@@ -853,9 +914,12 @@ Build your handling on `code`, not on `message`. `param` and `code` are omitted 
 | `param_not_supported` | 400 | Legal in the spec, no counterpart on our backend |
 | `method_not_allowed` | 405 | Right path, wrong verb; the message names the verb to use |
 | `endpoint_not_implemented` | 404 | The path is understood but this gateway does not serve it |
+| `endpoint_not_found` | 404 | Extra segments below a route we do own, e.g. `/v1/videos/foo/bar` |
+| `insufficient_quota` | 429 | The account is out of credit — not a rate limit, and waiting will not help. Used to be reported as `400`, which wrongly blamed your payload |
+| `timestamp_level_not_supported` | 400 | Word-level timestamps asked of a segment-only model; the message names one that can |
 | `stream_not_supported` | 400 | Streaming was requested; we do not open streams |
 | `idempotency_key_reuse` | 422 | Same `Idempotency-Key`, different request body |
-| `upstream_validation_error` | 400 / 401 / 403 / 404 / 409 | The backend rejected the request; `message` explains |
+| `invalid_value` | 400 / 401 / 403 / 404 / 409 | The backend rejected the request; `message` explains. `param` names the field **as you sent it** — the backend's internal field names are translated back into the OpenAI ones. Was `upstream_validation_error` |
 | `upstream_unavailable` | 503 | A retryable failure — capacity, not your request |
 | `upstream_job_failed` | 502 | The job failed permanently; `message` carries the reason |
 | `upstream_timeout` | 504 | The job did not finish within the wait window |
@@ -868,7 +932,9 @@ Endpoint-specific codes are listed in the sections above.
 - `503 upstream_unavailable` — retry with backoff; this is our capacity, not your payload.
 - `504 upstream_timeout` — the job exceeded the wait window; retry, ideally with an [`Idempotency-Key`](#idempotency) so you are not billed twice.
 - `502 upstream_job_failed` — do not blindly retry; read `message` first.
-- `429` — see [Rate limits](#rate-limits).
+- `429 rate_limit_exceeded` — retry after the delay we give you; see [Rate limits](#rate-limits).
+- `429 insufficient_quota` — **do not retry**; top up the account first. You do not have to code around this: the response carries `X-Should-Retry: false`, which both official SDKs honour ahead of the status, so it fails once instead of three times.
+- `404` — never retried by the SDKs, which is the point: a wrong path or an unknown model fails immediately instead of costing you four round-trips.
 
 <CodeGroup>
 ```json 503 — retryable capacity failure
@@ -910,6 +976,12 @@ Rate limiting is enforced by your deAPI plan and passed through unmodified. On `
 
 Note there is no `code` field on this one — `type` is the stable signal.
 
+**Not every `429` is a rate limit.** Running out of credit also returns `429`, with `"type": "insufficient_quota"` and a matching `code`. Waiting does not clear that one — only a top-up does — so it is sent with `X-Should-Retry: false` and your SDK stops after the first attempt:
+
+```json
+{"error": {"message": "Insufficient balance.", "type": "insufficient_quota", "code": "insufficient_quota"}}
+```
+
 A `429` carries the accounting headers:
 
 ```http
@@ -921,7 +993,14 @@ X-RateLimit-Daily-Remaining: 947
 Retry-After: 60
 ```
 
-The OpenAI Python and Node SDKs parse `Retry-After` and back off on their own. For the per-plan numbers, see [Limits & Quotas](/limits-and-quotas).
+The SDKs read `Retry-After` and `x-should-retry` only — the `X-RateLimit-*` values are there for your dashboards, not for the SDK. For the per-plan numbers, see [Limits & Quotas](/limits-and-quotas).
+
+A **per-minute** limit is deliberately left retryable: waiting is the right response and `Retry-After` says how long. `X-Should-Retry: false` is sent on the two `429`s where retrying cannot work:
+
+- `insufficient_quota` — no amount of waiting changes that answer.
+- A rate limit whose `Retry-After` exceeds **120 seconds**, i.e. the daily window. Neither SDK waits that long unaided: `openai-python` declines to retry above 120 s, and `openai-node` honours `Retry-After` only below 60 s and otherwise falls back to a 0.5 s backoff — three requests into a window that reopens hours later, each one another hit on the same counter.
+
+The header is withheld when the delay is something your client can sensibly wait out, including a daily limit hit just before the window rolls over. The real `Retry-After` is always sent, so you can schedule your own retry either way.
 
 <Warning>
   **You cannot track headroom from a successful response here.** The native API returns `X-RateLimit-Limit` and `X-RateLimit-Remaining` on `200`s, so you can throttle before you are throttled. This gateway does not: a successful `/v1/*` response carries `X-Request-Id` and nothing else about limits (measured over 351 consecutive calls — no `X-RateLimit-*` header on any of them). If you need to watch the counter, read it from the [native API](/api/v2/overview); here, handle the `429` when it arrives.
@@ -1044,7 +1123,8 @@ A single list of everything that will not behave the way the OpenAI docs describ
 | TTS language | No auto-detection — non-English text needs an explicit `voice` or `language` |
 | Transcription | `srt`/`vtt` rejected; `prompt`, `temperature`, `keywords[]` accepted but inert; `include[]`, `languages[]`, `chunking_strategy` rejected |
 | Speaker labels | Sequential letters only; speaker references not supported |
-| Embeddings | `dimensions` ignored; `usage.prompt_tokens` always `0`; array cap 100 |
+| Transcription detail | `segments[].tokens` is always `[]` and `avg_logprob` `0` outside `WhisperLargeV3Ct2` — the backend returns plain text, so these are not recoverable. We report empty rather than estimate |
+| Embeddings | `dimensions` ignored; `usage.prompt_tokens` always `0`; array cap 100, and each array item counts as one request against your rate limit |
 | Video enums | Our `seconds` and `size` values differ from the spec enums — typed clients will complain |
 | Video history | `GET /v1/videos` and `DELETE /v1/videos/{id}` answer `404 endpoint_not_implemented` — we keep no per-user history |
 | Files | No `/v1/files`; `file_id` is rejected wherever the spec allows it |
@@ -1080,7 +1160,9 @@ Every path this gateway does not serve — `GET /v1/videos`, `DELETE /v1/videos/
 
 If you branched on the status code, that branch is now dead. Branch on `code` instead: it is the part that distinguishes "this gateway does not serve this path" from an ordinary `404` such as `model_not_found` or `video_not_found`. `501` survives in one place only — `variant_not_supported` on `/v1/videos/{id}/content`.
 
-`model_not_found` moved the same way: **`404` on POST endpoints too**, where it used to be `400`.
+`model_not_found` moved the same way: **`404` on POST endpoints too**, where it used to be `400`. One code on two statuses forced every client to handle both.
+
+The reason for the whole move is in [Supported endpoints](#supported-endpoints): both SDKs retry any status `>= 500`, so the old `501` turned a typo into four requests and an `InternalServerError`.
 
 ### Added
 
@@ -1090,6 +1172,9 @@ If you branched on the status code, that branch is now dead. Branch on `code` in
 - **`instructions` for text-to-speech** — describe a voice in words on `Qwen3_TTS_12Hz_1_7B_VoiceDesign`.
 - **`application/json` on `/v1/images/edits`** — the second content type the spec defines; images are passed as `images: [{"image_url": …}]`.
 - **New models:** `ZAnimeDistill_8Step_INT8`, `WhisperLargeV3Ct2`, `MiniMaxH3_33B_Turbo_INT8`, `Qwen3_TTS_12Hz_1_7B_VoiceDesign`.
+- **Browser support** — `/v1/*` now sends CORS headers, so the official Node SDK runs in the browser with `dangerouslyAllowBrowser: true`. Preflight no longer fails on authentication, which previously made every browser-side call impossible. Read the [warning](#calling-from-a-browser) before you ship it.
+- **`created` is populated for every model** in `GET /v1/models`. It reports when the model became available here; entries used to be `0` unless the model was also listed on OpenRouter.
+- **Image-to-video on `Ltxv_13B_0_9_8_Distilled_FP8`** — the model supports it natively and we were rejecting it. It is the cheapest image-to-video model in the catalog by a wide margin.
 
 ### Fixed
 
@@ -1098,11 +1183,17 @@ If you branched on the status code, that branch is now dead. Branch on `code` in
 - `response_format="text"` on CTranslate2 models returned a raw JSON document, and `verbose_json` returned an empty `segments` array.
 - `POST /v1/videos/edits`, `/extensions` and `/characters` answered `405`, telling you the path existed and the method was wrong — both untrue. They now answer `404 endpoint_not_implemented`.
 - `language` in transcription is no longer an echo — it reaches the model and affects the transcript.
+- **Running out of credit reported `400`** — "your request is malformed", when the request was fine. It is now `429 insufficient_quota`, sent with `X-Should-Retry: false` so your SDK does not retry an answer only a top-up can change: one failed call instead of three.
+- **`param` named the backend's field, not yours.** A validation error on `input`, `file`, `input_reference` or `response_format` came back pointing at an internal field name that appears nowhere in your request. The names are now translated back to the ones you sent.
+- **Unrecognised paths under `/v1/videos/` answered `405`.** The earlier fix covered only the three collection names spelled out in the spec (`/edits`, `/extensions`, `/characters`); every other word still leaked a `405`. The whole class now answers `404`.
 
 ### Changed — may affect existing integrations
 
 - **`Ltxv_13B_0_9_8_Distilled_FP8` accepts `input_reference`.** Image-to-video is not limited to the `Ltx2_*` and `MiniMaxH3_*` families; all three video models take a first frame.
 - **Partner models (`gpt-image-1.5`, `gpt-image-2`, `nano-banana-2`, `flux-2-klein-9b`) are not routable here.** They are in the native catalog and answer `404 model_not_found` on this gateway.
+- **`upstream_validation_error` was renamed to `invalid_value`** — a code from OpenAI's own vocabulary rather than one of ours.
+- **`timestamp_granularities=["word"]` on a segment-only model now returns `400`.** It used to return `200` with word timings interpolated evenly across each segment; those numbers looked like measurements and were not.
+- **`Ltx2_3_22B_Dist_INT8` no longer advertises `2` seconds.** The backend requires at least 49 frames and 2 s is 48, so that value always failed; `3` and `5` stand in its place.
 
 <Warning>
   **Fields that used to be accepted and silently dropped now return `400`:** `stream=true`, `partial_images`, `background=transparent`, `output_format=jpeg|webp`, `output_compression` (both image endpoints); `input_fidelity` (edits — on `/v1/images/generations` the spec does not define it and it is accepted and ignored); `stream_format=sse` (speech); `stream=true`, `include[]`, `languages[]`, `chunking_strategy` (transcription).
