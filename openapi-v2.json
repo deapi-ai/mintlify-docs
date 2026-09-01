@@ -4928,7 +4928,7 @@
                         "example": -1
                     },
                     "format": {
-                        "description": "Audio output format. One of mp3, wav or flac. Any other value returns 422 \"The selected format is invalid.\" mp3 is recommended for size; wav and flac are lossless and produce much larger result files.",
+                        "description": "Audio output format. Validated in two stages: the value must be in this enum, AND it must also appear in `info.limits.output_formats` for your `model` (GET /api/v2/models). Every deployed music model currently publishes `[\"mp3\"]` only, so mp3 is in practice the only value that is accepted — `wav` and `flac` pass the enum but are rejected by the model with 422 \"This output format is not supported by this model. Available formats: mp3.\" A value outside the enum, e.g. `ogg`, fails earlier with 422 \"The selected format is invalid.\"",
                         "type": "string",
                         "enum": [
                             "mp3",
