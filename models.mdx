@@ -175,7 +175,7 @@ When the models endpoint returns several options for the same task, use these gu
 
 **OCR (Image-to-Text)** — Check `info.limits` for the maximum supported image dimensions. For complex layouts, consider multiple passes or post-processing.
 
-**Video generation** — Start with low frame counts to validate aesthetics, then scale up. Check `info.limits.max_frames`, `min_frames`, and `max_fps` for each model. Some models support a `last_frame` feature (see `info.features.supports_last_frame`). For audio-to-video, provide an audio file to condition the video generation alongside your text prompt — some models (e.g. LTX 2.3) support `txt2video`, `img2video`, and `aud2video` tasks.
+**Video generation** — Start with low frame counts to validate aesthetics, then scale up. Check `info.limits.max_frames`, `min_frames`, and `max_fps` for each model. Some models support a `last_frame` feature (see `info.features.supports_last_frame`). For audio-to-video, provide an audio file to condition the video generation alongside your text prompt — some models (`Ltx2_3_22B_Dist_INT8` and `Ltx2_5_22B_Dist_INT8`) support `txt2video`, `img2video`, and `audio2video` in one model. `Ltx2_5_22B_Dist_INT8` is the newest of them: same 49–241 frames @ 24 fps, but a larger frame (up to 1344 px on a side, subject to a `max_pixels` budget) and a slightly shorter reference-audio window (1–10 s against 1–11 s on 2.3).
 
 **Video replace (Animate)** — Upload a video and a reference character image. The model replaces the person in the video with the character from the image. Optionally provide a text prompt to guide the replacement. Check `info.limits` for supported video duration and resolution.
 
@@ -194,6 +194,7 @@ When the models endpoint returns several options for the same task, use these gu
 Each model defines its own limits in the `info.limits` object. These limits vary between models and task types. Common fields include:
 
 - **Dimensions:** `min_width`, `max_width`, `min_height`, `max_height`, and (for image models) `resolution_step` — the value that width/height must be divisible by.
+- **Pixel budget (newer models):** `min_side`, `max_side`, `max_pixels`, `max_ratio`, `dimension_multiple`. These bound the frame as a whole rather than each axis, so a size can be inside `max_width`/`max_height` and still be rejected — on `Ltx2_5_22B_Dist_INT8`, `1024x1024` fails with `Size 1024x1024 (1,048,576 px) exceeds the model limit of 1,032,192 px.` and `1344x512` fails with `has an aspect ratio of 2.62:1, above the model limit of 2.00:1.`, while `1344x768` passes.
 - **Steps:** `min_steps`, `max_steps` — how many inference steps the model supports.
 - **Video-specific:** `min_frames`, `max_frames`, `min_fps`, `max_fps`.
 - **Text-specific:** `max_input_tokens`, `max_total_tokens` (for embedding models), `min_text`, `max_text` (for speech models).
