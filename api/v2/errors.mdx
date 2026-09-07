@@ -11,6 +11,7 @@ deAPI uses conventional HTTP response codes to indicate the success or failure o
 | ----- | --------------------- | ----------------------------------------------------------------- |
 | `200` | OK                    | Request succeeded. Response contains requested data.              |
 | `401` | Unauthorized          | Invalid or missing API key.                                       |
+| `403` | Forbidden             | Account suspended. Returned before validation on endpoints that spend credits; `/price` endpoints are not gated. |
 | `404` | Not Found             | The requested resource (job, route) does not exist.               |
 | `413` | Payload Too Large     | Request body exceeded the upload cap. See [Limits & Quotas](/limits-and-quotas#file-uploads). |
 | `422` | Unprocessable Entity  | Request validation failed. Check the `errors` object for details. |
@@ -157,7 +158,7 @@ Returned when an unexpected error occurs on our servers.
 **Solution:** Wait a moment and retry your request. If the problem persists, check [status.deapi.ai](https://status.deapi.ai/) or contact support on [Discord](https://discord.com/invite/UFfK5YRBsr).
 
 <Note>
-  A job that fails **after** it was accepted does not produce an HTTP error. The submission returns `200` with a `request_id`, and the failure surfaces on the job status as `status: "error"` with `error_code`, `error_message`, `error_reason`, `retryable` and `refunded`. See [Webhooks](/execution-modes-and-integrations/webhooks) for the full value lists.
+  A job that fails **after** it was accepted does not produce an HTTP error. The submission returns `200` with a `request_id`, and the failure surfaces on the job status as `status: "error"` with `error_code`, `error_reason`, `retryable` and `refunded`. See [Webhooks](/execution-modes-and-integrations/webhooks) for the full value lists.
 </Note>
 
 ## Best Practices

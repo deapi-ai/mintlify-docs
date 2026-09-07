@@ -52,7 +52,7 @@ What this means in practice:
 - **Only the settled figure is authoritative.** Do not reconcile your own accounting against the estimate or against the unsettled amount on a freshly finished job.
 - Estimate accuracy is best for the model's default resolution and lower for unusual sizes or quality tiers.
 
-Failed jobs are not charged: they report `price.amount: 0` and your balance is untouched.
+A failed job is normally refunded — `refunded: true` and `price.amount: 0`. Note that `refunded: false` covers two different situations: a charge deliberately kept, and a job that failed before it was ever charged. It does not by itself mean you were billed.
 
 ---
 

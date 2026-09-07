@@ -155,7 +155,7 @@ curl https://api.deapi.ai/api/v2/jobs/abc123 \
 | `status`     | `pending`, `processing`, `done`, or `error` |
 | `progress`   | Progress percentage (when available)        |
 | `result_url` | Download URL (when `done`)                  |
-| `error_code`, `error_message`, `error_reason`, `retryable`, `refunded` | Error details (when `error`) |
+| `error_code`, `error_reason`, `retryable`, `refunded` | Error details (when `error`) |
 
 <Warning>
   Polling adds latency, wastes resources with unnecessary requests, and provides no live previews. Use webhooks or WebSockets when possible.

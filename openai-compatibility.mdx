@@ -213,7 +213,7 @@ Catalog reads are cached for 5 minutes, so a model added or removed on the deAPI
 For the full native catalog with capabilities, limits, defaults and LoRAs, use the [Model Selection endpoint](/api/v2/utilities/models) or the [Models guide](/models).
 
 <Warning>
-  **Partner models are native-only.** deAPI's catalog includes hosted partner models whose IDs look like the ones you already type — `gpt-image-1.5`, `gpt-image-2`, `nano-banana-2`, `flux-2-klein-9b`. **None of them is routable through this gateway.** They are absent from `GET /v1/models` and every call naming one answers `404 model_not_found`, on `/v1/models/{model}` and on POST alike.
+  **Partner models are native-only.** deAPI's catalog includes hosted partner models whose IDs look like the ones you already type — `gpt-image-1.5`, `gpt-image-2`, `nano-banana-2`. **None of them is routable through this gateway.** They are absent from `GET /v1/models` and every call naming one answers `404 model_not_found`, on `/v1/models/{model}` and on POST alike.
 
   This trips people up in exactly one way: `gpt-image-2` is a real deAPI model *and* the natural thing to send to an OpenAI-shaped endpoint, so the `404` reads like an outage rather than a routing rule. Reach partner models through the [native API](/api/v2/overview); they are billed differently from the network models, which is the reason they are not folded in here.
 </Warning>
@@ -1190,7 +1190,7 @@ The reason for the whole move is in [Supported endpoints](#supported-endpoints):
 ### Changed — may affect existing integrations
 
 - **`Ltxv_13B_0_9_8_Distilled_FP8` accepts `input_reference`.** Image-to-video is not limited to the `Ltx2_*` and `MiniMaxH3_*` families; all three video models take a first frame.
-- **Partner models (`gpt-image-1.5`, `gpt-image-2`, `nano-banana-2`, `flux-2-klein-9b`) are not routable here.** They are in the native catalog and answer `404 model_not_found` on this gateway.
+- **Partner models (`gpt-image-1.5`, `gpt-image-2`, `nano-banana-2`) are not routable here.** They are in the native catalog and answer `404 model_not_found` on this gateway.
 - **`upstream_validation_error` was renamed to `invalid_value`** — a code from OpenAI's own vocabulary rather than one of ours.
 - **`timestamp_granularities=["word"]` on a segment-only model now returns `400`.** It used to return `200` with word timings interpolated evenly across each segment; those numbers looked like measurements and were not.
 - **`Ltx2_3_22B_Dist_INT8` no longer advertises `2` seconds.** The backend requires at least 49 frames and 2 s is 48, so that value always failed; `3` and `5` stand in its place.

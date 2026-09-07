@@ -36,7 +36,7 @@ Rate limits are defined per endpoint as:
 - **RPM** — Requests Per Minute
 - **RPD** — Requests Per Day
 
-Limits reset daily at **midnight UTC**.
+Each window opens on your first request into a bucket and runs its full length from that moment — not to a calendar boundary in any timezone. Read `X-RateLimit-Reset` (RPM) and `X-RateLimit-Daily-Reset` (RPD) for the exact epoch second.
 
 ---
 
@@ -50,7 +50,7 @@ Basic accounts have conservative limits designed for testing and evaluation.
 
 | Endpoint | Models | RPM | RPD |
 | --- | --- | --- | --- |
-| `/api/v2/images/generations` | `Flux1schnell`, `ZImageTurbo_INT8`, `Flux_2_Klein_4B_BF16` | 3 | 100 |
+| `/api/v2/images/generations` | `Flux1schnell`, `ZImageTurbo_INT8`, `Flux_2_Klein_4B_BF16`, `ZAnimeDistill_8Step_INT8` | 3 | 100 |
 | `/api/v2/images/edits` | `Flux_2_Klein_4B_BF16`, `QwenImageEdit_Plus_NF4` | 1 | 15 |
 | `/api/v2/images/ocr` | `Nanonets_Ocr_S_F16` | 5 | 50 |
 | `/api/v2/images/background-removals` | `Ben2` | 5 | 100 |
@@ -86,7 +86,7 @@ Premium accounts have high limits suitable for production workloads. All endpoin
 
 | Endpoint | Models | RPM | RPD |
 | --- | --- | --- | --- |
-| `/api/v2/images/generations` | `Flux1schnell`, `ZImageTurbo_INT8`, `Flux_2_Klein_4B_BF16` | 300 | Unlimited |
+| `/api/v2/images/generations` | `Flux1schnell`, `ZImageTurbo_INT8`, `Flux_2_Klein_4B_BF16`, `ZAnimeDistill_8Step_INT8` | 300 | Unlimited |
 | `/api/v2/images/edits` | `Flux_2_Klein_4B_BF16`, `QwenImageEdit_Plus_NF4` | 300 | Unlimited |
 | `/api/v2/images/ocr` | `Nanonets_Ocr_S_F16` | 300 | Unlimited |
 | `/api/v2/images/background-removals` | `Ben2` | 300 | Unlimited |
@@ -107,11 +107,14 @@ Premium accounts have high limits suitable for production workloads. All endpoin
 
 ---
 
-### Endpoints Without Rate Limits
+### Utility Endpoints
 
-The following endpoints have no rate limits for all accounts:
+Utility endpoints are limited generously rather than not at all, and they sit in their own buckets:
 
-- **Utilities** — `/api/v2/account/balance`, `/api/v2/models`
+- `/api/v2/account/balance` — 600 RPM (`X-RateLimit-Source: static`, identical for every account)
+- `/api/v2/models` — 300 RPM on Premium (`X-RateLimit-Source: tier`)
+
+Read `X-RateLimit-Limit` on any response rather than hard-coding these.
 
 ---
 
@@ -229,5 +232,5 @@ When you exceed your rate limit, the API returns a `429 Too Many Requests` respo
 **How to handle:**
 
 1. **RPM exceeded** — Wait 60 seconds before retrying
-2. **RPD exceeded** — Wait until midnight UTC for daily reset
+2. **RPD exceeded** — Wait for the delay in `Retry-After`, or the epoch second in `X-RateLimit-Daily-Reset`
 3. **Need higher limits?** — [Upgrade to Premium](https://app.deapi.ai/billing) with any payment for 300 RPM and unlimited daily requests

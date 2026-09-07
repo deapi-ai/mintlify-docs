@@ -146,7 +146,6 @@ All webhook requests include these headers:
         "job_type": "txt2img",
         "failed_at": "2026-08-07T11:43:45+00:00",
         "error_code": "WORKER_TIMEOUT",
-        "error_message": "Worker failed to respond within the allowed time",
         "error_reason": "TIMEOUT",
         "retryable": true,
         "refunded": true
@@ -162,7 +161,6 @@ All webhook requests include these headers:
     | `data.job_type` | string | The job's inference type slug (see the `job.processing` tab) |
     | `data.failed_at` | string (ISO 8601) | When the job failed |
     | `data.error_code` | string | Coarse failure category |
-    | `data.error_message` | string | Human-readable error description |
     | `data.error_reason` | string | Actionable failure reason — **open list**, see below |
     | `data.retryable` | boolean | Whether resubmitting the identical request could succeed |
     | `data.refunded` | boolean | Whether the upfront charge was returned |
@@ -203,6 +201,8 @@ All webhook requests include these headers:
 ### Signature Verification
 
 Every webhook includes an HMAC-SHA256 signature in the `X-DeAPI-Signature` header. **Always verify this signature** to ensure the request came from deAPI.
+
+If neither a per-request `webhook_secret` nor an account-default secret exists, the callback is still delivered but **unsigned** — `X-DeAPI-Signature` arrives empty. Reject an empty value if you require authenticity.
 
 <Info>
   If you supplied a `webhook_secret` in the original job request, every callback for that job (including all retries) is signed with **that** secret. Otherwise, the signature uses the global webhook secret from your [account settings](https://app.deapi.ai/settings/webhooks). Your verification code must use whichever secret you sent for that job — typically by looking it up from `data.job_request_id` in your own store.
