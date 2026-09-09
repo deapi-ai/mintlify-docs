@@ -10,5 +10,5 @@ Call `GET /api/v2/models?limit=50` once at session start, cache the result, and 
 </Tip>
 
 <Warning>
-**Always send `limit=50`.** It is the maximum page size and returns the whole catalogue in one call. Omit it and you get only the first 25 models — a valid-looking response that is silently missing the rest. `per_page` does not work for this; it is accepted and ignored.
+**Send `limit=50` and check `meta.last_page`.** The page size defaults to 50 and is capped at 75 — a larger value is clamped down, not rejected. `limit=50` covers the current catalogue in one call, and `meta.last_page` reading `1` is what confirms the `data` array is complete; nothing else in the response distinguishes a partial page from a full one. `per_page` does not work for this; it is accepted and ignored.
 </Warning>

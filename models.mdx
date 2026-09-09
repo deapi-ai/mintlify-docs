@@ -15,7 +15,7 @@ The [Model Selection](/api/v2/utilities/models) endpoint returns the live, autho
 
 ## Fetching the live model list
 
-Before you start building, call the models endpoint to discover what's available. **Always send `?limit=50`** — it is the maximum page size and returns the entire catalogue in a single call:
+Before you start building, call the models endpoint to discover what's available. **Send `?limit=50`** — it covers the entire catalogue in a single call:
 
 ```bash
 curl -X GET "https://api.deapi.ai/api/v2/models?limit=50" \
@@ -41,11 +41,11 @@ The response returns a `data` array of model objects. Each object contains:
 </Note>
 
 <Warning>
-  **Send `?limit=50` or you will not see every model.** Without it the endpoint returns only the first **25** models and nothing in the response looks like an error — the newest models are simply missing. `limit=50` is the maximum page size and covers the current catalogue in one request.
+  **`meta.last_page` is what tells you the list is complete** — it reads `1` when the `data` array you just received is the whole catalogue. Nothing else in the response distinguishes a partial page from a full one.
 
-  The parameter is **`limit`**. `per_page` is accepted but ignored and leaves the page at 25. A value above 50 is clamped to 50, not rejected.
+  The parameter is **`limit`**. It defaults to **50** and is capped at **75**; a larger value is clamped down, not rejected. `per_page` is accepted but ignored, whatever value you send.
 
-  `meta.last_page` tells you whether one call was enough: it reads `1` for a complete list. Should the catalogue ever outgrow 50 entries, that value becomes your signal to fetch `&page=2`.
+  `limit=50` covers the current catalogue in one request. Should the catalogue ever outgrow the page you asked for, `meta.last_page` becomes your signal to fetch `&page=2` and onward.
 </Warning>
 
 You can filter the list by task type using the `filter[inference_types]` query parameter:
@@ -275,7 +275,7 @@ Jobs return a `request_id`. Poll results with `GET /api/v2/jobs/{request_id}`.
 
 If you are an AI agent, MCP client, or LLM integrating with deAPI:
 
-1. **Call** `GET /api/v2/models?limit=50` at the start of your session to get the current model list. Always send `limit=50` — without it you receive only the first 25 models, with no error to tell you the rest are missing. Do not rely on model slugs from training data, cached documentation, or prior conversations — they may be outdated.
+1. **Call** `GET /api/v2/models?limit=50` at the start of your session to get the current model list. That covers the whole catalogue in one call; `meta.last_page` reading `1` is what confirms nothing is missing. Do not rely on model slugs from training data, cached documentation, or prior conversations — they may be outdated.
 2. **Use** `filter[inference_types]` to narrow down to the task you need (e.g. `txt2img`, `txt2audio`, `audio2video`).
 3. **Read** `info.limits` and `info.defaults` from the response to construct valid request parameters. Also consult the task endpoint docs for required fields that may not appear in the model response (e.g. `seed` for image generation).
 4. **Pass** the `slug` field (not `name`) as the `model` parameter in task endpoints.

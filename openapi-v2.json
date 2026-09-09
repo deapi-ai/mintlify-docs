@@ -201,25 +201,10 @@
                         "$ref": "#/components/parameters/AcceptHeader"
                     },
                     {
-                        "name": "limit",
-                        "in": "query",
-                        "description": "Page size. Capped at 50; a larger value is clamped, not rejected. The applied value comes back as `meta.per_page`.",
-                        "required": false,
-                        "schema": {
-                            "type": "integer",
-                            "default": 25,
-                            "maximum": 50,
-                            "minimum": 1
-                        }
+                        "$ref": "#/components/parameters/ListLimit"
                     },
                     {
-                        "name": "page",
-                        "in": "query",
-                        "required": false,
-                        "schema": {
-                            "type": "integer",
-                            "default": 1
-                        }
+                        "$ref": "#/components/parameters/ListPage"
                     },
                     {
                         "name": "filter[inference_types]",
@@ -4266,7 +4251,7 @@
                         "example": "QwenImageEdit_Plus_NF4"
                     },
                     "loras": {
-                        "description": "Array of LoRA models to apply",
+                        "description": "Array of LoRA models to apply. Only models that publish a `loras` array in `GET /api/v2/models` have any to apply — the `model` example shown here publishes none, so leave the field out unless you switched to a model that does. Example is deliberately empty: a LoRA name is only valid for the one model that lists it.",
                         "type": "array",
                         "items": {
                             "required": [
@@ -4275,19 +4260,18 @@
                             ],
                             "properties": {
                                 "name": {
-                                    "description": "Name of the LoRA model",
-                                    "type": "string",
-                                    "example": "style_lora"
+                                    "description": "LoRA identifier, copied verbatim from `loras[].name` for your `model` in `GET /api/v2/models`. That is the value the API validates against — not the human-readable `loras[].display_name`.",
+                                    "type": "string"
                                 },
                                 "weight": {
                                     "description": "Weight of the LoRA model (must be non-negative)",
                                     "type": "number",
-                                    "example": 0.75,
                                     "minimum": 0
                                 }
                             },
                             "type": "object"
-                        }
+                        },
+                        "example": []
                     },
                     "guidance": {
                         "description": "Guidance scale. Required only when the model declares `info.features.supports_guidance`; for a model that does not, the value is accepted and ignored. Bounds are `info.limits.min_guidance` / `max_guidance`, from `GET /api/v2/models`.",
@@ -4576,7 +4560,7 @@
                         "example": "Flux1schnell"
                     },
                     "loras": {
-                        "description": "Array of LoRA models to apply",
+                        "description": "Array of LoRA models to apply. Accepted only by models that publish a `loras` array in `GET /api/v2/models` — a LoRA not listed for the selected `model` is rejected with a 422. The example below belongs to the `model` example shown and is not portable to another model.",
                         "type": "array",
                         "items": {
                             "required": [
@@ -4585,9 +4569,9 @@
                             ],
                             "properties": {
                                 "name": {
-                                    "description": "Name of the LoRA model",
+                                    "description": "LoRA identifier, copied verbatim from `loras[].name` for your `model` in `GET /api/v2/models`. That is the value the API validates against — not the human-readable `loras[].display_name`.",
                                     "type": "string",
-                                    "example": "style_lora"
+                                    "example": "PepeFluxSchnellLora"
                                 },
                                 "weight": {
                                     "description": "Weight of the LoRA model (must be non-negative)",
@@ -4795,99 +4779,239 @@
                 "type": "object"
             },
             "TranscribePriceRequestBody": {
-                "required": [
-                    "model"
-                ],
-                "properties": {
-                    "source_url": {
-                        "description": "URL of video/audio to estimate price for. Mutually exclusive with source_file and duration_seconds.",
-                        "type": "string",
-                        "example": "https://www.youtube.com/watch?v=jNQXAC9IVRw"
-                    },
-                    "source_file": {
-                        "description": "Audio or video file to estimate price for. Mutually exclusive with source_url and duration_seconds.",
-                        "type": "string",
-                        "format": "binary"
-                    },
-                    "duration_seconds": {
-                        "description": "Duration in seconds for direct price estimation. Mutually exclusive with source_url and source_file. This mode never fetches the source, so pass `platform` alongside it on models that price per platform — without it the quote uses the model base rate and no duration rounding, and can come in under the amount charged.",
-                        "type": "number",
-                        "example": 3600
-                    },
-                    "include_ts": {
-                        "description": "Should transcription include timestamps. Implied when `diarize` is true. Whether it raises the quote depends on `ts_level` — segment-level timing is included in the base price. Pass it exactly as you will pass it to POST /api/v2/audio/transcriptions.",
-                        "type": [
-                            "boolean",
-                            "null"
+                "description": "Exactly ONE input source per request — `source_url`, `source_file` or `duration_seconds` — hence the three variants below. They are mutually exclusive, not a menu of optional fields: sending two of them is a 422. `platform` belongs to the `duration_seconds` variant alone; with a URL or an upload the platform is derived from the source itself and passing it is rejected. Everything else (`include_ts`, `ts_level`, `include_metadata`, `diarize`, `lang`, `model`) applies to all three.",
+                "oneOf": [
+                    {
+                        "title": "From a source URL",
+                        "required": [
+                            "source_url",
+                            "model"
                         ],
-                        "example": false,
-                        "default": false
+                        "properties": {
+                            "source_url": {
+                                "description": "URL of video/audio to estimate price for. Mutually exclusive with `source_file` and `duration_seconds`; `platform` must NOT be sent with it, as it is derived from the URL.",
+                                "type": "string",
+                                "example": "https://www.youtube.com/watch?v=jNQXAC9IVRw"
+                            },
+                            "include_ts": {
+                                "description": "Should transcription include timestamps. Implied when `diarize` is true. Whether it raises the quote depends on `ts_level` — segment-level timing is included in the base price. Pass it exactly as you will pass it to POST /api/v2/audio/transcriptions.",
+                                "type": [
+                                    "boolean",
+                                    "null"
+                                ],
+                                "example": false,
+                                "default": false
+                            },
+                            "ts_level": {
+                                "description": "Timestamp granularity. Validated against the model exactly as on POST /api/v2/audio/transcriptions, so a price quote is never returned for a combination the job request would reject. Granularity affects the price on models that price timestamps separately: `segment` is included in the base price, while `word` and `char` carry a surcharge.",
+                                "type": [
+                                    "string",
+                                    "null"
+                                ],
+                                "example": "word",
+                                "default": "segment",
+                                "enum": [
+                                    "segment",
+                                    "word",
+                                    "char",
+                                    null
+                                ]
+                            },
+                            "include_metadata": {
+                                "description": "Whether the job will be asked to attach source metadata. Carries a flat surcharge on models that price it, so pass it exactly as you will pass it to POST /api/v2/audio/transcriptions or the quote will come in under the amount charged. The surcharge applies only to sources that can actually return metadata: uploads always return null and are never charged for it. Every recognised platform, YouTube included, does return metadata and is charged the surcharge.",
+                                "type": [
+                                    "boolean",
+                                    "null"
+                                ],
+                                "example": false,
+                                "default": false
+                            },
+                            "diarize": {
+                                "description": "Label each timed unit with a detected speaker. Requires a model that supports diarization. Implies `include_ts` and carries the timestamp surcharge at ANY granularity, including `segment`.",
+                                "type": [
+                                    "boolean",
+                                    "null"
+                                ],
+                                "example": false,
+                                "default": false
+                            },
+                            "lang": {
+                                "description": "Language hint for the transcription. Does not affect the price, but is validated against the model the same way as on the job request: a language outside a model's published `info.limits.languages` is rejected.",
+                                "type": [
+                                    "string",
+                                    "null"
+                                ],
+                                "example": "en",
+                                "maxLength": 16
+                            },
+                            "model": {
+                                "description": "The model to use for transcription.",
+                                "type": "string",
+                                "example": "WhisperLargeV3"
+                            }
+                        },
+                        "type": "object"
                     },
-                    "ts_level": {
-                        "description": "Timestamp granularity. Validated against the model exactly as on POST /api/v2/audio/transcriptions, so a price quote is never returned for a combination the job request would reject. Granularity affects the price on models that price timestamps separately: `segment` is included in the base price, while `word` and `char` carry a surcharge.",
-                        "type": [
-                            "string",
-                            "null"
+                    {
+                        "title": "From an uploaded file",
+                        "required": [
+                            "source_file",
+                            "model"
                         ],
-                        "example": "word",
-                        "default": "segment",
-                        "enum": [
-                            "segment",
-                            "word",
-                            "char",
-                            null
-                        ]
+                        "properties": {
+                            "source_file": {
+                                "description": "Audio or video file to estimate price for. Mutually exclusive with `source_url` and `duration_seconds`; `platform` must NOT be sent with it, as an upload belongs to no platform.",
+                                "type": "string",
+                                "format": "binary"
+                            },
+                            "include_ts": {
+                                "description": "Should transcription include timestamps. Implied when `diarize` is true. Whether it raises the quote depends on `ts_level` — segment-level timing is included in the base price. Pass it exactly as you will pass it to POST /api/v2/audio/transcriptions.",
+                                "type": [
+                                    "boolean",
+                                    "null"
+                                ],
+                                "example": false,
+                                "default": false
+                            },
+                            "ts_level": {
+                                "description": "Timestamp granularity. Validated against the model exactly as on POST /api/v2/audio/transcriptions, so a price quote is never returned for a combination the job request would reject. Granularity affects the price on models that price timestamps separately: `segment` is included in the base price, while `word` and `char` carry a surcharge.",
+                                "type": [
+                                    "string",
+                                    "null"
+                                ],
+                                "example": "word",
+                                "default": "segment",
+                                "enum": [
+                                    "segment",
+                                    "word",
+                                    "char",
+                                    null
+                                ]
+                            },
+                            "include_metadata": {
+                                "description": "Whether the job will be asked to attach source metadata. An upload always returns null metadata and is never charged the surcharge, so this flag does not move the quote on this variant. Pass it exactly as you will pass it to POST /api/v2/audio/transcriptions.",
+                                "type": [
+                                    "boolean",
+                                    "null"
+                                ],
+                                "example": false,
+                                "default": false
+                            },
+                            "diarize": {
+                                "description": "Label each timed unit with a detected speaker. Requires a model that supports diarization. Implies `include_ts` and carries the timestamp surcharge at ANY granularity, including `segment`.",
+                                "type": [
+                                    "boolean",
+                                    "null"
+                                ],
+                                "example": false,
+                                "default": false
+                            },
+                            "lang": {
+                                "description": "Language hint for the transcription. Does not affect the price, but is validated against the model the same way as on the job request: a language outside a model's published `info.limits.languages` is rejected.",
+                                "type": [
+                                    "string",
+                                    "null"
+                                ],
+                                "example": "en",
+                                "maxLength": 16
+                            },
+                            "model": {
+                                "description": "The model to use for transcription.",
+                                "type": "string",
+                                "example": "WhisperLargeV3"
+                            }
+                        },
+                        "type": "object"
                     },
-                    "platform": {
-                        "description": "The platform the source comes from. Only valid together with `duration_seconds`, where there is no URL to derive it from — with `source_url` or `source_file` it is rejected, because the platform is taken from the source itself. Some models price per platform, and TikTok is priced from a length-band card, so a duration-only quote that omits this is priced at the model base rate and can come in under the amount charged. Pass the platform you will actually submit.",
-                        "type": [
-                            "string",
-                            "null"
+                    {
+                        "title": "From a known duration",
+                        "required": [
+                            "duration_seconds",
+                            "model"
                         ],
-                        "example": "tiktok",
-                        "enum": [
-                            "youtube",
-                            "twitter",
-                            "twitch",
-                            "kick",
-                            "tiktok",
-                            null
-                        ]
-                    },
-                    "include_metadata": {
-                        "description": "Whether the job will be asked to attach source metadata. Carries a flat surcharge on models that price it, so pass it exactly as you will pass it to POST /api/v2/audio/transcriptions or the quote will come in under the amount charged. The surcharge applies only to sources that can actually return metadata: uploads always return null and are never charged for it. Every recognised platform, YouTube included, does return metadata and is charged the surcharge.",
-                        "type": [
-                            "boolean",
-                            "null"
-                        ],
-                        "example": false,
-                        "default": false
-                    },
-                    "diarize": {
-                        "description": "Label each timed unit with a detected speaker. Requires a model that supports diarization. Implies `include_ts` and carries the timestamp surcharge at ANY granularity, including `segment`.",
-                        "type": [
-                            "boolean",
-                            "null"
-                        ],
-                        "example": false,
-                        "default": false
-                    },
-                    "lang": {
-                        "description": "Language hint for the transcription. Does not affect the price, but is validated against the model the same way as on the job request: a language outside a model's published `info.limits.languages` is rejected.",
-                        "type": [
-                            "string",
-                            "null"
-                        ],
-                        "example": "en",
-                        "maxLength": 16
-                    },
-                    "model": {
-                        "description": "The model to use for transcription.",
-                        "type": "string",
-                        "example": "WhisperLargeV3"
+                        "properties": {
+                            "duration_seconds": {
+                                "description": "Duration in seconds for direct price estimation. Mutually exclusive with `source_url` and `source_file`. This mode never fetches the source, so pass `platform` alongside it on models that price per platform — without it the quote uses the model base rate and no duration rounding, and can come in under the amount charged.",
+                                "type": "number",
+                                "example": 3600,
+                                "minimum": 0.1
+                            },
+                            "platform": {
+                                "description": "The platform the source comes from. Valid ONLY on this variant, where there is no URL to derive it from — with `source_url` or `source_file` it is rejected, because the platform is taken from the source itself. Some models price per platform, and TikTok is priced from a length-band card, so a duration-only quote that omits this is priced at the model base rate and can come in under the amount charged. Pass the platform you will actually submit.",
+                                "type": [
+                                    "string",
+                                    "null"
+                                ],
+                                "example": "tiktok",
+                                "enum": [
+                                    "youtube",
+                                    "twitter",
+                                    "twitch",
+                                    "kick",
+                                    "tiktok",
+                                    null
+                                ]
+                            },
+                            "include_ts": {
+                                "description": "Should transcription include timestamps. Implied when `diarize` is true. Whether it raises the quote depends on `ts_level` — segment-level timing is included in the base price. Pass it exactly as you will pass it to POST /api/v2/audio/transcriptions.",
+                                "type": [
+                                    "boolean",
+                                    "null"
+                                ],
+                                "example": false,
+                                "default": false
+                            },
+                            "ts_level": {
+                                "description": "Timestamp granularity. Validated against the model exactly as on POST /api/v2/audio/transcriptions, so a price quote is never returned for a combination the job request would reject. Granularity affects the price on models that price timestamps separately: `segment` is included in the base price, while `word` and `char` carry a surcharge.",
+                                "type": [
+                                    "string",
+                                    "null"
+                                ],
+                                "example": "word",
+                                "default": "segment",
+                                "enum": [
+                                    "segment",
+                                    "word",
+                                    "char",
+                                    null
+                                ]
+                            },
+                            "include_metadata": {
+                                "description": "Whether the job will be asked to attach source metadata. Carries a flat surcharge on models that price it, so pass it exactly as you will pass it to POST /api/v2/audio/transcriptions or the quote will come in under the amount charged. The surcharge applies only to sources that can actually return metadata: uploads always return null and are never charged for it. Every recognised platform, YouTube included, does return metadata and is charged the surcharge.",
+                                "type": [
+                                    "boolean",
+                                    "null"
+                                ],
+                                "example": false,
+                                "default": false
+                            },
+                            "diarize": {
+                                "description": "Label each timed unit with a detected speaker. Requires a model that supports diarization. Implies `include_ts` and carries the timestamp surcharge at ANY granularity, including `segment`.",
+                                "type": [
+                                    "boolean",
+                                    "null"
+                                ],
+                                "example": false,
+                                "default": false
+                            },
+                            "lang": {
+                                "description": "Language hint for the transcription. Does not affect the price, but is validated against the model the same way as on the job request: a language outside a model's published `info.limits.languages` is rejected.",
+                                "type": [
+                                    "string",
+                                    "null"
+                                ],
+                                "example": "en",
+                                "maxLength": 16
+                            },
+                            "model": {
+                                "description": "The model to use for transcription.",
+                                "type": "string",
+                                "example": "WhisperLargeV3"
+                            }
+                        },
+                        "type": "object"
                     }
-                },
-                "type": "object"
+                ]
             },
             "Txt2MusicPriceRequestBody": {
                 "description": "Every example in this schema is a working set for the `model` example shown — they are not defaults and not portable. Sizes, step counts, frame counts and frame rates are all per-model: read `info.limits` and `info.defaults` for the model you actually intend to use from `GET /api/v2/models`. Substituting a different `model` while keeping these values is the most common source of a 422.",
@@ -5031,12 +5155,11 @@
                                 "example": "RealESRGAN_Vid_x4"
                             },
                             "scale": {
-                                "description": "Optional upscale factor. Only allowed for models that support a configurable scale.",
+                                "description": "Upscale factor. Accepted ONLY by models that publish `info.limits.min_scale`/`max_scale` in `GET /api/v2/models`, and REQUIRED by those models — read them for your `model` before sending. A fixed-scale model (both limits absent or null, e.g. `RealESRGAN_Vid_x4`) rejects this field with a 422; a configurable one rejects its absence. Deliberately carries no example, because no single value is valid across models.",
                                 "type": [
                                     "integer",
                                     "null"
                                 ],
-                                "example": 4,
                                 "maximum": 16,
                                 "minimum": 1
                             }
@@ -5053,12 +5176,12 @@
                             "width": {
                                 "description": "Width of video in pixels for price calculation. The accepted range is model-specific — read `info.limits.min_width`/`max_width` and `min_height`/`max_height` for your `model` from `GET /api/v2/models`. Some models also publish `dimension_multiple` or `resolution_step`: values are snapped DOWN to that grid before validation, so an off-grid size is silently reduced rather than rejected. `max_pixels` and `max_ratio`, where present, cap total area and aspect ratio on top of the per-side bounds.",
                                 "type": "integer",
-                                "example": 1280
+                                "example": 1024
                             },
                             "height": {
                                 "description": "Height of video in pixels for price calculation. The accepted range is model-specific — read `info.limits.min_width`/`max_width` and `min_height`/`max_height` for your `model` from `GET /api/v2/models`. Some models also publish `dimension_multiple` or `resolution_step`: values are snapped DOWN to that grid before validation, so an off-grid size is silently reduced rather than rejected. `max_pixels` and `max_ratio`, where present, cap total area and aspect ratio on top of the per-side bounds.",
                                 "type": "integer",
-                                "example": 1080
+                                "example": 576
                             },
                             "duration": {
                                 "description": "Optional video duration in seconds. Allows validating against the model's max allowed duration without uploading the file. Pricing itself is not duration-dependent for video upscaling. The accepted range is model-specific — read `info.limits.min_duration`/`max_duration` for your `model` from `GET /api/v2/models`. Some models additionally cap duration per output format via `info.limits.max_duration_by_format`.",
@@ -5076,12 +5199,11 @@
                                 "example": "RealESRGAN_Vid_x4"
                             },
                             "scale": {
-                                "description": "Optional upscale factor. Only allowed for models that support a configurable scale.",
+                                "description": "Upscale factor. Accepted ONLY by models that publish `info.limits.min_scale`/`max_scale` in `GET /api/v2/models`, and REQUIRED by those models — read them for your `model` before sending. A fixed-scale model (both limits absent or null, e.g. `RealESRGAN_Vid_x4`) rejects this field with a 422; a configurable one rejects its absence. Deliberately carries no example, because no single value is valid across models.",
                                 "type": [
                                     "integer",
                                     "null"
                                 ],
-                                "example": 4,
                                 "maximum": 16,
                                 "minimum": 1
                             }
@@ -5091,7 +5213,7 @@
                 ]
             },
             "Img2ImgRequestBody": {
-                "description": "Every example in this schema is a working set for the `model` example shown — they are not defaults and not portable. Sizes, step counts, frame counts and frame rates are all per-model: read `info.limits` and `info.defaults` for the model you actually intend to use from `GET /api/v2/models`. Substituting a different `model` while keeping these values is the most common source of a 422.",
+                "description": "Every example in this schema is a working set for the `model` example shown — they are not defaults and not portable. Sizes, step counts, frame counts and frame rates are all per-model: read `info.limits` and `info.defaults` for the model you actually intend to use from `GET /api/v2/models`. Substituting a different `model` while keeping these values is the most common source of a 422.\n\nAn input image is MANDATORY and comes in exactly one of two shapes — `image` for a single file, or `images[]` for several. Sending neither is a 422 (\"At least one image is required\"), and sending both is a 422 as well; the `oneOf` below is that choice, not a pair of optional fields. Everything else applies to both shapes.",
                 "required": [
                     "prompt",
                     "model",
@@ -5146,7 +5268,7 @@
                         "example": "QwenImageEdit_Plus_NF4"
                     },
                     "loras": {
-                        "description": "Array of LoRA models to apply",
+                        "description": "Array of LoRA models to apply. Only models that publish a `loras` array in `GET /api/v2/models` have any to apply — the `model` example shown here publishes none, so leave the field out unless you switched to a model that does. Example is deliberately empty: a LoRA name is only valid for the one model that lists it.",
                         "type": "array",
                         "items": {
                             "required": [
@@ -5155,19 +5277,18 @@
                             ],
                             "properties": {
                                 "name": {
-                                    "description": "Name of the LoRA model",
-                                    "type": "string",
-                                    "example": "style_lora"
+                                    "description": "LoRA identifier, copied verbatim from `loras[].name` for your `model` in `GET /api/v2/models`. That is the value the API validates against — not the human-readable `loras[].display_name`.",
+                                    "type": "string"
                                 },
                                 "weight": {
                                     "description": "Weight of the LoRA model (must be non-negative)",
                                     "type": "number",
-                                    "example": 0.75,
                                     "minimum": 0
                                 }
                             },
                             "type": "object"
-                        }
+                        },
+                        "example": []
                     },
                     "guidance": {
                         "description": "Guidance scale. Required only when the model declares `info.features.supports_guidance`; for a model that does not, the value is accepted and ignored. Bounds are `info.limits.min_guidance` / `max_guidance`, from `GET /api/v2/models`.",
@@ -5219,7 +5340,23 @@
                         "minLength": 32
                     }
                 },
-                "type": "object"
+                "type": "object",
+                "oneOf": [
+                    {
+                        "title": "One image",
+                        "required": [
+                            "image"
+                        ],
+                        "type": "object"
+                    },
+                    {
+                        "title": "Several images",
+                        "required": [
+                            "images[]"
+                        ],
+                        "type": "object"
+                    }
+                ]
             },
             "Img2TxtRequestBody": {
                 "required": [
@@ -5677,7 +5814,7 @@
                         "example": "Flux1schnell"
                     },
                     "loras": {
-                        "description": "Array of LoRA models to apply",
+                        "description": "Array of LoRA models to apply. Accepted only by models that publish a `loras` array in `GET /api/v2/models` — a LoRA not listed for the selected `model` is rejected with a 422. The example below belongs to the `model` example shown and is not portable to another model.",
                         "type": "array",
                         "items": {
                             "required": [
@@ -5686,9 +5823,9 @@
                             ],
                             "properties": {
                                 "name": {
-                                    "description": "Name of the LoRA model",
+                                    "description": "LoRA identifier, copied verbatim from `loras[].name` for your `model` in `GET /api/v2/models`. That is the value the API validates against — not the human-readable `loras[].display_name`.",
                                     "type": "string",
-                                    "example": "style_lora"
+                                    "example": "PepeFluxSchnellLora"
                                 },
                                 "weight": {
                                     "description": "Weight of the LoRA model (must be non-negative)",
@@ -5973,6 +6110,7 @@
                 "type": "object"
             },
             "TranscribeRequestBody": {
+                "description": "A source is MANDATORY and comes in exactly one of two shapes — `source_url` for a hosted video/audio, or `source_file` for an upload. Sending neither is a 422, and sending both is a 422 as well; the `oneOf` below is that choice, not a pair of optional fields. Everything else applies to both. The `/price` twin of this endpoint accepts a third shape, `duration_seconds`, which this one does not.",
                 "required": [
                     "model"
                 ],
@@ -6073,7 +6211,23 @@
                         "minLength": 32
                     }
                 },
-                "type": "object"
+                "type": "object",
+                "oneOf": [
+                    {
+                        "title": "From a source URL",
+                        "required": [
+                            "source_url"
+                        ],
+                        "type": "object"
+                    },
+                    {
+                        "title": "From an uploaded file",
+                        "required": [
+                            "source_file"
+                        ],
+                        "type": "object"
+                    }
+                ]
             },
             "VideoRemoveBgRequestBody": {
                 "required": [
@@ -6211,12 +6365,11 @@
                         "example": "RealESRGAN_Vid_x4"
                     },
                     "scale": {
-                        "description": "Optional upscale factor (e.g. 2, 4). Only allowed for models that support a configurable scale; fixed-scale models (e.g. x2/x4 only) reject this field. Validated against the per-model min/max scale defined in the admin panel.",
+                        "description": "Upscale factor. Accepted ONLY by models that publish `info.limits.min_scale`/`max_scale` in `GET /api/v2/models`, and REQUIRED by those models — read them for your `model` before sending. A fixed-scale model (both limits absent or null, e.g. `RealESRGAN_Vid_x4`) rejects this field with a 422; a configurable one rejects its absence. Deliberately carries no example, because no single value is valid across models.",
                         "type": [
                             "integer",
                             "null"
                         ],
-                        "example": 4,
                         "maximum": 16,
                         "minimum": 1
                     },
@@ -7709,6 +7862,28 @@
                 "schema": {
                     "type": "string",
                     "format": "uuid"
+                }
+            },
+            "ListLimit": {
+                "name": "limit",
+                "in": "query",
+                "description": "Items per page. Capped at 75; a larger value is clamped down, not rejected. The applied value comes back as `meta.per_page`.",
+                "required": false,
+                "schema": {
+                    "type": "integer",
+                    "default": 50,
+                    "maximum": 75,
+                    "minimum": 1
+                }
+            },
+            "ListPage": {
+                "name": "page",
+                "in": "query",
+                "required": false,
+                "schema": {
+                    "type": "integer",
+                    "default": 1,
+                    "minimum": 1
                 }
             }
         },
