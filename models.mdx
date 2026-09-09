@@ -43,7 +43,7 @@ The response returns a `data` array of model objects. Each object contains:
 <Warning>
   **`meta.last_page` is what tells you the list is complete** — it reads `1` when the `data` array you just received is the whole catalogue. Nothing else in the response distinguishes a partial page from a full one.
 
-  The parameter is **`limit`**. It defaults to **50** and is capped at **75**; a larger value is clamped down, not rejected. `per_page` is accepted but ignored, whatever value you send.
+  The parameter is **`limit`**. It defaults to **50**; a value above the maximum is clamped down, not rejected.
 
   `limit=50` covers the current catalogue in one request. Should the catalogue ever outgrow the page you asked for, `meta.last_page` becomes your signal to fetch `&page=2` and onward.
 </Warning>

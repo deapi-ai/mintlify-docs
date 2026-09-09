@@ -88,7 +88,7 @@ Typical API usage follows this pattern:
 
 <Steps>
   <Step title="Check available models">
-    Call `GET /api/v2/models?limit=50` to get current models and their parameters. That covers the whole catalogue in one call — the page size defaults to 50 and is capped at 75, and `meta.last_page` reading `1` is what confirms nothing is missing.
+    Call `GET /api/v2/models?limit=50` to get current models and their parameters. That covers the whole catalogue in one call — the page size defaults to 50, and `meta.last_page` reading `1` is what confirms nothing is missing.
   </Step>
   <Step title="Calculate price (optional)">
     Call the `/price` endpoint with your parameters to estimate cost.

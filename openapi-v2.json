@@ -204,7 +204,13 @@
                         "$ref": "#/components/parameters/ListLimit"
                     },
                     {
+                        "$ref": "#/components/parameters/ListPerPage"
+                    },
+                    {
                         "$ref": "#/components/parameters/ListPage"
+                    },
+                    {
+                        "$ref": "#/components/parameters/ClientModelsSort"
                     },
                     {
                         "name": "filter[inference_types]",
@@ -7867,12 +7873,24 @@
             "ListLimit": {
                 "name": "limit",
                 "in": "query",
-                "description": "Items per page. Capped at 75; a larger value is clamped down, not rejected. The applied value comes back as `meta.per_page`.",
+                "description": "Items per page. `per_page` is accepted as an alias; `limit` wins if both are sent. Values above the maximum are clamped down, not rejected.",
                 "required": false,
                 "schema": {
                     "type": "integer",
                     "default": 50,
-                    "maximum": 75,
+                    "maximum": 100,
+                    "minimum": 1
+                }
+            },
+            "ListPerPage": {
+                "name": "per_page",
+                "in": "query",
+                "description": "Alias of `limit`, kept for backward compatibility. Ignored when `limit` is also present.",
+                "required": false,
+                "schema": {
+                    "type": "integer",
+                    "default": 50,
+                    "maximum": 100,
                     "minimum": 1
                 }
             },
@@ -7884,6 +7902,46 @@
                     "type": "integer",
                     "default": 1,
                     "minimum": 1
+                }
+            },
+            "ClientModelsSort": {
+                "name": "sort",
+                "in": "query",
+                "description": "Sort field. Prefix with `-` for descending. `-created_at` is newest first, `created_at` is oldest first. Defaults to `-created_at` — newest models first, tie-broken by `id`.",
+                "required": false,
+                "schema": {
+                    "type": "string",
+                    "default": "-created_at",
+                    "enum": [
+                        "id",
+                        "-id",
+                        "name",
+                        "-name",
+                        "created_at",
+                        "-created_at",
+                        "updated_at",
+                        "-updated_at"
+                    ]
+                }
+            },
+            "WorkerModelsSort": {
+                "name": "sort",
+                "in": "query",
+                "description": "Sort field. Prefix with `-` for descending. Defaults to `id` (ascending catalogue order). Note this differs from the client surface, which defaults to newest-first.",
+                "required": false,
+                "schema": {
+                    "type": "string",
+                    "default": "id",
+                    "enum": [
+                        "id",
+                        "-id",
+                        "name",
+                        "-name",
+                        "created_at",
+                        "-created_at",
+                        "updated_at",
+                        "-updated_at"
+                    ]
                 }
             }
         },
