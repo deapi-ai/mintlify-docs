@@ -100,6 +100,8 @@ A failed job is normally refunded — `refunded: true` and `price.amount: 0`. No
 - Example: 256x256 for 2 seconds costs **0.001737 USD**.
 - Use lower resolution or shorter duration to reduce cost.
 - Use motion parameters in prompts to guide movement.
+- For reference inputs, send `ref_images_count` (0–9, default `0`) and `ref_videos_count` (0–1, default `0`) to [Video Animation Price Calculation](/api/v2/videos/animations-price); no file upload is needed for a quote. The source image does not count as a reference image.
+- More than 2 reference images applies a **×2** multiplier; any reference video applies **×3**. Only the highest multiplier applies — 4 reference images plus 1 video is **×3**, not ×6. Exactly 2 reference images adds no surcharge, and reference audio adds no surcharge.
 
 **Video-to-Text (Transcription)**
 

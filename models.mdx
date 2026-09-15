@@ -128,7 +128,7 @@ The table below shows which **task types** deAPI supports. To see which models a
 | Audio File-to-Text | `audio_file2text` | Transcribe an uploaded audio file into text. |
 | Image-to-Text (OCR) | `img2txt` | Extract text and meaning from images — OCR, descriptions, accessibility. |
 | Text-to-Video | `txt2video` | Generate short AI video clips from a text prompt. |
-| Image-to-Video | `img2video` | Animate a still image into a short video clip. |
+| Image-to-Video | `img2video` | Animate a still image or generate video from image, video, and audio references on supported models. |
 | Audio-to-Video | `audio2video` | Generate video conditioned on an audio file and a text prompt. |
 | Text-to-Embedding | `txt2embedding` | Create vector embeddings — search, RAG, semantic similarity, clustering. |
 | Background Removal | `img-rmbg` | Remove background from images — product photos, portraits, compositing. |
@@ -197,6 +197,7 @@ Each model defines its own limits in the `info.limits` object. These limits vary
 - **Pixel budget (newer models):** `min_side`, `max_side`, `max_pixels`, `max_ratio`, `dimension_multiple`. These bound the frame as a whole rather than each axis, so a size can be inside `max_width`/`max_height` and still be rejected — on `Ltx2_5_22B_Dist_INT8`, `1024x1024` fails with `Size 1024x1024 (1,048,576 px) exceeds the model limit of 1,032,192 px.` and `1344x512` fails with `has an aspect ratio of 2.62:1, above the model limit of 2.00:1.`, while `1344x768` passes.
 - **Steps:** `min_steps`, `max_steps` — how many inference steps the model supports.
 - **Video-specific:** `min_frames`, `max_frames`, `min_fps`, `max_fps`.
+- **Video references (img2video):** Check `info.features.supports_image_refs`, `supports_video_refs`, and `supports_audio_refs` separately. Models advertising reference support publish effective `max_ref_images`, `max_ref_videos`, `max_ref_audios`, and `max_ref_files` (combined count), plus `min_ref_video_duration`, `max_ref_video_duration`, `min_ref_audio_duration`, `max_ref_audio_duration`, `min_ref_image_ratio`, and `max_ref_image_ratio`. An unsupported type has a count limit of `0`. Use these per-model values rather than the outer ceilings of 9 images, 1 video, 3 audio clips, and 12 files in total. See [Video Animation](/api/v2/videos/animations) for input modes and prompt labels.
 - **Text-specific:** `max_input_tokens`, `max_total_tokens` (for embedding models), `min_text`, `max_text` (for speech models).
 
 If you provide image dimensions that are not aligned to the required step, the API may adjust them automatically. To avoid unexpected output sizes, always round your `width` and `height` to a multiple of the model's `resolution_step` before sending the request.

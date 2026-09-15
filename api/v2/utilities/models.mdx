@@ -5,6 +5,8 @@ openapi: "/openapi-v2.json GET /api/v2/models"
 
 List every available model with `slug`, supported `inference_types`, per-model limits (resolution, duration, steps), and feature flags (e.g., LoRA support).
 
+For [Video Animation](/api/v2/videos/animations), check `info.features.supports_image_refs`, `supports_video_refs`, and `supports_audio_refs` independently. Models advertising reference support publish effective `info.limits` for reference counts (`max_ref_images`, `max_ref_videos`, `max_ref_audios`, `max_ref_files`), video/audio duration (`min_ref_video_duration`, `max_ref_video_duration`, `min_ref_audio_duration`, `max_ref_audio_duration`), and image aspect ratio (`min_ref_image_ratio`, `max_ref_image_ratio`). An unsupported reference type has a count limit of `0`.
+
 <Tip>
 Call `GET /api/v2/models?limit=50` once at session start, cache the result, and use the returned `slug` values in your generation/edit requests. Filter with `&filter[inference_types]=txt2img` to narrow results by task.
 </Tip>

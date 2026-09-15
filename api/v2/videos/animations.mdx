@@ -3,8 +3,77 @@ title: "Video Animation (Image-to-Video)"
 openapi: "/openapi-v2.json POST /api/v2/videos/animations"
 ---
 
-Animate a still image into a video using motion synthesis. Returns a `request_id` for status polling.
+Animate a still image or generate a video from reference images, videos, and audio on supported models. Returns a `request_id` for status polling.
 
 <Note>
 **Prerequisite:** Consult the [Model Selection](/api/v2/utilities/models) endpoint to identify a valid model `slug` and check specific **limits**.
 </Note>
+
+## Input modes
+
+- **Keyframes:** Upload `first_frame_image` and, if the model supports it, `last_frame_image`. Images are fitted to the generation canvas and may have any aspect ratio.
+- **Full-reference mode:** Upload `ref_images` and/or `ref_videos`, with optional `ref_audios`. Do not combine references with `first_frame_image` or `last_frame_image`. Audio cannot be the only reference.
+
+Check `info.features.supports_image_refs`, `supports_video_refs`, and `supports_audio_refs` separately. Support for one reference type does not imply support for the others.
+
+## Reference order & prompt labels
+
+Send reference files as ordered multipart arrays. Explicit indices must start at `0` with no gaps, for example `ref_images[0]`, `ref_images[1]`.
+
+| Input | Prompt label |
+| --- | --- |
+| `ref_images[0]`, `ref_images[1]` | `<Picture 1>`, `<Picture 2>` |
+| `ref_videos[0]` | `<Video 1>` |
+| `ref_audios[0]` | `<Audio 1>`, unless the reference video has an audio track |
+
+Image numbering is independent of video and audio numbering. Reordering files changes which reference each prompt label addresses.
+
+<Warning>
+The reference-input specification assigns a video's audio track to `<Audio 1>` and shifts uploaded audio labels by one: `ref_audios[0]` becomes `<Audio 2>`. However, the current API responses tested for MiniMax do not include `reference_labels`, either when accepting the request or when returning the completed job. Keep track of whether the uploaded video contains an audio track; do not depend on a returned label map.
+</Warning>
+
+<Note>
+Audio references condition generation; they should not be treated as a guarantee that the output will replay the uploaded recording or preserve its exact words. Completed MiniMax tests accepted reference audio and produced an audio track, but automated transcription did not match the supplied speech. Review the generated result when exact spoken content matters.
+</Note>
+
+## Reference limits
+
+Read the selected model's `info.limits` from [Model Selection](/api/v2/utilities/models). These are the effective limits; the ceilings below do not mean every model accepts that many files.
+
+| Input | Model limits | Outer ceiling / file constraints |
+| --- | --- | --- |
+| `ref_images` | `max_ref_images`, `min_ref_image_ratio`, `max_ref_image_ratio` | Up to 9 images; 10 MB each; 64–5000 px per side; aspect ratio within 1:4–4:1. JPG, JPEG, PNG, GIF, BMP, WebP. |
+| `ref_videos` | `max_ref_videos`, `min_ref_video_duration`, `max_ref_video_duration` | Up to 1 video; default duration range 2–5 seconds. |
+| `ref_audios` | `max_ref_audios`, `min_ref_audio_duration`, `max_ref_audio_duration` | Up to 3 clips; 15 MB each; default duration range 1–10 seconds. WAV, MP3, FLAC, OGG, M4A. |
+
+`max_ref_files` caps the combined number of reference files, with an outer ceiling of 12. For models advertising reference support, an unsupported reference type has a limit of `0`; models without reference support may omit these fields entirely. Keyframe and reference images must be at least **1 KB**, at most **10 MB**, and 64–5000 px per side. The reference-image aspect ratio constraint does not apply to keyframes.
+
+<Note>
+For example, `MiniMaxH3_33B_Turbo_INT8` currently publishes `max_ref_images: 3`, `max_ref_videos: 1`, `max_ref_audios: 3`, and `max_ref_files: 3`. This permits at most **3 reference files in total**, not 3 of each type. Read the live model response before submitting a request.
+</Note>
+
+<Tip>
+Estimate the job with [Video Animation Price Calculation](/api/v2/videos/animations-price). Send reference counts instead of files: more than 2 reference images applies a ×2 multiplier, and any reference video applies ×3. Only the highest multiplier applies; reference audio adds no surcharge.
+</Tip>
+
+## Example: image, video, and audio references
+
+The following request uses three reference files, matching the current MiniMax combined limit. Use a **silent video** so the separate audio clip is addressed as `<Audio 1>`. Check the model's live limits before reusing these generation parameters.
+
+```bash
+curl -X POST "https://api.deapi.ai/api/v2/videos/animations" \
+  -H "Authorization: Bearer $DEAPI_API_KEY" \
+  -H "Accept: application/json" \
+  -F "model=MiniMaxH3_33B_Turbo_INT8" \
+  -F "width=512" \
+  -F "height=512" \
+  -F "frames=56" \
+  -F "fps=24" \
+  -F "seed=987" \
+  -F "prompt=Use the red robot appearance from <Picture 1> and the rolling motion from <Video 1>. Use <Audio 1> as the soundtrack. One continuous shot, static camera." \
+  -F "ref_images[0]=@robot.png" \
+  -F "ref_videos[0]=@motion-silent.mp4" \
+  -F "ref_audios[0]=@speech.mp3"
+```
+
+The acceptance response contains `data.request_id`. Poll [Get Job Results](/api/v2/utilities/jobs) until `data.status` is `done` or `error`; `progress: 100` alone does not mean the result is ready. Download `data.result_url` after completion and read the settled `data.price` (`is_estimated: false`).

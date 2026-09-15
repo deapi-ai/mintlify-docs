@@ -185,12 +185,21 @@ These caps apply to every endpoint regardless of media type. Exceeding them retu
 - Voice Cloning reference audio: max **15 MB**, 3–10 seconds duration. Supported formats: MP3, OGG, M4A.
 - Audio-to-Video conditioning audio: max **20 MB**. Supported formats: MP3, OGG.
 - Music reference audio (style transfer): max **15 MB**. Supported formats: MP3, OGG, M4A.
+- Image-to-Video reference audio (`ref_audios`): max **15 MB** per clip. Supported formats: WAV, MP3, FLAC, OGG, M4A. Duration is model-specific (default range 1–10 seconds); audio must accompany at least one reference image or video.
 
 **3. Images** (Image-to-Image, OCR, Background Removal, Upscale, Image-to-Video first/last frame, Reference Character)
 
 - Max size: **10 MB**
 - Supported Formats: JPG, JPEG, PNG, GIF, BMP, WebP
 - Dimensions: **min 64 px**, **max 5000 px** per side
+
+**Image-to-Video references**
+
+- Image-to-Video keyframe and reference images must be at least **1 KB** per file.
+- `ref_images` uses the same image size, format, and dimension limits above, with an aspect ratio within **1:4–4:1**. First/last keyframes may have any aspect ratio because they are fitted to the generation canvas.
+- Reference counts and durations depend on the selected model. Read `info.limits.max_ref_images`, `max_ref_videos`, `max_ref_audios`, and `max_ref_files`, plus `min_ref_video_duration`, `max_ref_video_duration`, `min_ref_audio_duration`, `max_ref_audio_duration`, `min_ref_image_ratio`, and `max_ref_image_ratio`. An unsupported reference type has a count limit of `0`.
+- Outer ceilings are **9 images**, **1 video**, **3 audio clips**, and **12 reference files in total**. Reference video duration defaults to **2–5 seconds**, but the model's published limits take precedence. The global **75 MB** request cap still applies.
+- References cannot be combined with `first_frame_image` or `last_frame_image`. See [Video Animation](/api/v2/videos/animations) for input modes and ordering rules.
 
 <Tip>
   For larger source media that won't fit under the request body cap, prefer **URL-based input** (`source_url`) where supported — it bypasses the upload cap entirely and is subject only to the duration limits listed below.

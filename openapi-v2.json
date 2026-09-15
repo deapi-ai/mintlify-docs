@@ -4435,6 +4435,22 @@
                         "description": "The model to use for video generation. Available models can be retrieved via the GET /api/v2/models endpoint.",
                         "type": "string",
                         "example": "Ltxv_13B_0_9_8_Distilled_FP8"
+                    },
+                    "ref_images_count": {
+                        "description": "How many `ref_images` the generation request will carry. **More than 2 reference images multiplies the price by 2.** The source image of an img2video request is not a reference image and does not count, so exactly 2 is still unmultiplied. Send the count here rather than the files — a quote never requires an upload.",
+                        "type": "integer",
+                        "example": 4,
+                        "default": 0,
+                        "maximum": 9,
+                        "minimum": 0
+                    },
+                    "ref_videos_count": {
+                        "description": "How many `ref_videos` the generation request will carry. **Any reference video multiplies the price by 3.** The two surcharges do not compound: the highest applicable multiplier wins, so 4 reference images plus a reference video is x3, not x6. Reference audio carries no surcharge.",
+                        "type": "integer",
+                        "example": 1,
+                        "default": 0,
+                        "maximum": 1,
+                        "minimum": 0
                     }
                 },
                 "type": "object"
@@ -5434,16 +5450,106 @@
                 "type": "object"
             },
             "Img2VideoRequestBody": {
-                "description": "Every example in this schema is a working set for the `model` example shown — they are not defaults and not portable. Sizes, step counts, frame counts and frame rates are all per-model: read `info.limits` and `info.defaults` for the model you actually intend to use from `GET /api/v2/models`. Substituting a different `model` while keeping these values is the most common source of a 422.",
+                "description": "Every example in this schema is a working set for the `model` example shown — they are not defaults and not portable. Sizes, step counts, frame counts and frame rates are all per-model: read `info.limits` and `info.defaults` for the model you actually intend to use from `GET /api/v2/models`. Substituting a different `model` while keeping these values is the most common source of a 422. Reference inputs (`ref_images`/`ref_videos`/`ref_audios`) are bounded per model too: a model that advertises `supports_image_refs`/`supports_video_refs`/`supports_audio_refs` always publishes the effective `info.limits.max_ref_images`, `max_ref_videos`, `max_ref_audios`, `max_ref_files` (the cap across all three types), `min/max_ref_video_duration`, `min/max_ref_audio_duration` and `min/max_ref_image_ratio` — read them rather than the ceilings quoted on each field, which are only the outer envelope (never more than 9 / 1 / 3 files and 12 in total). An unsupported type publishes `0`. Every uploaded image, keyframe or reference, must be 64–5000 px per side.",
                 "required": [
                     "prompt",
-                    "first_frame_image",
                     "model",
                     "width",
                     "height",
                     "seed",
                     "frames",
                     "fps"
+                ],
+                "oneOf": [
+                    {
+                        "required": [
+                            "first_frame_image"
+                        ],
+                        "not": {
+                            "anyOf": [
+                                {
+                                    "required": [
+                                        "ref_images"
+                                    ],
+                                    "properties": {
+                                        "ref_images": {
+                                            "type": "array"
+                                        }
+                                    }
+                                },
+                                {
+                                    "required": [
+                                        "ref_videos"
+                                    ],
+                                    "properties": {
+                                        "ref_videos": {
+                                            "type": "array"
+                                        }
+                                    }
+                                },
+                                {
+                                    "required": [
+                                        "ref_audios"
+                                    ],
+                                    "properties": {
+                                        "ref_audios": {
+                                            "type": "array"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "anyOf": [
+                            {
+                                "required": [
+                                    "ref_images"
+                                ],
+                                "properties": {
+                                    "ref_images": {
+                                        "type": "array",
+                                        "minItems": 1
+                                    }
+                                }
+                            },
+                            {
+                                "required": [
+                                    "ref_videos"
+                                ],
+                                "properties": {
+                                    "ref_videos": {
+                                        "type": "array",
+                                        "minItems": 1
+                                    }
+                                }
+                            }
+                        ],
+                        "not": {
+                            "anyOf": [
+                                {
+                                    "required": [
+                                        "first_frame_image"
+                                    ],
+                                    "properties": {
+                                        "first_frame_image": {
+                                            "type": "string"
+                                        }
+                                    }
+                                },
+                                {
+                                    "required": [
+                                        "last_frame_image"
+                                    ],
+                                    "properties": {
+                                        "last_frame_image": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
                 ],
                 "properties": {
                     "prompt": {
@@ -5460,12 +5566,45 @@
                         "example": "blur, darkness, noise"
                     },
                     "first_frame_image": {
-                        "description": "Image for the first frame of video. Supported formats: JPG, JPEG, PNG, GIF, BMP, WebP. Maximum file size: 10 MB.",
+                        "description": "Image for the first frame of video. Required unless reference inputs (`ref_images`/`ref_videos`) are supplied — the two modes are mutually exclusive. Supported formats: JPG, JPEG, PNG, GIF, BMP, WebP. File size: at least 1 KB, maximum 10 MB, 64–5000 px per side. Any aspect ratio: a keyframe is fitted to the generation canvas, so the 1:4–4:1 rule that applies to `ref_images` does not apply here.",
                         "type": "string",
                         "format": "binary"
                     },
+                    "ref_images": {
+                        "description": "Ordered reference images (full-reference mode). **Order is binding**: `ref_images[0]` is\naddressed in the prompt as `<Picture 1>`, `ref_images[1]` as `<Picture 2>`, and so on —\nnumbering is 1-based and counted within images only. Send the parts in index order, or\nindex them explicitly (`ref_images[0]`, `ref_images[1]`, …); the list must start at 0 and\nhave no gaps. Reordering the list rebinds every label in your prompt and produces a\ndifferent video with no error. Mutually exclusive with `first_frame_image`/`last_frame_image`.\nRequires a model whose specs advertise image-reference support; video and audio\nreferences are advertised separately, so a model may accept one type and not another.\nSupported formats: JPG, JPEG, PNG, GIF, BMP, WebP. File size: at least 1 KB, maximum 10 MB, 64–5000 px\nper side. Each image must be within a 1:4–4:1 aspect ratio (`info.limits.min_ref_image_ratio`\n/ `max_ref_image_ratio`) — a reference keeps its own aspect, unlike a keyframe, which is\nfitted to the canvas. **The number of entries is model-specific — read\n`info.limits.max_ref_images` for your `model` from `GET /api/v2/models`.** Never more than 9.",
+                        "type": [
+                            "array",
+                            "null"
+                        ],
+                        "items": {
+                            "type": "string",
+                            "format": "binary"
+                        }
+                    },
+                    "ref_videos": {
+                        "description": "Ordered reference videos (full-reference mode). `ref_videos[0]` is addressed as `<Video 1>`.\nMutually exclusive with `first_frame_image`/`last_frame_image`. **Count and duration are\nmodel-specific — read `info.limits.max_ref_videos` and `min_ref_video_duration` /\n`max_ref_video_duration` for your `model`.** A model publishing `max_ref_videos: 0` takes no\nvideo references. Defaults are 2–5 seconds.\n\n⚠️ If a reference video carries an audio track, that track occupies `<Audio 1>` and shifts\nevery `ref_audios` entry by one — so with a sounded video, `ref_audios[0]` is `<Audio 2>`,\nnot `<Audio 1>`. The current MiniMax acceptance and completed-job responses tested do not include\n`reference_labels`. Track the presence of a video audio track in your client rather than\ndepending on a returned label map; the soundtrack shift described here comes from the\nreference-input specification and is not exposed in those responses. Never more than 1.",
+                        "type": [
+                            "array",
+                            "null"
+                        ],
+                        "items": {
+                            "type": "string",
+                            "format": "binary"
+                        }
+                    },
+                    "ref_audios": {
+                        "description": "Ordered reference audio clips (full-reference mode). `ref_audios[0]` is addressed as\n`<Audio 1>` — unless a reference video contributed its own soundtrack first, see\n`ref_videos`. Audio may never be the only reference: at least one `ref_images` or\n`ref_videos` entry is required alongside it. **Count and duration are model-specific — read\n`info.limits.max_ref_audios` and `min_ref_audio_duration` / `max_ref_audio_duration` for your\n`model`.** Defaults are 1–10 seconds. Supported formats: WAV, MP3, FLAC, OGG, M4A. Maximum\nfile size: 15 MB. Never more than 3. Audio references condition generation;\nacceptance does not guarantee verbatim speech or exact replay of the reference recording.",
+                        "type": [
+                            "array",
+                            "null"
+                        ],
+                        "items": {
+                            "type": "string",
+                            "format": "binary"
+                        }
+                    },
                     "last_frame_image": {
-                        "description": "Image for the last frame of video (optional). Supported formats: JPG, JPEG, PNG, GIF, BMP, WebP. Maximum file size: 10 MB.",
+                        "description": "Image for the last frame of video (optional). Supported formats: JPG, JPEG, PNG, GIF, BMP, WebP. File size: at least 1 KB, maximum 10 MB, 64–5000 px per side, any aspect ratio.",
                         "type": [
                             "string",
                             "null"
@@ -6535,7 +6674,7 @@
                         ]
                     },
                     "info": {
-                        "description": "Model specifications including limits, features, and defaults. Structure varies by model type. Audio models (txt2audio, txt2music) additionally carry `limits.output_formats` — the only formats this model may be asked to return, enforced with a 422 — and `defaults.format`, the suggested pick. Note `format` is required on the generation endpoints: `defaults.format` is a hint for building a UI or a client wrapper, never a server-side fallback. Read `output_formats` instead of assuming a fixed list: `wav` is disabled on most models because uncompressed audio at longer durations exceeds the result-upload limit. Music models also carry `limits.max_duration_by_format` — the longest `duration` (seconds) whose result file still fits the upload limit in each enabled format; the effective maximum is the lower of it and `limits.max_duration`.",
+                        "description": "Model specifications including limits, features, and defaults. Structure varies by model type. Audio models (txt2audio, txt2music) additionally carry `limits.output_formats` — the only formats this model may be asked to return, enforced with a 422 — and `defaults.format`, the suggested pick. Note `format` is required on the generation endpoints: `defaults.format` is a hint for building a UI or a client wrapper, never a server-side fallback. Read `output_formats` instead of assuming a fixed list: `wav` is disabled on most models because uncompressed audio at longer durations exceeds the result-upload limit. Music models also carry `limits.max_duration_by_format` — the longest `duration` (seconds) whose result file still fits the upload limit in each enabled format; the effective maximum is the lower of it and `limits.max_duration`. A model advertising reference-input support (`features.supports_image_refs` / `supports_video_refs` / `supports_audio_refs`, img2video) always carries the effective `limits.max_ref_images`, `max_ref_videos`, `max_ref_audios`, `max_ref_files`, `min/max_ref_video_duration`, `min/max_ref_audio_duration` and `min/max_ref_image_ratio` — already clamped to what the worker accepts, `0` for an unsupported type — so they can be read without a fallback.",
                         "type": "object",
                         "example": {
                             "limits": {

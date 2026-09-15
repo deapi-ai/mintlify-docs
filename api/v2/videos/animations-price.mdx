@@ -4,3 +4,22 @@ openapi: "/openapi-v2.json POST /api/v2/videos/animations/price"
 ---
 
 Estimate the cost of a video animation (image-to-video) job before submitting it.
+
+## Reference inputs
+
+Send counts matching the planned [Video Animation](/api/v2/videos/animations) request. A quote does not require file uploads.
+
+| Parameter | Range | Default | Price effect |
+| --- | --- | --- | --- |
+| `ref_images_count` | 0–9 | `0` | More than 2 reference images applies a ×2 multiplier. |
+| `ref_videos_count` | 0–1 | `0` | Any reference video applies a ×3 multiplier. |
+
+The source image does not count as a reference image. Exactly 2 reference images adds no surcharge. Reference audio adds no surcharge.
+
+<Note>
+Multipliers do not compound: 4 reference images and 1 reference video applies ×3, not ×6. Generation limits still depend on the selected model — check [Model Selection](/api/v2/utilities/models) before choosing reference counts.
+</Note>
+
+<Warning>
+A successful quote does not validate the model's reference-file limits. For example, the price endpoint accepts 4 reference images and 1 reference video for `MiniMaxH3_33B_Turbo_INT8`, but that model currently permits only 3 reference files in total. Check `max_ref_images`, `max_ref_videos`, and `max_ref_files` before generation.
+</Warning>
