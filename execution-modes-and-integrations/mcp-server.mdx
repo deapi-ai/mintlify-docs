@@ -70,7 +70,7 @@ The deAPI MCP server exposes the following tools:
 | `video_upscale`                  | Upscale videos to higher resolution — uses `/api/v2/videos/upscales`                                 |
 | `video_remove_background`        | Remove background from videos — uses `/api/v2/videos/background-removals`                            |
 | `video_file_transcription`       | Transcribe uploaded video files to text — uses `/api/v2/audio/transcriptions`                        |
-| `video_url_transcription`        | Transcribe videos from URLs (YouTube, X, Twitch, TikTok, Kick) — uses `/api/v2/audio/transcriptions`. For TikTok set `model` to `WhisperLargeV3Ct2`; the tool otherwise defaults to `WhisperLargeV3`, which rejects TikTok |
+| `video_url_transcription`        | Transcribe videos from URLs (YouTube, X, Twitch, TikTok, Kick) — uses `/api/v2/audio/transcriptions`. The tool defaults to `WhisperLargeV3`; for TikTok set `model` to `WhisperLargeV3Ct2`, which is cheaper for TikTok and returns empty text, rather than invented words, when a clip has no speech |
 | `text_to_video_price`            | Calculate price for text-to-video generation                                                          |
 | `image_to_video_price`           | Calculate price for image-to-video generation                                                         |
 | `audio_to_video_price`           | Calculate price for audio-to-video generation                                                         |
@@ -84,7 +84,7 @@ The deAPI MCP server exposes the following tools:
 
 | Tool                            | Description                                           |
 | ------------------------------- | ----------------------------------------------------- |
-| `text_to_audio`                 | Convert text to natural-sounding speech (TTS)         |
+| `text_to_audio`                 | Convert text to speech (TTS) with a preset voice, a voice cloned from `ref_audio`, or a voice designed from an `instruct` description. Each model supports one of these modes; leave `mode` unset and the tool uses the model's own |
 | `text_to_music`                 | Generate music tracks from text descriptions          |
 | `audio_transcription`           | Transcribe uploaded audio files to text using Whisper |
 | `audio_url_transcription`       | Transcribe audio from URLs (X/Twitter Spaces)         |
@@ -114,6 +114,33 @@ The deAPI MCP server exposes the following tools:
 | `get_available_models` | List all available AI models with specifications |
 | `get_balance`          | Check your deAPI account balance                 |
 | `check_job_status`     | Check status of submitted jobs                   |
+
+---
+
+### Working with Results
+
+Generation tools wait for the job to finish and return its outcome in one call:
+
+```json
+{
+  "success": true,
+  "result": null,
+  "result_url": "https://results.deapi.ai/21661623/4d04b54c-….txt?X-Amz-…",
+  "job_id": "a8d972db-252a-4204-be62-26f248247177",
+  "metadata": { "elapsed_time": 8.39, "attempts": 5 },
+  "price": { "amount": 0.0052474, "is_estimated": false }
+}
+```
+
+- **`result_url`** points to the output file. Images, video and audio always come back this way.
+- **`result`** carries text inline (transcripts, OCR, embeddings) when `return_result_in_response` is `true`. With `WhisperLargeV3Ct2`, `result` is a JSON string with `text`, `language` and, when timestamps are requested, `segments`.
+- **`price.amount`** is what the job cost.
+
+**Long transcripts.** Some MCP clients cap how much of a tool result they pass to the model and drop the rest. For long videos, call the transcription tool with `return_result_in_response: false`: the transcript stays out of the tool result and the tool returns `result_url`, a signed link to the full transcript file.
+
+**Pricing a URL transcription.** `video_url_transcription_price` accepts either `video_url` or `duration_seconds`, not both. With a URL, the price is read from the source itself. TikTok links can't be quoted by URL — pass `duration_seconds` together with `platform: "tiktok"`. The platform changes the price, so set `platform` whenever you quote by duration.
+
+**Webhooks.** All 18 generation tools accept `webhook_url` and an optional `webhook_secret`, and pass them to the API. deAPI then calls your endpoint when the job finishes, so your own systems are notified as well. The tool still waits and returns the result in the conversation. See [Webhooks](/execution-modes-and-integrations/webhooks) for the payload and signature.
 
 ---
 
@@ -147,6 +174,7 @@ To use deAPI MCP tools directly in Claude conversations:
 - _"Using deAPI MCP, generate an image of a futuristic city at sunset"_
 - _"With deAPI MCP, transcribe this YouTube video: [URL]"_
 - _"With deAPI MCP, transcribe this Twitch video: [URL]"_
+- _"With deAPI MCP, transcribe this TikTok with WhisperLargeV3Ct2: [URL]"_
 - _"Check my deAPI MCP balance"_
 - _"Using deAPI MCP, create a video of waves crashing on a beach"_
 
@@ -388,7 +416,7 @@ Point your MCP client to your server URL instead of the default `https://mcp.dea
 
 The MCP server provides access to all deAPI models.
 
-Use the `get_available_models` tool to retrieve the full list with current specifications and limits.
+Use the `get_available_models` tool to retrieve the full list with current specifications and limits. It returns the whole catalogue in one call, including the newest models. Tool descriptions also list each model's request bounds, and for TTS models the supported languages and voices.
 
 ---
 
