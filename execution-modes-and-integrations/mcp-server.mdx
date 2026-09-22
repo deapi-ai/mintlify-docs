@@ -136,7 +136,7 @@ Generation tools wait for the job to finish and return its outcome in one call:
 - **`result`** carries text inline (transcripts, OCR, embeddings) when `return_result_in_response` is `true`. With `WhisperLargeV3Ct2`, `result` is a JSON string with `text`, `language` and, when timestamps are requested, `segments`.
 - **`price.amount`** is what the job cost.
 
-**Long transcripts.** Some MCP clients cap how much of a tool result they pass to the model and drop the rest. For long videos, call the transcription tool with `return_result_in_response: false`: the transcript stays out of the tool result and the tool returns `result_url`, a signed link to the full transcript file.
+**Long transcripts.** Some MCP clients cap how much of a tool result they pass to the model and drop the rest. For long videos, call the transcription tool with `return_result_in_response: false`: the transcript stays out of the tool result and the tool returns `result_url`, a signed link to the full transcript file. This helps only if the client passes the link to the model: Parallel's Task API, for example, replaces `result_url` with `[redacted]`, so the agent never receives the transcript. With such clients, keep `return_result_in_response: true` and accept that only the part that fits in the client's limit gets through (25,000 characters on Parallel).
 
 **Pricing a URL transcription.** `video_url_transcription_price` accepts either `video_url` or `duration_seconds`, not both. With a URL, the price is read from the source itself. TikTok links can't be quoted by URL — pass `duration_seconds` together with `platform: "tiktok"`. The platform changes the price, so set `platform` whenever you quote by duration.
 
