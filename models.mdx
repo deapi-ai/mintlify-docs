@@ -123,6 +123,8 @@ The table below shows which **task types** deAPI supports. To see which models a
 | Text-to-Speech | `txt2audio` | Turn text into natural voice — narration, accessibility, product voices. Supports voice cloning and voice design. |
 | Text-to-Music | `txt2music` | Generate music tracks from text — background music, jingles, songs with vocals. |
 | Video-to-Text | `video2text` | Transcribe video by URL (YouTube, Twitch, Kick, X , TikTok) into text. TikTok requires `WhisperLargeV3Ct2`. |
+| Video Description (URL) | `video2desc` | Create a timestamped description of visible events and scenes from a video URL. |
+| Video Description (upload) | `video_file2desc` | Create a timestamped description of visible events and scenes from an uploaded video file. |
 | Audio-to-Text | `audio2text` | Transcribe audio by URL into text — subtitles, notes, search, accessibility. |
 | Video File-to-Text | `video_file2text` | Transcribe an uploaded video file into text. |
 | Audio File-to-Text | `audio_file2text` | Transcribe an uploaded audio file into text. |
@@ -151,6 +153,8 @@ The table below shows which **task types** deAPI supports. To see which models a
   | --- | --- | --- |
   | `audio2text` | `POST /api/v2/audio/transcriptions` | `POST /api/v1/client/aud2txt` |
   | `video2text` | `POST /api/v2/audio/transcriptions` | `POST /api/v1/client/vid2txt` |
+  | `video2desc` | `POST /api/v2/videos/descriptions` | — |
+  | `video_file2desc` | `POST /api/v2/videos/descriptions` | — |
   | `audio_file2text` | `POST /api/v2/audio/transcriptions` | `POST /api/v1/client/audiofile2txt` |
   | `video_file2text` | `POST /api/v2/audio/transcriptions` | `POST /api/v1/client/videofile2txt` |
   | `txt2audio` | `POST /api/v2/audio/speech` | `POST /api/v1/client/txt2audio` |

@@ -1,0 +1,51 @@
+---
+title: "Video Description"
+openapi: "/openapi-v2.json POST /api/v2/videos/descriptions"
+---
+
+Create a timestamped index of visible events and scene boundaries in a video. This reads the picture, not the audio; use [Audio Transcription](/api/v2/audio/transcriptions) for speech or audio transcription.
+
+Submit either a hosted video URL or an uploaded video file. The request is asynchronous: the response returns a `request_id` that you can poll with [Get Job Status](/api/v2/utilities/jobs).
+
+<Warning>
+  Send exactly one of `video_url` or `video_file`. The `model` slug must support `video2desc` for URL input or `video_file2desc` for uploads. Discover the current model list with `GET /api/v2/models?limit=50`.
+</Warning>
+
+## Describe a video URL
+
+```bash
+curl -X POST "https://api.deapi.ai/api/v2/videos/descriptions" \
+  -H "Authorization: Bearer $DEAPI_API_KEY" \
+  -H "Accept: application/json" \
+  -F "video_url=https://www.youtube.com/watch?v=jNQXAC9IVRw" \
+  -F "model=Marlin_2B" \
+  -F "preset=balanced" \
+  -F "include_metadata=0" \
+  -F "return_result_in_response=1"
+```
+
+To upload a file, replace the `video_url` field with `-F "video_file=@/path/to/video.mp4"`. Supported file types are MP4, MPEG, QuickTime, AVI, WMV, OGG, WebM, and MKV; the file must contain a video stream.
+
+## Presets
+
+`Marlin_2B` supports `fast`, `balanced`, and `detail`. The preset controls the per-frame detail level and processing time: higher detail can capture more small visual elements and costs more. `balanced` is the default. Check the model listing for current preset support and limits, including `max_video_duration_seconds`.
+
+## Results
+
+The submission response contains a `request_id`:
+
+```json
+{
+  "data": {
+    "request_id": "..."
+  }
+}
+```
+
+Poll `GET /api/v2/jobs/{request_id}` until the job is complete. The result is a JSON document containing timestamped `events`, `scenes`, and source `meta`, available through the job's `result_url`. Set `return_result_in_response=1` to also include the description inline in the job status response's `data.result` field. This inline value is a JSON-encoded string; parse it as JSON in your client. The downloaded `result_url` contains the JSON document directly.
+
+Set `include_metadata=1` in multipart requests to request source metadata such as title, channel, uploader, upload date, and engagement counts. This metadata is available for URL sources; uploaded files return `null`. Metadata on URL sources has the same flat surcharge as transcription metadata.
+
+## Supported URL sources
+
+Video URLs may come from YouTube, Twitter/X, Twitch, Kick, or TikTok. Audio-only sources (such as Twitter Spaces) and live streams are rejected. To transcribe speech in a video, use [Audio Transcription](/api/v2/audio/transcriptions).

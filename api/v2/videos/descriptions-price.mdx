@@ -1,0 +1,54 @@
+---
+title: "Video Description Price Calculation"
+openapi: "/openapi-v2.json POST /api/v2/videos/descriptions/price"
+---
+
+Estimate the cost of a video description before submitting the job. Use exactly one input mode: `video_url`, `video_file`, or `duration_seconds`.
+
+## Quote a URL source
+
+```bash
+curl -X POST "https://api.deapi.ai/api/v2/videos/descriptions/price" \
+  -H "Authorization: Bearer $DEAPI_API_KEY" \
+  -H "Accept: application/json" \
+  -F "video_url=https://www.youtube.com/watch?v=jNQXAC9IVRw" \
+  -F "model=Marlin_2B" \
+  -F "preset=balanced" \
+  -F "include_metadata=0"
+```
+
+The response contains the estimated `price` (illustrative value below):
+
+```json
+{
+  "data": {
+    "price": 0.25
+  }
+}
+```
+
+## Quote by known duration
+
+Use `duration_seconds` when you know the source length and do not want the quote endpoint to fetch the video. Optionally identify its platform. `platform` is valid only with `duration_seconds`; sending it with `video_url` or `video_file` returns a validation error. For TikTok, use this mode with `platform=tiktok`; URL-based TikTok quotes are refused because looking up the video itself has a cost.
+
+```bash
+curl -X POST "https://api.deapi.ai/api/v2/videos/descriptions/price" \
+  -H "Authorization: Bearer $DEAPI_API_KEY" \
+  -H "Accept: application/json" \
+  -F "duration_seconds=180" \
+  -F "platform=tiktok" \
+  -F "model=Marlin_2B" \
+  -F "preset=balanced"
+```
+
+For a duration-only quote, `platform` may be `youtube`, `twitter`, `twitch`, `kick`, or `tiktok`. TikTok pricing uses fixed duration cards up to 1, 2, 3, 5, or 10 minutes, with 10 minutes as the maximum. Other platforms use machine time at the model's hourly rate.
+
+## Quote an uploaded file
+
+For an upload quote, send `video_file` instead of `video_url` or `duration_seconds`; only the file duration is read. Uploads do not return source metadata and are not charged the metadata surcharge.
+
+## Pricing details
+
+For non-TikTok sources, price follows the model's processing time, which increases with video length and preset detail. `Marlin_2B` offers `fast`, `balanced`, and `detail`; TikTok's fixed card is scaled by preset (`fast` ×0.75, `balanced` ×1, `detail` ×1.5). Omit `preset` to use the model default (`balanced`).
+
+`include_metadata=1` in multipart requests adds the transcription metadata flat surcharge for URL sources. If quoting with `duration_seconds` for a URL source, provide its `platform` so the quote can account for URL metadata pricing. The quote accepts the same model and preset values as [Video Description](/api/v2/videos/descriptions).
