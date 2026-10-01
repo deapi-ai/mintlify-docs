@@ -241,7 +241,9 @@
                                     "video_file2text",
                                     "video-replace",
                                     "vid-upscale",
-                                    "vid-rmbg"
+                                    "vid-rmbg",
+                                    "video2desc",
+                                    "video_file2desc"
                                 ]
                             }
                         }
@@ -3719,6 +3721,192 @@
                     }
                 ]
             }
+        },
+        "/api/v2/videos/descriptions/price": {
+            "post": {
+                "tags": [
+                    "Client API v2"
+                ],
+                "summary": "Estimate the price of a video description",
+                "description": "Quote a video description before submitting it. Priced on the machine time the description takes — which grows with the length of the video and with the `preset` — at the model's hourly rate, except on TikTok, where the price is a fixed card by length (up to 1, 2, 3, 5 or 10 minutes; 10 minutes is the maximum) scaled ×0.75 / ×1 / ×1.5 by the `preset`. `include_metadata` adds the same flat surcharge as on transcription, on URL sources only. Provide the source as a URL, an upload, or a known `duration_seconds`.",
+                "operationId": "estimateVideoDescriptionPrice",
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/AcceptHeader"
+                    }
+                ],
+                "requestBody": {
+                    "description": "Provide exactly one of video_url, video_file or duration_seconds.",
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/VideoDescriptionPriceRequestBody"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Calculated price for the video description.",
+                        "headers": {
+                            "X-RateLimit-Policy": {
+                                "$ref": "#/components/headers/X-RateLimit-Policy"
+                            },
+                            "X-RateLimit-Source": {
+                                "$ref": "#/components/headers/X-RateLimit-Source"
+                            },
+                            "X-RateLimit-Limit": {
+                                "$ref": "#/components/headers/X-RateLimit-Limit"
+                            },
+                            "X-RateLimit-Remaining": {
+                                "$ref": "#/components/headers/X-RateLimit-Remaining"
+                            },
+                            "X-RateLimit-Reset": {
+                                "$ref": "#/components/headers/X-RateLimit-Reset"
+                            },
+                            "X-RateLimit-Daily-Limit": {
+                                "$ref": "#/components/headers/X-RateLimit-Daily-Limit"
+                            },
+                            "X-RateLimit-Daily-Remaining": {
+                                "$ref": "#/components/headers/X-RateLimit-Daily-Remaining"
+                            },
+                            "X-RateLimit-Daily-Reset": {
+                                "$ref": "#/components/headers/X-RateLimit-Daily-Reset"
+                            }
+                        },
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "properties": {
+                                                "price": {
+                                                    "description": "Calculated price",
+                                                    "type": "number",
+                                                    "format": "float",
+                                                    "example": 0.25
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized user.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/response_error_default"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationError"
+                    },
+                    "429": {
+                        "$ref": "#/components/responses/RateLimitExceeded"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v2/videos/descriptions": {
+            "post": {
+                "tags": [
+                    "Client API v2"
+                ],
+                "summary": "Describe what happens in a video",
+                "description": "Produce a timestamped index of what happens on screen — a list of events, each with `start`, `end` (seconds) and a `description` — plus scene boundaries and source metadata. Reads the picture, not the audio track; for speech use POST /api/v2/audio/transcriptions. Accepts either a video URL (YouTube, Twitter/X, Twitch, Kick, TikTok) or a file upload. The result is a JSON document: `{\"events\": [{\"start\", \"end\", \"description\", \"merged?\", \"edge_distance\"}], \"scenes\": [...], \"meta\": {\"duration\", \"preset\", ...}}`, delivered as `result_url` on the job (and as a serialized JSON string in `result` when `return_result_in_response` is set). Priced on machine time at the model's hourly rate — longer videos and higher presets cost more — or, for TikTok, on a fixed card by length capped at 10 minutes; see POST /api/v2/videos/descriptions/price.",
+                "operationId": "createVideoDescription",
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/AcceptHeader"
+                    }
+                ],
+                "requestBody": {
+                    "description": "Video description parameters. Provide exactly one of video_url or video_file.",
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/VideoDescriptionRequestBody"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "ID of the inference request.",
+                        "headers": {
+                            "X-RateLimit-Policy": {
+                                "$ref": "#/components/headers/X-RateLimit-Policy"
+                            },
+                            "X-RateLimit-Source": {
+                                "$ref": "#/components/headers/X-RateLimit-Source"
+                            },
+                            "X-RateLimit-Limit": {
+                                "$ref": "#/components/headers/X-RateLimit-Limit"
+                            },
+                            "X-RateLimit-Remaining": {
+                                "$ref": "#/components/headers/X-RateLimit-Remaining"
+                            },
+                            "X-RateLimit-Reset": {
+                                "$ref": "#/components/headers/X-RateLimit-Reset"
+                            },
+                            "X-RateLimit-Daily-Limit": {
+                                "$ref": "#/components/headers/X-RateLimit-Daily-Limit"
+                            },
+                            "X-RateLimit-Daily-Remaining": {
+                                "$ref": "#/components/headers/X-RateLimit-Daily-Remaining"
+                            },
+                            "X-RateLimit-Daily-Reset": {
+                                "$ref": "#/components/headers/X-RateLimit-Daily-Reset"
+                            }
+                        },
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/JobRequestResponseResource"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized user.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/response_error_default"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationError"
+                    },
+                    "429": {
+                        "$ref": "#/components/responses/RateLimitExceeded"
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/AccountSuspended"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
         }
     },
     "components": {
@@ -4096,7 +4284,7 @@
                         "example": "A beautiful sunset over mountains with dramatic music"
                     },
                     "negative_prompt": {
-                        "description": "Elements to avoid in the generated video",
+                        "description": "Elements to avoid in the generated video. Dropped (not forwarded to the worker) when the model declares `info.features.supports_negative_prompt: false`.",
                         "type": [
                             "string",
                             "null"
@@ -4135,12 +4323,12 @@
                         "example": 512
                     },
                     "guidance": {
-                        "description": "Guidance scale. Required only when the model declares `info.features.supports_guidance`; for a model that does not, the value is accepted and ignored. Bounds are `info.limits.min_guidance` / `max_guidance`, from `GET /api/v2/models`.",
+                        "description": "Guidance scale. Bounded by `info.limits.min_guidance` / `max_guidance` from `GET /api/v2/models` (0–30 when the model declares none). Required when the model declares `info.features.supports_guidance: true`; optional when the flag is absent. When the model declares `supports_guidance: false` the value is accepted and dropped — it is neither forwarded to the worker nor priced.",
                         "type": "number",
                         "example": 7.5
                     },
                     "steps": {
-                        "description": "Number of inference steps. Required when the model publishes step bounds: send it if `info.limits.min_steps` / `max_steps` or `info.defaults.steps` is present for your `model` in `GET /api/v2/models`, and stay inside that range. Key off those fields rather than `info.features.supports_steps`, which some models omit while still using steps.",
+                        "description": "Number of inference steps. Bounded by `info.limits.min_steps` / `max_steps` from `GET /api/v2/models` (1–100 when the model declares none). Required when the model declares `info.features.supports_steps: true`; optional when the flag is absent. When the model declares `supports_steps: false` the value is accepted and dropped — it is neither forwarded to the worker nor priced.",
                         "type": "integer",
                         "example": 20
                     },
@@ -4208,7 +4396,7 @@
                         "example": 512
                     },
                     "steps": {
-                        "description": "Number of inference steps. Required when the model publishes step bounds: send it if `info.limits.min_steps` / `max_steps` or `info.defaults.steps` is present for your `model` in `GET /api/v2/models`, and stay inside that range. Key off those fields rather than `info.features.supports_steps`, which some models omit while still using steps.",
+                        "description": "Number of inference steps. Bounded by `info.limits.min_steps` / `max_steps` from `GET /api/v2/models` (1–100 when the model declares none). Required when the model declares `info.features.supports_steps: true`; optional when the flag is absent. When the model declares `supports_steps: false` the value is accepted and dropped — it is neither forwarded to the worker nor priced.",
                         "type": "integer",
                         "example": 20
                     },
@@ -4244,7 +4432,7 @@
                         "example": "A beautiful sunset over mountains"
                     },
                     "negative_prompt": {
-                        "description": "Elements to avoid in the generated image",
+                        "description": "Elements to avoid in the generated image. Dropped (not forwarded to the worker) when the model declares `info.features.supports_negative_prompt: false`.",
                         "type": [
                             "string",
                             "null"
@@ -4280,12 +4468,12 @@
                         "example": []
                     },
                     "guidance": {
-                        "description": "Guidance scale. Required only when the model declares `info.features.supports_guidance`; for a model that does not, the value is accepted and ignored. Bounds are `info.limits.min_guidance` / `max_guidance`, from `GET /api/v2/models`.",
+                        "description": "Guidance scale. Bounded by `info.limits.min_guidance` / `max_guidance` from `GET /api/v2/models` (0–30 when the model declares none). Required when the model declares `info.features.supports_guidance: true`; optional when the flag is absent. When the model declares `supports_guidance: false` the value is accepted and dropped — it is neither forwarded to the worker nor priced.",
                         "type": "number",
                         "example": 7.5
                     },
                     "steps": {
-                        "description": "Number of inference steps. Required when the model publishes step bounds: send it if `info.limits.min_steps` / `max_steps` or `info.defaults.steps` is present for your `model` in `GET /api/v2/models`, and stay inside that range. Key off those fields rather than `info.features.supports_steps`, which some models omit while still using steps.",
+                        "description": "Number of inference steps. Bounded by `info.limits.min_steps` / `max_steps` from `GET /api/v2/models` (1–100 when the model declares none). Required when the model declares `info.features.supports_steps: true`; optional when the flag is absent. When the model declares `supports_steps: false` the value is accepted and dropped — it is neither forwarded to the worker nor priced.",
                         "type": "integer",
                         "example": 20
                     },
@@ -4301,6 +4489,22 @@
                         "description": "Random seed for generation",
                         "type": "integer",
                         "example": 42
+                    },
+                    "width": {
+                        "description": "Requested output width. Does not move the price; accepted so the quote applies the same per-model size box as the generation request (only on a model declaring `info.features.supports_custom_output_size`; ignored otherwise).",
+                        "type": [
+                            "integer",
+                            "null"
+                        ],
+                        "example": 1024
+                    },
+                    "height": {
+                        "description": "Requested output height. Does not move the price; accepted so the quote applies the same per-model size box as the generation request (only on a model declaring `info.features.supports_custom_output_size`; ignored otherwise).",
+                        "type": [
+                            "integer",
+                            "null"
+                        ],
+                        "example": 1024
                     }
                 },
                 "type": "object"
@@ -4417,7 +4621,7 @@
                         "example": 512
                     },
                     "steps": {
-                        "description": "Number of inference steps. Required when the model publishes step bounds: send it if `info.limits.min_steps` / `max_steps` or `info.defaults.steps` is present for your `model` in `GET /api/v2/models`, and stay inside that range. Key off those fields rather than `info.features.supports_steps`, which some models omit while still using steps.",
+                        "description": "Number of inference steps. Bounded by `info.limits.min_steps` / `max_steps` from `GET /api/v2/models` (1–100 when the model declares none). Required when the model declares `info.features.supports_steps: true`; optional when the flag is absent. When the model declares `supports_steps: false` the value is accepted and dropped — it is neither forwarded to the worker nor priced.",
                         "type": "integer",
                         "example": 1
                     },
@@ -4450,6 +4654,14 @@
                         "example": 1,
                         "default": 0,
                         "maximum": 1,
+                        "minimum": 0
+                    },
+                    "ref_audios_count": {
+                        "description": "How many `ref_audios` the generation request will carry. No surcharge; accepted so the quote applies the same per-model reference limits (`info.limits.max_ref_*`, `info.features.supports_*_refs`) as the generation request. The example set here belongs to the `model` example shown.",
+                        "type": "integer",
+                        "example": 0,
+                        "default": 0,
+                        "maximum": 3,
                         "minimum": 0
                     }
                 },
@@ -4569,7 +4781,7 @@
                         "example": "A beautiful sunset over mountains"
                     },
                     "negative_prompt": {
-                        "description": "Elements to avoid in the generated image",
+                        "description": "Elements to avoid in the generated image. Dropped (not forwarded to the worker) when the model declares `info.features.supports_negative_prompt: false`.",
                         "type": [
                             "string",
                             "null"
@@ -4616,12 +4828,12 @@
                         "example": 512
                     },
                     "guidance": {
-                        "description": "Guidance scale. Required only when the model declares `info.features.supports_guidance`; for a model that does not, the value is accepted and ignored. Bounds are `info.limits.min_guidance` / `max_guidance`, from `GET /api/v2/models`.",
+                        "description": "Guidance scale. Bounded by `info.limits.min_guidance` / `max_guidance` from `GET /api/v2/models` (0–30 when the model declares none). Required when the model declares `info.features.supports_guidance: true`; optional when the flag is absent. When the model declares `supports_guidance: false` the value is accepted and dropped — it is neither forwarded to the worker nor priced.",
                         "type": "number",
                         "example": 7.5
                     },
                     "steps": {
-                        "description": "Number of inference steps. Required when the model publishes step bounds: send it if `info.limits.min_steps` / `max_steps` or `info.defaults.steps` is present for your `model` in `GET /api/v2/models`, and stay inside that range. Key off those fields rather than `info.features.supports_steps`, which some models omit while still using steps.",
+                        "description": "Number of inference steps. Bounded by `info.limits.min_steps` / `max_steps` from `GET /api/v2/models` (1–100 when the model declares none). Required when the model declares `info.features.supports_steps: true`; optional when the flag is absent. When the model declares `supports_steps: false` the value is accepted and dropped — it is neither forwarded to the worker nor priced.",
                         "type": "integer",
                         "example": 4
                     },
@@ -4720,6 +4932,11 @@
                             "null"
                         ],
                         "example": "Read this in a calm, measured tone"
+                    },
+                    "ref_audio": {
+                        "description": "Optional on the quote (`mode: voice_clone`). When sent, held to the model's `info.limits.min_ref_audio_duration` / `max_ref_audio_duration` exactly as on generation, so a quote cannot succeed for a reference the job rejects.",
+                        "type": "string",
+                        "format": "binary"
                     }
                 },
                 "type": "object"
@@ -4778,7 +4995,7 @@
                         "example": 512
                     },
                     "steps": {
-                        "description": "Number of inference steps. Required when the model publishes step bounds: send it if `info.limits.min_steps` / `max_steps` or `info.defaults.steps` is present for your `model` in `GET /api/v2/models`, and stay inside that range. Key off those fields rather than `info.features.supports_steps`, which some models omit while still using steps.",
+                        "description": "Number of inference steps. Bounded by `info.limits.min_steps` / `max_steps` from `GET /api/v2/models` (1–100 when the model declares none). Required when the model declares `info.features.supports_steps: true`; optional when the flag is absent. When the model declares `supports_steps: false` the value is accepted and dropped — it is neither forwarded to the worker nor priced.",
                         "type": "integer",
                         "example": 1
                     },
@@ -5057,6 +5274,58 @@
                         "description": "Number of diffusion inference steps (1-100). Use 8 for turbo models, 32+ for base models. The accepted range is model-specific — read `info.limits.min_steps`/`max_steps` for your `model` from `GET /api/v2/models`; several models pin it to a single value.",
                         "type": "integer",
                         "example": 8
+                    },
+                    "guidance_scale": {
+                        "description": "Optional on the quote. Validated against `info.limits.min_guidance` / `max_guidance` exactly as on generation, so a quote cannot succeed for a value the job rejects.",
+                        "type": "number",
+                        "example": 1
+                    },
+                    "bpm": {
+                        "description": "Optional on the quote. Validated against `info.limits.min_bpm` / `max_bpm` exactly as on generation.",
+                        "type": [
+                            "integer",
+                            "null"
+                        ],
+                        "example": 120
+                    },
+                    "caption": {
+                        "description": "Optional on the quote. Validated against `info.limits.min_caption` / `max_caption` (character length) exactly as on generation.",
+                        "type": "string",
+                        "example": "calm lo-fi beats"
+                    },
+                    "lyrics": {
+                        "description": "Optional on the quote. Validated exactly as on generation when sent.",
+                        "type": "string",
+                        "example": "[Instrumental]"
+                    },
+                    "keyscale": {
+                        "description": "Optional on the quote. Validated exactly as on generation when sent.",
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "example": "C major"
+                    },
+                    "timesignature": {
+                        "description": "Optional on the quote. Must be 2, 3, 4, or 6 — validated exactly as on generation when sent.",
+                        "type": [
+                            "integer",
+                            "null"
+                        ],
+                        "example": 4
+                    },
+                    "vocal_language": {
+                        "description": "Optional on the quote. Validated exactly as on generation when sent.",
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "example": "en"
+                    },
+                    "reference_audio": {
+                        "description": "Optional on the quote. When sent, held to the model's `info.limits.min_ref_audio_duration` / `max_ref_audio_duration` exactly as on generation.",
+                        "type": "string",
+                        "format": "binary"
                     }
                 },
                 "type": "object"
@@ -5153,6 +5422,11 @@
                         "description": "The model to use for video replacement. Available models can be retrieved via the GET /api/v2/models endpoint.",
                         "type": "string",
                         "example": "Wan2_2_Animate_14B_INT8"
+                    },
+                    "steps": {
+                        "description": "Optional on the quote. Validated against `info.limits.min_steps` / `max_steps` exactly as on generation (which defaults it to 4).",
+                        "type": "integer",
+                        "example": 4
                     }
                 },
                 "type": "object"
@@ -5248,7 +5522,7 @@
                         "example": "A beautiful sunset over mountains"
                     },
                     "negative_prompt": {
-                        "description": "Elements to avoid in the generated image",
+                        "description": "Elements to avoid in the generated image. Dropped (not forwarded to the worker) when the model declares `info.features.supports_negative_prompt: false`.",
                         "type": [
                             "string",
                             "null"
@@ -5313,12 +5587,12 @@
                         "example": []
                     },
                     "guidance": {
-                        "description": "Guidance scale. Required only when the model declares `info.features.supports_guidance`; for a model that does not, the value is accepted and ignored. Bounds are `info.limits.min_guidance` / `max_guidance`, from `GET /api/v2/models`.",
+                        "description": "Guidance scale. Bounded by `info.limits.min_guidance` / `max_guidance` from `GET /api/v2/models` (0–30 when the model declares none). Required when the model declares `info.features.supports_guidance: true`; optional when the flag is absent. When the model declares `supports_guidance: false` the value is accepted and dropped — it is neither forwarded to the worker nor priced.",
                         "type": "number",
                         "example": 7.5
                     },
                     "steps": {
-                        "description": "Number of inference steps. Required when the model publishes step bounds: send it if `info.limits.min_steps` / `max_steps` or `info.defaults.steps` is present for your `model` in `GET /api/v2/models`, and stay inside that range. Key off those fields rather than `info.features.supports_steps`, which some models omit while still using steps.",
+                        "description": "Number of inference steps. Bounded by `info.limits.min_steps` / `max_steps` from `GET /api/v2/models` (1–100 when the model declares none). Required when the model declares `info.features.supports_steps: true`; optional when the flag is absent. When the model declares `supports_steps: false` the value is accepted and dropped — it is neither forwarded to the worker nor priced.",
                         "type": "integer",
                         "example": 20
                     },
@@ -5558,7 +5832,7 @@
                         "example": "A beautiful sunset over mountains"
                     },
                     "negative_prompt": {
-                        "description": "Elements to avoid in the generated video",
+                        "description": "Elements to avoid in the generated video. Dropped (not forwarded to the worker) when the model declares `info.features.supports_negative_prompt: false`.",
                         "type": [
                             "string",
                             "null"
@@ -5622,12 +5896,12 @@
                         "example": 512
                     },
                     "guidance": {
-                        "description": "Guidance scale. Required only when the model declares `info.features.supports_guidance`; for a model that does not, the value is accepted and ignored. Bounds are `info.limits.min_guidance` / `max_guidance`, from `GET /api/v2/models`.",
+                        "description": "Guidance scale. Bounded by `info.limits.min_guidance` / `max_guidance` from `GET /api/v2/models` (0–30 when the model declares none). Required when the model declares `info.features.supports_guidance: true`; optional when the flag is absent. When the model declares `supports_guidance: false` the value is accepted and dropped — it is neither forwarded to the worker nor priced.",
                         "type": "number",
                         "example": 7.5
                     },
                     "steps": {
-                        "description": "Number of inference steps. Required when the model publishes step bounds: send it if `info.limits.min_steps` / `max_steps` or `info.defaults.steps` is present for your `model` in `GET /api/v2/models`, and stay inside that range. Key off those fields rather than `info.features.supports_steps`, which some models omit while still using steps.",
+                        "description": "Number of inference steps. Bounded by `info.limits.min_steps` / `max_steps` from `GET /api/v2/models` (1–100 when the model declares none). Required when the model declares `info.features.supports_steps: true`; optional when the flag is absent. When the model declares `supports_steps: false` the value is accepted and dropped — it is neither forwarded to the worker nor priced.",
                         "type": "integer",
                         "example": 1
                     },
@@ -5946,7 +6220,7 @@
                         "example": "A beautiful sunset over mountains"
                     },
                     "negative_prompt": {
-                        "description": "Elements to avoid in the generated image",
+                        "description": "Elements to avoid in the generated image. Dropped (not forwarded to the worker) when the model declares `info.features.supports_negative_prompt: false`.",
                         "type": [
                             "string",
                             "null"
@@ -5993,12 +6267,12 @@
                         "example": 512
                     },
                     "guidance": {
-                        "description": "Guidance scale. Required only when the model declares `info.features.supports_guidance`; for a model that does not, the value is accepted and ignored. Bounds are `info.limits.min_guidance` / `max_guidance`, from `GET /api/v2/models`.",
+                        "description": "Guidance scale. Bounded by `info.limits.min_guidance` / `max_guidance` from `GET /api/v2/models` (0–30 when the model declares none). Required when the model declares `info.features.supports_guidance: true`; optional when the flag is absent. When the model declares `supports_guidance: false` the value is accepted and dropped — it is neither forwarded to the worker nor priced.",
                         "type": "number",
                         "example": 7.5
                     },
                     "steps": {
-                        "description": "Number of inference steps. Required when the model publishes step bounds: send it if `info.limits.min_steps` / `max_steps` or `info.defaults.steps` is present for your `model` in `GET /api/v2/models`, and stay inside that range. Key off those fields rather than `info.features.supports_steps`, which some models omit while still using steps.",
+                        "description": "Number of inference steps. Bounded by `info.limits.min_steps` / `max_steps` from `GET /api/v2/models` (1–100 when the model declares none). Required when the model declares `info.features.supports_steps: true`; optional when the flag is absent. When the model declares `supports_steps: false` the value is accepted and dropped — it is neither forwarded to the worker nor priced.",
                         "type": "integer",
                         "example": 4
                     },
@@ -6178,7 +6452,7 @@
                         "example": "A beautiful sunset over mountains"
                     },
                     "negative_prompt": {
-                        "description": "Elements to avoid in the generated video",
+                        "description": "Elements to avoid in the generated video. Dropped (not forwarded to the worker) when the model declares `info.features.supports_negative_prompt: false`.",
                         "type": [
                             "string",
                             "null"
@@ -6196,12 +6470,12 @@
                         "example": 512
                     },
                     "guidance": {
-                        "description": "Guidance scale. Required only when the model declares `info.features.supports_guidance`; for a model that does not, the value is accepted and ignored. Bounds are `info.limits.min_guidance` / `max_guidance`, from `GET /api/v2/models`.",
+                        "description": "Guidance scale. Bounded by `info.limits.min_guidance` / `max_guidance` from `GET /api/v2/models` (0–30 when the model declares none). Required when the model declares `info.features.supports_guidance: true`; optional when the flag is absent. When the model declares `supports_guidance: false` the value is accepted and dropped — it is neither forwarded to the worker nor priced.",
                         "type": "number",
                         "example": 7.5
                     },
                     "steps": {
-                        "description": "Number of inference steps. Required when the model publishes step bounds: send it if `info.limits.min_steps` / `max_steps` or `info.defaults.steps` is present for your `model` in `GET /api/v2/models`, and stay inside that range. Key off those fields rather than `info.features.supports_steps`, which some models omit while still using steps.",
+                        "description": "Number of inference steps. Bounded by `info.limits.min_steps` / `max_steps` from `GET /api/v2/models` (1–100 when the model declares none). Required when the model declares `info.features.supports_steps: true`; optional when the flag is absent. When the model declares `supports_steps: false` the value is accepted and dropped — it is neither forwarded to the worker nor priced.",
                         "type": "integer",
                         "example": 1
                     },
@@ -7155,7 +7429,7 @@
                                 ]
                             },
                             "result_url": {
-                                "description": "URL to the result file (e.g. generate image or audio). Only available when status is done",
+                                "description": "URL to the result file (for example, an image, audio, or a video-description JSON document). Only available when status is done.",
                                 "type": [
                                     "string",
                                     "null"
@@ -7186,7 +7460,7 @@
                                 ]
                             },
                             "result": {
-                                "description": "Generate text (e.g. transcription) Only available when status is done",
+                                "description": "Generated text, available when status is done. For video descriptions requested with `return_result_in_response: true`, this is a serialized JSON string containing `events`, `scenes` and `meta`; parse it as JSON.",
                                 "type": [
                                     "string",
                                     "null"
@@ -7792,6 +8066,301 @@
                     }
                 },
                 "type": "object"
+            },
+            "VideoDescriptionPriceRequestBody": {
+                "description": "Exactly ONE input source per request — `video_url`, `video_file` or `duration_seconds` — hence the three variants below. They are mutually exclusive, not a menu of optional fields: sending two of them is a 422. `platform` belongs to the `duration_seconds` variant alone. `model` and `preset` apply to all three, and are validated exactly as on POST /api/v2/videos/descriptions, so a quote is never returned for a request the job endpoint would reject.",
+                "oneOf": [
+                    {
+                        "title": "From a video URL",
+                        "required": [
+                            "video_url",
+                            "model"
+                        ],
+                        "properties": {
+                            "video_url": {
+                                "description": "URL of the video to quote. Mutually exclusive with `video_file` and `duration_seconds`; `platform` must NOT be sent with it, as it is derived from the URL. Quotes from a TikTok URL are refused (the lookup itself costs money) — quote TikTok by `duration_seconds` + `platform: tiktok` instead.",
+                                "type": "string",
+                                "example": "https://www.youtube.com/watch?v=jNQXAC9IVRw"
+                            },
+                            "preset": {
+                                "description": "The preset you will submit. It sets how much machine time the description takes (`detail` is roughly 7× `fast` per hour of material), which is what the price follows; on a TikTok, where the price is a fixed card, it multiplies the card ×0.75 / ×1 / ×1.5 for `fast` / `balanced` / `detail`. Omitted quotes at the model default (`balanced`). Ignored on a model without `info.features.supports_presets`.",
+                                "type": [
+                                    "string",
+                                    "null"
+                                ],
+                                "example": "balanced",
+                                "enum": [
+                                    "fast",
+                                    "balanced",
+                                    "detail",
+                                    null
+                                ]
+                            },
+                            "include_metadata": {
+                                "description": "Whether the job will ask for source metadata. Carries a flat surcharge on URL sources (an upload always returns null metadata and is never charged), so pass it exactly as you will pass it to POST /api/v2/videos/descriptions.",
+                                "type": [
+                                    "boolean",
+                                    "null"
+                                ],
+                                "example": false,
+                                "default": false
+                            },
+                            "model": {
+                                "description": "The model to use.",
+                                "type": "string",
+                                "example": "Marlin_2B"
+                            }
+                        },
+                        "type": "object",
+                        "not": {
+                            "anyOf": [
+                                {
+                                    "required": [
+                                        "duration_seconds"
+                                    ]
+                                },
+                                {
+                                    "required": [
+                                        "video_file"
+                                    ]
+                                },
+                                {
+                                    "required": [
+                                        "platform"
+                                    ]
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "title": "From an uploaded file",
+                        "required": [
+                            "video_file",
+                            "model"
+                        ],
+                        "properties": {
+                            "video_file": {
+                                "description": "Video file to quote. Mutually exclusive with `video_url` and `duration_seconds`. Only the duration is read from it here.",
+                                "type": "string",
+                                "format": "binary"
+                            },
+                            "preset": {
+                                "description": "The preset you will submit. It sets how much machine time the description takes (`detail` is roughly 7× `fast` per hour of material), which is what the price follows; on a TikTok, where the price is a fixed card, it multiplies the card ×0.75 / ×1 / ×1.5 for `fast` / `balanced` / `detail`. Omitted quotes at the model default (`balanced`). Ignored on a model without `info.features.supports_presets`.",
+                                "type": [
+                                    "string",
+                                    "null"
+                                ],
+                                "example": "balanced",
+                                "enum": [
+                                    "fast",
+                                    "balanced",
+                                    "detail",
+                                    null
+                                ]
+                            },
+                            "include_metadata": {
+                                "description": "Whether the job will ask for source metadata. Carries a flat surcharge on URL sources (an upload always returns null metadata and is never charged), so pass it exactly as you will pass it to POST /api/v2/videos/descriptions.",
+                                "type": [
+                                    "boolean",
+                                    "null"
+                                ],
+                                "example": false,
+                                "default": false
+                            },
+                            "model": {
+                                "description": "The model to use.",
+                                "type": "string",
+                                "example": "Marlin_2B"
+                            }
+                        },
+                        "type": "object",
+                        "not": {
+                            "anyOf": [
+                                {
+                                    "required": [
+                                        "duration_seconds"
+                                    ]
+                                },
+                                {
+                                    "required": [
+                                        "video_url"
+                                    ]
+                                },
+                                {
+                                    "required": [
+                                        "platform"
+                                    ]
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "title": "From a known duration",
+                        "required": [
+                            "duration_seconds",
+                            "model"
+                        ],
+                        "properties": {
+                            "duration_seconds": {
+                                "description": "Source duration in seconds. Mutually exclusive with `video_url` and `video_file`. This mode never fetches the source.",
+                                "type": "number",
+                                "example": 600,
+                                "minimum": 0.1
+                            },
+                            "platform": {
+                                "description": "The platform the source comes from. Valid ONLY on this variant, where there is no URL to derive it from — with `video_url` or `video_file` it is rejected. It changes the price: `tiktok` is quoted on the fixed length card (and capped at 10 minutes), every other value on machine time, and `platform` also decides whether `include_metadata` carries its surcharge — only platform sources can return metadata. A duration-only quote that omits it is priced as an upload, so for a URL job it can come in under the amount actually charged.",
+                                "type": [
+                                    "string",
+                                    "null"
+                                ],
+                                "example": "youtube",
+                                "enum": [
+                                    "youtube",
+                                    "twitter",
+                                    "twitch",
+                                    "kick",
+                                    "tiktok",
+                                    null
+                                ]
+                            },
+                            "preset": {
+                                "description": "The preset you will submit. It sets how much machine time the description takes (`detail` is roughly 7× `fast` per hour of material), which is what the price follows; on a TikTok, where the price is a fixed card, it multiplies the card ×0.75 / ×1 / ×1.5 for `fast` / `balanced` / `detail`. Omitted quotes at the model default (`balanced`). Ignored on a model without `info.features.supports_presets`.",
+                                "type": [
+                                    "string",
+                                    "null"
+                                ],
+                                "example": "balanced",
+                                "enum": [
+                                    "fast",
+                                    "balanced",
+                                    "detail",
+                                    null
+                                ]
+                            },
+                            "include_metadata": {
+                                "description": "Whether the job will ask for source metadata. Carries a flat surcharge on URL sources (an upload always returns null metadata and is never charged), so pass it exactly as you will pass it to POST /api/v2/videos/descriptions.",
+                                "type": [
+                                    "boolean",
+                                    "null"
+                                ],
+                                "example": false,
+                                "default": false
+                            },
+                            "model": {
+                                "description": "The model to use.",
+                                "type": "string",
+                                "example": "Marlin_2B"
+                            }
+                        },
+                        "type": "object",
+                        "not": {
+                            "anyOf": [
+                                {
+                                    "required": [
+                                        "video_file"
+                                    ]
+                                },
+                                {
+                                    "required": [
+                                        "video_url"
+                                    ]
+                                }
+                            ]
+                        }
+                    }
+                ]
+            },
+            "VideoDescriptionRequestBody": {
+                "description": "A source is MANDATORY and comes in exactly one of two shapes — `video_url` for a hosted video, or `video_file` for an upload. Sending neither is a 422, and sending both is a 422 as well; the `oneOf` below is that choice, not a pair of optional fields. Everything else applies to both. The `/price` twin of this endpoint accepts a third shape, `duration_seconds`, which this one does not.",
+                "required": [
+                    "model"
+                ],
+                "properties": {
+                    "video_url": {
+                        "description": "URL of the video to describe (YouTube, Twitter/X, Twitch, Kick, TikTok — the same platforms as transcription). Audio-only sources such as Twitter Spaces are rejected. Live streams are rejected. Mutually exclusive with video_file.",
+                        "type": "string",
+                        "example": "https://www.youtube.com/watch?v=jNQXAC9IVRw"
+                    },
+                    "video_file": {
+                        "description": "Video file to describe. Supported: mp4, mpeg, quicktime, avi, wmv, ogg, webm, mkv. Must contain a video stream. Mutually exclusive with video_url.",
+                        "type": "string",
+                        "format": "binary"
+                    },
+                    "model": {
+                        "description": "The model to use. Available models can be retrieved via the GET /api/v2/models endpoint; a model lists `video2desc` (URL sources) and/or `video_file2desc` (uploads) in its `inference_types`. Its `info.limits.max_video_duration_seconds`, when present, is the longest source it accepts.",
+                        "type": "string",
+                        "example": "Marlin_2B"
+                    },
+                    "preset": {
+                        "description": "Detail level. A preset is the per-frame pixel budget the model reads the video at: `fast` reads a small frame over long windows, `detail` a large frame over short windows, so higher presets read more of what is on screen (small text, brand names) and cost more — roughly ×1 / ×3 / ×7 machine time for `fast` / `balanced` / `detail` (×0.75 / ×1 / ×1.5 on the TikTok card). Omit for the default (`balanced`, or the cheapest preset the model offers if it does not offer `balanced`). Only honoured on a model whose `info.features.supports_presets` is true; such a model publishes the presets it offers as `info.limits.available_presets` and rejects any other. On a model without the flag the field is ignored.",
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "example": "balanced",
+                        "enum": [
+                            "fast",
+                            "balanced",
+                            "detail",
+                            null
+                        ]
+                    },
+                    "include_metadata": {
+                        "description": "If true, the job-status response carries a `metadata` object describing the source — title, channel, uploader, upload date and engagement counts such as views, likes and comments — exactly as on POST /api/v2/audio/transcriptions. Only URL sources have any; an uploaded file returns null and is never charged for the flag. Carries the same flat surcharge as transcription metadata.",
+                        "type": [
+                            "boolean",
+                            "null"
+                        ],
+                        "example": false,
+                        "default": false
+                    },
+                    "return_result_in_response": {
+                        "description": "If true, the completed job-status response includes the description as a serialized JSON string in `data.result`, in addition to `data.result_url`. Parse the string as JSON to read `events`, `scenes` and `meta`.",
+                        "type": [
+                            "boolean",
+                            "null"
+                        ],
+                        "example": false,
+                        "default": false
+                    },
+                    "webhook_url": {
+                        "description": "Optional HTTPS URL to receive webhook notifications for job status changes (processing, completed, failed). Must be HTTPS. Max 2048 characters. A per-request URL is self-contained: it is delivered even when the account has no webhook configuration, or the account webhook is disabled. See the `webhooks` block at the top level of this document for the event payloads and the headers each delivery carries.",
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "format": "uri",
+                        "example": "https://your-server.com/webhooks/deapi",
+                        "maxLength": 2048
+                    },
+                    "webhook_secret": {
+                        "description": "Optional per-request HMAC secret (min. 32 chars) used to sign the webhook callback. Overrides the account-default secret for this job only. If omitted, the account-default secret signs the callback; if no secret exists at all, the callback is still delivered but UNSIGNED (empty X-DeAPI-Signature header). Requires `webhook_url` to also be set.",
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "example": "a1b2c3d4e5f60708091a2b3c4d5e6f7081920a1b2c3d4e5f60708091a2b3c4d5",
+                        "maxLength": 255,
+                        "minLength": 32
+                    }
+                },
+                "type": "object",
+                "oneOf": [
+                    {
+                        "title": "From a video URL",
+                        "required": [
+                            "video_url"
+                        ],
+                        "type": "object"
+                    },
+                    {
+                        "title": "From an uploaded file",
+                        "required": [
+                            "video_file"
+                        ],
+                        "type": "object"
+                    }
+                ]
             }
         },
         "responses": {

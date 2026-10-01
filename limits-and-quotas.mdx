@@ -20,7 +20,7 @@ All new accounts start as **Basic** and can upgrade to **Premium** by making any
 <Note>
   Upon registration, you receive a **\$5 bonus** added to your balance. This bonus is available for **Basic accounts** with conservative rate limits designed for testing and evaluation.
 
-  To upgrade to **Premium** (300 RPM, unlimited daily requests), simply top up your account with any available amount. Your remaining bonus balance carries over — for example, if you use \$2 of your bonus and then purchase \$10, your total balance becomes \$13 (\$3 remaining \+ \$10 purchased), now usable with Premium limits.
+  To upgrade to **Premium** with the model-specific limits below, simply top up your account with any available amount. Your remaining bonus balance carries over — for example, if you use \$2 of your bonus and then purchase \$10, your total balance becomes \$13 (\$3 remaining \+ \$10 purchased), now usable with Premium limits.
 </Note>
 
 <Warning>
@@ -31,18 +31,20 @@ All new accounts start as **Basic** and can upgrade to **Premium** by making any
 
 ## Rate Limits
 
-Rate limits are defined per endpoint as:
+Rate limits depend on the model, endpoint, and account tier. They are expressed as:
 
 - **RPM** — Requests Per Minute
 - **RPD** — Requests Per Day
 
 Each window opens on your first request into a bucket and runs its full length from that moment — not to a calendar boundary in any timezone. Read `X-RateLimit-Reset` (RPM) and `X-RateLimit-Daily-Reset` (RPD) for the exact epoch second.
 
+The response headers describe the effective bucket. `X-RateLimit-Source: model` identifies a model override shared across account tiers; `tier` identifies an account-tier limit. A `w=86400` entry in `X-RateLimit-Policy` indicates a daily limit. A minute-only policy means no daily limit applies; missing daily headers alone do not establish this.
+
 ---
 
 ### Basic Limits
 
-Basic accounts have conservative limits designed for testing and evaluation.
+Basic accounts have conservative limits designed for testing and evaluation. For entries marked "Read response headers", a fixed Basic quota is not published here. Read `X-RateLimit-Limit` for RPM and `X-RateLimit-Policy` for the applicable windows on a request made with your Basic account; do not assume the Premium quota applies.
 
 ---
 
@@ -62,13 +64,17 @@ Basic accounts have conservative limits designed for testing and evaluation.
 | `/api/v2/videos/audio-syncs` | `Ltx2_3_22B_Dist_INT8`, `Ltx2_5_22B_Dist_INT8` | 1 | 15 |
 | `/api/v2/videos/replacements` | `Wan2_2_Animate_14B_INT8` | 1 | 15 |
 | `/api/v2/videos/upscales` | `RealESRGAN_Vid_x4 , RealESRGAN_Vid_x2 , FlashVSR_Tiny` | 1 | 15 |
-| `/api/v2/audio/speech` | `Kokoro`, `Chatterbox`, `Qwen3_TTS_12Hz_1_7B_CustomVoice`, `Qwen3_TTS_12Hz_1_7B_Base`, `Qwen3_TTS_12Hz_1_7B_VoiceDesign` | 5 | 300 |
+| `/api/v2/audio/speech` | `Kokoro`, `Chatterbox`, `Qwen3_TTS_12Hz_1_7B_CustomVoice` | 5 | 300 |
+| `/api/v2/audio/speech` | `Qwen3_TTS_12Hz_1_7B_Base`, `Qwen3_TTS_12Hz_1_7B_VoiceDesign` | 3 | 300 |
 | `/api/v2/audio/music` | `AceStep_1_5_Turbo`, `AceStep_1_5_Base`, `AceStep_1_5_XL_Turbo_INT8` | 1 | 15 |
 | `/api/v2/audio/transcriptions` | `WhisperLargeV3`, `WhisperLargeV3Ct2` | 1 | 10 |
 | `/api/v2/embeddings` | `Bge_M3_FP16` | 10 | 500 |
+| `/api/v2/images/generations` | `gpt-image-1.5`, `gpt-image-2`, `nano-banana-2` | Read response headers | Read response headers |
+| `/api/v2/images/edits` | `gpt-image-1.5`, `gpt-image-2` | Read response headers | Read response headers |
+| `/api/v2/videos/descriptions` | `Marlin_2B` | 1 | 10 |
 
 <Note>
-  In v2 transcription is unified into a single endpoint (`/api/v2/audio/transcriptions`) — the Whisper shared-limit across 4 v1 endpoints no longer applies.
+  In v2 audio and video transcription use a single endpoint (`/api/v2/audio/transcriptions`). Check the limits for the selected model in the table above.
 </Note>
 
 #### Utility Endpoints
@@ -82,28 +88,56 @@ Basic accounts have conservative limits designed for testing and evaluation.
 
 ### Premium Limits
 
-Premium accounts have high limits suitable for production workloads. All endpoints share a unified **300 RPM** with **unlimited daily requests**.
+Premium accounts use the model-specific RPM and RPD limits below. Utility endpoints have separate limits.
 
 | Endpoint | Models | RPM | RPD |
 | --- | --- | --- | --- |
-| `/api/v2/images/generations` | `Flux1schnell`, `ZImageTurbo_INT8`, `Flux_2_Klein_4B_BF16`, `ZAnimeDistill_8Step_INT8` | 300 | Unlimited |
-| `/api/v2/images/edits` | `Flux_2_Klein_4B_BF16`, `QwenImageEdit_Plus_NF4` | 300 | Unlimited |
-| `/api/v2/images/ocr` | `Nanonets_Ocr_S_F16` | 300 | Unlimited |
-| `/api/v2/images/background-removals` | `Ben2` | 300 | Unlimited |
-| `/api/v2/images/upscales` | `RealESRGAN_x4` | 300 | Unlimited |
-| `/api/v2/videos/generations` | `Ltxv_13B_0_9_8_Distilled_FP8`, `Ltx2_3_22B_Dist_INT8`, `Ltx2_5_22B_Dist_INT8`, `MiniMaxH3_33B_Turbo_INT8` | 300 | Unlimited |
-| `/api/v2/videos/animations` | `Ltxv_13B_0_9_8_Distilled_FP8`, `Ltx2_3_22B_Dist_INT8`, `Ltx2_5_22B_Dist_INT8`, `MiniMaxH3_33B_Turbo_INT8` | 300 | Unlimited |
-| `/api/v2/videos/audio-syncs` | `Ltx2_3_22B_Dist_INT8`, `Ltx2_5_22B_Dist_INT8` | 300 | Unlimited |
-| `/api/v2/videos/replacements` | `Wan2_2_Animate_14B_INT8` | 300 | Unlimited |
-| `/api/v2/videos/upscales` | `RealESRGAN_Vid_x4 , RealESRGAN_Vid_x2 , FlashVSR_Tiny` | 300 | Unlimited |
-| `/api/v2/audio/speech` | `Kokoro`, `Chatterbox`, `Qwen3_TTS_12Hz_1_7B_CustomVoice`, `Qwen3_TTS_12Hz_1_7B_Base`, `Qwen3_TTS_12Hz_1_7B_VoiceDesign` | 300 | Unlimited |
-| `/api/v2/audio/music` | `AceStep_1_5_Turbo`, `AceStep_1_5_Base`, `AceStep_1_5_XL_Turbo_INT8` | 300 | Unlimited |
-| `/api/v2/audio/transcriptions` | `WhisperLargeV3`, `WhisperLargeV3Ct2` | 300 | Unlimited |
-| `/api/v2/embeddings` | `Bge_M3_FP16` | 300 | Unlimited |
+| `/api/v2/images/generations` | `Flux1schnell` | 45 | 13,000 |
+| `/api/v2/images/generations` | `ZImageTurbo_INT8` | 20 | 6,100 |
+| `/api/v2/images/generations` | `Flux_2_Klein_4B_BF16` | 60 | 17,000 |
+| `/api/v2/images/generations` | `ZAnimeDistill_8Step_INT8` | 35 | 10,000 |
+| `/api/v2/images/generations` | `gpt-image-1.5` | 20 | 500 |
+| `/api/v2/images/generations` | `gpt-image-2` | 20 | 500 |
+| `/api/v2/images/generations` | `nano-banana-2` | 20 | 500 |
+| `/api/v2/images/edits` | `Flux_2_Klein_4B_BF16` | 60 | 17,000 |
+| `/api/v2/images/edits` | `QwenImageEdit_Plus_NF4` | 2 | 860 |
+| `/api/v2/images/edits` | `gpt-image-1.5` | 20 | 500 |
+| `/api/v2/images/edits` | `gpt-image-2` | 20 | 500 |
+| `/api/v2/images/ocr` | `Nanonets_Ocr_S_F16` | 65 | 18,000 |
+| `/api/v2/images/background-removals` | `Ben2` | 300 | 100,000 |
+| `/api/v2/images/upscales` | `RealESRGAN_x4` | 300 | 100,000 |
+| `/api/v2/videos/generations` | `Ltxv_13B_0_9_8_Distilled_FP8` | 16 | 4,700 |
+| `/api/v2/videos/generations` | `Ltx2_3_22B_Dist_INT8` | 5 | 1,600 |
+| `/api/v2/videos/generations` | `Ltx2_5_22B_Dist_INT8` | 5 | 1,600 |
+| `/api/v2/videos/generations` | `MiniMaxH3_33B_Turbo_INT8` | 3 | 1,000 |
+| `/api/v2/videos/animations` | `Ltxv_13B_0_9_8_Distilled_FP8` | 16 | 4,700 |
+| `/api/v2/videos/animations` | `Ltx2_3_22B_Dist_INT8` | 5 | 1,600 |
+| `/api/v2/videos/animations` | `Ltx2_5_22B_Dist_INT8` | 5 | 1,600 |
+| `/api/v2/videos/animations` | `MiniMaxH3_33B_Turbo_INT8` | 3 | 1,000 |
+| `/api/v2/videos/audio-syncs` | `Ltx2_3_22B_Dist_INT8` | 5 | 1,600 |
+| `/api/v2/videos/audio-syncs` | `Ltx2_5_22B_Dist_INT8` | 5 | 1,600 |
+| `/api/v2/videos/replacements` | `Wan2_2_Animate_14B_INT8` | 1 | 250 |
+| `/api/v2/videos/upscales` | `RealESRGAN_Vid_x4` | 8 | 2,300 |
+| `/api/v2/videos/upscales` | `RealESRGAN_Vid_x2` | 20 | 6,000 |
+| `/api/v2/videos/upscales` | `FlashVSR_Tiny` | 2 | 840 |
+| `/api/v2/audio/speech` | `Kokoro` | 300 | 90,000 |
+| `/api/v2/audio/speech` | `Chatterbox` | 14 | 4,300 |
+| `/api/v2/audio/speech` | `Qwen3_TTS_12Hz_1_7B_CustomVoice` | 5 | 1,500 |
+| `/api/v2/audio/speech` | `Qwen3_TTS_12Hz_1_7B_Base` | 5 | 1,200 |
+| `/api/v2/audio/speech` | `Qwen3_TTS_12Hz_1_7B_VoiceDesign` | 5 | 1,400 |
+| `/api/v2/audio/music` | `AceStep_1_5_Turbo` | 55 | 17,000 |
+| `/api/v2/audio/music` | `AceStep_1_5_Base` | 30 | 9,400 |
+| `/api/v2/audio/music` | `AceStep_1_5_XL_Turbo_INT8` | 40 | 21,000 |
+| `/api/v2/audio/transcriptions` | `WhisperLargeV3` | 35 | 11,000 |
+| `/api/v2/audio/transcriptions` | `WhisperLargeV3Ct2` | 16 | 4,600 |
+| `/api/v2/embeddings` | `Bge_M3_FP16` | 190 | 55,000 |
+| `/api/v2/videos/descriptions` | `Marlin_2B` | 5 | 690 |
 
 <Info>
-  In v2 Whisper is a single endpoint (`/api/v2/audio/transcriptions`) with its own 300 RPM allocation.
+  Transcription limits depend on the selected model: `WhisperLargeV3` has 35 RPM / 11,000 RPD, and `WhisperLargeV3Ct2` has 16 RPM / 4,600 RPD. Both use `/api/v2/audio/transcriptions`.
 </Info>
+
+Video-description processing time depends on the source duration and preset. Read the rate-limit response headers for the limits effective on your account.
 
 ---
 
@@ -114,6 +148,13 @@ Utility endpoints are limited generously rather than not at all, and they sit in
 - `/api/v2/account/balance` — 600 RPM (`X-RateLimit-Source: static`, identical for every account)
 - `/api/v2/models` — 300 RPM on Premium (`X-RateLimit-Source: tier`)
 
+Price calculation and job status use the following tier limits:
+
+| Endpoint | Basic RPM | Basic RPD | Premium RPM | Premium RPD |
+| --- | --- | --- | --- | --- |
+| Price Calculation (`/api/v2/**/price`) | 50 | 200 | 300 | Unlimited |
+| Jobs Status (`/api/v2/jobs/{job_request}`) | 50 | 200 | 300 | Unlimited |
+
 Read `X-RateLimit-Limit` on any response rather than hard-coding these.
 
 ---
@@ -122,9 +163,9 @@ Read `X-RateLimit-Limit` on any response rather than hard-coding these.
 
 | Aspect | Basic | Premium |
 | --- | --- | --- |
-| RPM Limits | 1–10 RPM | 300 RPM (all endpoints) |
-| Daily Limits (RPD) | Limited | Unlimited |
-| Transcription Limit | 1 unified endpoint (v2) | 300 RPM (v2) |
+| RPM Limits | Model-specific; see Basic table | Model-specific; see Premium table |
+| Daily Limits (RPD) | Model-specific; see Basic table | Model-specific; see Premium table |
+| Transcription Limit | 1 RPM / 10 RPD | 35 RPM / 11,000 RPD (`WhisperLargeV3`); 16 RPM / 4,600 RPD (`WhisperLargeV3Ct2`) |
 | Upgrade Requirement | — | Any payment via Stripe |
 
 ---
@@ -141,12 +182,12 @@ Many AI infrastructure providers enforce restrictive initial limits, necessitati
 **Scaling to Production**
 
 - Traditional Providers: Typically require specific monetary spend thresholds (e.g., \$50\+) and time delays (weeks/months) to unlock higher rate limits.
-- deAPI: Instant upgrade to Premium (300 RPM, unlimited daily requests) with any available top-up amount (\$10, \$25, or \$50).
+- deAPI: Instant upgrade to Premium with the model-specific limits above after any available top-up amount (\$10, \$25, or \$50).
 
 **Limit Structure**
 
 - Traditional Providers: Often utilize separate quotas for tokens (TPM), requests (RPM), daily limits (RPD), and per-model restrictions.
-- deAPI Premium: Simple unified structure — 300 RPM across all endpoints with unlimited daily requests.
+- deAPI Premium: RPM and RPD quotas are listed per model, with separate limits for utility endpoints.
 
 For High Volume Production requirements beyond Premium limits, please contact support via: [support@deapi.ai](mailto:support@deapi.ai)
 
@@ -242,4 +283,4 @@ When you exceed your rate limit, the API returns a `429 Too Many Requests` respo
 
 1. **RPM exceeded** — Wait 60 seconds before retrying
 2. **RPD exceeded** — Wait for the delay in `Retry-After`, or the epoch second in `X-RateLimit-Daily-Reset`
-3. **Need higher limits?** — [Upgrade to Premium](https://app.deapi.ai/billing) with any payment for 300 RPM and unlimited daily requests
+3. **Need higher limits?** — Compare the Basic and Premium quotas for your model above. [Upgrade to Premium](https://app.deapi.ai/billing) with any payment, or contact support if your workload exceeds its limits.

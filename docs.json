@@ -198,7 +198,9 @@
               "api/v2/videos/replacements",
               "api/v2/videos/replacements-price",
               "api/v2/videos/upscales",
-              "api/v2/videos/upscales-price"
+              "api/v2/videos/upscales-price",
+              "api/v2/videos/descriptions",
+              "api/v2/videos/descriptions-price"
             ]
           },
           {
