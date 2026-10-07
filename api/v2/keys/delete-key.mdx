@@ -1,0 +1,10 @@
+---
+title: "Delete Key"
+openapi: "/openapi-v2.json DELETE /api/v2/keys/{id}"
+---
+
+<Note>
+  Requires an **ADMIN** key. An API key gets `403` with `code: insufficient_permissions` — see [API Keys](/api-keys).
+</Note>
+
+Permanently delete an API key. The key stops working immediately and frees its slot. Its past usage stays in usage reports, grouped as `deleted` in [Get Account Usage](/api/v2/account/usage). ADMIN keys can be deleted only in the Dashboard.

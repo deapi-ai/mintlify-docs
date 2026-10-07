@@ -1,0 +1,12 @@
+---
+title: "Get Current Key"
+openapi: "/openapi-v2.json GET /api/v2/key"
+---
+
+<Note>
+  Works with both **ADMIN** and **API** keys — see [API Keys](/api-keys).
+</Note>
+
+Return the key that sent the request: its name, role, status, expiration date, spend limit with what is left in the current window, and IP allowlist. The secret is never returned.
+
+Use it to check how much of the limit is left, or when it resets, before sending a job.

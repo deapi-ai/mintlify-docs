@@ -23,7 +23,7 @@
                     "Client API v2"
                 ],
                 "summary": "Get account balance",
-                "description": "Retrieve the current account balance for the authenticated client.",
+                "description": "Retrieve the current account balance for the authenticated client. Needs an ADMIN key.",
                 "operationId": "getAccountBalance",
                 "parameters": [
                     {
@@ -86,6 +86,9 @@
                                 }
                             }
                         }
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/InsufficientPermissions"
                     },
                     "429": {
                         "$ref": "#/components/responses/RateLimitExceeded"
@@ -3907,6 +3910,854 @@
                     }
                 ]
             }
+        },
+        "/api/v2/key": {
+            "get": {
+                "tags": [
+                    "Client API v2"
+                ],
+                "summary": "Get the calling API key",
+                "description": "The key sending the request: name, preview, role, status, dates, spend limit and IP whitelist. Never the secret. Works with any key role.",
+                "operationId": "getCurrentApiKey",
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/AcceptHeader"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "The calling key.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/ApiKeyResource"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Missing, unknown, expired or deactivated key — `code` says which: `missing_key`, `invalid_key`, `key_expired` or `key_revoked`.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/response_error_default"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/InsufficientPermissions"
+                    },
+                    "429": {
+                        "$ref": "#/components/responses/RateLimitExceeded"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v2/key/usage": {
+            "get": {
+                "tags": [
+                    "Client API v2"
+                ],
+                "summary": "Usage of the calling API key",
+                "description": "Cost, requests and errors of the key sending the request. Works with any key role.",
+                "operationId": "getCurrentApiKeyUsage",
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/AcceptHeader"
+                    },
+                    {
+                        "$ref": "#/components/parameters/UsageFrom"
+                    },
+                    {
+                        "$ref": "#/components/parameters/UsageTo"
+                    },
+                    {
+                        "name": "group_by",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "default": "day",
+                            "enum": [
+                                "day",
+                                "hour",
+                                "type",
+                                "model"
+                            ]
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "The report.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/UsageReport"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Missing, unknown, expired or deactivated key — `code` says which: `missing_key`, `invalid_key`, `key_expired` or `key_revoked`.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/response_error_default"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/InsufficientPermissions"
+                    },
+                    "422": {
+                        "description": "Invalid range or group_by.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/response_error_default"
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "$ref": "#/components/responses/RateLimitExceeded"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v2/keys": {
+            "get": {
+                "tags": [
+                    "Client API v2"
+                ],
+                "summary": "List the account's API keys",
+                "description": "Every key of the account, newest first. Needs an ADMIN key. Never secrets.",
+                "operationId": "listApiKeys",
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/AcceptHeader"
+                    },
+                    {
+                        "$ref": "#/components/parameters/ListLimit"
+                    },
+                    {
+                        "$ref": "#/components/parameters/ListPerPage"
+                    },
+                    {
+                        "$ref": "#/components/parameters/ListPage"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "A page of keys.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiKeyCollection"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Missing, unknown, expired or deactivated key — `code` says which: `missing_key`, `invalid_key`, `key_expired` or `key_revoked`.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/response_error_default"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/InsufficientPermissions"
+                    },
+                    "429": {
+                        "$ref": "#/components/responses/RateLimitExceeded"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Client API v2"
+                ],
+                "summary": "Create an API key",
+                "description": "Creates a key with the API role. Needs an ADMIN key; ADMIN keys can only be created in the Dashboard. **The secret is returned once, in this response.** Counts toward the account's limit of active keys and the hourly limit of keys created over the API (shared by all ADMIN keys of the account). An `ip_whitelist` given here applies from the key's first call.",
+                "operationId": "createApiKey",
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/AcceptHeader"
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "name"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "Customer 1234",
+                                        "maxLength": 255
+                                    },
+                                    "expires_at": {
+                                        "description": "Optional. Leave it out for a key that never expires. A date must be in the future and no later than 2038-01-19 03:14:07 UTC, the latest instant this platform can store — a 422, not a silently shortened key.",
+                                        "type": [
+                                            "string",
+                                            "null"
+                                        ],
+                                        "format": "date-time",
+                                        "example": "2026-12-31T23:59:59Z"
+                                    },
+                                    "role": {
+                                        "description": "Only `api`. `admin` is refused with 403.",
+                                        "type": "string",
+                                        "example": "api",
+                                        "enum": [
+                                            "api",
+                                            "admin"
+                                        ]
+                                    },
+                                    "ip_whitelist": {
+                                        "$ref": "#/components/schemas/ApiKeyIpWhitelist",
+                                        "description": "Optional. The only addresses the new key may be used from; omitted or `[]` means any. Duplicates and surrounding whitespace are removed, an explicit `null` is refused."
+                                    },
+                                    "limit": {
+                                        "$ref": "#/components/schemas/ApiKeySpendLimit",
+                                        "description": "Optional. What this key may spend per window, in USD; omitted or `null` means no limit. Work that would take the key past it is refused with 402 `key_limit_exceeded`."
+                                    },
+                                    "reset_interval": {
+                                        "description": "How often that limit starts over; `none` means it never does. Only accepted together with a non-null `limit`. Windows are anchored on the key's creation instant, not the calendar.",
+                                        "type": "string",
+                                        "example": "monthly",
+                                        "default": "none",
+                                        "enum": [
+                                            "none",
+                                            "daily",
+                                            "weekly",
+                                            "monthly"
+                                        ]
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "The new key, with its secret.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/CreatedApiKeyResource"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Missing, unknown, expired or deactivated key — `code` says which: `missing_key`, `invalid_key`, `key_expired` or `key_revoked`.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/response_error_default"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/InsufficientPermissions"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ApiKeyLimitReached"
+                    },
+                    "429": {
+                        "$ref": "#/components/responses/ApiKeyCreationRateLimited"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v2/keys/{id}": {
+            "get": {
+                "tags": [
+                    "Client API v2"
+                ],
+                "summary": "Get an API key",
+                "description": "Any key of the account. Needs an ADMIN key.",
+                "operationId": "getApiKey",
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/AcceptHeader"
+                    },
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "The key.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/ApiKeyResource"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Missing, unknown, expired or deactivated key — `code` says which: `missing_key`, `invalid_key`, `key_expired` or `key_revoked`.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/response_error_default"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/InsufficientPermissions"
+                    },
+                    "404": {
+                        "description": "No such key on this account.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/response_error_default"
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "$ref": "#/components/responses/RateLimitExceeded"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "patch": {
+                "tags": [
+                    "Client API v2"
+                ],
+                "summary": "Change an API key",
+                "description": "Switches an API-role key on or off, changes its expiry date, spend limit and reset window, and sets the addresses it may be used from. Needs an ADMIN key. The role cannot be changed; ADMIN keys are changed in the Dashboard only. Making a key active again counts toward the limit of active keys.",
+                "operationId": "updateApiKey",
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/AcceptHeader"
+                    },
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "active": {
+                                        "description": "`false` disables the key, `true` enables it again.",
+                                        "type": "boolean",
+                                        "example": false
+                                    },
+                                    "expires_at": {
+                                        "description": "`null` removes the expiry date. A date must be in the future and no later than 2038-01-19 03:14:07 UTC, the latest instant this platform can store — a 422, not a silently shortened key.",
+                                        "type": [
+                                            "string",
+                                            "null"
+                                        ],
+                                        "format": "date-time",
+                                        "example": "2027-01-31T23:59:59Z"
+                                    },
+                                    "ip_whitelist": {
+                                        "$ref": "#/components/schemas/ApiKeyIpWhitelist",
+                                        "description": "Replaces the whole list — entries are not merged with the ones already there. `[]` clears it and the key works from any address again; omitting the field leaves the list untouched, and an explicit `null` is refused."
+                                    },
+                                    "limit": {
+                                        "$ref": "#/components/schemas/ApiKeySpendLimit",
+                                        "description": "The new spend limit per window, in USD. `null` removes the limit; omitting the field leaves both the limit and what has been spent against it untouched. Changing the amount never resets the counter: raising it from 50 to 100 on a key that has already spent 50 leaves 50 of room, and lowering it below what has been spent accepts nothing more until the window resets."
+                                    },
+                                    "reset_interval": {
+                                        "description": "The new window. Changing it restarts the counter. Can be sent on its own, but only for a key that already has a limit; alongside `\"limit\": null` it is refused.",
+                                        "type": "string",
+                                        "example": "daily",
+                                        "enum": [
+                                            "none",
+                                            "daily",
+                                            "weekly",
+                                            "monthly"
+                                        ]
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "The key after the change.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/ApiKeyResource"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Missing, unknown, expired or deactivated key — `code` says which: `missing_key`, `invalid_key`, `key_expired` or `key_revoked`.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/response_error_default"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/InsufficientPermissions"
+                    },
+                    "404": {
+                        "description": "No such key on this account.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/response_error_default"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ApiKeyLimitReached"
+                    },
+                    "429": {
+                        "$ref": "#/components/responses/RateLimitExceeded"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Client API v2"
+                ],
+                "summary": "Delete an API key",
+                "description": "Permanently deletes an API-role key. Needs an ADMIN key; ADMIN keys are deleted in the Dashboard only. The key's past usage stays in usage reports.",
+                "operationId": "deleteApiKey",
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/AcceptHeader"
+                    },
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Deleted."
+                    },
+                    "401": {
+                        "description": "Missing, unknown, expired or deactivated key — `code` says which: `missing_key`, `invalid_key`, `key_expired` or `key_revoked`.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/response_error_default"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/InsufficientPermissions"
+                    },
+                    "404": {
+                        "description": "No such key on this account.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/response_error_default"
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "$ref": "#/components/responses/RateLimitExceeded"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v2/keys/{id}/usage": {
+            "get": {
+                "tags": [
+                    "Client API v2"
+                ],
+                "summary": "Usage of an API key",
+                "description": "Like `GET /api/v2/key/usage`, for any key of the account. Needs an ADMIN key.",
+                "operationId": "getApiKeyUsage",
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/AcceptHeader"
+                    },
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "$ref": "#/components/parameters/UsageFrom"
+                    },
+                    {
+                        "$ref": "#/components/parameters/UsageTo"
+                    },
+                    {
+                        "name": "group_by",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "default": "day",
+                            "enum": [
+                                "day",
+                                "hour",
+                                "type",
+                                "model"
+                            ]
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "The report.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/UsageReport"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Missing, unknown, expired or deactivated key — `code` says which: `missing_key`, `invalid_key`, `key_expired` or `key_revoked`.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/response_error_default"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/InsufficientPermissions"
+                    },
+                    "404": {
+                        "description": "No such key on this account.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/response_error_default"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Invalid range or group_by.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/response_error_default"
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "$ref": "#/components/responses/RateLimitExceeded"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v2/account": {
+            "get": {
+                "tags": [
+                    "Client API v2"
+                ],
+                "summary": "Get the account's billing",
+                "description": "Balance and automatic top-up settings. Needs an ADMIN key.",
+                "operationId": "getAccount",
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/AcceptHeader"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "The account's billing.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/AccountBilling"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Missing, unknown, expired or deactivated key — `code` says which: `missing_key`, `invalid_key`, `key_expired` or `key_revoked`.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/response_error_default"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/InsufficientPermissions"
+                    },
+                    "429": {
+                        "$ref": "#/components/responses/RateLimitExceeded"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v2/account/usage": {
+            "get": {
+                "tags": [
+                    "Client API v2"
+                ],
+                "summary": "Usage of the whole account",
+                "description": "Cost, requests and errors of every key of the account, optionally per key. The same data as the Usage screen in the Dashboard. Needs an ADMIN key.",
+                "operationId": "getAccountUsage",
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/AcceptHeader"
+                    },
+                    {
+                        "$ref": "#/components/parameters/UsageFrom"
+                    },
+                    {
+                        "$ref": "#/components/parameters/UsageTo"
+                    },
+                    {
+                        "name": "group_by",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "default": "day",
+                            "enum": [
+                                "day",
+                                "hour",
+                                "type",
+                                "model",
+                                "key"
+                            ]
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "The report.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/UsageReport"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Missing, unknown, expired or deactivated key — `code` says which: `missing_key`, `invalid_key`, `key_expired` or `key_revoked`.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/response_error_default"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/InsufficientPermissions"
+                    },
+                    "422": {
+                        "description": "Invalid range or group_by.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/response_error_default"
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "$ref": "#/components/responses/RateLimitExceeded"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v2/account/payments": {
+            "get": {
+                "tags": [
+                    "Client API v2"
+                ],
+                "summary": "List the account's payments",
+                "description": "Top-ups of the balance, newest first, in every status. Needs an ADMIN key.",
+                "operationId": "listAccountPayments",
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/AcceptHeader"
+                    },
+                    {
+                        "$ref": "#/components/parameters/ListLimit"
+                    },
+                    {
+                        "$ref": "#/components/parameters/ListPerPage"
+                    },
+                    {
+                        "$ref": "#/components/parameters/ListPage"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "A page of payments.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PaymentCollection"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Missing, unknown, expired or deactivated key — `code` says which: `missing_key`, `invalid_key`, `key_expired` or `key_revoked`.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/response_error_default"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/InsufficientPermissions"
+                    },
+                    "429": {
+                        "$ref": "#/components/responses/RateLimitExceeded"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
         }
     },
     "components": {
@@ -3929,6 +4780,22 @@
                     "statusCode": {
                         "description": "Status code",
                         "type": "integer"
+                    },
+                    "code": {
+                        "description": "A stable, machine-readable reason, on the responses that publish one. Refused credentials (401): `missing_key` — no Bearer credentials arrived at all; `invalid_key` — a key was presented but is unknown, carries the wrong secret, or is malformed; `key_expired` — past its expiry date; `key_revoked` — deactivated. Refused requests: `insufficient_permissions` (403), `ip_not_allowed` (403), `active_key_limit_reached` (422), `insufficient_balance` (422), `key_limit_exceeded` (402), `rate_limited` (429). Absent wherever a response publishes no code, so treat an unknown value as the status code alone — the list grows.",
+                        "type": "string",
+                        "enum": [
+                            "missing_key",
+                            "invalid_key",
+                            "key_expired",
+                            "key_revoked",
+                            "insufficient_permissions",
+                            "ip_not_allowed",
+                            "active_key_limit_reached",
+                            "insufficient_balance",
+                            "key_limit_exceeded",
+                            "rate_limited"
+                        ]
                     }
                 },
                 "type": "object"
@@ -8359,6 +9226,736 @@
                         "type": "object"
                     }
                 ]
+            },
+            "UsageFigures": {
+                "required": [
+                    "cost",
+                    "requests",
+                    "errors"
+                ],
+                "properties": {
+                    "cost": {
+                        "description": "Charged, net of refunds.",
+                        "type": "number",
+                        "format": "float",
+                        "example": 12.345678
+                    },
+                    "requests": {
+                        "description": "Inference requests accepted in the window.",
+                        "type": "integer",
+                        "example": 830
+                    },
+                    "errors": {
+                        "description": "Of those, requests that ended in an error. Requests refused before a job was created (401, 403, 429) are not counted.",
+                        "type": "integer",
+                        "example": 4
+                    }
+                },
+                "type": "object"
+            },
+            "UsageReport": {
+                "required": [
+                    "from",
+                    "to",
+                    "group_by",
+                    "currency",
+                    "totals",
+                    "groups"
+                ],
+                "properties": {
+                    "from": {
+                        "description": "Start of the range, UTC, inclusive.",
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2026-09-15T00:00:00+00:00"
+                    },
+                    "to": {
+                        "description": "End of the range, UTC, exclusive.",
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2026-09-22T00:00:00+00:00"
+                    },
+                    "group_by": {
+                        "type": "string",
+                        "example": "day",
+                        "enum": [
+                            "day",
+                            "hour",
+                            "type",
+                            "model",
+                            "key"
+                        ]
+                    },
+                    "currency": {
+                        "type": "string",
+                        "example": "USD"
+                    },
+                    "totals": {
+                        "$ref": "#/components/schemas/UsageFigures"
+                    },
+                    "groups": {
+                        "description": "Only groups with usage. `key` is: day — `YYYY-MM-DD`; hour — the hour's start (UTC); type — a v2 inference type such as `images.generations`; model — the model slug; key — the API key id, `panel` for what the Dashboard itself ran on the account, `deleted` for keys that no longer exist, null when the request has no recorded origin.",
+                        "type": "array",
+                        "items": {
+                            "allOf": [
+                                {
+                                    "properties": {
+                                        "key": {
+                                            "example": "2026-09-21",
+                                            "oneOf": [
+                                                {
+                                                    "type": "string"
+                                                },
+                                                {
+                                                    "type": "integer"
+                                                },
+                                                {
+                                                    "type": "null"
+                                                }
+                                            ]
+                                        },
+                                        "name": {
+                                            "description": "Only with group_by=key: the key's name, or `Panel` / `Deleted keys` for those two groups.",
+                                            "type": [
+                                                "string",
+                                                "null"
+                                            ]
+                                        }
+                                    },
+                                    "type": "object"
+                                },
+                                {
+                                    "$ref": "#/components/schemas/UsageFigures"
+                                }
+                            ]
+                        }
+                    }
+                },
+                "type": "object"
+            },
+            "ApiKeyIpWhitelist": {
+                "description": "The addresses an API key may be used from. An empty list means any address, which is what a key carries until a list is set. Entries are single IPv4/IPv6 addresses or CIDR ranges of either family, and a key with a non-empty list is refused from anywhere else — including a call whose address cannot be established. Sending the field replaces the whole list; `[]` clears it. A JSON object is refused, as is an entry that could never gate anything: a `/0` range (say \"any address\" with an empty list instead) and an IPv4 address written in IPv6 notation such as `::ffff:192.0.2.1` (write `192.0.2.1`, the form a caller is matched against).",
+                "type": "array",
+                "items": {
+                    "type": "string",
+                    "example": "203.0.113.7"
+                },
+                "example": [
+                    "203.0.113.7",
+                    "198.51.100.0/24"
+                ],
+                "maxItems": 20
+            },
+            "ApiKeySpendLimit": {
+                "description": "What this key may spend per window, in USD. Null means no limit, which is what every key carries until one is set. `0` is a real value and means the key accepts no paid work at all. A limit is a ceiling, not a reservation: it holds nothing against the account balance, and the limits of an account's keys may add up to far more than the account has. Sending `null` removes the limit; because nothing is counted for a key without one, removing a limit and setting it again inside the same window starts the counter from zero.",
+                "type": [
+                    "number",
+                    "null"
+                ],
+                "format": "float",
+                "example": 100,
+                "maximum": 999999.999999,
+                "minimum": 0
+            },
+            "ApiKeyResource": {
+                "required": [
+                    "id",
+                    "name",
+                    "preview",
+                    "role",
+                    "status",
+                    "created_at",
+                    "expires_at",
+                    "last_used_at",
+                    "ip_whitelist",
+                    "ip_whitelist_count",
+                    "limit",
+                    "reset_interval",
+                    "limit_used",
+                    "limit_remaining",
+                    "limit_resets_at"
+                ],
+                "properties": {
+                    "id": {
+                        "description": "Key id. The secret is never returned here — only once, by `POST /api/v2/keys`.",
+                        "type": "integer",
+                        "example": 42
+                    },
+                    "name": {
+                        "type": "string",
+                        "example": "Production backend"
+                    },
+                    "preview": {
+                        "description": "Key id and the last characters of the secret, for recognising a key.",
+                        "type": "string",
+                        "example": "42|...f3a"
+                    },
+                    "role": {
+                        "description": "`api` — inference and the key's own data; `admin` — also account billing and key management.",
+                        "type": "string",
+                        "example": "api",
+                        "enum": [
+                            "api",
+                            "admin"
+                        ]
+                    },
+                    "status": {
+                        "type": "string",
+                        "example": "active",
+                        "enum": [
+                            "active",
+                            "revoked",
+                            "expired"
+                        ],
+                        "description": "`revoked` — disabled in the Dashboard or with `PATCH /api/v2/keys/{id}` (`active: false`); `expired` — past `expires_at`."
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2026-09-22T10:00:00+00:00"
+                    },
+                    "expires_at": {
+                        "description": "Null when the key does not expire.",
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "format": "date-time",
+                        "example": null
+                    },
+                    "last_used_at": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "format": "date-time",
+                        "example": "2026-09-22T11:30:00+00:00"
+                    },
+                    "ip_whitelist": {
+                        "$ref": "#/components/schemas/ApiKeyIpWhitelist"
+                    },
+                    "ip_whitelist_count": {
+                        "description": "How many entries the list holds — `0` means the key works from any address.",
+                        "type": "integer",
+                        "example": 2,
+                        "minimum": 0
+                    },
+                    "limit": {
+                        "$ref": "#/components/schemas/ApiKeySpendLimit"
+                    },
+                    "reset_interval": {
+                        "description": "How often the spend limit starts over. `none` while the key has no limit, and for a limit that never resets.",
+                        "type": "string",
+                        "example": "monthly",
+                        "enum": [
+                            "none",
+                            "daily",
+                            "weekly",
+                            "monthly"
+                        ]
+                    },
+                    "limit_used": {
+                        "description": "Spent against the limit in the window running now, in USD. Null when the key has no limit — nothing is counted for a key without one. Not the same figure as `GET /api/v2/keys/{id}/usage`, which sums what the key spent over the period you ask for: this counts only what went through the ceiling since the current window opened.",
+                        "type": [
+                            "number",
+                            "null"
+                        ],
+                        "format": "float",
+                        "example": 41.25
+                    },
+                    "limit_remaining": {
+                        "description": "What is left of the limit in this window, in USD; null when there is no limit. Never negative — a cost settled after the work was admitted can put the counter over the ceiling, and the key then simply accepts nothing more until the window resets.",
+                        "type": [
+                            "number",
+                            "null"
+                        ],
+                        "format": "float",
+                        "example": 58.75
+                    },
+                    "limit_resets_at": {
+                        "description": "When the counter next starts over. Null when the key has no limit, and null when it has one that never resets (`reset_interval: none`). Windows are anchored on the key's creation instant, not the calendar: a key created on the 15th at 13:42 UTC resets on the 15th at 13:42.",
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "format": "date-time",
+                        "example": "2026-10-22T10:00:00+00:00"
+                    }
+                },
+                "type": "object"
+            },
+            "ApiKeyCollection": {
+                "required": [
+                    "data",
+                    "links",
+                    "meta"
+                ],
+                "properties": {
+                    "data": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/ApiKeyResource"
+                        }
+                    },
+                    "links": {
+                        "properties": {
+                            "first": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ],
+                                "format": "uri",
+                                "example": "https://api.deapi.ai/api/v2/keys?page=1"
+                            },
+                            "last": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ],
+                                "format": "uri",
+                                "example": "https://api.deapi.ai/api/v2/keys?page=1"
+                            },
+                            "prev": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ],
+                                "format": "uri",
+                                "example": null
+                            },
+                            "next": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ],
+                                "format": "uri",
+                                "example": null
+                            }
+                        },
+                        "type": "object"
+                    },
+                    "meta": {
+                        "properties": {
+                            "current_page": {
+                                "type": "integer",
+                                "example": 1
+                            },
+                            "from": {
+                                "type": [
+                                    "integer",
+                                    "null"
+                                ],
+                                "example": 1
+                            },
+                            "last_page": {
+                                "type": "integer",
+                                "example": 1
+                            },
+                            "links": {
+                                "description": "Per-page navigation entries, including the \"Previous\" and \"Next\" labels.",
+                                "type": "array",
+                                "items": {
+                                    "properties": {
+                                        "url": {
+                                            "type": [
+                                                "string",
+                                                "null"
+                                            ]
+                                        },
+                                        "label": {
+                                            "type": "string",
+                                            "example": "1"
+                                        },
+                                        "page": {
+                                            "type": [
+                                                "integer",
+                                                "null"
+                                            ],
+                                            "example": 1
+                                        },
+                                        "active": {
+                                            "type": "boolean",
+                                            "example": true
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            },
+                            "path": {
+                                "type": "string",
+                                "format": "uri",
+                                "example": "https://api.deapi.ai/api/v2/keys"
+                            },
+                            "per_page": {
+                                "type": "integer",
+                                "example": 50
+                            },
+                            "to": {
+                                "type": [
+                                    "integer",
+                                    "null"
+                                ],
+                                "example": 2
+                            },
+                            "total": {
+                                "type": "integer",
+                                "example": 2
+                            }
+                        },
+                        "type": "object"
+                    }
+                },
+                "type": "object"
+            },
+            "CreatedApiKeyResource": {
+                "required": [
+                    "id",
+                    "name",
+                    "preview",
+                    "role",
+                    "status",
+                    "created_at",
+                    "expires_at",
+                    "last_used_at",
+                    "ip_whitelist",
+                    "ip_whitelist_count",
+                    "limit",
+                    "reset_interval",
+                    "limit_used",
+                    "limit_remaining",
+                    "limit_resets_at",
+                    "secret"
+                ],
+                "properties": {
+                    "id": {
+                        "description": "Key id.",
+                        "type": "integer",
+                        "example": 43
+                    },
+                    "name": {
+                        "type": "string",
+                        "example": "Customer 1234"
+                    },
+                    "preview": {
+                        "type": "string",
+                        "example": "43|...9bc"
+                    },
+                    "role": {
+                        "type": "string",
+                        "example": "api",
+                        "enum": [
+                            "api"
+                        ]
+                    },
+                    "status": {
+                        "type": "string",
+                        "example": "active",
+                        "enum": [
+                            "active"
+                        ]
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2026-09-22T12:00:00+00:00"
+                    },
+                    "expires_at": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "format": "date-time",
+                        "example": null
+                    },
+                    "last_used_at": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "format": "date-time",
+                        "example": null
+                    },
+                    "ip_whitelist": {
+                        "$ref": "#/components/schemas/ApiKeyIpWhitelist"
+                    },
+                    "ip_whitelist_count": {
+                        "type": "integer",
+                        "example": 2,
+                        "minimum": 0
+                    },
+                    "limit": {
+                        "$ref": "#/components/schemas/ApiKeySpendLimit"
+                    },
+                    "reset_interval": {
+                        "description": "How often the spend limit starts over. `none` when no limit was set.",
+                        "type": "string",
+                        "example": "monthly",
+                        "enum": [
+                            "none",
+                            "daily",
+                            "weekly",
+                            "monthly"
+                        ]
+                    },
+                    "limit_used": {
+                        "description": "Always `0` on a key that was just created, and null when it was created without a limit.",
+                        "type": [
+                            "number",
+                            "null"
+                        ],
+                        "format": "float",
+                        "example": 0
+                    },
+                    "limit_remaining": {
+                        "description": "The whole limit on a key that was just created; null when it has none.",
+                        "type": [
+                            "number",
+                            "null"
+                        ],
+                        "format": "float",
+                        "example": 100
+                    },
+                    "limit_resets_at": {
+                        "description": "One window after the key was created. Null when there is no limit or it never resets.",
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "format": "date-time",
+                        "example": "2026-10-22T12:00:00+00:00"
+                    },
+                    "secret": {
+                        "description": "The full key for the `Authorization: Bearer` header. Returned only in this response — store it now, it cannot be read again.",
+                        "type": "string",
+                        "example": "43|kx8…"
+                    }
+                },
+                "type": "object"
+            },
+            "AccountBilling": {
+                "required": [
+                    "balance",
+                    "currency",
+                    "auto_top_up"
+                ],
+                "properties": {
+                    "balance": {
+                        "description": "Remaining balance.",
+                        "type": "number",
+                        "format": "float",
+                        "example": 42.17
+                    },
+                    "currency": {
+                        "type": "string",
+                        "example": "USD"
+                    },
+                    "auto_top_up": {
+                        "$ref": "#/components/schemas/AutoTopUp"
+                    }
+                },
+                "type": "object"
+            },
+            "AutoTopUp": {
+                "required": [
+                    "enabled",
+                    "threshold",
+                    "amount"
+                ],
+                "properties": {
+                    "enabled": {
+                        "description": "On for this account and available on the platform.",
+                        "type": "boolean",
+                        "example": true
+                    },
+                    "threshold": {
+                        "description": "The balance below which a top-up is charged.",
+                        "type": "number",
+                        "format": "float",
+                        "example": 2
+                    },
+                    "amount": {
+                        "description": "The balance a top-up brings the account to; null when not set up.",
+                        "type": [
+                            "number",
+                            "null"
+                        ],
+                        "format": "float",
+                        "example": 25
+                    }
+                },
+                "type": "object"
+            },
+            "PaymentResource": {
+                "required": [
+                    "id",
+                    "amount",
+                    "currency",
+                    "status",
+                    "provider",
+                    "created_at"
+                ],
+                "properties": {
+                    "id": {
+                        "description": "Payment id.",
+                        "type": "integer",
+                        "example": 1201
+                    },
+                    "amount": {
+                        "description": "In the currency's main unit.",
+                        "type": "number",
+                        "format": "float",
+                        "example": 25
+                    },
+                    "currency": {
+                        "type": "string",
+                        "example": "USD"
+                    },
+                    "status": {
+                        "type": "string",
+                        "example": "paid",
+                        "enum": [
+                            "pending",
+                            "paid",
+                            "disputed",
+                            "cancelled",
+                            "failed",
+                            "expired"
+                        ]
+                    },
+                    "provider": {
+                        "type": "string",
+                        "example": "Stripe"
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2026-09-20T09:15:00+00:00"
+                    }
+                },
+                "type": "object"
+            },
+            "PaymentCollection": {
+                "required": [
+                    "data",
+                    "links",
+                    "meta"
+                ],
+                "properties": {
+                    "data": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/PaymentResource"
+                        }
+                    },
+                    "links": {
+                        "properties": {
+                            "first": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ],
+                                "format": "uri",
+                                "example": "https://api.deapi.ai/api/v2/account/payments?page=1"
+                            },
+                            "last": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ],
+                                "format": "uri",
+                                "example": "https://api.deapi.ai/api/v2/account/payments?page=1"
+                            },
+                            "prev": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ],
+                                "format": "uri",
+                                "example": null
+                            },
+                            "next": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ],
+                                "format": "uri",
+                                "example": null
+                            }
+                        },
+                        "type": "object"
+                    },
+                    "meta": {
+                        "properties": {
+                            "current_page": {
+                                "type": "integer",
+                                "example": 1
+                            },
+                            "from": {
+                                "type": [
+                                    "integer",
+                                    "null"
+                                ],
+                                "example": 1
+                            },
+                            "last_page": {
+                                "type": "integer",
+                                "example": 1
+                            },
+                            "links": {
+                                "description": "Per-page navigation entries, including the \"Previous\" and \"Next\" labels.",
+                                "type": "array",
+                                "items": {
+                                    "properties": {
+                                        "url": {
+                                            "type": [
+                                                "string",
+                                                "null"
+                                            ]
+                                        },
+                                        "label": {
+                                            "type": "string",
+                                            "example": "1"
+                                        },
+                                        "page": {
+                                            "type": [
+                                                "integer",
+                                                "null"
+                                            ],
+                                            "example": 1
+                                        },
+                                        "active": {
+                                            "type": "boolean",
+                                            "example": true
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            },
+                            "path": {
+                                "type": "string",
+                                "format": "uri",
+                                "example": "https://api.deapi.ai/api/v2/account/payments"
+                            },
+                            "per_page": {
+                                "type": "integer",
+                                "example": 50
+                            },
+                            "to": {
+                                "type": [
+                                    "integer",
+                                    "null"
+                                ],
+                                "example": 2
+                            },
+                            "total": {
+                                "type": "integer",
+                                "example": 2
+                            }
+                        },
+                        "type": "object"
+                    }
+                },
+                "type": "object"
             }
         },
         "responses": {
@@ -8516,6 +10113,104 @@
                         }
                     }
                 }
+            },
+            "InsufficientPermissions": {
+                "description": "The API key may not make this call. `insufficient_permissions` — its role does not cover this endpoint; account billing and key management need an ADMIN key, and the role is fixed when the key is created. `ip_not_allowed` — the key carries an IP whitelist and the call did not come from an address on it; nothing is created and nothing is charged, and the call does not spend the account's request allowance. Keep calling from a refused address and the 403 turns into a 429 with `X-RateLimit-Type: ip-not-allowed`, counted against that address alone.",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "properties": {
+                                "message": {
+                                    "type": "string",
+                                    "example": "This API key does not have permission to access this endpoint."
+                                },
+                                "code": {
+                                    "type": "string",
+                                    "example": "insufficient_permissions",
+                                    "enum": [
+                                        "insufficient_permissions",
+                                        "ip_not_allowed"
+                                    ]
+                                }
+                            },
+                            "type": "object"
+                        }
+                    }
+                }
+            },
+            "ApiKeyLimitReached": {
+                "description": "The account already has as many active API keys as it may. Disabled, expired and deleted keys do not count — disable or delete keys that are no longer used. This is the number of keys, not money: a key that has spent its own `limit` is refused with 402 `key_limit_exceeded`, never with this code.",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "properties": {
+                                "message": {
+                                    "type": "string",
+                                    "example": "You have reached the limit of 100 active API keys — delete or deactivate the ones you no longer use."
+                                },
+                                "code": {
+                                    "type": "string",
+                                    "example": "active_key_limit_reached",
+                                    "enum": [
+                                        "active_key_limit_reached"
+                                    ]
+                                }
+                            },
+                            "type": "object"
+                        }
+                    }
+                }
+            },
+            "ApiKeyCreationRateLimited": {
+                "description": "Too many keys created over the API in the last hour — the limit is per account, shared by all its ADMIN keys and separate from keys created in the Dashboard. Retry after `Retry-After` seconds. Also returned when the general request rate for this endpoint is exceeded; `X-RateLimit-Type` tells them apart — `key-creation` here, `minute` or `daily` there.",
+                "headers": {
+                    "Retry-After": {
+                        "description": "Seconds until another key can be created.",
+                        "schema": {
+                            "type": "integer",
+                            "example": 1800
+                        }
+                    },
+                    "X-RateLimit-Type": {
+                        "$ref": "#/components/headers/X-RateLimit-Type"
+                    },
+                    "X-RateLimit-Limit": {
+                        "$ref": "#/components/headers/X-RateLimit-Limit"
+                    },
+                    "X-RateLimit-Remaining": {
+                        "$ref": "#/components/headers/X-RateLimit-Remaining"
+                    },
+                    "X-RateLimit-Reset": {
+                        "$ref": "#/components/headers/X-RateLimit-Reset"
+                    },
+                    "X-RateLimit-Policy": {
+                        "$ref": "#/components/headers/X-RateLimit-Policy"
+                    }
+                },
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "properties": {
+                                "message": {
+                                    "type": "string",
+                                    "example": "Too many API keys created recently."
+                                },
+                                "code": {
+                                    "type": "string",
+                                    "example": "rate_limited",
+                                    "enum": [
+                                        "rate_limited"
+                                    ]
+                                },
+                                "retry_after": {
+                                    "type": "integer",
+                                    "example": 1800
+                                }
+                            },
+                            "type": "object"
+                        }
+                    }
+                }
             }
         },
         "parameters": {
@@ -8649,6 +10344,28 @@
                         "-updated_at"
                     ]
                 }
+            },
+            "UsageFrom": {
+                "name": "from",
+                "in": "query",
+                "description": "Start of the range, UTC, inclusive. Default: 7 days before `to`. Cannot be older than the data retention (90 days).",
+                "required": false,
+                "schema": {
+                    "type": "string",
+                    "format": "date-time",
+                    "example": "2026-09-15T00:00:00Z"
+                }
+            },
+            "UsageTo": {
+                "name": "to",
+                "in": "query",
+                "description": "End of the range, UTC, exclusive. Default: now. An hourly breakdown covers at most 31 days.",
+                "required": false,
+                "schema": {
+                    "type": "string",
+                    "format": "date-time",
+                    "example": "2026-09-22T00:00:00Z"
+                }
             }
         },
         "headers": {
@@ -8681,13 +10398,15 @@
                 }
             },
             "X-RateLimit-Type": {
-                "description": "Which window rejected the request: `minute` (RPM) or `daily` (RPD). Sent only on 429.",
+                "description": "Which limit rejected the request. Sent only on 429. Read it before anything else on the response: it decides what the other `X-RateLimit-*` headers are counting.\n\n`minute` — the per-request RPM window. `daily` — the per-request RPD window; the Daily-* pair is the one at 0.\n\n`key-creation` — the hourly cap on keys created over the API (`POST /api/v2/keys`), per account and shared by its ADMIN keys. The whole `X-RateLimit-*` set describes that bucket and there are no Daily-* headers.\n\n`ip-not-allowed` — too many calls from an address your key's IP whitelist refuses. Counted against that address, never against your account.",
                 "schema": {
                     "type": "string",
                     "example": "minute",
                     "enum": [
                         "minute",
-                        "daily"
+                        "daily",
+                        "key-creation",
+                        "ip-not-allowed"
                     ]
                 }
             },

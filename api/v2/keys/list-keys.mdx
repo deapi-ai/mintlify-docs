@@ -1,0 +1,10 @@
+---
+title: "List Keys"
+openapi: "/openapi-v2.json GET /api/v2/keys"
+---
+
+<Note>
+  Requires an **ADMIN** key. An API key gets `403` with `code: insufficient_permissions` — see [API Keys](/api-keys).
+</Note>
+
+List every key of the account, newest first, with its role, status, spend limit, usage in the current window and IP allowlist. Secrets are never returned.

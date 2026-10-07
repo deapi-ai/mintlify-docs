@@ -1,0 +1,10 @@
+---
+title: "Get Key"
+openapi: "/openapi-v2.json GET /api/v2/keys/{id}"
+---
+
+<Note>
+  Requires an **ADMIN** key. An API key gets `403` with `code: insufficient_permissions` — see [API Keys](/api-keys).
+</Note>
+
+Return one key of the account by its id — the same fields as [Get Current Key](/api/v2/keys/get-current-key).

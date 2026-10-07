@@ -1,0 +1,10 @@
+---
+title: "Get Key Usage"
+openapi: "/openapi-v2.json GET /api/v2/keys/{id}/usage"
+---
+
+<Note>
+  Requires an **ADMIN** key. An API key gets `403` with `code: insufficient_permissions` — see [API Keys](/api-keys).
+</Note>
+
+Return the cost, number of requests and number of errors of any key of the account, over a time window — the same report as [Get Current Key Usage](/api/v2/keys/get-current-key-usage).
