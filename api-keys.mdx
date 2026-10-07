@@ -33,7 +33,7 @@ Each key can carry any combination of the restrictions below — set them when c
 
 Good to know about the spend limit:
 
-- **Changing the limit does not reset the counter.** Raising a limit from $50 to $100 after spending $50 leaves $50 of headroom. Lowering it below the amount already spent blocks the key until the window resets.
+- **Changing the limit does not reset the counter.** Raising a limit from \$50 to \$100 after spending \$50 leaves \$50 of headroom. Lowering it below the amount already spent blocks the key until the window resets.
 - **A limit is a ceiling, not a budget.** A key never spends more than the account balance, and the limits of all keys together may exceed it.
 - A refunded (failed) job gives its cost back to the key's limit.
 
@@ -59,7 +59,7 @@ Key-related rejections carry a machine-readable `code` field next to `message`:
 | `422` | `insufficient_balance` | The account balance is too low. Top up and retry the same request. |
 | `429` | `rate_limited` | Too many requests. |
 
-Example — a key with a $0 limit and no reset window (`resets_at` is `null` when the limit never resets):
+Example — a key with a \$0 limit and no reset window (`resets_at` is `null` when the limit never resets):
 
 ```json
 {
