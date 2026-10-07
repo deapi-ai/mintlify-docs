@@ -237,6 +237,27 @@
               "api/v2/utilities/jobs",
               "api/v2/utilities/models"
             ]
+          },
+          {
+            "group": "API Keys",
+            "pages": [
+              "api/v2/keys/get-current-key",
+              "api/v2/keys/get-current-key-usage",
+              "api/v2/keys/list-keys",
+              "api/v2/keys/create-key",
+              "api/v2/keys/get-key",
+              "api/v2/keys/update-key",
+              "api/v2/keys/delete-key",
+              "api/v2/keys/get-key-usage"
+            ]
+          },
+          {
+            "group": "Account",
+            "pages": [
+              "api/v2/account/get-account",
+              "api/v2/account/usage",
+              "api/v2/account/payments"
+            ]
           }
         ]
       },

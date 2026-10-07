@@ -1,0 +1,12 @@
+---
+title: "Get Account Usage"
+openapi: "/openapi-v2.json GET /api/v2/account/usage"
+---
+
+<Note>
+  Requires an **ADMIN** key. An API key gets `403` with `code: insufficient_permissions` — see [API Keys](/api-keys).
+</Note>
+
+Return the cost, number of requests and number of errors of the whole account over a time window — the same data as the Usage screen in the Dashboard. Group the figures by `day`, `hour`, `type`, `model` or `key`.
+
+With `group_by=key`, each group's `key` is the id of an existing key, `panel` for jobs started from the Dashboard itself (such as the Playground), `deleted` for all keys that have since been deleted, or `null` when the source of a request is unknown.

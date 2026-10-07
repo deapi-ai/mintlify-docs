@@ -1,0 +1,10 @@
+---
+title: "Get Current Key Usage"
+openapi: "/openapi-v2.json GET /api/v2/key/usage"
+---
+
+<Note>
+  Works with both **ADMIN** and **API** keys — see [API Keys](/api-keys).
+</Note>
+
+Return the cost, number of requests and number of errors of the key that sent the request, over a time window. Group the figures by `day`, `hour`, `type` or `model`. The report shows nothing about other keys or the account balance.

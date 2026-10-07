@@ -1,6 +1,6 @@
 ---
 title: "API Keys"
-description: "Key roles (ADMIN and API) and the optional restrictions you can set on each key: expiration, spend limit and IP allowlist."
+description: "Key roles (ADMIN and API), the optional restrictions you can set on each key (expiration, spend limit and IP allowlist), and managing keys via the API."
 ---
 
 Every request is authenticated with an API key sent in the `Authorization: Bearer <API_KEY>` header. Create and manage keys in **Dashboard → Settings → API Keys**. Give each project, teammate or end customer its own key, scoped to exactly what it needs: what it may do, for how long, how much it may spend, and where it may be called from.
@@ -47,6 +47,60 @@ Rejected requests — expired, disabled, outside the allowlist or over the limit
 
 An account can have up to **100 active keys**. Expired, disabled and deleted keys do not count — disabling a key frees its slot immediately.
 
+## Managing keys via the API
+
+Everything you can do with keys in the Dashboard can also be done over the API, using the same `Authorization: Bearer <API_KEY>` header. All paths below are relative to `https://api.deapi.ai`.
+
+### Any key: inspect itself
+
+Both roles can read their own state and usage:
+
+| Endpoint | What it returns |
+| --- | --- |
+| [`GET /api/v2/key`](/api/v2/keys/get-current-key) | The calling key: name, preview, role, status (`active`, `revoked` — disabled — or `expired`), creation and expiration dates, spend limit and reset window, spend in the current window, remaining amount, next reset, and whether an IP allowlist is on and how many entries it has. The secret is never returned. |
+| [`GET /api/v2/key/usage`](/api/v2/keys/get-current-key-usage) | The calling key's usage over a time window: cost, number of requests and number of errors. Takes `from`, `to` and `group_by` (`day`, `hour`, `type` or `model`). It shows nothing about other keys or the account balance. |
+
+```bash
+curl https://api.deapi.ai/api/v2/key \
+  -H "Authorization: Bearer $DEAPI_KEY"
+```
+
+This lets an application check how much of its limit is left, or when the limit resets, before it sends a job.
+
+### ADMIN key: manage all keys
+
+An ADMIN key can also manage every key on the account. An API key gets `403` `insufficient_permissions` on all of these endpoints.
+
+| Endpoint | What it does |
+| --- | --- |
+| [`GET /api/v2/keys`](/api/v2/keys/list-keys) | Lists the account's keys: id, name, preview, role, status, spend limit and window, spend in the current window, expiration date, number of allowlist entries and last use. Secrets are never returned. |
+| [`POST /api/v2/keys`](/api/v2/keys/create-key) | Creates an **API** key. Takes a name, expiration date, spend limit, reset window and IP allowlist. Creating an ADMIN key this way is rejected with `403`. |
+| [`GET /api/v2/keys/{id}`](/api/v2/keys/get-key) | Details of one key: the same fields as `GET /api/v2/key`. |
+| [`PATCH /api/v2/keys/{id}`](/api/v2/keys/update-key) | Changes the spend limit, reset window, expiration date or IP allowlist, or disables / re-enables the key. The role cannot be changed. |
+| [`DELETE /api/v2/keys/{id}`](/api/v2/keys/delete-key) | Deletes the key permanently. Its past usage stays in usage reports. |
+| [`GET /api/v2/keys/{id}/usage`](/api/v2/keys/get-key-usage) | Usage of one key, with the same parameters as `GET /api/v2/key/usage`. |
+
+<Warning>
+  The secret of a new key is returned **only once**, in the response to `POST /api/v2/keys`. No other endpoint returns it. Store it straight away; if it is lost, create a new key and delete the old one.
+</Warning>
+
+Creating keys is rate-limited. Too many in a short time returns `429` `rate_limited`.
+
+### ADMIN key: account billing and usage
+
+| Endpoint | What it returns |
+| --- | --- |
+| [`GET /api/v2/account`](/api/v2/account/get-account) | Account billing: balance, currency, auto top-up status, top-up threshold and top-up amount. |
+| [`GET /api/v2/account/usage`](/api/v2/account/usage) | Usage of the whole account over a time window — the same data as the Usage screen in the Dashboard. Takes `from`, `to` and `group_by` (`day`, `hour`, `key`, `type` or `model`). |
+| [`GET /api/v2/account/payments`](/api/v2/account/payments) | History of payments and top-ups. |
+
+With `group_by=key`, each group's `key` is one of:
+
+- **a number** — the id of an existing key,
+- `panel` — jobs started from the Dashboard itself, such as the Playground (`name: "Panel"`),
+- `deleted` — all keys that have since been deleted, combined (`name: "Deleted keys"`),
+- `null` — requests with no usage log, where the source is unknown.
+
 ## Error codes
 
 Key-related rejections carry a machine-readable `code` field next to `message`:
@@ -56,9 +110,10 @@ Key-related rejections carry a machine-readable `code` field next to `message`:
 | `401` | `missing_key` | The request has no `Authorization` header. |
 | `401` | `invalid_key` | The key does not exist or is malformed. |
 | `401` | `key_expired` | The key's expiration date has passed. |
-| `401` | `key_revoked` | The key was disabled in the Dashboard. |
+| `401` | `key_revoked` | The key was disabled in the Dashboard or via the API. |
 | `402` | `key_limit_exceeded` | The key's spend limit is used up. The response also carries `limit`, `used`, `remaining` and `resets_at` (the next reset, or `null` if the limit never resets). |
 | `403` | `ip_not_allowed` | The request came from an address outside the key's IP allowlist. |
-| `403` | `insufficient_permissions` | An API key called an endpoint that requires an ADMIN key, such as the account balance. |
+| `403` | `insufficient_permissions` | An API key called an endpoint that requires an ADMIN key, such as the account balance or key management. |
+| `422` | `active_key_limit_reached` | Creating or re-enabling a key over the API would exceed the limit of 100 active keys. |
 | `422` | `insufficient_balance` | The account balance is too low. Top up and retry the same request. |
-| `429` | `rate_limited` | Too many requests. |
+| `429` | `rate_limited` | Too many requests, or too many keys created in a short time. |

@@ -1,0 +1,12 @@
+---
+title: "Update Key"
+openapi: "/openapi-v2.json PATCH /api/v2/keys/{id}"
+---
+
+<Note>
+  Requires an **ADMIN** key. An API key gets `403` with `code: insufficient_permissions` — see [API Keys](/api-keys).
+</Note>
+
+Disable or re-enable an API key, or change its expiration date, spend limit, reset window or IP allowlist. Send only the fields you want to change. The role cannot be changed, and ADMIN keys can be changed only in the Dashboard.
+
+Changes apply from the next request. Changing the spend limit does not reset the counter; changing the reset window does.

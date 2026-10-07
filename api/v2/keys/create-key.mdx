@@ -1,0 +1,16 @@
+---
+title: "Create Key"
+openapi: "/openapi-v2.json POST /api/v2/keys"
+---
+
+<Note>
+  Requires an **ADMIN** key. An API key gets `403` with `code: insufficient_permissions` — see [API Keys](/api-keys).
+</Note>
+
+Create a new **API** key, optionally with an expiration date, spend limit, reset window and IP allowlist. ADMIN keys can only be created in the Dashboard.
+
+<Warning>
+  The `secret` is returned **only once**, in the response to this call. Store it straight away — it cannot be read again. If it is lost, create a new key and delete the old one.
+</Warning>
+
+Keys created over the API count toward the account limit of [100 active keys](/api-keys#number-of-keys). Creating keys is also rate-limited per account: too many in an hour returns `429` with `X-RateLimit-Type: key-creation`.
