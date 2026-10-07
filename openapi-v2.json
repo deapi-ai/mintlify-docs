@@ -5420,8 +5420,7 @@
                     },
                     "model": {
                         "description": "The model to use for video replacement. Available models can be retrieved via the GET /api/v2/models endpoint.",
-                        "type": "string",
-                        "example": "Wan2_2_Animate_14B_INT8"
+                        "type": "string"
                     },
                     "steps": {
                         "description": "Optional on the quote. Validated against `info.limits.min_steps` / `max_steps` exactly as on generation (which defaults it to 4).",
@@ -6741,8 +6740,7 @@
                     },
                     "model": {
                         "description": "The model to use for video replacement. Available models can be retrieved via the GET /api/v2/models endpoint.",
-                        "type": "string",
-                        "example": "Wan2_2_Animate_14B_INT8"
+                        "type": "string"
                     },
                     "webhook_url": {
                         "description": "Optional HTTPS URL to receive webhook notifications for job status changes (processing, completed, failed). Must be HTTPS. Max 2048 characters. A per-request URL is self-contained: it is delivered even when the account has no webhook configuration, or the account webhook is disabled. See the `webhooks` block at the top level of this document for the event payloads and the headers each delivery carries.",

@@ -1,8 +1,12 @@
 ---
-title: "Video Replace (Animate)"
+title: "Video Replace"
 openapi: "/openapi.json POST /api/v1/client/videos/replace"
 description: "Replace a person in a video with a character from a reference image. Ideal for character animation, face swap, and creative video editing."
 ---
+
+<Warning>
+  **No model is currently available for this endpoint.** The previous model (`Wan2_2_Animate_14B_INT8`) has been retired, and a new character-replacement model is coming to this endpoint soon. In the meantime, use `MiniMaxH3_33B_Turbo_INT8` on [Video Animation](/api/v2/videos/animations): pass the character as a reference image and the source motion as a reference video (2–5 s).
+</Warning>
 
 <Warning>
   **API v1 is deprecated.** This version is no longer being developed — new endpoints, parameters and models are added to v2 only. Use the v2 endpoints to stay current: [v2 API documentation](https://docs.deapi.ai/api/v2/overview).

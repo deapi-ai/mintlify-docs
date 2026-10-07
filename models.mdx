@@ -136,7 +136,7 @@ The table below shows which **task types** deAPI supports. To see which models a
 | Background Removal | `img-rmbg` | Remove background from images — product photos, portraits, compositing. |
 | Image Upscale | `img-upscale` | Upscale images to higher resolution. |
 | Video Upscale | `vid-upscale` | Upscale videos to higher resolution — sharpen, restore, and enlarge video content. |
-| Video Replace | `video-replace` | Replace a person in a video with a character from a reference image. |
+| Video Replace | `video-replace` | Replace a person in a video with a character from a reference image — no model currently available (new model coming soon). |
 
 <Note>
   Some models support **multiple tasks** (e.g. both `txt2img` and `img2img`). The models endpoint will list all supported `inference_types` for each model.
@@ -181,7 +181,7 @@ When the models endpoint returns several options for the same task, use these gu
 
 **Video generation** — Start with low frame counts to validate aesthetics, then scale up. Check `info.limits.max_frames`, `min_frames`, and `max_fps` for each model. Some models support a `last_frame` feature (see `info.features.supports_last_frame`). For audio-to-video, provide an audio file to condition the video generation alongside your text prompt — some models (`Ltx2_3_22B_Dist_INT8` and `Ltx2_5_22B_Dist_INT8`) support `txt2video`, `img2video`, and `audio2video` in one model. `Ltx2_5_22B_Dist_INT8` is the newest of them: same 49–241 frames @ 24 fps, but a larger frame (up to 1344 px on a side, subject to a `max_pixels` budget) and a slightly shorter reference-audio window (1–10 s against 1–11 s on 2.3).
 
-**Video replace (Animate)** — Upload a video and a reference character image. The model replaces the person in the video with the character from the image. Optionally provide a text prompt to guide the replacement. Check `info.limits` for supported video duration and resolution.
+**Video replace** — No model is currently available for this task; a new character-replacement model is coming soon. In the meantime, use `MiniMaxH3_33B_Turbo_INT8` with `img2video` (`POST /api/v2/videos/animations`): pass the character as a reference image and the source motion as a reference video. Check `info.limits` for reference-file counts and durations.
 
 **Embeddings** — Check `info.limits.max_input_tokens` and `max_total_tokens` for batch sizing. Use for semantic search, clustering, and retrieval-augmented generation (RAG).
 

@@ -4,6 +4,10 @@ openapi: "/openapi-v2.json POST /api/v2/videos/replacements"
 description: "Replace a person in a video with a character from a reference image."
 ---
 
+<Warning>
+  **No model is currently available for this endpoint.** The previous model (`Wan2_2_Animate_14B_INT8`) has been retired, and a new character-replacement model is coming to this endpoint soon. In the meantime, use `MiniMaxH3_33B_Turbo_INT8` on [Video Animation](/api/v2/videos/animations): pass the character as a reference image and the source motion as a reference video (2–5 s).
+</Warning>
+
 Swap a character in an input video for one shown in a reference image, preserving motion and composition. Returns a `request_id` for status polling.
 
 <Note>
