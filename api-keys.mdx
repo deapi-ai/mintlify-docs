@@ -1,0 +1,60 @@
+---
+title: "API Keys"
+description: "Key roles (ADMIN and API) and the optional restrictions you can set on each key: expiration, spend limit and IP allowlist."
+---
+
+Every request is authenticated with an API key sent in the `Authorization: Bearer <API_KEY>` header. Create and manage keys in **Dashboard → Settings → API Keys**. Give each project, teammate or end customer its own key, scoped to exactly what it needs: what it may do, for how long, how much it may spend, and where it may be called from.
+
+## Key roles
+
+Every key has one of two roles, chosen when the key is created. The role cannot be changed later — to change it, create a new key.
+
+- **API key** — runs inference (images, video, audio, …). It has no access to account billing or to other keys: for example, [Check Balance](/api/v2/utilities/balance) returns `403` `insufficient_permissions`. Use it for applications, integrations and keys you hand out per project or per end customer.
+- **ADMIN key** — full access to the account: inference, account billing and key management.
+
+<Warning>
+  Keys created before roles were introduced are **ADMIN** keys, so existing integrations keep working unchanged. If a key only needs to run inference, replace it with a new API key and delete the old one.
+</Warning>
+
+<Tip>
+  Treat an ADMIN key like a password: keep it server-side and never ship it in client apps. Use API keys everywhere else.
+</Tip>
+
+## Key restrictions
+
+Each key can carry any combination of the restrictions below — set them when creating the key or change them later. Changes apply from the next request; there is no need to recreate the key.
+
+| Restriction | What it does | Default |
+| --- | --- | --- |
+| **Expiration date** | The key stops working after this date. Presets: 1 hour, 1 day, 7, 30, 90 or 180 days, 1 year, or a custom date. Extending the date brings an expired key back. | No expiration |
+| **Spend limit (USD)** | Hard cap on what the key may spend. Once reached, the key rejects new jobs until the limit resets or is raised. | No limit |
+| **Reset window** | How often the spend counter returns to zero: never, daily, weekly or monthly. Windows run in UTC and are anchored to the moment the key was created. | Never |
+| **IP allowlist** | The key works only from the listed IPv4/IPv6 addresses or CIDR ranges (up to 20 entries). | Any IP |
+
+Good to know about the spend limit:
+
+- **Changing the limit does not reset the counter.** Raising a limit from \$50 to \$100 after spending \$50 leaves \$50 of headroom. Lowering it below the amount already spent blocks the key until the window resets.
+- **A limit is a ceiling, not a budget.** A key never spends more than the account balance, and the limits of all keys together may exceed it.
+- A refunded (failed) job gives its cost back to the key's limit.
+
+Rejected requests — expired, disabled, outside the allowlist or over the limit — do not create a job and are not charged.
+
+## Number of keys
+
+An account can have up to **100 active keys**. Expired, disabled and deleted keys do not count — disabling a key frees its slot immediately.
+
+## Error codes
+
+Key-related rejections carry a machine-readable `code` field next to `message`:
+
+| HTTP | `code` | When |
+| --- | --- | --- |
+| `401` | `missing_key` | The request has no `Authorization` header. |
+| `401` | `invalid_key` | The key does not exist or is malformed. |
+| `401` | `key_expired` | The key's expiration date has passed. |
+| `401` | `key_revoked` | The key was disabled in the Dashboard. |
+| `402` | `key_limit_exceeded` | The key's spend limit is used up. The response also carries `limit`, `used`, `remaining` and `resets_at` (the next reset, or `null` if the limit never resets). |
+| `403` | `ip_not_allowed` | The request came from an address outside the key's IP allowlist. |
+| `403` | `insufficient_permissions` | An API key called an endpoint that requires an ADMIN key, such as the account balance. |
+| `422` | `insufficient_balance` | The account balance is too low. Top up and retry the same request. |
+| `429` | `rate_limited` | Too many requests. |

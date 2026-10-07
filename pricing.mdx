@@ -157,11 +157,9 @@ Every other source — YouTube, X, Twitch, Kick, uploaded files — is billed by
 - Costs scale linearly with token count, making it efficient even at large volumes.
 - Important: Different embedding models may have varying dimensionality (e.g. 768 vs. 1024), but pricing is standardized per token for simplicity.
 
-**Video Replace (Animate)**
+**Video Replace**
 
-- Replaces a character in a video using a reference image.
-- Price depends on video duration, resolution, and inference steps.
-- Use the `/api/v2/videos/replacements/price` endpoint with your `model`, `duration` (or upload `video`), `width`, and `height` to get exact pricing.
+- No model is currently available for `/api/v2/videos/replacements` — a new character-replacement model is coming soon. In the meantime, use `MiniMaxH3_33B_Turbo_INT8` on `/api/v2/videos/animations` with a reference image and a reference video; price it with `/api/v2/videos/animations/price`.
 
 **Video Upscale**
 

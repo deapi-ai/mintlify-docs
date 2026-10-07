@@ -3,6 +3,10 @@ title: "Check Balance"
 openapi: "/openapi-v2.json GET /api/v2/account/balance"
 ---
 
+<Note>
+  Requires an **ADMIN** key. An API key gets `403` with `code: insufficient_permissions` — see [API Keys](/api-keys).
+</Note>
+
 Retrieve the current account balance (in USD) for the authenticated API key. Useful for displaying usage in dashboards or gating background jobs when funds run low.
 
 <Note>
