@@ -89,6 +89,10 @@ The `dpn-sk-` prefix is required by this gateway and applies only here — the n
 
 Every request validates the token against your deAPI account, so a revoked token stops working immediately.
 
+<Warning>
+  Keys with an [IP allowlist](/api-keys#key-restrictions) do not work through this endpoint. Use a key without an IP allowlist here, or call the native API at `https://api.deapi.ai` instead.
+</Warning>
+
 | Response | Meaning |
 | --- | --- |
 | `401` without `code` | No `Authorization: Bearer …` header, or the header is empty |

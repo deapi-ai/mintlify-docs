@@ -31,6 +31,10 @@ Each key can carry any combination of the restrictions below — set them when c
 | **Reset window** | How often the spend counter returns to zero: never, daily, weekly or monthly. Windows run in UTC and are anchored to the moment the key was created. | Never |
 | **IP allowlist** | The key works only from the listed IPv4/IPv6 addresses or CIDR ranges (up to 20 entries). | Any IP |
 
+<Warning>
+  Keys with an IP allowlist do not work with the [OpenAI-compatible endpoint](/openai-compatibility) at `https://oai.deapi.ai/v1`. Call the native API at `https://api.deapi.ai` with such keys, or use a key without an IP allowlist for the OpenAI-compatible endpoint.
+</Warning>
+
 Good to know about the spend limit:
 
 - **Changing the limit does not reset the counter.** Raising a limit from \$50 to \$100 after spending \$50 leaves \$50 of headroom. Lowering it below the amount already spent blocks the key until the window resets.
