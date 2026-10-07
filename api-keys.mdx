@@ -58,16 +58,3 @@ Key-related rejections carry a machine-readable `code` field next to `message`:
 | `403` | `insufficient_permissions` | An API key called an endpoint that requires an ADMIN key, such as the account balance. |
 | `422` | `insufficient_balance` | The account balance is too low. Top up and retry the same request. |
 | `429` | `rate_limited` | Too many requests. |
-
-Example — a key with a \$0 limit and no reset window (`resets_at` is `null` when the limit never resets):
-
-```json
-{
-  "message": "This API key has reached its spend limit of $0.00. It does not reset on its own — raise or remove the limit on the key to continue.",
-  "code": "key_limit_exceeded",
-  "limit": 0,
-  "used": 0,
-  "remaining": 0,
-  "resets_at": null
-}
-```
