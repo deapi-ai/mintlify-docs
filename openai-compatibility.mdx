@@ -24,7 +24,7 @@ This is a translation layer over the deAPI inference network — not a rebrand o
   <Tab title="Python">
     ```bash
     pip install openai
-    export OPENAI_API_KEY="dpn-sk-1234|AbCdEf..."
+    export OPENAI_API_KEY="sk-dp-1234-AbCdEf..."
     export OPENAI_BASE_URL="https://oai.deapi.ai/v1"
     ```
 
@@ -44,7 +44,7 @@ This is a translation layer over the deAPI inference network — not a rebrand o
   <Tab title="Node.js / TypeScript">
     ```bash
     npm install openai
-    export OPENAI_API_KEY="dpn-sk-1234|AbCdEf..."
+    export OPENAI_API_KEY="sk-dp-1234-AbCdEf..."
     export OPENAI_BASE_URL="https://oai.deapi.ai/v1"
     ```
 
@@ -64,7 +64,7 @@ This is a translation layer over the deAPI inference network — not a rebrand o
   <Tab title="cURL">
     ```bash
     curl -s https://oai.deapi.ai/v1/images/generations \
-      -H "Authorization: Bearer dpn-sk-1234|AbCdEf..." \
+      -H "Authorization: Bearer sk-dp-1234-AbCdEf..." \
       -H "Content-Type: application/json" \
       -d '{"model":"Flux1schnell","prompt":"a red fox in a snowy forest","size":"1024x1024"}'
     ```
@@ -79,15 +79,17 @@ This is a translation layer over the deAPI inference network — not a rebrand o
 
 ## Authentication
 
-Generate an API token in the deAPI panel. It looks like `dpn-sk-<id>|<token>` and goes into the standard OpenAI `Authorization` header:
+Create an API key in the deAPI panel. It looks like `sk-dp-<id>-<secret>` and goes, unchanged, into the standard OpenAI `Authorization` header:
 
 ```http
-Authorization: Bearer dpn-sk-<id>|<token>
+Authorization: Bearer sk-dp-<id>-<secret>
 ```
 
-The `dpn-sk-` prefix is required by this gateway and applies only here — the native API at `https://api.deapi.ai` takes the raw key without it. Note the literal `|` in the value: in a shell it must be quoted.
+It is the same key you use with the native API at `https://api.deapi.ai` — paste it as is, with no prefix to add or remove.
 
-Every request validates the token against your deAPI account, so a revoked token stops working immediately.
+Keys created before the `sk-dp-` format keep working here: the raw `<id>|<secret>` form, and the same key with a `dpn-sk-` prefix added. A raw key contains a literal `|`, so quote it in a shell.
+
+Every request validates the key against your deAPI account, so a revoked key stops working immediately.
 
 <Warning>
   Keys with an [IP allowlist](/api-keys#key-restrictions) do not work through this endpoint. Use a key without an IP allowlist here, or call the native API at `https://api.deapi.ai` instead.
@@ -95,9 +97,10 @@ Every request validates the token against your deAPI account, so a revoked token
 
 | Response | Meaning |
 | --- | --- |
-| `401` without `code` | No `Authorization: Bearer …` header, or the header is empty |
-| `401` `invalid_api_key` — "Invalid API key format" | The header is present but the token prefix is not one we recognise |
-| `401` `invalid_api_key` — "Invalid API key provided" | The token was rejected by deAPI |
+| `401` `missing_api_key` | No `Authorization` header, an empty one, or a scheme other than `Bearer` |
+| `401` `invalid_api_key` | The key was rejected by deAPI: unknown, malformed, expired or deactivated |
+
+The `Bearer` scheme is matched case-insensitively, so `authorization: bearer …` works too.
 
 ### Calling from a browser
 
@@ -245,7 +248,7 @@ Three parameters change. Everything else — request format, response schema, er
 | Parameter | OpenAI | deAPI |
 | --- | --- | --- |
 | `base_url` / `baseURL` | `https://api.openai.com/v1` | `https://oai.deapi.ai/v1` |
-| `api_key` / `apiKey` | `sk-...` | `dpn-sk-<id>\|<token>` |
+| `api_key` / `apiKey` | `sk-...` | `sk-dp-<id>-<secret>` — your deAPI key as is |
 | `model` | `dall-e-3`, `tts-1`, … | Native model ID (see below) |
 
 | If you were calling | Use instead |
@@ -402,7 +405,7 @@ Both are instruction-following editors, not inpainting models. The gateway itsel
 
 ```bash
 curl -s https://oai.deapi.ai/v1/images/edits \
-  -H "Authorization: Bearer dpn-sk-1234|AbCdEf..." \
+  -H "Authorization: Bearer sk-dp-1234-AbCdEf..." \
   -F model=QwenImageEdit_Plus_NF4 \
   -F image=@source.png \
   -F prompt="make the sky stormy"
@@ -889,7 +892,7 @@ Every error under `/v1/*` uses the OpenAI envelope:
 }
 ```
 
-Build your handling on `code`, not on `message`. `param` and `code` are omitted entirely when they do not apply, so treat them as optional keys rather than expecting empty strings. Some responses — notably `401` for a missing header and every `429` — carry no `code` at all; for those, `type` plus the HTTP status is the stable signal.
+Build your handling on `code`, not on `message`. `param` and `code` are omitted entirely when they do not apply, so treat them as optional keys rather than expecting empty strings. Some responses carry no `code` at all; for those, `type` plus the HTTP status is the stable signal.
 
 | HTTP | `type` |
 | --- | --- |
@@ -1056,7 +1059,7 @@ Because deAPI uses the OpenAI API format, it works with any framework that accep
     from langchain_openai import OpenAIEmbeddings
 
     embeddings = OpenAIEmbeddings(
-        openai_api_key="dpn-sk-1234|AbCdEf...",
+        openai_api_key="sk-dp-1234-AbCdEf...",
         openai_api_base="https://oai.deapi.ai/v1",
         model="Bge_M3_FP16",
     )
@@ -1067,7 +1070,7 @@ Because deAPI uses the OpenAI API format, it works with any framework that accep
     from llama_index.embeddings.openai import OpenAIEmbedding
 
     embed_model = OpenAIEmbedding(
-        api_key="dpn-sk-1234|AbCdEf...",
+        api_key="sk-dp-1234-AbCdEf...",
         api_base="https://oai.deapi.ai/v1",
         model="Bge_M3_FP16",
     )
@@ -1078,7 +1081,7 @@ Because deAPI uses the OpenAI API format, it works with any framework that accep
     import { createOpenAI } from "@ai-sdk/openai";
 
     const deapi = createOpenAI({
-      apiKey: "dpn-sk-1234|AbCdEf...",
+      apiKey: "sk-dp-1234-AbCdEf...",
       baseURL: "https://oai.deapi.ai/v1",
     });
     ```
@@ -1088,7 +1091,7 @@ Because deAPI uses the OpenAI API format, it works with any framework that accep
 If your codebase already uses the standard OpenAI environment variables, override them at the process level — zero code changes required:
 
 ```bash
-export OPENAI_API_KEY="dpn-sk-1234|AbCdEf..."
+export OPENAI_API_KEY="sk-dp-1234-AbCdEf..."
 export OPENAI_BASE_URL="https://oai.deapi.ai/v1"
 ```
 
@@ -1157,6 +1160,12 @@ deAPI also runs models with no OpenAI counterpart at all — image and video ups
 ---
 
 ## Recent changes
+
+### Changed — one key format for both APIs
+
+- **Keys look like `sk-dp-<id>-<secret>` and work here unchanged.** The gateway used to need a `dpn-sk-` prefix in front of the native key, which tools set up for OpenAI often left out. Older keys still work in their raw `<id>|<secret>` form and with the `dpn-sk-` prefix.
+- **A missing key now has a `code`.** No `Authorization` header, an empty one, or a scheme other than `Bearer` returns `401 missing_api_key` instead of a `401` with no `code`.
+- **`bearer` in lowercase is accepted.** `authorization: bearer <key>` used to return `401` although the header was sent.
 
 ### Changed — unimplemented paths answer `404`, not `501`
 

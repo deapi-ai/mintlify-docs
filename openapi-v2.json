@@ -9388,7 +9388,7 @@
                     "preview": {
                         "description": "Key id and the last characters of the secret, for recognising a key.",
                         "type": "string",
-                        "example": "42|...f3a"
+                        "example": "sk-dp-42-...f3a"
                     },
                     "role": {
                         "description": "`api` — inference and the key's own data; `admin` — also account billing and key management.",
@@ -9638,7 +9638,7 @@
                     },
                     "preview": {
                         "type": "string",
-                        "example": "43|...9bc"
+                        "example": "sk-dp-43-...9bc"
                     },
                     "role": {
                         "type": "string",
@@ -9727,7 +9727,7 @@
                     "secret": {
                         "description": "The full key for the `Authorization: Bearer` header. Returned only in this response — store it now, it cannot be read again.",
                         "type": "string",
-                        "example": "43|kx8…"
+                        "example": "sk-dp-43-kx8…"
                     }
                 },
                 "type": "object"
