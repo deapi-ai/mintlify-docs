@@ -5,6 +5,8 @@ description: "Key roles (ADMIN and API), the optional restrictions you can set o
 
 Every request is authenticated with an API key sent in the `Authorization: Bearer <API_KEY>` header. Create and manage keys in **Dashboard → Settings → API Keys**. Give each project, teammate or end customer its own key, scoped to exactly what it needs: what it may do, for how long, how much it may spend, and where it may be called from.
 
+A key looks like `sk-dp-<id>-<secret>`. Use it as is everywhere: the native API, the [OpenAI-compatible endpoint](/openai-compatibility), the [MCP server](/execution-modes-and-integrations/mcp-server) and WebSockets. Keys created before this format look like `<id>|<secret>` and keep working unchanged.
+
 ## Key roles
 
 Every key has one of two roles, chosen when the key is created. The role cannot be changed later — to change it, create a new key.
