@@ -24,7 +24,7 @@ Connect and listen for updates:
 ```javascript
 import Pusher from 'pusher-js';
 
-const CLIENT_ID = 'your-client-id';      // From your dashboard
+const CLIENT_ID = 'your-client-id';      // UUID from your dashboard
 const API_TOKEN = 'your-api-token';      // From authentication
 
 const pusher = new Pusher('depin-api-prod-key', {
@@ -83,7 +83,7 @@ For maximum reliability, use both: WebSockets for real-time UI updates and webho
 
 ### Required Credentials
 
-- **Client ID:** Your unique identifier (from [dashboard](https://app.deapi.ai/dashboard))
+- **Client ID:** A UUID shown on the [Dashboard](https://app.deapi.ai/dashboard) and in **Settings → General** (e.g. `00fff671-6210-4274-a987-f669cbbaca76`)
 - **API Token:** Your authentication token (see [Quickstart](/quickstart))
 
 ## Connecting
@@ -180,7 +180,7 @@ import pysher
 import time
 
 YOUR_API_TOKEN = 'your-api-token'
-YOUR_CLIENT_ID = 'your-client-id'
+YOUR_CLIENT_ID = 'your-client-id'  # UUID from your dashboard
 
 pusher = pysher.Pusher(
     key='depin-api-prod-key',
@@ -213,6 +213,8 @@ Each client has a private channel scoped to their account:
 private-client.{client_id}
 ```
 
+`{client_id}` is your Client ID, a UUID shown on the Dashboard and in **Settings → General** (e.g. `00fff671-6210-4274-a987-f669cbbaca76`). Subscribe to `private-client.<Client ID>` and listen for the `.request.status.updated` event. Authorize the subscription at `POST https://api.deapi.ai/broadcasting/auth` with your API key.
+
 <Warning>
 Private channels require authentication. You can only subscribe to your own channel.
 </Warning>
@@ -236,18 +238,18 @@ Sent whenever a job's status changes or progress is updated.
   "preview": "iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAIAAAAl...",
   "result_url": null,
   "results_alt_formats": null,
-  "progress": "75.00"
+  "progress": "45.50"
 }
 ```
 
 | Field | Type | Description |
 |-------|------|-------------|
-| `request_id` | string | Job's unique identifier (UUID) |
-| `status` | string | Current status: `processing` or `done`. All intermediate updates use `processing`; read `progress` to track how far the job is |
-| `preview` | string \| null | Low-resolution preview image (image generation jobs only), as a raw base64-encoded PNG without a `data:` prefix. `null` until the first preview is ready |
-| `result_url` | string \| null | Signed download URL (only when `done`) |
-| `results_alt_formats` | object \| null | Signed URLs of alternative renditions keyed by format, e.g. `jpg` and `webp` for images (only when `done`) |
-| `progress` | string | Progress percentage as decimal string (e.g., `"75.00"`) |
+| `request_id` | string | The job's request ID. |
+| `status` | string | `processing` while the job runs (sent repeatedly as `progress` advances), then `done`. Rarely `error`. There is no separate `in_progress` status. |
+| `progress` | string \| number | Percentage as a decimal string, e.g. `"45.50"`; may be `0` (number) before the job is picked up. Parse it as a float. |
+| `preview` | string \| null | Intermediate preview, when the model produces one (a base64-encoded PNG without a `data:` prefix). May be `null`. |
+| `result_url` | string \| null | Download URL, set only when `status` is `done`. |
+| `results_alt_formats` | object \| null | Alternative-format URLs for image results, set only when `status` is `done`. |
 
 <Warning>
 The `result_url` is a signed URL that expires. Download promptly or use the job status endpoint to get a fresh URL.
@@ -256,21 +258,19 @@ The `result_url` is a signed URL that expires. Download promptly or use the job 
 ### Status Flow
 
 ```
-pending → processing (multiple updates) → done
-                   ↘
-                     error
+processing (multiple events, each with updated progress) → done
 ```
 
-| Status | Description | WebSocket Event |
-|--------|-------------|-----------------|
-| `pending` | Job queued, waiting for worker | No |
-| `processing` | Worker assigned and generating. Sent repeatedly as `progress` increases | Yes (with `progress` and previews) |
-| `done` | Completed successfully | Yes (with result URL) |
-| `error` | Failed | Via [webhooks](/execution-modes-and-integrations/webhooks) only |
+| Status | Meaning | WebSocket Event |
+|--------|---------|-----------------|
+| `pending` | Queued, waiting for a worker | No |
+| `processing` | Generating; sent with each progress update | Yes (repeatedly, with `progress`; `preview` when available) |
+| `done` | Finished, result ready | Yes (with `result_url`) |
+| `error` | Failed | Usually no — see below |
 
-<Note>
-There is no separate `in_progress` status. A job typically receives several `processing` events with increasing `progress`, followed by a single `done` event. To show progress, check `progress` on `processing` events rather than waiting for a different status.
-</Note>
+<Warning>
+A failed job usually does not emit a WebSocket event. Don't rely on WebSocket alone to detect completion: use a [webhook](/execution-modes-and-integrations/webhooks), or poll `GET /api/v2/jobs/{request_id}` as a fallback.
+</Warning>
 
 ## Complete Examples
 
@@ -283,11 +283,11 @@ import Pusher from 'pusher-js';
 
 interface JobUpdate {
   request_id: string;
-  status: 'processing' | 'done';
+  status: 'processing' | 'done' | 'error';
   preview: string | null;
   result_url: string | null;
   results_alt_formats: Record<string, string> | null;
-  progress: string;
+  progress: string | number; // progress bar: parseFloat(String(event.progress))
 }
 
 export function useJobUpdates(clientId: string, apiToken: string) {
@@ -331,6 +331,7 @@ export function useJobUpdates(clientId: string, apiToken: string) {
 
     echo.private(`client.${clientId}`)
       .listen('.request.status.updated', (data: JobUpdate) => {
+        // Read progress from `progress`, not from `status`
         setUpdates(prev => new Map(prev).set(data.request_id, data));
       });
 
@@ -415,7 +416,7 @@ Content-Type: application/json
 ```json
 {
   "socket_id": "123456.789012",
-  "channel_name": "private-client.42"
+  "channel_name": "private-client.00fff671-6210-4274-a987-f669cbbaca76"
 }
 ```
 
@@ -462,7 +463,7 @@ pusher.disconnect();
   </Accordion>
 
   <Accordion title="Authorization fails (403)">
-    - Confirm your client ID matches your API token
+    - Confirm your Client ID (a UUID, not a number) matches your API token
     - Verify channel name format: `private-client.{your_client_id}`
     - Check that your API token has not been revoked
   </Accordion>
