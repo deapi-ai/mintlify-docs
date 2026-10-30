@@ -112,7 +112,8 @@ All webhook requests include these headers:
         "job_type": "txt2img",
         "completed_at": "2026-08-07T11:43:26+00:00",
         "result_url": "https://results.deapi.ai/19315424/....png?X-Amz-Signature=...",
-        "processing_time_ms": 12000
+        "processing_time_ms": 12000,
+        "price": { "amount": 0.0234, "is_estimated": false }
       }
     }
     ```
@@ -126,6 +127,9 @@ All webhook requests include these headers:
     | `data.completed_at` | string (ISO 8601) | When job completed |
     | `data.result_url` | string (URL) | **Pre-signed, expiring** URL to download the result. Fetch it promptly, or re-read a fresh URL from `GET /api/v2/jobs/{request_id}`. |
     | `data.processing_time_ms` | integer | Processing time in milliseconds |
+    | `data.price` | object \| null | What this request cost you, in credits — the same figure `GET /api/v2/jobs/{request_id}` reports. |
+    | `data.price.amount` | number | Credits charged. |
+    | `data.price.is_estimated` | boolean | `true` for models served by an external provider whose charge has not settled yet. The amount is then the estimate quoted at submission, and the settled charge can differ. Don't use estimated values for reconciliation. |
 
     <Note>
       The webhook payload carries only `result_url`. Alternative renditions (`results_alt_formats`, e.g. `jpg` / `webp` for images) and inline results are available from `GET /api/v2/jobs/{request_id}`.
@@ -148,7 +152,8 @@ All webhook requests include these headers:
         "error_code": "WORKER_TIMEOUT",
         "error_reason": "TIMEOUT",
         "retryable": true,
-        "refunded": true
+        "refunded": true,
+        "price": { "amount": 0.0234, "is_estimated": false }
       }
     }
     ```
@@ -163,7 +168,14 @@ All webhook requests include these headers:
     | `data.error_code` | string | Coarse failure category |
     | `data.error_reason` | string | Actionable failure reason — **open list**, see below |
     | `data.retryable` | boolean | Whether resubmitting the identical request could succeed |
-    | `data.refunded` | boolean | Whether the upfront charge was returned |
+    | `data.refunded` | boolean | Refund state at the moment the failure was recorded. The refund may be booked moments later, so this can read `false` for a job that does get refunded. |
+    | `data.price` | object \| null | Charge at the moment the failure was recorded, before any refund. |
+    | `data.price.amount` | number | Credits charged at that moment. |
+    | `data.price.is_estimated` | boolean | Always `false` on `job.failed`. |
+
+    <Note>
+      For the final refund state and charge, read `GET /api/v2/jobs/{request_id}` — it is authoritative.
+    </Note>
 
     **`error_code` — coarse category:**
 
