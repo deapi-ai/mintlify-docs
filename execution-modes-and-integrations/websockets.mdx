@@ -232,20 +232,22 @@ Sent whenever a job's status changes or progress is updated.
 ```json
 {
   "request_id": "123e4567-e89b-12d3-a456-426614174000",
-  "status": "in_progress",
-  "preview": "data:image/jpeg;base64,/9j/4AAQSkZJRg...",
+  "status": "processing",
+  "preview": "iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAIAAAAl...",
   "result_url": null,
-  "progress": "45.50"
+  "results_alt_formats": null,
+  "progress": "75.00"
 }
 ```
 
 | Field | Type | Description |
 |-------|------|-------------|
 | `request_id` | string | Job's unique identifier (UUID) |
-| `status` | string | Current status: `processing`, `in_progress`, or `done` |
-| `preview` | string \| null | Base64 preview image (image generation jobs only) |
+| `status` | string | Current status: `processing` or `done`. All intermediate updates use `processing`; read `progress` to track how far the job is |
+| `preview` | string \| null | Low-resolution preview image (image generation jobs only), as a raw base64-encoded PNG without a `data:` prefix. `null` until the first preview is ready |
 | `result_url` | string \| null | Signed download URL (only when `done`) |
-| `progress` | string | Progress percentage as decimal string (e.g., `"45.50"`) |
+| `results_alt_formats` | object \| null | Signed URLs of alternative renditions keyed by format, e.g. `jpg` and `webp` for images (only when `done`) |
+| `progress` | string | Progress percentage as decimal string (e.g., `"75.00"`) |
 
 <Warning>
 The `result_url` is a signed URL that expires. Download promptly or use the job status endpoint to get a fresh URL.
@@ -254,18 +256,21 @@ The `result_url` is a signed URL that expires. Download promptly or use the job 
 ### Status Flow
 
 ```
-pending → processing → in_progress (multiple) → done
-                    ↘                         ↗
-                      ─────── error ─────────
+pending → processing (multiple updates) → done
+                   ↘
+                     error
 ```
 
 | Status | Description | WebSocket Event |
 |--------|-------------|-----------------|
 | `pending` | Job queued, waiting for worker | No |
-| `processing` | Worker assigned, starting | Yes |
-| `in_progress` | Actively generating | Yes (with previews) |
+| `processing` | Worker assigned and generating. Sent repeatedly as `progress` increases | Yes (with `progress` and previews) |
 | `done` | Completed successfully | Yes (with result URL) |
 | `error` | Failed | Via [webhooks](/execution-modes-and-integrations/webhooks) only |
+
+<Note>
+There is no separate `in_progress` status. A job typically receives several `processing` events with increasing `progress`, followed by a single `done` event. To show progress, check `progress` on `processing` events rather than waiting for a different status.
+</Note>
 
 ## Complete Examples
 
@@ -278,9 +283,10 @@ import Pusher from 'pusher-js';
 
 interface JobUpdate {
   request_id: string;
-  status: 'processing' | 'in_progress' | 'done';
+  status: 'processing' | 'done';
   preview: string | null;
   result_url: string | null;
+  results_alt_formats: Record<string, string> | null;
   progress: string;
 }
 
