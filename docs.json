@@ -74,6 +74,30 @@
   },
   "redirects": [
     {
+      "source": "/api/v2/videos/replacements",
+      "destination": "/api/v2/overview"
+    },
+    {
+      "source": "/api/v2/videos/replacements-price",
+      "destination": "/api/v2/overview"
+    },
+    {
+      "source": "/api/videos/replacements",
+      "destination": "/api/v2/overview"
+    },
+    {
+      "source": "/api/videos/replacements-price",
+      "destination": "/api/v2/overview"
+    },
+    {
+      "source": "/api/v1/transformation/video-replace",
+      "destination": "/api/v1/overview"
+    },
+    {
+      "source": "/api/v1/transformation/video-replace-price",
+      "destination": "/api/v1/overview"
+    },
+    {
       "source": "/api/generation/:slug*",
       "destination": "/api/v1/generation/:slug*"
     },
@@ -196,8 +220,6 @@
               "api/v2/videos/animations-price",
               "api/v2/videos/audio-syncs",
               "api/v2/videos/audio-syncs-price",
-              "api/v2/videos/replacements",
-              "api/v2/videos/replacements-price",
               "api/v2/videos/upscales",
               "api/v2/videos/upscales-price",
               "api/v2/videos/descriptions",
@@ -312,8 +334,6 @@
             "pages": [
               "api/v1/transformation/image-to-image",
               "api/v1/transformation/image-to-image-price",
-              "api/v1/transformation/video-replace",
-              "api/v1/transformation/video-replace-price",
               "api/v1/transformation/background-removal",
               "api/v1/transformation/background-removal-price",
               "api/v1/transformation/image-upscale",
