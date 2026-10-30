@@ -30,7 +30,6 @@ Example pricing is shown below for reference; exact, up-to-date rates are always
 | Embeddings | number of tokens processed | 0.000084 USD per 1,000 tokens | `POST /api/v2/embeddings` |
 | Image Background Removal | per image | Use `/price` endpoint | `POST /api/v2/images/background-removals` |
 | Image Upscale | resolution × scale | Use `/price` endpoint | `POST /api/v2/images/upscales` |
-| Video Replacement | duration × resolution × steps | Use `/price` endpoint | `POST /api/v2/videos/replacements` |
 | Video Upscale | resolution × duration × scale | Use `/price` endpoint | `POST /api/v2/videos/upscales` |
 
 ---
@@ -156,10 +155,6 @@ Every other source — YouTube, X, Twitch, Kick, uploaded files — is billed by
 - Embeddings are typically used for semantic search, retrieval-augmented generation (RAG), clustering, and similarity matching.
 - Costs scale linearly with token count, making it efficient even at large volumes.
 - Important: Different embedding models may have varying dimensionality (e.g. 768 vs. 1024), but pricing is standardized per token for simplicity.
-
-**Video Replace**
-
-- No model is currently available for `/api/v2/videos/replacements` — a new character-replacement model is coming soon. In the meantime, use `MiniMaxH3_33B_Turbo_INT8` on `/api/v2/videos/animations` with a reference image and a reference video; price it with `/api/v2/videos/animations/price`.
 
 **Video Upscale**
 
