@@ -1,0 +1,24 @@
+# openapi-v2.json is a byte-for-byte copy of openapi.json, kept so the old
+# https://docs.deapi.ai/openapi-v2.json URL keeps working (Mintlify redirects
+# do not apply to static files). Update both files together:
+#   cp openapi.json openapi-v2.json
+name: openapi-v2.json in sync
+
+on:
+  pull_request:
+    paths: ["openapi.json", "openapi-v2.json"]
+  push:
+    branches: [main]
+    paths: ["openapi.json", "openapi-v2.json"]
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Compare openapi.json and openapi-v2.json
+        run: |
+          if ! cmp -s openapi.json openapi-v2.json; then
+            echo "::error file=openapi-v2.json::openapi-v2.json differs from openapi.json. Run: cp openapi.json openapi-v2.json"
+            exit 1
+          fi
