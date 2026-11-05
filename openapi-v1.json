@@ -1,8 +1,8 @@
 {
     "openapi": "3.0.0",
     "info": {
-        "title": "deAPI REST API",
-        "description": "Decentralized AI inference API for image generation, video processing, audio transcription, and more.",
+        "title": "deAPI REST API v1 (legacy)",
+        "description": "Legacy v1 API. For new integrations use API v2 — its OpenAPI spec is https://docs.deapi.ai/openapi.json. Decentralized AI inference API for image generation, video processing, audio transcription, and more.",
         "contact": {
             "name": "deAPI Support",
             "url": "https://deapi.ai",

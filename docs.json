@@ -15,7 +15,7 @@
   "api": {
     "openapi": [
       "openapi.json",
-      "openapi-v2.json"
+      "openapi-v1.json"
     ],
     "baseUrl": "https://api.deapi.ai",
     "auth": {
@@ -73,6 +73,10 @@
     ]
   },
   "redirects": [
+    {
+      "source": "/openapi-v2.json",
+      "destination": "/openapi.json"
+    },
     {
       "source": "/api/v2/videos/replacements",
       "destination": "/api/v2/overview"
