@@ -47,7 +47,7 @@
                         }
                     },
                     "401": {
-                        "description": "Missing, unknown, expired or deactivated key.",
+                        "description": "Missing, unknown, expired or deactivated key — `code` says which: `missing_key`, `invalid_key`, `key_expired` or `key_revoked`.",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -104,7 +104,7 @@
                         }
                     },
                     "401": {
-                        "description": "Missing, unknown, expired or deactivated key.",
+                        "description": "Missing, unknown, expired or deactivated key — `code` says which: `missing_key`, `invalid_key`, `key_expired` or `key_revoked`.",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -133,7 +133,7 @@
                     "Client API v2"
                 ],
                 "summary": "Get the calling API key",
-                "description": "The key sending the request: name, preview, role, status and dates. Never the secret.",
+                "description": "The key sending the request: name, preview, role, status, dates, spend limit and IP whitelist. Never the secret. Works with any key role.",
                 "operationId": "getCurrentApiKey",
                 "parameters": [
                     {
@@ -241,7 +241,7 @@
                     "Client API v2"
                 ],
                 "summary": "Create an API key",
-                "description": "Creates a key with the API role. ADMIN keys can only be created in the panel. The secret is returned once, in this response. Counts toward the account's limit of active keys and the hourly limit of keys created over the API (shared by all ADMIN keys of the account). An `ip_whitelist` given here applies from the key's first call.",
+                "description": "Creates a key with the API role. Needs an ADMIN key; ADMIN keys can only be created in the Dashboard. **The secret is returned once, in this response.** Counts toward the account's limit of active keys and the hourly limit of keys created over the API (shared by all ADMIN keys of the account). An `ip_whitelist` given here applies from the key's first call.",
                 "operationId": "createApiKey",
                 "parameters": [
                     {
@@ -263,7 +263,7 @@
                                         "maxLength": 255
                                     },
                                     "expires_at": {
-                                        "description": "Optional. Must be in the future and no later than 2038-01-19 03:14:07 UTC, the latest instant this platform can store — a 422, not a silently shortened key. Leave the field out for a key that never expires; an expiry past that ceiling would mean the same thing and is refused rather than guessed at. Only accepted once expiry dates are enabled for the platform.",
+                                        "description": "Optional. Leave it out for a key that never expires. A date must be in the future and no later than 2038-01-19 03:14:07 UTC, the latest instant this platform can store — a 422, not a silently shortened key.",
                                         "type": [
                                             "string",
                                             "null"
@@ -289,7 +289,7 @@
                                         "description": "Optional. What this key may spend per window, in USD; omitted or `null` means no limit. Work that would take the key past it is refused with 402 `key_limit_exceeded`."
                                     },
                                     "reset_interval": {
-                                        "description": "How often that limit starts over; `none` means it never does. Only accepted together with a non-null `limit` — a window with nothing under it schedules nothing. Windows are anchored on the key's creation instant, not the calendar.",
+                                        "description": "How often that limit starts over; `none` means it never does. Only accepted together with a non-null `limit`. Windows are anchored on the key's creation instant, not the calendar.",
                                         "type": "string",
                                         "example": "monthly",
                                         "default": "none",
@@ -424,7 +424,7 @@
                     "Client API v2"
                 ],
                 "summary": "Delete an API key",
-                "description": "Permanently deletes an API-role key. ADMIN keys are deleted in the panel only.",
+                "description": "Permanently deletes an API-role key. Needs an ADMIN key; ADMIN keys are deleted in the Dashboard only. The key's past usage stays in usage reports.",
                 "operationId": "deleteApiKey",
                 "parameters": [
                     {
@@ -481,7 +481,7 @@
                     "Client API v2"
                 ],
                 "summary": "Change an API key",
-                "description": "Switches an API-role key on or off, changes its expiry date and sets the addresses it may be used from. The role cannot be changed; ADMIN keys are changed in the panel only. Making a key active again counts toward the limit of active keys.",
+                "description": "Switches an API-role key on or off, changes its expiry date, spend limit and reset window, and sets the addresses it may be used from. Needs an ADMIN key. The role cannot be changed; ADMIN keys are changed in the Dashboard only. Making a key active again counts toward the limit of active keys.",
                 "operationId": "updateApiKey",
                 "parameters": [
                     {
@@ -503,11 +503,12 @@
                             "schema": {
                                 "properties": {
                                     "active": {
+                                        "description": "`false` disables the key, `true` enables it again.",
                                         "type": "boolean",
                                         "example": false
                                     },
                                     "expires_at": {
-                                        "description": "Null removes the expiry date. A date must be in the future and no later than 2038-01-19 03:14:07 UTC, the latest instant this platform can store — a 422, not a silently shortened key. Send null rather than a date past that ceiling: the two would mean the same thing. Only accepted once expiry dates are enabled for the platform.",
+                                        "description": "`null` removes the expiry date. A date must be in the future and no later than 2038-01-19 03:14:07 UTC, the latest instant this platform can store — a 422, not a silently shortened key.",
                                         "type": [
                                             "string",
                                             "null"
@@ -517,14 +518,14 @@
                                     },
                                     "ip_whitelist": {
                                         "$ref": "#/components/schemas/ApiKeyIpWhitelist",
-                                        "description": "Replaces the whole list — entries are not merged with the ones already there. `[]` clears it and the key works from any address again; omitting the field leaves the list untouched, and an explicit `null` is refused. Changing the list is not an activation, so it never counts toward the limit of active keys."
+                                        "description": "Replaces the whole list — entries are not merged with the ones already there. `[]` clears it and the key works from any address again; omitting the field leaves the list untouched, and an explicit `null` is refused."
                                     },
                                     "limit": {
                                         "$ref": "#/components/schemas/ApiKeySpendLimit",
-                                        "description": "The new spend limit per window, in USD. `null` REMOVES the limit; omitting the field leaves both the limit and what has been spent against it untouched. Changing the amount never resets the counter: raising it from 50 to 100 on a key that has already spent 50 leaves 50 of room, and lowering it below what has been spent accepts nothing more until the window resets. Because nothing is counted for a key without a limit, removing one and setting it again inside the same window starts from zero."
+                                        "description": "The new spend limit per window, in USD. `null` removes the limit; omitting the field leaves both the limit and what has been spent against it untouched. Changing the amount never resets the counter: raising it from 50 to 100 on a key that has already spent 50 leaves 50 of room, and lowering it below what has been spent accepts nothing more until the window resets."
                                     },
                                     "reset_interval": {
-                                        "description": "The new window. Changing it RESTARTS the counter — a monthly total inside a freshly opened daily window would refuse work for a reason its owner cannot see. Can be sent on its own, but only for a key that already has a limit; alongside `\"limit\": null` it is refused.",
+                                        "description": "The new window. Changing it restarts the counter. Can be sent on its own, but only for a key that already has a limit; alongside `\"limit\": null` it is refused.",
                                         "type": "string",
                                         "example": "daily",
                                         "enum": [
@@ -599,7 +600,7 @@
                     "Client API v2"
                 ],
                 "summary": "Get account balance",
-                "description": "Retrieve the current account balance for the authenticated client. Needs an ADMIN API key.",
+                "description": "Retrieve the current account balance for the authenticated client. Needs an ADMIN key.",
                 "operationId": "getAccountBalance",
                 "parameters": [
                     {
@@ -818,7 +819,6 @@
                                     "audio_file2text",
                                     "video2text",
                                     "video_file2text",
-                                    "video-replace",
                                     "vid-upscale",
                                     "vid-rmbg",
                                     "video2desc",
@@ -1157,7 +1157,7 @@
                     "Client API v2"
                 ],
                 "summary": "Usage of the calling API key",
-                "description": "Cost, requests and errors of the key sending the request. Any key role.",
+                "description": "Cost, requests and errors of the key sending the request. Works with any key role.",
                 "operationId": "getCurrentApiKeyUsage",
                 "parameters": [
                     {
@@ -1202,7 +1202,7 @@
                         }
                     },
                     "401": {
-                        "description": "Missing, unknown, expired or deactivated key.",
+                        "description": "Missing, unknown, expired or deactivated key — `code` says which: `missing_key`, `invalid_key`, `key_expired` or `key_revoked`.",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -1241,7 +1241,7 @@
                     "Client API v2"
                 ],
                 "summary": "Usage of an API key",
-                "description": "Like GET /v2/key/usage, for any key of the account. Needs an ADMIN key.",
+                "description": "Like `GET /api/v2/key/usage`, for any key of the account. Needs an ADMIN key.",
                 "operationId": "getApiKeyUsage",
                 "parameters": [
                     {
@@ -1294,7 +1294,7 @@
                         }
                     },
                     "401": {
-                        "description": "Missing, unknown, expired or deactivated key.",
+                        "description": "Missing, unknown, expired or deactivated key — `code` says which: `missing_key`, `invalid_key`, `key_expired` or `key_revoked`.",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -1343,7 +1343,7 @@
                     "Client API v2"
                 ],
                 "summary": "Usage of the whole account",
-                "description": "Cost, requests and errors of every key of the account, optionally per key. Needs an ADMIN key.",
+                "description": "Cost, requests and errors of every key of the account, optionally per key. The same data as the Usage screen in the Dashboard. Needs an ADMIN key.",
                 "operationId": "getAccountUsage",
                 "parameters": [
                     {
@@ -1389,7 +1389,7 @@
                         }
                     },
                     "401": {
-                        "description": "Missing, unknown, expired or deactivated key.",
+                        "description": "Missing, unknown, expired or deactivated key — `code` says which: `missing_key`, `invalid_key`, `key_expired` or `key_revoked`.",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -3105,114 +3105,6 @@
                 ]
             }
         },
-        "/api/v2/videos/replacements/price": {
-            "post": {
-                "tags": [
-                    "Client API v2"
-                ],
-                "summary": "Estimate the price of a video character replacement",
-                "description": "Estimate the price of a video character replacement request.",
-                "operationId": "estimateVideoReplacementPrice",
-                "parameters": [
-                    {
-                        "$ref": "#/components/parameters/AcceptHeader"
-                    }
-                ],
-                "requestBody": {
-                    "description": "Video replace price calculation parameters",
-                    "required": true,
-                    "content": {
-                        "multipart/form-data": {
-                            "schema": {
-                                "$ref": "#/components/schemas/VideoReplacePriceRequestBody"
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "200": {
-                        "description": "Calculated price for video replace inference.",
-                        "headers": {
-                            "X-RateLimit-Policy": {
-                                "$ref": "#/components/headers/X-RateLimit-Policy"
-                            },
-                            "X-RateLimit-Source": {
-                                "$ref": "#/components/headers/X-RateLimit-Source"
-                            },
-                            "X-RateLimit-Limit": {
-                                "$ref": "#/components/headers/X-RateLimit-Limit"
-                            },
-                            "X-RateLimit-Remaining": {
-                                "$ref": "#/components/headers/X-RateLimit-Remaining"
-                            },
-                            "X-RateLimit-Reset": {
-                                "$ref": "#/components/headers/X-RateLimit-Reset"
-                            },
-                            "X-RateLimit-Daily-Limit": {
-                                "$ref": "#/components/headers/X-RateLimit-Daily-Limit"
-                            },
-                            "X-RateLimit-Daily-Remaining": {
-                                "$ref": "#/components/headers/X-RateLimit-Daily-Remaining"
-                            },
-                            "X-RateLimit-Daily-Reset": {
-                                "$ref": "#/components/headers/X-RateLimit-Daily-Reset"
-                            }
-                        },
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "data": {
-                                            "properties": {
-                                                "price": {
-                                                    "description": "What this request would cost, in the same credit unit as the account balance. A quote only — nothing is charged by this endpoint.",
-                                                    "type": "number",
-                                                    "format": "float",
-                                                    "example": 0.15
-                                                }
-                                            },
-                                            "type": "object"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized user.",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/response_error_default"
-                                }
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Not found.",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/response_error_default"
-                                }
-                            }
-                        }
-                    },
-                    "422": {
-                        "$ref": "#/components/responses/ValidationError"
-                    },
-                    "429": {
-                        "$ref": "#/components/responses/RateLimitExceeded"
-                    }
-                },
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ]
-            }
-        },
         "/api/v2/videos/upscales/price": {
             "post": {
                 "tags": [
@@ -4428,7 +4320,7 @@
                     "Client API v2"
                 ],
                 "summary": "Describe what happens in a video",
-                "description": "Produce a timestamped index of what happens on screen — a list of events, each with `start`, `end` (seconds) and a `description` — plus scene boundaries and source metadata. Reads the picture, not the audio track; for speech use POST /api/v2/audio/transcriptions. Accepts either a video URL (YouTube, Twitter/X, Twitch, Kick, TikTok) or a file upload. The result is a JSON document: `{\"events\": [{\"start\", \"end\", \"description\", \"merged?\", \"edge_distance\"}], \"scenes\": [...], \"meta\": {\"duration\", \"preset\", ...}}`, delivered as `result_url` on the job (and inline in `result` when `return_result_in_response` is set). Priced on machine time at the model's hourly rate — longer videos and higher presets cost more — or, for TikTok, on a fixed card by length capped at 10 minutes; see POST /api/v2/videos/descriptions/price.",
+                "description": "Produce a timestamped index of what happens on screen — a list of events, each with `start`, `end` (seconds) and a `description` — plus scene boundaries and source metadata. Reads the picture, not the audio track; for speech use POST /api/v2/audio/transcriptions. Accepts either a video URL (YouTube, Twitter/X, Twitch, Kick, TikTok) or a file upload. The result is a JSON document: `{\"events\": [{\"start\", \"end\", \"description\", \"merged?\", \"edge_distance\"}], \"scenes\": [...], \"meta\": {\"duration\", \"preset\", ...}}`, delivered as `result_url` on the job (and as a serialized JSON string in `result` when `return_result_in_response` is set). Priced on machine time at the model's hourly rate — longer videos and higher presets cost more — or, for TikTok, on a fixed card by length capped at 10 minutes; see POST /api/v2/videos/descriptions/price.",
                 "operationId": "createVideoDescription",
                 "parameters": [
                     {
@@ -4533,107 +4425,6 @@
                         "multipart/form-data": {
                             "schema": {
                                 "$ref": "#/components/schemas/VideoRemoveBgRequestBody"
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "200": {
-                        "description": "ID of the inference request.",
-                        "headers": {
-                            "X-RateLimit-Policy": {
-                                "$ref": "#/components/headers/X-RateLimit-Policy"
-                            },
-                            "X-RateLimit-Source": {
-                                "$ref": "#/components/headers/X-RateLimit-Source"
-                            },
-                            "X-RateLimit-Limit": {
-                                "$ref": "#/components/headers/X-RateLimit-Limit"
-                            },
-                            "X-RateLimit-Remaining": {
-                                "$ref": "#/components/headers/X-RateLimit-Remaining"
-                            },
-                            "X-RateLimit-Reset": {
-                                "$ref": "#/components/headers/X-RateLimit-Reset"
-                            },
-                            "X-RateLimit-Daily-Limit": {
-                                "$ref": "#/components/headers/X-RateLimit-Daily-Limit"
-                            },
-                            "X-RateLimit-Daily-Remaining": {
-                                "$ref": "#/components/headers/X-RateLimit-Daily-Remaining"
-                            },
-                            "X-RateLimit-Daily-Reset": {
-                                "$ref": "#/components/headers/X-RateLimit-Daily-Reset"
-                            }
-                        },
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/JobRequestResponseResource"
-                                }
-                            }
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized user.",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/response_error_default"
-                                }
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Not found.",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/response_error_default"
-                                }
-                            }
-                        }
-                    },
-                    "422": {
-                        "$ref": "#/components/responses/ValidationError"
-                    },
-                    "429": {
-                        "$ref": "#/components/responses/RateLimitExceeded"
-                    },
-                    "403": {
-                        "$ref": "#/components/responses/AccountSuspended"
-                    },
-                    "402": {
-                        "$ref": "#/components/responses/KeyLimitExceeded"
-                    }
-                },
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ]
-            }
-        },
-        "/api/v2/videos/replacements": {
-            "post": {
-                "tags": [
-                    "Client API v2"
-                ],
-                "summary": "Replace a person in the input video with the character",
-                "description": "Replace a person in the input video with the character from a reference image.",
-                "operationId": "replaceVideoCharacter",
-                "parameters": [
-                    {
-                        "$ref": "#/components/parameters/AcceptHeader"
-                    }
-                ],
-                "requestBody": {
-                    "description": "Video replace parameters",
-                    "required": true,
-                    "content": {
-                        "multipart/form-data": {
-                            "schema": {
-                                "$ref": "#/components/schemas/VideoReplaceRequestBody"
                             }
                         }
                     }
@@ -4828,84 +4619,76 @@
                     "totals",
                     "groups"
                 ],
-                "type": "object",
-                "allOf": [
-                    {
-                        "$ref": "#/components/schemas/WebhookFailedPayload"
+                "properties": {
+                    "from": {
+                        "description": "Start of the range, UTC, inclusive.",
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2026-09-15T00:00:00+00:00"
                     },
-                    {
-                        "properties": {
-                            "from": {
-                                "description": "Usage reports over the API (DEV-2045, part C) — the same source as the panel's Usage\ntab (depin-shared UsageReport). A key sees its own usage; an ADMIN key also any key of\nthe account and the whole account. Never the balance, never other accounts.",
-                                "type": "string",
-                                "format": "date-time",
-                                "example": "2026-09-15T00:00:00+00:00"
-                            },
-                            "to": {
-                                "description": "Exclusive.",
-                                "type": "string",
-                                "format": "date-time",
-                                "example": "2026-09-22T00:00:00+00:00"
-                            },
-                            "group_by": {
-                                "type": "string",
-                                "example": "day",
-                                "enum": [
-                                    "day",
-                                    "hour",
-                                    "type",
-                                    "model",
-                                    "key"
-                                ]
-                            },
-                            "currency": {
-                                "type": "string",
-                                "example": "USD"
-                            },
-                            "totals": {
-                                "$ref": "#/components/schemas/UsageFigures"
-                            },
-                            "groups": {
-                                "description": "Only groups with usage. `key` is: day — `YYYY-MM-DD`; hour — the hour's start (UTC); type — a v2 inference type such as `images.generations`; model — the model slug; key — the API key id, `panel` for what the dashboard itself ran on the account, `deleted` for keys that no longer exist, null when the request has no recorded origin.",
-                                "type": "array",
-                                "items": {
-                                    "allOf": [
-                                        {
-                                            "properties": {
-                                                "key": {
-                                                    "example": "2026-09-21",
-                                                    "oneOf": [
-                                                        {
-                                                            "type": "string"
-                                                        },
-                                                        {
-                                                            "type": "integer"
-                                                        },
-                                                        {
-                                                            "type": "null"
-                                                        }
-                                                    ]
+                    "to": {
+                        "description": "End of the range, UTC, exclusive.",
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2026-09-22T00:00:00+00:00"
+                    },
+                    "group_by": {
+                        "type": "string",
+                        "example": "day",
+                        "enum": [
+                            "day",
+                            "hour",
+                            "type",
+                            "model",
+                            "key"
+                        ]
+                    },
+                    "currency": {
+                        "type": "string",
+                        "example": "USD"
+                    },
+                    "totals": {
+                        "$ref": "#/components/schemas/UsageFigures"
+                    },
+                    "groups": {
+                        "description": "Only groups with usage. `key` is: day — `YYYY-MM-DD`; hour — the hour's start (UTC); type — a v2 inference type such as `images.generations`; model — the model slug; key — the API key id, `panel` for what the Dashboard itself ran on the account, `deleted` for keys that no longer exist, null when the request has no recorded origin.",
+                        "type": "array",
+                        "items": {
+                            "allOf": [
+                                {
+                                    "properties": {
+                                        "key": {
+                                            "example": "2026-09-21",
+                                            "oneOf": [
+                                                {
+                                                    "type": "string"
                                                 },
-                                                "name": {
-                                                    "description": "Only with group_by=key: the key's name, or `Panel` / `Deleted keys` for those two groups.",
-                                                    "type": [
-                                                        "string",
-                                                        "null"
-                                                    ]
+                                                {
+                                                    "type": "integer"
+                                                },
+                                                {
+                                                    "type": "null"
                                                 }
-                                            },
-                                            "type": "object"
+                                            ]
                                         },
-                                        {
-                                            "$ref": "#/components/schemas/UsageFigures"
+                                        "name": {
+                                            "description": "Only with group_by=key: the key's name, or `Panel` / `Deleted keys` for those two groups.",
+                                            "type": [
+                                                "string",
+                                                "null"
+                                            ]
                                         }
-                                    ]
+                                    },
+                                    "type": "object"
+                                },
+                                {
+                                    "$ref": "#/components/schemas/UsageFigures"
                                 }
-                            }
-                        },
-                        "type": "object"
+                            ]
+                        }
                     }
-                ]
+                },
+                "type": "object"
             },
             "UsageFigures": {
                 "required": [
@@ -4913,33 +4696,25 @@
                     "requests",
                     "errors"
                 ],
-                "type": "object",
-                "allOf": [
-                    {
-                        "$ref": "#/components/schemas/WebhookFailedPayload"
+                "properties": {
+                    "cost": {
+                        "description": "Charged, net of refunds.",
+                        "type": "number",
+                        "format": "float",
+                        "example": 12.345678
                     },
-                    {
-                        "properties": {
-                            "cost": {
-                                "description": "Charged, net of refunds.",
-                                "type": "number",
-                                "format": "float",
-                                "example": 12.345678
-                            },
-                            "requests": {
-                                "description": "Inference requests accepted in the window.",
-                                "type": "integer",
-                                "example": 830
-                            },
-                            "errors": {
-                                "description": "Of those, requests that ended in an error. Requests refused before a job was created (401, 403, 429) are not counted.",
-                                "type": "integer",
-                                "example": 4
-                            }
-                        },
-                        "type": "object"
+                    "requests": {
+                        "description": "Inference requests accepted in the window.",
+                        "type": "integer",
+                        "example": 830
+                    },
+                    "errors": {
+                        "description": "Of those, requests that ended in an error. Requests refused before a job was created (401, 403, 429) are not counted.",
+                        "type": "integer",
+                        "example": 4
                     }
-                ]
+                },
+                "type": "object"
             },
             "response_error_default": {
                 "properties": {
@@ -4961,7 +4736,7 @@
                         "type": "integer"
                     },
                     "code": {
-                        "description": "A stable, machine-readable reason, on the responses that publish one. Refused credentials (401, client API only — the worker API's 401 carries no `code`): `missing_key` — no Bearer credentials arrived at all, so send an `Authorization: Bearer` header (or look for a proxy stripping the one you sent) rather than checking the key itself; `invalid_key` — a key WAS presented but is unknown, carries the wrong secret, or is not in the `{id}|{secret}` shape, which is what a key truncated or mangled in transit looks like; `key_expired` — past its expiry date; `key_revoked` — deactivated. Refused requests: `insufficient_permissions` (403), `ip_not_allowed` (403), `active_key_limit_reached` (422), `insufficient_balance` (422), `key_limit_exceeded` (402), `rate_limited` (429). Absent wherever a response publishes no code, so treat an unknown value as the status code alone — the list grows.",
+                        "description": "A stable, machine-readable reason, on the responses that publish one. Refused credentials (401): `missing_key` — no Bearer credentials arrived at all; `invalid_key` — a key was presented but is unknown, carries the wrong secret, or is malformed; `key_expired` — past its expiry date; `key_revoked` — deactivated. Refused requests: `insufficient_permissions` (403), `ip_not_allowed` (403), `active_key_limit_reached` (422), `insufficient_balance` (422), `key_limit_exceeded` (402), `rate_limited` (429). Absent wherever a response publishes no code, so treat an unknown value as the status code alone — the list grows.",
                         "type": "string",
                         "enum": [
                             "missing_key",
@@ -4980,7 +4755,7 @@
                 "type": "object"
             },
             "ApiKeyIpWhitelist": {
-                "description": "The addresses an API key may be used from (DEV-2043). An empty list means any address, which is what a key carries until a list is set. Entries are single IPv4/IPv6 addresses or CIDR ranges of either family, and a key with a non-empty list is refused from anywhere else — including a call whose address cannot be established. Sending the field replaces the whole list; `[]` clears it. A JSON object is refused, as is an entry that could never gate anything: a `/0` range (say \"any address\" with an empty list instead) and an IPv4 address written in IPv6 notation such as `::ffff:192.0.2.1` (write `192.0.2.1`, the form a caller is matched against).",
+                "description": "The addresses an API key may be used from. An empty list means any address, which is what a key carries until a list is set. Entries are single IPv4/IPv6 addresses or CIDR ranges of either family, and a key with a non-empty list is refused from anywhere else — including a call whose address cannot be established. Sending the field replaces the whole list; `[]` clears it. A JSON object is refused, as is an entry that could never gate anything: a `/0` range (say \"any address\" with an empty list instead) and an IPv4 address written in IPv6 notation such as `::ffff:192.0.2.1` (write `192.0.2.1`, the form a caller is matched against).",
                 "type": "array",
                 "items": {
                     "type": "string",
@@ -6455,7 +6230,7 @@
                             "model": {
                                 "description": "The model to use.",
                                 "type": "string",
-                                "example": "Marlin2B"
+                                "example": "Marlin_2B"
                             }
                         },
                         "type": "object"
@@ -6498,7 +6273,7 @@
                             "model": {
                                 "description": "The model to use.",
                                 "type": "string",
-                                "example": "Marlin2B"
+                                "example": "Marlin_2B"
                             }
                         },
                         "type": "object"
@@ -6558,7 +6333,7 @@
                             "model": {
                                 "description": "The model to use.",
                                 "type": "string",
-                                "example": "Marlin2B"
+                                "example": "Marlin_2B"
                             }
                         },
                         "type": "object"
@@ -6613,58 +6388,6 @@
                         "type": "object"
                     }
                 ]
-            },
-            "VideoReplacePriceRequestBody": {
-                "description": "Every example in this schema is a working set for the `model` example shown — they are not defaults and not portable. Sizes, step counts, frame counts and frame rates are all per-model: read `info.limits` and `info.defaults` for the model you actually intend to use from `GET /api/v2/models`. Substituting a different `model` while keeping these values is the most common source of a 422.",
-                "required": [
-                    "model"
-                ],
-                "properties": {
-                    "video": {
-                        "description": "Input video file. If provided, duration and dimensions are extracted automatically. Required if duration is not provided.",
-                        "type": [
-                            "string",
-                            "null"
-                        ],
-                        "format": "binary"
-                    },
-                    "duration": {
-                        "description": "Input video duration in seconds. Required if video file is not provided. The accepted range is model-specific — read `info.limits.min_duration`/`max_duration` for your `model` from `GET /api/v2/models`. Some models additionally cap duration per output format via `info.limits.max_duration_by_format`.",
-                        "type": [
-                            "number",
-                            "null"
-                        ],
-                        "format": "float",
-                        "example": 5
-                    },
-                    "width": {
-                        "description": "Output video width in pixels. If omitted and video file is provided, uses video native width. The accepted range is model-specific — read `info.limits.min_width`/`max_width` and `min_height`/`max_height` for your `model` from `GET /api/v2/models`. Some models also publish `dimension_multiple` or `resolution_step`: values are snapped DOWN to that grid before validation, so an off-grid size is silently reduced rather than rejected. `max_pixels` and `max_ratio`, where present, cap total area and aspect ratio on top of the per-side bounds.",
-                        "type": [
-                            "integer",
-                            "null"
-                        ],
-                        "example": 512
-                    },
-                    "height": {
-                        "description": "Output video height in pixels. If omitted and video file is provided, uses video native height. The accepted range is model-specific — read `info.limits.min_width`/`max_width` and `min_height`/`max_height` for your `model` from `GET /api/v2/models`. Some models also publish `dimension_multiple` or `resolution_step`: values are snapped DOWN to that grid before validation, so an off-grid size is silently reduced rather than rejected. `max_pixels` and `max_ratio`, where present, cap total area and aspect ratio on top of the per-side bounds.",
-                        "type": [
-                            "integer",
-                            "null"
-                        ],
-                        "example": 512
-                    },
-                    "steps": {
-                        "description": "Optional on the quote. Validated against `info.limits.min_steps` / `max_steps` exactly as on generation (which defaults it to 4).",
-                        "type": "integer",
-                        "example": 4
-                    },
-                    "model": {
-                        "description": "The model to use for video replacement. Available models can be retrieved via the GET /api/v2/models endpoint.",
-                        "type": "string",
-                        "example": "Wan2_2_Animate_14B_INT8"
-                    }
-                },
-                "type": "object"
             },
             "VideoUpscalePriceRequestBody": {
                 "description": "Every example in this schema is a working set for the `model` example shown — they are not defaults and not portable. Sizes, step counts, frame counts and frame rates are all per-model: read `info.limits` and `info.defaults` for the model you actually intend to use from `GET /api/v2/models`. Substituting a different `model` while keeping these values is the most common source of a 422.",
@@ -6960,7 +6683,6 @@
                 "description": "Every example in this schema is a working set for the `model` example shown — they are not defaults and not portable. Sizes, step counts, frame counts and frame rates are all per-model: read `info.limits` and `info.defaults` for the model you actually intend to use from `GET /api/v2/models`. Substituting a different `model` while keeping these values is the most common source of a 422. Reference inputs (`ref_images`/`ref_videos`/`ref_audios`) are bounded per model too: a model that advertises `supports_image_refs`/`supports_video_refs`/`supports_audio_refs` always publishes the effective `info.limits.max_ref_images`, `max_ref_videos`, `max_ref_audios`, `max_ref_files` (the cap across all three types), `min/max_ref_video_duration`, `min/max_ref_audio_duration` and `min/max_ref_image_ratio` — read them rather than the ceilings quoted on each field, which are only the outer envelope of self-hosted models (never more than 9 / 1 / 3 files and 12 in total; a partner-served model publishes its own, possibly higher, limits). An unsupported type publishes `0`. Every uploaded image, keyframe or reference, must be 64–5000 px per side.",
                 "required": [
                     "prompt",
-                    "first_frame_image",
                     "model",
                     "width",
                     "height",
@@ -7095,7 +6817,98 @@
                         "minLength": 32
                     }
                 },
-                "type": "object"
+                "type": "object",
+                "oneOf": [
+                    {
+                        "required": [
+                            "first_frame_image"
+                        ],
+                        "not": {
+                            "anyOf": [
+                                {
+                                    "required": [
+                                        "ref_images"
+                                    ],
+                                    "properties": {
+                                        "ref_images": {
+                                            "type": "array"
+                                        }
+                                    }
+                                },
+                                {
+                                    "required": [
+                                        "ref_videos"
+                                    ],
+                                    "properties": {
+                                        "ref_videos": {
+                                            "type": "array"
+                                        }
+                                    }
+                                },
+                                {
+                                    "required": [
+                                        "ref_audios"
+                                    ],
+                                    "properties": {
+                                        "ref_audios": {
+                                            "type": "array"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "anyOf": [
+                            {
+                                "required": [
+                                    "ref_images"
+                                ],
+                                "properties": {
+                                    "ref_images": {
+                                        "type": "array",
+                                        "minItems": 1
+                                    }
+                                }
+                            },
+                            {
+                                "required": [
+                                    "ref_videos"
+                                ],
+                                "properties": {
+                                    "ref_videos": {
+                                        "type": "array",
+                                        "minItems": 1
+                                    }
+                                }
+                            }
+                        ],
+                        "not": {
+                            "anyOf": [
+                                {
+                                    "required": [
+                                        "first_frame_image"
+                                    ],
+                                    "properties": {
+                                        "first_frame_image": {
+                                            "type": "string"
+                                        }
+                                    }
+                                },
+                                {
+                                    "required": [
+                                        "last_frame_image"
+                                    ],
+                                    "properties": {
+                                        "last_frame_image": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                ]
             },
             "ImageRemoveBgRequestBody": {
                 "required": [
@@ -7810,7 +7623,7 @@
                     "model": {
                         "description": "The model to use. Available models can be retrieved via the GET /api/v2/models endpoint; a model lists `video2desc` (URL sources) and/or `video_file2desc` (uploads) in its `inference_types`. Its `info.limits.max_video_duration_seconds`, when present, is the longest source it accepts.",
                         "type": "string",
-                        "example": "Marlin2B"
+                        "example": "Marlin_2B"
                     },
                     "preset": {
                         "description": "Detail level. A preset is the per-frame pixel budget the model reads the video at: `fast` reads a small frame over long windows, `detail` a large frame over short windows, so higher presets read more of what is on screen (small text, brand names) and cost more — roughly ×1 / ×1.7 / ×3.75 machine time for `fast` / `balanced` / `detail` (×0.75 / ×1 / ×1.5 on the TikTok card). Omit for the default (`balanced`, or the cheapest preset the model offers if it does not offer `balanced`). Only honoured on a model whose `info.features.supports_presets` is true; such a model publishes the presets it offers as `info.limits.available_presets` and rejects any other. On a model without the flag the field is ignored.",
@@ -7836,7 +7649,7 @@
                         "default": false
                     },
                     "return_result_in_response": {
-                        "description": "If true, the job-status response carries the description JSON inline in `result` in addition to the download url.",
+                        "description": "If true, the completed job-status response includes the description as a serialized JSON string in `data.result`, in addition to `data.result_url`. Parse the string as JSON to read `events`, `scenes` and `meta`.",
                         "type": [
                             "boolean",
                             "null"
@@ -7922,86 +7735,6 @@
                 },
                 "type": "object"
             },
-            "VideoReplaceRequestBody": {
-                "description": "Every example in this schema is a working set for the `model` example shown — they are not defaults and not portable. Sizes, step counts, frame counts and frame rates are all per-model: read `info.limits` and `info.defaults` for the model you actually intend to use from `GET /api/v2/models`. Substituting a different `model` while keeping these values is the most common source of a 422.",
-                "required": [
-                    "video",
-                    "ref_image",
-                    "model"
-                ],
-                "properties": {
-                    "video": {
-                        "description": "Input video file. Supported formats: MP4, MPEG, QuickTime, AVI, WMV, OGG.",
-                        "type": "string",
-                        "format": "binary"
-                    },
-                    "ref_image": {
-                        "description": "Reference character image. Supported formats: JPG, JPEG, PNG, GIF, BMP, WebP. Maximum file size: 10 MB.",
-                        "type": "string",
-                        "format": "binary"
-                    },
-                    "prompt": {
-                        "description": "Optional text prompt to guide the replacement",
-                        "type": [
-                            "string",
-                            "null"
-                        ],
-                        "example": "A dancer performing on a neon-lit stage"
-                    },
-                    "width": {
-                        "description": "Output video width in pixels. If omitted, uses input video width. Must be provided together with height. The accepted range is model-specific — read `info.limits.min_width`/`max_width` and `min_height`/`max_height` for your `model` from `GET /api/v2/models`. Some models also publish `dimension_multiple` or `resolution_step`: values are snapped DOWN to that grid before validation, so an off-grid size is silently reduced rather than rejected. `max_pixels` and `max_ratio`, where present, cap total area and aspect ratio on top of the per-side bounds.",
-                        "type": [
-                            "integer",
-                            "null"
-                        ],
-                        "example": 768
-                    },
-                    "height": {
-                        "description": "Output video height in pixels. If omitted, uses input video height. Must be provided together with width. The accepted range is model-specific — read `info.limits.min_width`/`max_width` and `min_height`/`max_height` for your `model` from `GET /api/v2/models`. Some models also publish `dimension_multiple` or `resolution_step`: values are snapped DOWN to that grid before validation, so an off-grid size is silently reduced rather than rejected. `max_pixels` and `max_ratio`, where present, cap total area and aspect ratio on top of the per-side bounds.",
-                        "type": [
-                            "integer",
-                            "null"
-                        ],
-                        "example": 768
-                    },
-                    "steps": {
-                        "description": "Number of inference steps (default: 4). The accepted range is model-specific — read `info.limits.min_steps`/`max_steps` for your `model` from `GET /api/v2/models`; the base rule allows 1-100 but a model may narrow it further.",
-                        "type": "integer",
-                        "example": 4
-                    },
-                    "seed": {
-                        "description": "Random seed for generation (default: -1 for random)",
-                        "type": "integer",
-                        "example": -1
-                    },
-                    "model": {
-                        "description": "The model to use for video replacement. Available models can be retrieved via the GET /api/v2/models endpoint.",
-                        "type": "string",
-                        "example": "Wan2_2_Animate_14B_INT8"
-                    },
-                    "webhook_url": {
-                        "description": "Optional HTTPS URL to receive webhook notifications for job status changes (processing, completed, failed). Must be HTTPS. Max 2048 characters. A per-request URL is self-contained: it is delivered even when the account has no webhook configuration, or the account webhook is disabled. See the `webhooks` block at the top level of this document for the event payloads and the headers each delivery carries.",
-                        "type": [
-                            "string",
-                            "null"
-                        ],
-                        "format": "uri",
-                        "example": "https://your-server.com/webhooks/deapi",
-                        "maxLength": 2048
-                    },
-                    "webhook_secret": {
-                        "description": "Optional per-request HMAC secret (min. 32 chars) used to sign the webhook callback. Overrides the account-default secret for this job only. If omitted, the account-default secret signs the callback; if no secret exists at all, the callback is still delivered but UNSIGNED (empty X-DeAPI-Signature header). Requires `webhook_url` to also be set.",
-                        "type": [
-                            "string",
-                            "null"
-                        ],
-                        "example": "a1b2c3d4e5f60708091a2b3c4d5e6f7081920a1b2c3d4e5f60708091a2b3c4d5",
-                        "maxLength": 255,
-                        "minLength": 32
-                    }
-                },
-                "type": "object"
-            },
             "VideoUpscaleRequestBody": {
                 "required": [
                     "video",
@@ -8058,7 +7791,7 @@
                 ],
                 "properties": {
                     "balance": {
-                        "description": "OpenAPI shape of GET /v2/account (DEV-2045). The response is built in\nAccountController::show().",
+                        "description": "Remaining balance.",
                         "type": "number",
                         "format": "float",
                         "example": 42.17
@@ -8123,7 +7856,7 @@
                 ],
                 "properties": {
                     "id": {
-                        "description": "An API key as the API shows it (DEV-2045). Never the secret — that is returned once,\nby POST /v2/keys (CreatedApiKeyResource).",
+                        "description": "Key id. The secret is never returned here — only once, by `POST /api/v2/keys`.",
                         "type": "integer",
                         "example": 42
                     },
@@ -8134,7 +7867,7 @@
                     "preview": {
                         "description": "Key id and the last characters of the secret, for recognising a key.",
                         "type": "string",
-                        "example": "42|...f3a"
+                        "example": "sk-dp-42-...f3a"
                     },
                     "role": {
                         "description": "`api` — inference and the key's own data; `admin` — also account billing and key management.",
@@ -8152,7 +7885,8 @@
                             "active",
                             "revoked",
                             "expired"
-                        ]
+                        ],
+                        "description": "`revoked` — disabled in the Dashboard or with `PATCH /api/v2/keys/{id}` (`active: false`); `expired` — past `expires_at`."
                     },
                     "created_at": {
                         "type": "string",
@@ -8180,7 +7914,7 @@
                         "$ref": "#/components/schemas/ApiKeyIpWhitelist"
                     },
                     "ip_whitelist_count": {
-                        "description": "How many entries the list holds — `0` means the key works from any address. The length of `ip_whitelist`, so a listing can show 'Any IP' or a count without reading the entries.",
+                        "description": "How many entries the list holds — `0` means the key works from any address.",
                         "type": "integer",
                         "example": 2,
                         "minimum": 0
@@ -8200,7 +7934,7 @@
                         ]
                     },
                     "limit_used": {
-                        "description": "Spent against the limit in the window running now, in USD. Null when the key has no limit — nothing is counted for a key without one. Not the same figure as GET /keys/{id}/usage, which sums what the key spent over the period you ask for: this counts only what went through the ceiling since the current window opened.",
+                        "description": "Spent against the limit in the window running now, in USD. Null when the key has no limit — nothing is counted for a key without one. Not the same figure as `GET /api/v2/keys/{id}/usage`, which sums what the key spent over the period you ask for: this counts only what went through the ceiling since the current window opened.",
                         "type": [
                             "number",
                             "null"
@@ -8218,7 +7952,7 @@
                         "example": 58.75
                     },
                     "limit_resets_at": {
-                        "description": "When the counter next starts over. Null when the key has no limit, and null when it has one that never resets (`reset_interval: none`) — there is no date to give, and the way to let work through again is to raise or remove the limit. Windows are anchored on the key's creation instant, not the calendar: a key created on the 15th at 13:42 UTC resets on the 15th at 13:42.",
+                        "description": "When the counter next starts over. Null when the key has no limit, and null when it has one that never resets (`reset_interval: none`). Windows are anchored on the key's creation instant, not the calendar: a key created on the 15th at 13:42 UTC resets on the 15th at 13:42.",
                         "type": [
                             "string",
                             "null"
@@ -8230,7 +7964,7 @@
                 "type": "object"
             },
             "ApiKeySpendLimit": {
-                "description": "What this key may spend per window, in USD (DEV-2042). Null means no limit, which is what every key carries until one is set. `0` is a real value and means the key accepts no paid work at all. A limit is a ceiling, not a reservation: it holds nothing against the account balance, and the limits of an account's keys may add up to far more than the account has. Sending `null` removes the limit; because nothing is counted for a key without one, removing a limit and setting it again inside the same window starts the counter from zero.",
+                "description": "What this key may spend per window, in USD. Null means no limit, which is what every key carries until one is set. `0` is a real value and means the key accepts no paid work at all. A limit is a ceiling, not a reservation: it holds nothing against the account balance, and the limits of an account's keys may add up to far more than the account has. Sending `null` removes the limit; because nothing is counted for a key without one, removing a limit and setting it again inside the same window starts the counter from zero.",
                 "type": [
                     "number",
                     "null"
@@ -8730,119 +8464,111 @@
                     "limit_resets_at",
                     "secret"
                 ],
-                "type": "object",
-                "allOf": [
-                    {
+                "properties": {
+                    "id": {
+                        "description": "Key id.",
+                        "type": "integer",
+                        "example": 43
+                    },
+                    "name": {
+                        "type": "string",
+                        "example": "Customer 1234"
+                    },
+                    "preview": {
+                        "type": "string",
+                        "example": "sk-dp-43-...9bc"
+                    },
+                    "role": {
+                        "type": "string",
+                        "example": "api",
+                        "enum": [
+                            "api"
+                        ]
+                    },
+                    "status": {
+                        "type": "string",
+                        "example": "active",
+                        "enum": [
+                            "active"
+                        ]
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2026-09-22T12:00:00+00:00"
+                    },
+                    "expires_at": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "format": "date-time",
+                        "example": null
+                    },
+                    "last_used_at": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "format": "date-time",
+                        "example": null
+                    },
+                    "ip_whitelist": {
+                        "$ref": "#/components/schemas/ApiKeyIpWhitelist"
+                    },
+                    "ip_whitelist_count": {
+                        "type": "integer",
+                        "example": 2,
+                        "minimum": 0
+                    },
+                    "limit": {
                         "$ref": "#/components/schemas/ApiKeySpendLimit"
                     },
-                    {
-                        "properties": {
-                            "id": {
-                                "description": "The response to POST /v2/keys — the only place the secret ever appears.",
-                                "type": "integer",
-                                "example": 43
-                            },
-                            "name": {
-                                "type": "string",
-                                "example": "Customer 1234"
-                            },
-                            "preview": {
-                                "type": "string",
-                                "example": "43|...9bc"
-                            },
-                            "role": {
-                                "type": "string",
-                                "example": "api",
-                                "enum": [
-                                    "api"
-                                ]
-                            },
-                            "status": {
-                                "type": "string",
-                                "example": "active",
-                                "enum": [
-                                    "active"
-                                ]
-                            },
-                            "created_at": {
-                                "type": "string",
-                                "format": "date-time",
-                                "example": "2026-09-22T12:00:00+00:00"
-                            },
-                            "expires_at": {
-                                "type": [
-                                    "string",
-                                    "null"
-                                ],
-                                "format": "date-time",
-                                "example": null
-                            },
-                            "last_used_at": {
-                                "type": [
-                                    "string",
-                                    "null"
-                                ],
-                                "format": "date-time",
-                                "example": null
-                            },
-                            "ip_whitelist": {
-                                "$ref": "#/components/schemas/ApiKeyIpWhitelist"
-                            },
-                            "ip_whitelist_count": {
-                                "type": "integer",
-                                "example": 2,
-                                "minimum": 0
-                            },
-                            "limit": {
-                                "$ref": "#/components/schemas/ApiKeySpendLimit"
-                            },
-                            "reset_interval": {
-                                "description": "How often the spend limit starts over. `none` when no limit was set.",
-                                "type": "string",
-                                "example": "monthly",
-                                "enum": [
-                                    "none",
-                                    "daily",
-                                    "weekly",
-                                    "monthly"
-                                ]
-                            },
-                            "limit_used": {
-                                "description": "Always `0` on a key that was just created, and null when it was created without a limit.",
-                                "type": [
-                                    "number",
-                                    "null"
-                                ],
-                                "format": "float",
-                                "example": 0
-                            },
-                            "limit_remaining": {
-                                "description": "The whole limit on a key that was just created; null when it has none.",
-                                "type": [
-                                    "number",
-                                    "null"
-                                ],
-                                "format": "float",
-                                "example": 100
-                            },
-                            "limit_resets_at": {
-                                "description": "One window after the key was created. Null when there is no limit or it never resets.",
-                                "type": [
-                                    "string",
-                                    "null"
-                                ],
-                                "format": "date-time",
-                                "example": "2026-10-22T12:00:00+00:00"
-                            },
-                            "secret": {
-                                "description": "The full key for the `Authorization: Bearer` header. Returned only in this response — store it now, it cannot be read again.",
-                                "type": "string",
-                                "example": "43|kx8…"
-                            }
-                        },
-                        "type": "object"
+                    "reset_interval": {
+                        "description": "How often the spend limit starts over. `none` when no limit was set.",
+                        "type": "string",
+                        "example": "monthly",
+                        "enum": [
+                            "none",
+                            "daily",
+                            "weekly",
+                            "monthly"
+                        ]
+                    },
+                    "limit_used": {
+                        "description": "Always `0` on a key that was just created, and null when it was created without a limit.",
+                        "type": [
+                            "number",
+                            "null"
+                        ],
+                        "format": "float",
+                        "example": 0
+                    },
+                    "limit_remaining": {
+                        "description": "The whole limit on a key that was just created; null when it has none.",
+                        "type": [
+                            "number",
+                            "null"
+                        ],
+                        "format": "float",
+                        "example": 100
+                    },
+                    "limit_resets_at": {
+                        "description": "One window after the key was created. Null when there is no limit or it never resets.",
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "format": "date-time",
+                        "example": "2026-10-22T12:00:00+00:00"
+                    },
+                    "secret": {
+                        "description": "The full key for the `Authorization: Bearer` header. Returned only in this response — store it now, it cannot be read again.",
+                        "type": "string",
+                        "example": "sk-dp-43-kx8…"
                     }
-                ]
+                },
+                "type": "object"
             },
             "ImageToImageInferenceJobResource": {
                 "properties": {
@@ -9080,7 +8806,7 @@
                                 ]
                             },
                             "result_url": {
-                                "description": "URL to the result file (e.g. generate image or audio). Only available when status is done",
+                                "description": "URL to the result file (for example, an image, audio, or a video-description JSON document). Only available when status is done.",
                                 "type": [
                                     "string",
                                     "null"
@@ -9111,7 +8837,7 @@
                                 ]
                             },
                             "result": {
-                                "description": "Generate text (e.g. transcription) Only available when status is done",
+                                "description": "Generated text, available when status is done. For video descriptions requested with `return_result_in_response: true`, this is a serialized JSON string containing `events`, `scenes` and `meta`; parse it as JSON.",
                                 "type": [
                                     "string",
                                     "null"
@@ -9275,7 +9001,7 @@
                 ],
                 "properties": {
                     "id": {
-                        "description": "A top-up of the account's balance (DEV-2045).",
+                        "description": "Payment id.",
                         "type": "integer",
                         "example": 1201
                     },
@@ -9633,61 +9359,6 @@
                 },
                 "type": "object"
             },
-            "VideoReplaceInferenceJobResource": {
-                "properties": {
-                    "data": {
-                        "description": "Job settings data",
-                        "properties": {
-                            "job_id": {
-                                "description": "Unique job identifier",
-                                "type": "string"
-                            },
-                            "model": {
-                                "description": "Model name used for video replacement",
-                                "type": "string"
-                            },
-                            "video": {
-                                "description": "Presigned URL for the input video file",
-                                "type": "string"
-                            },
-                            "ref_image": {
-                                "description": "Presigned URL for the reference character image",
-                                "type": "string"
-                            },
-                            "prompt": {
-                                "description": "Text prompt for guiding the replacement",
-                                "type": [
-                                    "string",
-                                    "null"
-                                ]
-                            },
-                            "width": {
-                                "description": "Output video width in pixels",
-                                "type": "integer"
-                            },
-                            "height": {
-                                "description": "Output video height in pixels",
-                                "type": "integer"
-                            },
-                            "steps": {
-                                "description": "Number of inference steps",
-                                "type": "integer"
-                            },
-                            "seed": {
-                                "description": "Random seed for generation",
-                                "type": "integer"
-                            },
-                            "mode": {
-                                "description": "Animation mode for the worker endpoint",
-                                "type": "string",
-                                "example": "replace"
-                            }
-                        },
-                        "type": "object"
-                    }
-                },
-                "type": "object"
-            },
             "VideoUpscaleInferenceJobResource": {
                 "properties": {
                     "data": {
@@ -9880,7 +9551,7 @@
                 }
             },
             "InsufficientPermissions": {
-                "description": "The API key may not make this call. `insufficient_permissions` — its permission does not cover this endpoint; account billing and key management need an ADMIN key, and the permission is fixed when the key is created, so use or create an ADMIN key in the panel. `ip_not_allowed` — the key carries an IP whitelist and the call did not come from an address on it; this is decided before the endpoint runs, so nothing is created and nothing is charged, and the call does not spend the account's request allowance either. Keep calling from a refused address and the 403 turns into a 429 with `X-RateLimit-Type: ip-not-allowed`, counted against that address alone.",
+                "description": "The API key may not make this call. `insufficient_permissions` — its role does not cover this endpoint; account billing and key management need an ADMIN key, and the role is fixed when the key is created. `ip_not_allowed` — the key carries an IP whitelist and the call did not come from an address on it; nothing is created and nothing is charged, and the call does not spend the account's request allowance. Keep calling from a refused address and the 403 turns into a 429 with `X-RateLimit-Type: ip-not-allowed`, counted against that address alone.",
                 "content": {
                     "application/json": {
                         "schema": {
@@ -9954,7 +9625,7 @@
                 }
             },
             "ApiKeyLimitReached": {
-                "description": "The account already has as many active API keys as it may. Deactivated, expired and deleted keys do not count — deactivate or delete keys that are no longer used. This is the number of KEYS, not money: a key that has spent its own `limit` is refused with 402 `key_limit_exceeded` on the endpoints that spend, and never with this code.",
+                "description": "The account already has as many active API keys as it may. Disabled, expired and deleted keys do not count — disable or delete keys that are no longer used. This is the number of keys, not money: a key that has spent its own `limit` is refused with 402 `key_limit_exceeded`, never with this code.",
                 "content": {
                     "application/json": {
                         "schema": {
@@ -9977,7 +9648,7 @@
                 }
             },
             "ApiKeyCreationRateLimited": {
-                "description": "Too many keys created over the API in the last hour — the limit is per account, shared by all its ADMIN keys and separate from keys created in the panel. Retry after `Retry-After` seconds. Also returned when the general request rate for this endpoint is exceeded (see RateLimitExceeded); the two are different buckets with different windows, and `X-RateLimit-Type` tells them apart — `key-creation` here, `minute` or `daily` there. Every `X-RateLimit-*` header on this response describes the bucket named by that header and no other, so backing off on them is always correct.",
+                "description": "Too many keys created over the API in the last hour — the limit is per account, shared by all its ADMIN keys and separate from keys created in the Dashboard. Retry after `Retry-After` seconds. Also returned when the general request rate for this endpoint is exceeded; `X-RateLimit-Type` tells them apart — `key-creation` here, `minute` or `daily` there.",
                 "headers": {
                     "Retry-After": {
                         "description": "Seconds until another key can be created.",
