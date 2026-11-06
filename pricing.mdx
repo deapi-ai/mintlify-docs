@@ -77,6 +77,7 @@ A failed job is normally refunded — `refunded: true` and `price.amount: 0`. No
 **Text-to-Music (Music Generation)**
 
 - Price depends on track duration and the number of inference steps. Duration is model-specific: **10–300 s** on the turbo models (`AceStep_1_5_XL_Turbo_INT8`, `AceStep_1_5_Turbo`). For `AceStep_1_5_XL_Base_INT8`, read `min_duration` / `max_duration` from the models endpoint.
+- `MiniMaxMusic3_11B_INT8` accepts **20–300 s** with steps fixed at 30. On this model `duration` is an upper limit: the song ends on its own when the lyrics run out, but the price is always for the duration you request.
 - We recommend the XL models: `AceStep_1_5_XL_Turbo_INT8` (fast, 8 steps) and `AceStep_1_5_XL_Base_INT8` (more steps, higher quality).
 - Turbo models use fewer steps (e.g. 8) and are cheaper; base models use more steps (e.g. 32\+) for higher quality.
 - Use the `/price` endpoint with your `model`, `duration`, and `inference_steps` to get exact pricing before generation.

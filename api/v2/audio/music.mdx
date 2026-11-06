@@ -6,8 +6,12 @@ openapi: "/openapi.json POST /api/v2/audio/music"
 Generate music tracks from text with control over lyrics, tempo, key, and style. Returns a `request_id` for status polling.
 
 <Note>
-  **Prerequisite:** Consult the [Model Selection](/api/v2/utilities/models) endpoint to identify a valid model `slug` and check its parameter limits. Model slugs look like `AceStep_1_5_XL_Turbo_INT8` — always take them from the models endpoint rather than hard-coding a display name. We recommend the XL models: `AceStep_1_5_XL_Turbo_INT8` (fast, 8 steps) and `AceStep_1_5_XL_Base_INT8` (more steps, higher quality).
+  **Prerequisite:** Consult the [Model Selection](/api/v2/utilities/models) endpoint to identify a valid model `slug` and check its parameter limits. Model slugs look like `AceStep_1_5_XL_Turbo_INT8` — always take them from the models endpoint rather than hard-coding a display name. We recommend the XL models: `AceStep_1_5_XL_Turbo_INT8` (fast, 8 steps) and `AceStep_1_5_XL_Base_INT8` (more steps, higher quality). For complete songs with sung vocals, use `MiniMaxMusic3_11B_INT8` (`inference_steps` exactly 30, `guidance_scale` exactly 1.7).
 </Note>
+
+<Info>
+  On `MiniMaxMusic3_11B_INT8`, `duration` is a maximum, not a target. The song ends on its own when the lyrics run out, so the file can be much shorter than requested, while the price is always for the requested duration. If the lyrics need more time than `duration` allows, the track is cut off at the limit.
+</Info>
 
 ## Field values worth knowing
 
