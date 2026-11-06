@@ -6,7 +6,7 @@ openapi: "/openapi.json POST /api/v2/audio/music"
 Generate music tracks from text with control over lyrics, tempo, key, and style. Returns a `request_id` for status polling.
 
 <Note>
-  **Prerequisite:** Consult the [Model Selection](/api/v2/utilities/models) endpoint to identify a valid model `slug` and check its parameter limits. Model slugs look like `AceStep_1_5_Turbo` — always take them from the models endpoint rather than hard-coding a display name.
+  **Prerequisite:** Consult the [Model Selection](/api/v2/utilities/models) endpoint to identify a valid model `slug` and check its parameter limits. Model slugs look like `AceStep_1_5_XL_Turbo_INT8` — always take them from the models endpoint rather than hard-coding a display name. We recommend the XL models: `AceStep_1_5_XL_Turbo_INT8` (fast, 8 steps) and `AceStep_1_5_XL_Base_INT8` (more steps, higher quality).
 </Note>
 
 ## Field values worth knowing

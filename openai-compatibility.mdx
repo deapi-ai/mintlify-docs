@@ -181,7 +181,7 @@ for m in client.models.list().data:
 
 `GET /v1/models/{model}` (`client.models.retrieve(...)`) returns a single entry in the same shape. Unknown, hidden, or out-of-plan models answer `404 model_not_found`.
 
-The response shape is standard: `{id, object, created, owned_by}`, where `owned_by` is always `depin`. **`created` is the date the model first became available on this gateway**, not the date the model itself was built — the inference backend publishes no such date, and this is the only one we can state truthfully. Cohorts that arrived together share a timestamp, so it does not order models within a release.
+The response shape is standard: `{id, object, created, owned_by}`, where `owned_by` is always `deapi` (it read `depin` until November 2026). **`created` is the date the model first became available on this gateway**, not the date the model itself was built — the inference backend publishes no such date, and this is the only one we can state truthfully. Cohorts that arrived together share a timestamp, so it does not order models within a release.
 
 Entries used to report `0` unless the model was also listed on OpenRouter. Every model now carries a real timestamp.
 
@@ -192,18 +192,18 @@ Catalog reads are cached for 5 minutes, so a model added or removed on the deAPI
 {
   "object": "list",
   "data": [
-    {"id": "Flux1schnell", "object": "model", "created": 1776902400, "owned_by": "depin"},
-    {"id": "Kokoro", "object": "model", "created": 1776902400, "owned_by": "depin"},
-    {"id": "Bge_M3_FP16", "object": "model", "created": 1776902400, "owned_by": "depin"},
-    {"id": "QwenImageEdit_Plus_NF4", "object": "model", "created": 1776902400, "owned_by": "depin"},
-    {"id": "Ltx2_3_22B_Dist_INT8", "object": "model", "created": 1777334400, "owned_by": "depin"},
-    {"id": "WhisperLargeV3Ct2", "object": "model", "created": 1787011200, "owned_by": "depin"}
+    {"id": "Flux1schnell", "object": "model", "created": 1776902400, "owned_by": "deapi"},
+    {"id": "Kokoro", "object": "model", "created": 1776902400, "owned_by": "deapi"},
+    {"id": "Bge_M3_FP16", "object": "model", "created": 1776902400, "owned_by": "deapi"},
+    {"id": "QwenImageEdit_Plus_NF4", "object": "model", "created": 1776902400, "owned_by": "deapi"},
+    {"id": "Ltx2_3_22B_Dist_INT8", "object": "model", "created": 1777334400, "owned_by": "deapi"},
+    {"id": "WhisperLargeV3Ct2", "object": "model", "created": 1787011200, "owned_by": "deapi"}
   ]
 }
 ```
 
 ```json GET /v1/models/Flux1schnell → 200
-{"id": "Flux1schnell", "object": "model", "created": 1776902400, "owned_by": "depin"}
+{"id": "Flux1schnell", "object": "model", "created": 1776902400, "owned_by": "deapi"}
 ```
 
 ```json GET /v1/models/dall-e-3 → 404
@@ -220,7 +220,7 @@ Catalog reads are cached for 5 minutes, so a model added or removed on the deAPI
 For the full native catalog with capabilities, limits, defaults and LoRAs, use the [Model Selection endpoint](/api/v2/utilities/models) or the [Models guide](/models).
 
 <Warning>
-  **Partner models are native-only.** deAPI's catalog includes hosted partner models whose IDs look like the ones you already type — `gpt-image-1.5`, `gpt-image-2`, `nano-banana-2`. **None of them is routable through this gateway.** They are absent from `GET /v1/models` and every call naming one answers `404 model_not_found`, on `/v1/models/{model}` and on POST alike.
+  **Partner models are native-only.** deAPI's catalog includes hosted partner models whose IDs look like the ones you already type — `gpt-image-1.5`, `gpt-image-2`, `gpt-image-2.5`, `nano-banana-2`, `nano-banana-2.1`, and the video model `seedance-2.5`. **None of them is routable through this gateway.** They are absent from `GET /v1/models` and every call naming one answers `404 model_not_found`, on `/v1/models/{model}` and on POST alike.
 
   This trips people up in exactly one way: `gpt-image-2` is a real deAPI model *and* the natural thing to send to an OpenAI-shaped endpoint, so the `404` reads like an outage rather than a routing rule. Reach partner models through the [native API](/api/v2/overview); they are billed differently from the network models, which is the reason they are not folded in here.
 </Warning>
@@ -253,12 +253,12 @@ Three parameters change. Everything else — request format, response schema, er
 
 | If you were calling | Use instead |
 | --- | --- |
-| `dall-e-3`, `gpt-image-1` (generations) | `Flux1schnell`, `ZImageTurbo_INT8`, `ZAnimeDistill_8Step_INT8` |
+| `dall-e-3`, `gpt-image-1` (generations) | `Flux1schnell`, `Flux_2_Klein_4B_BF16`, `ZImageTurbo_INT8`, `ZAnimeDistill_8Step_INT8` |
 | `gpt-image-1` (edits) | `QwenImageEdit_Plus_NF4`, `Flux_2_Klein_4B_BF16` |
 | `tts-1`, `tts-1-hd`, `gpt-4o-mini-tts` | `Kokoro`, `Chatterbox`, `Qwen3_TTS_12Hz_1_7B_CustomVoice` |
 | `whisper-1`, `gpt-4o-transcribe` | `WhisperLargeV3`, `WhisperLargeV3Ct2` |
 | `text-embedding-3-small` | `Bge_M3_FP16` |
-| `sora-2` | `Ltx2_3_22B_Dist_INT8`, `MiniMaxH3_33B_Turbo_INT8`, `Ltxv_13B_0_9_8_Distilled_FP8` |
+| `sora-2` | `Ltx2_5_22B_Dist_INT8`, `Ltx2_3_22B_Dist_INT8`, `MiniMaxH3_33B_Turbo_INT8`, `Ltxv_13B_0_9_8_Distilled_FP8` |
 
 ---
 
@@ -337,6 +337,7 @@ img = client.images.generate(
 | `Flux1schnell` | `512x512`, `768x768`, `1024x1024`, `1024x1536`, `1536x1024` | 4 | Distilled: quality maps to 2 / 4 / 8 steps — not 50 |
 | `ZImageTurbo_INT8` | `512x512`, `768x768`, `1024x1024` | 4 | 6 / 8 / 16 steps |
 | `ZAnimeDistill_8Step_INT8` | `512x512`, `768x768`, `1024x1024` | 4 | Anime-oriented variant, 6 / 8 / 16 steps |
+| `Flux_2_Klein_4B_BF16` | Any `WxH` from 256 to 1536 px per side, in steps of 16 (e.g. `1024x1024`, `1536x1024`, `1024x1536`) | 2 | Distilled model with a fixed 4 steps. The same model also does [image editing](#image-editing) |
 
 | Field | Behaviour |
 | --- | --- |
@@ -720,7 +721,8 @@ The only family that is asynchronous for the client as well: `POST` returns imme
 | --- | --- | --- | --- | --- |
 | `Ltxv_13B_0_9_8_Distilled_FP8` | 1, 2, 3, 4 | `512x512`, `512x768`, `768x512`, `768x768` | 30 | Yes |
 | `Ltx2_3_22B_Dist_INT8` | 3, 4, 5, 6, 8, 10 | `768x768`, `768x1024`, `1024x768`, `1024x1024` | 24 | Yes |
-| `MiniMaxH3_33B_Turbo_INT8` | 8 | `1344x768` | 24 | Yes |
+| `Ltx2_5_22B_Dist_INT8` | 3, 4, 5, 6, 8, 10 | `768x768`, `1344x768`, `768x1344`, `1024x768`, `768x1024` | 24 | Yes |
+| `MiniMaxH3_33B_Turbo_INT8` | 8 | `1344x768`, `768x1344`, `1024x768`, `768x1024`, `768x768` | 24 | Yes |
 
 Each model validates `seconds` and `size` against its own list — the table is a union, not a menu that applies everywhere.
 
@@ -1161,6 +1163,16 @@ deAPI also runs models with no OpenAI counterpart at all — image and video ups
 
 ## Recent changes
 
+### Added — November 2026
+
+- **`Flux_2_Klein_4B_BF16` on `/v1/images/generations`.** It was documented for edits only. On generations it accepts any `size` from 256 to 1536 px per side in steps of 16, with `n` up to 2.
+- **`Ltx2_5_22B_Dist_INT8` on `/v1/videos`**, for text-to-video and image-to-video: 3–10 s at 24 fps, landscape and portrait up to `1344x768`.
+- **More sizes on `MiniMaxH3_33B_Turbo_INT8`:** `768x1344`, `1024x768`, `768x1024` and `768x768` in addition to `1344x768`.
+
+### Changed — `owned_by` is `deapi`
+
+`GET /v1/models` now reports `"owned_by": "deapi"` for every model. It used to be `"depin"`. If you filter the list on this value, update the filter.
+
 ### Changed — one key format for both APIs
 
 - **Keys look like `sk-dp-<id>-<secret>` and work here unchanged.** The gateway used to need a `dpn-sk-` prefix in front of the native key, which tools set up for OpenAI often left out. Older keys still work in their raw `<id>|<secret>` form and with the `dpn-sk-` prefix.
@@ -1169,7 +1181,7 @@ deAPI also runs models with no OpenAI counterpart at all — image and video ups
 
 ### Changed — unimplemented paths answer `404`, not `501`
 
-Every path this gateway does not serve — `GET /v1/videos`, `DELETE /v1/videos/{id}`, `/v1/videos/edits`, `/extensions`, `/{id}/remix`, `/characters`, `/v1/chat/completions`, `/v1/responses`, `/v1/files`, `/v1/moderations`, `/v1/audio/translations`, `/v1/images/variations`, and anything unrecognised under `/v1/*` — now answers **`404`** with `code: "endpoint_not_implemented"`. It used to answer `501`.
+Every path this gateway does not serve — `GET /v1/videos`, `DELETE /v1/videos/{id}`, `/v1/videos/edits`, `/extensions`, `/{id}/remix`, `/characters`, `/v1/responses`, `/v1/files`, `/v1/moderations`, `/v1/audio/translations`, `/v1/images/variations`, and anything unrecognised under `/v1/*` — now answers **`404`** with `code: "endpoint_not_implemented"`. It used to answer `501`.
 
 If you branched on the status code, that branch is now dead. Branch on `code` instead: it is the part that distinguishes "this gateway does not serve this path" from an ordinary `404` such as `model_not_found` or `video_not_found`. `501` survives in one place only — `variant_not_supported` on `/v1/videos/{id}/content`.
 
