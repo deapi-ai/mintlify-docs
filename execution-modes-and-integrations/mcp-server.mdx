@@ -48,9 +48,9 @@ The deAPI MCP server exposes the following tools:
 
 | Tool                            | Description                                                                                                          |
 | ------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
-| `text_to_image`                 | Generate images from text prompts using AI diffusion models (Flux, Z-Image-Turbo) — uses `/api/v2/images/generations` |
-| `image_to_image`                | Transform existing images using text prompts (style transfer, editing) — uses `/api/v2/images/edits`                 |
-| `image_to_text`                 | Extract text from images using OCR — uses `/api/v2/images/ocr`                                                       |
+| `text_to_image`                 | Generate images from text prompts (FLUX.1 Schnell, FLUX.2 Klein, Z-Image-Turbo, Z-Anime, and partner models such as GPT Image and Nano Banana) — uses `/api/v2/images/generations` |
+| `image_to_image`                | Edit existing images with a text prompt (FLUX.2 Klein, Qwen Image Edit, GPT Image). Pass several source images in `images` on models that combine them — uses `/api/v2/images/edits` |
+| `image_to_text`                 | Extract text from images using OCR (Nanonets OCR, LightOnOCR) — uses `/api/v2/images/ocr`                            |
 | `image_remove_background`       | Remove background from images (transparent PNG output) — uses `/api/v2/images/background-removals`                   |
 | `image_upscale`                 | Upscale images to higher resolution — uses `/api/v2/images/upscales`                                                 |
 | `text_to_image_price`           | Calculate price for text-to-image generation                                                                          |
@@ -64,19 +64,19 @@ The deAPI MCP server exposes the following tools:
 | Tool                             | Description                                                                                          |
 | -------------------------------- | ---------------------------------------------------------------------------------------------------- |
 | `text_to_video`                  | Generate videos from text prompts — uses `/api/v2/videos/generations`                                |
-| `image_to_video`                 | Animate static images into videos — uses `/api/v2/videos/animations`                                 |
+| `image_to_video`                 | Animate a start image (and optional end image) into a video, or build one from reference images, videos and audio (`ref_images`, `ref_videos`, `ref_audios`) on models that support references — uses `/api/v2/videos/animations` |
 | `audio_to_video`                 | Generate video conditioned on audio and text prompt — uses `/api/v2/videos/audio-syncs`              |
 | `video_upscale`                  | Upscale videos to higher resolution — uses `/api/v2/videos/upscales`                                 |
-| `video_remove_background`        | Remove background from videos — uses `/api/v2/videos/background-removals`                            |
-| `video_file_transcription`       | Transcribe uploaded video files to text — uses `/api/v2/audio/transcriptions`                        |
-| `video_url_transcription`        | Transcribe videos from URLs (YouTube, X, Twitch, TikTok, Kick) — uses `/api/v2/audio/transcriptions`. The tool defaults to `WhisperLargeV3`; for TikTok set `model` to `WhisperLargeV3Ct2`, which is cheaper for TikTok and returns empty text, rather than invented words, when a clip has no speech |
+| `video_file_transcription`       | Transcribe uploaded video files to text — uses `/api/v2/audio/transcriptions`. Defaults to `WhisperLargeV3Ct2` |
+| `video_url_transcription`        | Transcribe videos from URLs (YouTube, X, Twitch, TikTok, Kick) — uses `/api/v2/audio/transcriptions`. Defaults to `WhisperLargeV3Ct2`, which honours `lang`, supports word timestamps and `diarize`, and returns empty text, rather than invented words, when a clip has no speech |
+| `video_description`              | Describe what happens on screen as a timestamped index of events and scenes, from a video URL or an uploaded file (`Marlin_2B`, presets `fast` / `balanced` / `detail`) — uses `/api/v2/videos/descriptions` |
 | `text_to_video_price`            | Calculate price for text-to-video generation                                                          |
 | `image_to_video_price`           | Calculate price for image-to-video generation                                                         |
 | `audio_to_video_price`           | Calculate price for audio-to-video generation                                                         |
 | `video_upscale_price`            | Calculate price for video upscaling                                                                   |
-| `video_remove_background_price`  | Calculate price for video background removal                                                          |
 | `video_file_transcription_price` | Calculate price for video file transcription                                                          |
 | `video_url_transcription_price`  | Calculate price for video URL transcription                                                           |
+| `video_description_price`        | Calculate price for a video description (by URL, file, or `duration_seconds`)                         |
 
 #### Audio & Speech
 
@@ -84,8 +84,8 @@ The deAPI MCP server exposes the following tools:
 | ------------------------------- | ----------------------------------------------------- |
 | `text_to_audio`                 | Convert text to speech (TTS) with a preset voice, a voice cloned from `ref_audio`, or a voice designed from an `instruct` description. Each model supports one of these modes; leave `mode` unset and the tool uses the model's own |
 | `text_to_music`                 | Generate music tracks from text descriptions          |
-| `audio_transcription`           | Transcribe uploaded audio files to text using Whisper |
-| `audio_url_transcription`       | Transcribe audio from URLs (X/Twitter Spaces)         |
+| `audio_transcription`           | Transcribe uploaded audio files to text (defaults to `WhisperLargeV3Ct2`) |
+| `audio_url_transcription`       | Transcribe audio from URLs (X/Twitter Spaces), defaults to `WhisperLargeV3Ct2` |
 | `text_to_audio_price`           | Calculate price for text-to-speech                    |
 | `text_to_music_price`           | Calculate price for music generation                  |
 | `audio_transcription_price`     | Calculate price for audio file transcription          |
@@ -412,7 +412,27 @@ Point your MCP client to your server URL instead of the default `https://mcp.dea
 
 ### Supported Models
 
-The MCP server provides access to all deAPI models.
+The MCP server provides access to all deAPI models. The tools take the same model slugs as the [HTTP API](/api/v2/overview), so a model added to the catalogue becomes usable over MCP straight away, with no server update.
+
+| Tool | Models (slug) |
+| --- | --- |
+| `text_to_image` | `Flux_2_Klein_4B_BF16`, `Flux1schnell`, `ZImageTurbo_INT8`, `ZAnimeDistill_8Step_INT8` · partner: `gpt-image-1.5`, `gpt-image-2`, `gpt-image-2.5`, `nano-banana-2`, `nano-banana-2.1` |
+| `image_to_image` | `Flux_2_Klein_4B_BF16`, `QwenImageEdit_Plus_NF4` · partner: `gpt-image-1.5`, `gpt-image-2`, `gpt-image-2.5`, `nano-banana-2.1` |
+| `image_to_text` (OCR) | `Nanonets_Ocr_S_F16`, `LightOnOcr_3_4B_Q8` |
+| `image_remove_background` | `Ben2` |
+| `image_upscale` | `RealESRGAN_x4` |
+| `text_to_video`, `image_to_video` | `Ltx2_5_22B_Dist_INT8`, `Ltx2_3_22B_Dist_INT8`, `MiniMaxH3_33B_Turbo_INT8`, `Ltxv_13B_0_9_8_Distilled_FP8` · partner: `seedance-2.5` |
+| `audio_to_video` | `Ltx2_5_22B_Dist_INT8`, `Ltx2_3_22B_Dist_INT8` |
+| `video_upscale` | `RealESRGAN_Vid_x2`, `RealESRGAN_Vid_x4`, `FlashVSR_Tiny` |
+| `video_description` | `Marlin_2B` |
+| `text_to_audio` | `Kokoro`, `Chatterbox`, `Qwen3_TTS_12Hz_1_7B_CustomVoice`, `Qwen3_TTS_12Hz_1_7B_Base` (voice cloning), `Qwen3_TTS_12Hz_1_7B_VoiceDesign` |
+| `text_to_music` | `AceStep_1_5_XL_Turbo_INT8` (recommended), `AceStep_1_5_XL_Base_INT8` (recommended), `AceStep_1_5_Turbo` |
+| Transcription tools | `WhisperLargeV3Ct2` (default), `WhisperLargeV3` |
+| `text_to_embedding` | `Bge_M3_FP16` |
+
+<Note>
+  This table is a snapshot. The catalogue depends on your account: partner models require a Premium account, and some models are visible only to selected accounts. Treat `get_available_models` as the source of truth.
+</Note>
 
 Use the `get_available_models` tool to retrieve the full list with current specifications and limits. It returns the whole catalogue in one call, including the newest models. Tool descriptions also list each model's request bounds, and for TTS models the supported languages and voices.
 
