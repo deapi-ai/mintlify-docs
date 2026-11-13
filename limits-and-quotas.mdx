@@ -76,6 +76,7 @@ Basic accounts have conservative limits designed for testing and evaluation. For
 | `/api/v2/audio/music` | `MiniMaxMusic3_11B_INT8` | Read response headers | Read response headers |
 | `/api/v2/videos/generations`, `/api/v2/videos/animations` | `seedance-2.5` | Read response headers | Read response headers |
 | `/api/v2/videos/descriptions` | `Marlin_2B` | 1 | 10 |
+| `/api/v2/web/search`, `/api/v2/web/contents` | — | 2 | 50 |
 
 <Note>
   In v2 audio and video transcription use a single endpoint (`/api/v2/audio/transcriptions`). Check the limits for the selected model in the table above.
@@ -137,6 +138,7 @@ Premium accounts use the model-specific RPM and RPD limits below. Utility endpoi
 | `/api/v2/audio/transcriptions` | `WhisperLargeV3Ct2` | 16 | 4,600 |
 | `/api/v2/embeddings` | `Bge_M3_FP16` | 190 | 55,000 |
 | `/api/v2/videos/descriptions` | `Marlin_2B` | 5 | 1200 |
+| `/api/v2/web/search`, `/api/v2/web/contents` | — | 15 | 5,000 |
 
 <Info>
   Transcription limits depend on the selected model: `WhisperLargeV3` has 35 RPM / 11,000 RPD, and `WhisperLargeV3Ct2` has 16 RPM / 4,600 RPD. Both use `/api/v2/audio/transcriptions`.
@@ -152,7 +154,6 @@ Utility endpoints are limited generously rather than not at all, and they sit in
 
 - `/api/v2/account/balance` — 600 RPM (`X-RateLimit-Source: static`, identical for every account)
 - `/api/v2/models` — 300 RPM on Premium (`X-RateLimit-Source: tier`)
-
 Price calculation and job status use the following tier limits:
 
 | Endpoint | Basic RPM | Basic RPD | Premium RPM | Premium RPD |

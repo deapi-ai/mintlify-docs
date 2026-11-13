@@ -1,0 +1,12 @@
+---
+title: "Web Search Price Calculation"
+openapi: "/openapi.json POST /api/v2/web/search/price"
+---
+
+Estimate the cost of a web search before running it. Send the same body you would send to [Web Search](/api/v2/web/search) — it is validated the same way, so an invalid body returns the same 422. Nothing is charged.
+
+<Note>
+  Unlike the other `/price` endpoints, this one returns the price at the top level — `{"price": 0.0048}` — not inside `data`.
+</Note>
+
+The price depends on `mode`, `limit` and whether `summary` is requested. `text`, `excerpts`, filters and the query itself do not change it.

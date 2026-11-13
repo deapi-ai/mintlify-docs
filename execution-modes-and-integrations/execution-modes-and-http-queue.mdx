@@ -5,6 +5,10 @@ description: "How to receive job results via webhooks, WebSockets, or polling"
 
 All deAPI model endpoints use an **asynchronous job queue**. You submit a request, receive a `request_id`, and retrieve results using one of three methods:
 
+<Note>
+  The [Web Search](/api/v2/web/search) and [Web Contents](/api/v2/web/contents) endpoints are the exception: they are synchronous and return results directly in the response body, so webhooks, WebSockets and polling do not apply to them.
+</Note>
+
 <CardGroup cols={3}>
   <Card title="Webhooks" icon="bell" href="/execution-modes-and-integrations/webhooks">
     Results pushed to your server (recommended).

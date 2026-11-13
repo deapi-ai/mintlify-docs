@@ -61,6 +61,17 @@ All endpoints use base URL `https://api.deapi.ai` and require authentication via
 | `POST` | `/api/v2/embeddings` | Generate text embeddings | [→](/api/v2/embeddings/embeddings) |
 | `POST` | `/api/v2/embeddings/price` | Calculate embedding price | [→](/api/v2/embeddings/embeddings-price) |
 
+## Web
+
+Search the live web and read web pages. Unlike the model endpoints, these are **synchronous** — results come back in the response body, with no job to poll — and the response is not wrapped in `data`.
+
+| Method | Endpoint | Description | Docs |
+| --- | --- | --- | --- |
+| `POST` | `/api/v2/web/search` | Search the web, optionally with page text, excerpts and summaries | [→](/api/v2/web/search) |
+| `POST` | `/api/v2/web/search/price` | Calculate web search price | [→](/api/v2/web/search-price) |
+| `POST` | `/api/v2/web/contents` | Read up to 20 URLs as clean text, excerpts or summaries | [→](/api/v2/web/contents) |
+| `POST` | `/api/v2/web/contents/price` | Calculate web contents price | [→](/api/v2/web/contents-price) |
+
 ## Prompt Enhancement
 
 AI-powered prompt boosters. In v2 all boosters use a single unified endpoint — select the booster with the `type` field (dot notation) and the target model via `model_slug`.
@@ -84,7 +95,7 @@ AI-powered prompt boosters. In v2 all boosters use a single unified endpoint —
 
 ## Workflow
 
-Typical API usage follows this pattern:
+Typical usage of the model endpoints follows this pattern (the [Web](#web) endpoints and the prompt booster answer synchronously and skip steps 4–5):
 
 <Steps>
   <Step title="Check available models">

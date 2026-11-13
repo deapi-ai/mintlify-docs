@@ -2558,6 +2558,476 @@
                 ]
             }
         },
+        "/api/v2/web/search": {
+            "post": {
+                "tags": [
+                    "Client API v2"
+                ],
+                "summary": "Search the web",
+                "description": "Search the live web and get ranked results — optionally with each page's text, the most relevant excerpts and an AI-written summary — in a single synchronous call. The response is returned directly: there is no `request_id` to poll, no webhook and no job status. The amount charged is returned in `cost`.",
+                "operationId": "webSearch",
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/AcceptHeader"
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/WebSearchRequestBody"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Search results.",
+                        "headers": {
+                            "X-RateLimit-Policy": {
+                                "$ref": "#/components/headers/X-RateLimit-Policy"
+                            },
+                            "X-RateLimit-Source": {
+                                "$ref": "#/components/headers/X-RateLimit-Source"
+                            },
+                            "X-RateLimit-Limit": {
+                                "$ref": "#/components/headers/X-RateLimit-Limit"
+                            },
+                            "X-RateLimit-Remaining": {
+                                "$ref": "#/components/headers/X-RateLimit-Remaining"
+                            },
+                            "X-RateLimit-Reset": {
+                                "$ref": "#/components/headers/X-RateLimit-Reset"
+                            },
+                            "X-RateLimit-Daily-Limit": {
+                                "$ref": "#/components/headers/X-RateLimit-Daily-Limit"
+                            },
+                            "X-RateLimit-Daily-Remaining": {
+                                "$ref": "#/components/headers/X-RateLimit-Daily-Remaining"
+                            },
+                            "X-RateLimit-Daily-Reset": {
+                                "$ref": "#/components/headers/X-RateLimit-Daily-Reset"
+                            }
+                        },
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/WebSearchResponse"
+                                },
+                                "examples": {
+                                    "quick": {
+                                        "summary": "Quick search",
+                                        "value": {
+                                            "request_id": "ba1e1b58-a12c-4f83-9ec7-572e301fa1c2",
+                                            "cost": 0.0048,
+                                            "results": [
+                                                {
+                                                    "url": "https://huggingface.co/models?pipeline_tag=text-to-image",
+                                                    "title": "Text-to-Image Models – Hugging Face"
+                                                },
+                                                {
+                                                    "url": "https://fluence.ai/blog/best-open-source-text-to-image-models/",
+                                                    "title": "12 Best Open Source Image Generation Models (in 2026)",
+                                                    "published_at": "2026-10-20T08:48:00+00:00",
+                                                    "author": "Fluence"
+                                                }
+                                            ]
+                                        }
+                                    },
+                                    "with_content": {
+                                        "summary": "Balanced search with text, excerpts and summary",
+                                        "value": {
+                                            "request_id": "dc260284-883c-44be-b61b-ef82a3486a50",
+                                            "cost": 0.012,
+                                            "results": [
+                                                {
+                                                    "url": "https://bfl.ai/blog/flux-2",
+                                                    "title": "FLUX.2: Frontier Visual Intelligence | Black Forest Labs",
+                                                    "published_at": "2025-11-25T15:11:07+00:00",
+                                                    "image": "https://bfl.ai/api/og/blog/flux-2",
+                                                    "text": "FLUX.2: Frontier Visual Intelligence | Black Forest Labs\n\n# FLUX.2: Frontier Visual Intelligence\n\nNovember 25, 2025 5 min read ...",
+                                                    "excerpts": [
+                                                        "# FLUX.2: Frontier Visual Intelligence\n\nFLUX.2 is designed for real-world creative workflows ..."
+                                                    ],
+                                                    "summary": "FLUX.2 introduces several major enhancements for real-world creative workflows: multi-reference support ..."
+                                                }
+                                            ]
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Missing, unknown, expired or deactivated key — `code` says which: `missing_key`, `invalid_key`, `key_expired` or `key_revoked`.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/response_error_default"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not found.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/response_error_default"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationError"
+                    },
+                    "429": {
+                        "$ref": "#/components/responses/RateLimitExceeded"
+                    },
+                    "402": {
+                        "$ref": "#/components/responses/KeyLimitExceeded"
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/AccountSuspended"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v2/web/search/price": {
+            "post": {
+                "tags": [
+                    "Client API v2"
+                ],
+                "summary": "Estimate the price of a web search",
+                "description": "Estimate what a web search would cost. Accepts the same body as `POST /api/v2/web/search` and validates it the same way. Nothing is charged.",
+                "operationId": "estimateWebSearchPrice",
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/AcceptHeader"
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/WebSearchRequestBody"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Calculated price.",
+                        "headers": {
+                            "X-RateLimit-Policy": {
+                                "$ref": "#/components/headers/X-RateLimit-Policy"
+                            },
+                            "X-RateLimit-Source": {
+                                "$ref": "#/components/headers/X-RateLimit-Source"
+                            },
+                            "X-RateLimit-Limit": {
+                                "$ref": "#/components/headers/X-RateLimit-Limit"
+                            },
+                            "X-RateLimit-Remaining": {
+                                "$ref": "#/components/headers/X-RateLimit-Remaining"
+                            },
+                            "X-RateLimit-Reset": {
+                                "$ref": "#/components/headers/X-RateLimit-Reset"
+                            },
+                            "X-RateLimit-Daily-Limit": {
+                                "$ref": "#/components/headers/X-RateLimit-Daily-Limit"
+                            },
+                            "X-RateLimit-Daily-Remaining": {
+                                "$ref": "#/components/headers/X-RateLimit-Daily-Remaining"
+                            },
+                            "X-RateLimit-Daily-Reset": {
+                                "$ref": "#/components/headers/X-RateLimit-Daily-Reset"
+                            }
+                        },
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/WebPriceResponse"
+                                },
+                                "examples": {
+                                    "quick": {
+                                        "summary": "Quick search, up to 10 results",
+                                        "value": {
+                                            "price": 0.0048
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Missing, unknown, expired or deactivated key — `code` says which: `missing_key`, `invalid_key`, `key_expired` or `key_revoked`.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/response_error_default"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not found.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/response_error_default"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationError"
+                    },
+                    "429": {
+                        "$ref": "#/components/responses/RateLimitExceeded"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v2/web/contents": {
+            "post": {
+                "tags": [
+                    "Client API v2"
+                ],
+                "summary": "Read web pages",
+                "description": "Fetch up to 20 URLs and get clean page text, the most relevant excerpts and/or an AI-written summary of each — in a single synchronous call. Request at least one of `text`, `excerpts` or `summary`. Each page reports its own `status`; pages that could not be read are not charged. The response is returned directly — there is no job to poll.",
+                "operationId": "webContents",
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/AcceptHeader"
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/WebContentsRequestBody"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Page contents, one entry per requested URL.",
+                        "headers": {
+                            "X-RateLimit-Policy": {
+                                "$ref": "#/components/headers/X-RateLimit-Policy"
+                            },
+                            "X-RateLimit-Source": {
+                                "$ref": "#/components/headers/X-RateLimit-Source"
+                            },
+                            "X-RateLimit-Limit": {
+                                "$ref": "#/components/headers/X-RateLimit-Limit"
+                            },
+                            "X-RateLimit-Remaining": {
+                                "$ref": "#/components/headers/X-RateLimit-Remaining"
+                            },
+                            "X-RateLimit-Reset": {
+                                "$ref": "#/components/headers/X-RateLimit-Reset"
+                            },
+                            "X-RateLimit-Daily-Limit": {
+                                "$ref": "#/components/headers/X-RateLimit-Daily-Limit"
+                            },
+                            "X-RateLimit-Daily-Remaining": {
+                                "$ref": "#/components/headers/X-RateLimit-Daily-Remaining"
+                            },
+                            "X-RateLimit-Daily-Reset": {
+                                "$ref": "#/components/headers/X-RateLimit-Daily-Reset"
+                            }
+                        },
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/WebContentsResponse"
+                                },
+                                "examples": {
+                                    "mixed": {
+                                        "summary": "One page read, one not found, one unreachable",
+                                        "value": {
+                                            "request_id": "72e1b519-fefb-4fc0-8f43-126d73f776cb",
+                                            "cost": 0.0012,
+                                            "results": [
+                                                {
+                                                    "url": "https://example.com",
+                                                    "status": "ok",
+                                                    "title": "Example Domain",
+                                                    "text": "Example Domain\n\nThis domain is for use in documentation examples ..."
+                                                },
+                                                {
+                                                    "url": "https://deapi.ai/nonexistent-page",
+                                                    "status": "not_found"
+                                                },
+                                                {
+                                                    "url": "https://unreachable.example/page",
+                                                    "status": "unknown"
+                                                }
+                                            ]
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Missing, unknown, expired or deactivated key — `code` says which: `missing_key`, `invalid_key`, `key_expired` or `key_revoked`.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/response_error_default"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not found.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/response_error_default"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationError"
+                    },
+                    "429": {
+                        "$ref": "#/components/responses/RateLimitExceeded"
+                    },
+                    "402": {
+                        "$ref": "#/components/responses/KeyLimitExceeded"
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/AccountSuspended"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v2/web/contents/price": {
+            "post": {
+                "tags": [
+                    "Client API v2"
+                ],
+                "summary": "Estimate the price of reading web pages",
+                "description": "Estimate what a web contents request would cost, assuming every URL can be read. Accepts the same body as `POST /api/v2/web/contents` and validates it the same way. Nothing is charged.",
+                "operationId": "estimateWebContentsPrice",
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/AcceptHeader"
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/WebContentsRequestBody"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Calculated price.",
+                        "headers": {
+                            "X-RateLimit-Policy": {
+                                "$ref": "#/components/headers/X-RateLimit-Policy"
+                            },
+                            "X-RateLimit-Source": {
+                                "$ref": "#/components/headers/X-RateLimit-Source"
+                            },
+                            "X-RateLimit-Limit": {
+                                "$ref": "#/components/headers/X-RateLimit-Limit"
+                            },
+                            "X-RateLimit-Remaining": {
+                                "$ref": "#/components/headers/X-RateLimit-Remaining"
+                            },
+                            "X-RateLimit-Reset": {
+                                "$ref": "#/components/headers/X-RateLimit-Reset"
+                            },
+                            "X-RateLimit-Daily-Limit": {
+                                "$ref": "#/components/headers/X-RateLimit-Daily-Limit"
+                            },
+                            "X-RateLimit-Daily-Remaining": {
+                                "$ref": "#/components/headers/X-RateLimit-Daily-Remaining"
+                            },
+                            "X-RateLimit-Daily-Reset": {
+                                "$ref": "#/components/headers/X-RateLimit-Daily-Reset"
+                            }
+                        },
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/WebPriceResponse"
+                                },
+                                "examples": {
+                                    "text": {
+                                        "summary": "One URL, text only",
+                                        "value": {
+                                            "price": 0.0012
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Missing, unknown, expired or deactivated key — `code` says which: `missing_key`, `invalid_key`, `key_expired` or `key_revoked`.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/response_error_default"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not found.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/response_error_default"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationError"
+                    },
+                    "429": {
+                        "$ref": "#/components/responses/RateLimitExceeded"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
         "/api/v2/videos/generations/price": {
             "post": {
                 "tags": [
@@ -9530,6 +10000,367 @@
                     }
                 },
                 "type": "object"
+            },
+            "WebTextOption": {
+                "description": "Return the page as clean text (Markdown-like). `true` uses the default length cap of 20,000 characters; an object lets you set your own cap. Longer pages are cut at the cap.",
+                "oneOf": [
+                    {
+                        "type": "boolean"
+                    },
+                    {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "properties": {
+                            "max_length": {
+                                "description": "Maximum number of characters of text returned per page.",
+                                "type": "integer",
+                                "minimum": 1,
+                                "maximum": 100000,
+                                "example": 5000
+                            }
+                        }
+                    }
+                ],
+                "example": {
+                    "max_length": 5000
+                }
+            },
+            "WebExcerptsOption": {
+                "description": "Return the passages of the page most relevant to your search (or to `query`, if you set one). `true` ranks passages against the search query; on the contents endpoint, which has no search query, pass an object with `query` to steer the selection.",
+                "oneOf": [
+                    {
+                        "type": "boolean"
+                    },
+                    {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "properties": {
+                            "query": {
+                                "description": "What the excerpts should be about.",
+                                "type": "string",
+                                "minLength": 1,
+                                "maxLength": 2000,
+                                "example": "pricing"
+                            }
+                        }
+                    }
+                ],
+                "example": true
+            },
+            "WebSummaryOption": {
+                "description": "Return a short AI-written summary of each page. `true` writes a general summary; an object with `query` focuses the summary on a question. Billed per page (see pricing).",
+                "oneOf": [
+                    {
+                        "type": "boolean"
+                    },
+                    {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "properties": {
+                            "query": {
+                                "description": "Question or angle the summary should answer.",
+                                "type": "string",
+                                "minLength": 1,
+                                "maxLength": 2000,
+                                "example": "What does this company offer?"
+                            }
+                        }
+                    }
+                ],
+                "example": {
+                    "query": "What does this company offer?"
+                }
+            },
+            "WebSearchRequestBody": {
+                "type": "object",
+                "required": [
+                    "query"
+                ],
+                "properties": {
+                    "query": {
+                        "description": "What to search for, in natural language or as keywords.",
+                        "type": "string",
+                        "maxLength": 2000,
+                        "example": "open source text to image models 2026"
+                    },
+                    "mode": {
+                        "description": "`quick` is the fastest and cheapest; `balanced` takes a little longer, returns better-ranked results and is the only mode that can return `summary`. Defaults to `balanced`.",
+                        "type": "string",
+                        "enum": [
+                            "quick",
+                            "balanced"
+                        ],
+                        "default": "balanced",
+                        "example": "quick"
+                    },
+                    "limit": {
+                        "description": "Maximum number of results. The base price covers up to 10 results; every result above 10 adds to the price.",
+                        "type": "integer",
+                        "minimum": 1,
+                        "maximum": 25,
+                        "default": 10,
+                        "example": 5
+                    },
+                    "include": {
+                        "description": "Page content to return with each result. Leave it out to get only `url`, `title` and the metadata the page exposes.",
+                        "type": "object",
+                        "additionalProperties": false,
+                        "properties": {
+                            "text": {
+                                "$ref": "#/components/schemas/WebTextOption"
+                            },
+                            "excerpts": {
+                                "$ref": "#/components/schemas/WebExcerptsOption"
+                            },
+                            "summary": {
+                                "allOf": [
+                                    {
+                                        "$ref": "#/components/schemas/WebSummaryOption"
+                                    }
+                                ],
+                                "description": "AI-written summary of each result. Only available in `balanced` mode — in `quick` mode the request is refused with 422 (`include.summary`)."
+                            }
+                        }
+                    },
+                    "only_domains": {
+                        "description": "Return results from these domains only. Bare hostnames such as `deapi.ai` or `docs.deapi.ai` — no scheme, path, port or wildcard.",
+                        "type": "array",
+                        "maxItems": 50,
+                        "items": {
+                            "type": "string",
+                            "example": "deapi.ai"
+                        },
+                        "example": [
+                            "deapi.ai",
+                            "docs.deapi.ai"
+                        ]
+                    },
+                    "country": {
+                        "description": "Bias results towards a country. ISO 3166-1 alpha-2 code, case-insensitive (e.g. `US`, `DE`, `PL`).",
+                        "type": "string",
+                        "minLength": 2,
+                        "maxLength": 2,
+                        "example": "US"
+                    },
+                    "published_after": {
+                        "description": "Only results published on or after this date (ISO 8601 date or date-time).",
+                        "type": "string",
+                        "format": "date",
+                        "example": "2026-01-01"
+                    },
+                    "published_before": {
+                        "description": "Only results published on or before this date (ISO 8601 date or date-time). Must not be earlier than `published_after`.",
+                        "type": "string",
+                        "format": "date",
+                        "example": "2026-11-01"
+                    }
+                }
+            },
+            "WebContentsRequestBody": {
+                "type": "object",
+                "required": [
+                    "urls"
+                ],
+                "description": "Request at least one of `text`, `excerpts` or `summary` — a request with none of them is refused with 422.",
+                "properties": {
+                    "urls": {
+                        "description": "Pages to read. Full URLs including the scheme (`https://…`).",
+                        "type": "array",
+                        "minItems": 1,
+                        "maxItems": 20,
+                        "items": {
+                            "type": "string",
+                            "format": "uri"
+                        },
+                        "example": [
+                            "https://deapi.ai"
+                        ]
+                    },
+                    "text": {
+                        "$ref": "#/components/schemas/WebTextOption"
+                    },
+                    "excerpts": {
+                        "$ref": "#/components/schemas/WebExcerptsOption"
+                    },
+                    "summary": {
+                        "$ref": "#/components/schemas/WebSummaryOption"
+                    }
+                }
+            },
+            "WebSearchResult": {
+                "type": "object",
+                "required": [
+                    "url"
+                ],
+                "description": "One search hit. Every field except `url` is optional and omitted (not null) when unavailable.",
+                "properties": {
+                    "url": {
+                        "description": "Page URL.",
+                        "type": "string",
+                        "format": "uri",
+                        "example": "https://deapi.ai/"
+                    },
+                    "title": {
+                        "description": "Page title. Omitted when the page has none.",
+                        "type": "string",
+                        "example": "deAPI - One API for Open Source Generative AI Models"
+                    },
+                    "published_at": {
+                        "description": "Publication date, when the page exposes one. Omitted otherwise.",
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2026-10-20T08:48:00+00:00"
+                    },
+                    "author": {
+                        "description": "Author, when the page exposes one. Omitted otherwise.",
+                        "type": "string",
+                        "example": "deAPI"
+                    },
+                    "image": {
+                        "description": "Representative image (e.g. the Open Graph image), when the page has one. Omitted otherwise.",
+                        "type": "string",
+                        "format": "uri",
+                        "example": "https://deapi.ai/images/og/og-deapi.jpg"
+                    },
+                    "text": {
+                        "description": "Page text, present when `text` was requested. Cut at `max_length` (default 20,000 characters).",
+                        "type": "string"
+                    },
+                    "excerpts": {
+                        "description": "Most relevant passages, present when `excerpts` was requested.",
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "summary": {
+                        "description": "AI-written summary, present when `summary` was requested.",
+                        "type": "string"
+                    }
+                }
+            },
+            "WebContentsResult": {
+                "type": "object",
+                "required": [
+                    "url",
+                    "status"
+                ],
+                "description": "One requested page, in the order of `urls`. Optional fields are omitted (not null) when unavailable.",
+                "properties": {
+                    "url": {
+                        "description": "Page URL.",
+                        "type": "string",
+                        "format": "uri",
+                        "example": "https://deapi.ai/"
+                    },
+                    "status": {
+                        "description": "`ok` — the page was read and the requested content is present. `not_found` — the page returned 404. `unknown` — the page could not be read for another reason (unreachable host, server error, blocked). Pages that are not `ok` carry only `url` and `status`, and are not charged.",
+                        "type": "string",
+                        "enum": [
+                            "ok",
+                            "not_found",
+                            "unknown"
+                        ],
+                        "example": "ok"
+                    },
+                    "title": {
+                        "description": "Page title. Omitted when the page has none.",
+                        "type": "string",
+                        "example": "deAPI - One API for Open Source Generative AI Models"
+                    },
+                    "published_at": {
+                        "description": "Publication date, when the page exposes one. Omitted otherwise.",
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2026-10-20T08:48:00+00:00"
+                    },
+                    "author": {
+                        "description": "Author, when the page exposes one. Omitted otherwise.",
+                        "type": "string",
+                        "example": "deAPI"
+                    },
+                    "image": {
+                        "description": "Representative image (e.g. the Open Graph image), when the page has one. Omitted otherwise.",
+                        "type": "string",
+                        "format": "uri",
+                        "example": "https://deapi.ai/images/og/og-deapi.jpg"
+                    },
+                    "text": {
+                        "description": "Page text, present when `text` was requested. Cut at `max_length` (default 20,000 characters).",
+                        "type": "string"
+                    },
+                    "excerpts": {
+                        "description": "Most relevant passages, present when `excerpts` was requested.",
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "summary": {
+                        "description": "AI-written summary, present when `summary` was requested.",
+                        "type": "string"
+                    }
+                }
+            },
+            "WebSearchResponse": {
+                "type": "object",
+                "description": "Returned directly — there is no `data` envelope and no job to poll.",
+                "properties": {
+                    "request_id": {
+                        "description": "Identifier of this request, useful when contacting support.",
+                        "type": "string",
+                        "format": "uuid",
+                        "example": "ba1e1b58-a12c-4f83-9ec7-572e301fa1c2"
+                    },
+                    "cost": {
+                        "description": "What this request was charged, in USD. Matches the amount deducted from the balance and reported by the usage endpoints.",
+                        "type": "number",
+                        "format": "float",
+                        "example": 0.0048
+                    },
+                    "results": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/WebSearchResult"
+                        }
+                    }
+                }
+            },
+            "WebContentsResponse": {
+                "type": "object",
+                "description": "Returned directly — there is no `data` envelope and no job to poll.",
+                "properties": {
+                    "request_id": {
+                        "description": "Identifier of this request, useful when contacting support.",
+                        "type": "string",
+                        "format": "uuid",
+                        "example": "ba1e1b58-a12c-4f83-9ec7-572e301fa1c2"
+                    },
+                    "cost": {
+                        "description": "What this request was charged, in USD. Matches the amount deducted from the balance and reported by the usage endpoints.",
+                        "type": "number",
+                        "format": "float",
+                        "example": 0.0048
+                    },
+                    "results": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/WebContentsResult"
+                        }
+                    }
+                }
+            },
+            "WebPriceResponse": {
+                "type": "object",
+                "description": "Unlike the other price endpoints, the price is returned at the top level, not inside `data`.",
+                "properties": {
+                    "price": {
+                        "description": "What the request would cost, in USD. A quote only — nothing is charged by this endpoint.",
+                        "type": "number",
+                        "format": "float",
+                        "example": 0.0048
+                    }
+                }
             }
         },
         "responses": {

@@ -245,6 +245,15 @@
             ]
           },
           {
+            "group": "Web",
+            "pages": [
+              "api/v2/web/search",
+              "api/v2/web/search-price",
+              "api/v2/web/contents",
+              "api/v2/web/contents-price"
+            ]
+          },
+          {
             "group": "Prompt Enhancement",
             "pages": [
               "api/v2/prompt-enhancement/overview",

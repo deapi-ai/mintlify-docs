@@ -1,0 +1,86 @@
+---
+title: "Web Search"
+openapi: "/openapi.json POST /api/v2/web/search"
+---
+
+Search the live web and get ranked results in a single call — optionally with each page's clean text, the passages most relevant to your query, and an AI-written summary. Built for AI agents, RAG pipelines and research tools that need fresh, citable sources.
+
+<Info>
+  **Synchronous.** Results come back in the response body. There is no `request_id` to poll, no webhook and no job status — `request_id` in the response is only an identifier for support. The amount charged is returned in `cost`.
+</Info>
+
+### Modes
+
+| `mode` | Use it for | `summary` |
+| --- | --- | --- |
+| `quick` | Lowest latency and price — autocomplete, agent tool calls, fact lookups | Not available (422) |
+| `balanced` (default) | Better-ranked results for research and RAG | Available |
+
+### Getting page content with the results
+
+Leave `include` out to get only `url`, `title` and whatever metadata the page exposes (`published_at`, `author`, `image`). Add any of these to `include` to get page content in the same call:
+
+- **`text`** — the page as clean text. `true` returns up to 20,000 characters; `{"max_length": 5000}` sets your own cap (1–100,000).
+- **`excerpts`** — the passages most relevant to your `query`. `{"query": "..."}` steers them towards a different question.
+- **`summary`** — an AI-written summary of each result (`balanced` mode only). `{"query": "..."}` focuses it on a question.
+
+Optional fields are **omitted** from a result when the page does not provide them — check for presence rather than `null`.
+
+### Filters
+
+- **`only_domains`** — up to 50 bare hostnames (`deapi.ai`, `docs.deapi.ai`). No scheme, path, port or wildcard.
+- **`country`** — ISO 3166-1 alpha-2 code (`US`, `DE`, `PL`) to bias results towards a country.
+- **`published_after`** / **`published_before`** — ISO 8601 dates; `published_before` cannot be earlier than `published_after`.
+
+### Example
+
+```bash
+curl -X POST "https://api.deapi.ai/api/v2/web/search" \
+  -H "Authorization: Bearer $DEAPI_API_KEY" \
+  -H "Accept: application/json" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "query": "FLUX.2 image model release",
+    "mode": "balanced",
+    "limit": 3,
+    "include": {
+      "text": { "max_length": 2000 },
+      "excerpts": true,
+      "summary": { "query": "What is new in this model?" }
+    }
+  }'
+```
+
+```json Response
+{
+  "request_id": "dc260284-883c-44be-b61b-ef82a3486a50",
+  "cost": 0.012,
+  "results": [
+    {
+      "url": "https://bfl.ai/blog/flux-2",
+      "title": "FLUX.2: Frontier Visual Intelligence | Black Forest Labs",
+      "published_at": "2025-11-25T15:11:07+00:00",
+      "image": "https://bfl.ai/api/og/blog/flux-2",
+      "text": "FLUX.2: Frontier Visual Intelligence ...",
+      "excerpts": ["FLUX.2 is designed for real-world creative workflows ..."],
+      "summary": "FLUX.2 introduces several major enhancements ..."
+    }
+  ]
+}
+```
+
+### Pricing
+
+| Component | Price |
+| --- | --- |
+| `quick` search, up to 10 results | 0.0048 USD |
+| `balanced` search, up to 10 results | 0.0084 USD |
+| Each result above 10 (`limit` 11–25) | \+0.0012 USD |
+| `summary` | \+0.0012 USD per result (counted from `limit`) |
+| `text`, `excerpts` | Included |
+
+Use [Web Search Price](/api/v2/web/search-price) to get the exact quote for a request body. See also [Pricing](/pricing).
+
+<Tip>
+  Already have the URLs? Use [Web Contents](/api/v2/web/contents) to read specific pages instead of searching.
+</Tip>
