@@ -1,0 +1,81 @@
+---
+title: "Web Contents"
+openapi: "/openapi.json POST /api/v2/web/contents"
+---
+
+Read up to 20 web pages in one call and get each page's clean text, its most relevant excerpts and/or an AI-written summary — ready to pass to an LLM. Useful for RAG ingestion, link previews, monitoring and agent "open this page" tools.
+
+<Info>
+  **Synchronous.** Page contents come back in the response body — there is no job to poll and no webhook. The amount charged is returned in `cost`.
+</Info>
+
+### What to request
+
+Send at least one of these; a request with none of them is refused with **422**.
+
+- **`text`** — the page as clean text. `true` returns up to 20,000 characters; `{"max_length": 50000}` sets your own cap (1–100,000).
+- **`excerpts`** — the most relevant passages. Pass `{"query": "..."}` to say what they should be about.
+- **`summary`** — an AI-written summary. Pass `{"query": "..."}` to focus it on a question.
+
+### Per-page status
+
+Results come back in the same order as `urls`, each with its own `status`:
+
+| `status` | Meaning |
+| --- | --- |
+| `ok` | The page was read; the requested fields are present. |
+| `not_found` | The page returned 404. |
+| `unknown` | The page could not be read for another reason — unreachable host, server error or blocked. |
+
+Pages that are not `ok` carry only `url` and `status` and **are not charged** — `cost` covers only the pages that were read. One failed URL does not fail the whole request.
+
+### Example
+
+```bash
+curl -X POST "https://api.deapi.ai/api/v2/web/contents" \
+  -H "Authorization: Bearer $DEAPI_API_KEY" \
+  -H "Accept: application/json" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "urls": ["https://deapi.ai", "https://deapi.ai/nonexistent-page"],
+    "text": { "max_length": 2000 },
+    "summary": { "query": "What does this company offer?" }
+  }'
+```
+
+```json Response
+{
+  "request_id": "ddb2e452-de33-4eb3-9763-8d339794bc4a",
+  "cost": 0.0024,
+  "results": [
+    {
+      "url": "https://deapi.ai",
+      "status": "ok",
+      "title": "deAPI - One API for Open Source Generative AI Models",
+      "image": "https://deapi.ai/images/og/og-deapi.jpg",
+      "text": "deAPI - One API for Open Source Generative AI Models ...",
+      "summary": "deAPI offers a single, unified REST API to access 100+ open-source generative AI models ..."
+    },
+    {
+      "url": "https://deapi.ai/nonexistent-page",
+      "status": "not_found"
+    }
+  ]
+}
+```
+
+### Pricing
+
+**0.0012 USD per page for each content type requested** — `text`, `excerpts` and `summary` each count once per page that was read.
+
+| Request | Price per page read |
+| --- | --- |
+| One of `text`, `excerpts`, `summary` | 0.0012 USD |
+| Two of them | 0.0024 USD |
+| All three | 0.0036 USD |
+
+Use [Web Contents Price](/api/v2/web/contents-price) to get a quote. See also [Pricing](/pricing).
+
+<Tip>
+  Need to find the pages first? [Web Search](/api/v2/web/search) can return `text`, `excerpts` and `summary` for its results in the same call.
+</Tip>

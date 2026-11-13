@@ -31,6 +31,8 @@ Example pricing is shown below for reference; exact, up-to-date rates are always
 | Image Background Removal | per image | Use `/price` endpoint | `POST /api/v2/images/background-removals` |
 | Image Upscale | resolution × scale | Use `/price` endpoint | `POST /api/v2/images/upscales` |
 | Video Upscale | resolution × duration × scale | Use `/price` endpoint | `POST /api/v2/videos/upscales` |
+| Web Search | mode \+ number of results | 0.0048 USD (`quick`) / 0.0084 USD (`balanced`) per search, up to 10 results | `POST /api/v2/web/search` |
+| Web Contents | pages read × content types | 0.0012 USD per page per content type | `POST /api/v2/web/contents` |
 
 ---
 
@@ -157,6 +159,26 @@ Every other source — YouTube, X, Twitch, Kick, uploaded files — is billed by
 - Embeddings are typically used for semantic search, retrieval-augmented generation (RAG), clustering, and similarity matching.
 - Costs scale linearly with token count, making it efficient even at large volumes.
 - Important: Different embedding models may have varying dimensionality (e.g. 768 vs. 1024), but pricing is standardized per token for simplicity.
+
+**Web Search and Contents**
+
+Both endpoints are synchronous and return the amount charged in the `cost` field of the response.
+
+[Web Search](/api/v2/web/search) (`POST /api/v2/web/search`):
+
+- **0.0048 USD** per `quick` search and **0.0084 USD** per `balanced` search, covering up to 10 results.
+- Each result above 10 (`limit` 11–25) adds **0.0012 USD**.
+- `summary` (balanced mode only) adds **0.0012 USD** per result, counted from `limit`.
+- `text` and `excerpts` are included at no extra cost.
+- Example: `balanced`, `limit: 25`, with `summary` → 0.0084 \+ 15 × 0.0012 \+ 25 × 0.0012 = **0.0564 USD**.
+
+[Web Contents](/api/v2/web/contents) (`POST /api/v2/web/contents`):
+
+- **0.0012 USD** per page for each content type requested — `text`, `excerpts` and `summary` each count once per page.
+- Pages that cannot be read (`status` `not_found` or `unknown`) are not charged.
+- Example: 5 URLs with `text` and `summary`, all read → 5 × 2 × 0.0012 = **0.012 USD**.
+
+Use `POST /api/v2/web/search/price` and `POST /api/v2/web/contents/price` for an exact quote.
 
 **Video Upscale**
 

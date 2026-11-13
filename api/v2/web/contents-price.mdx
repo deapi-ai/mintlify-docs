@@ -1,0 +1,12 @@
+---
+title: "Web Contents Price Calculation"
+openapi: "/openapi.json POST /api/v2/web/contents/price"
+---
+
+Estimate the cost of reading web pages before running the request. Send the same body you would send to [Web Contents](/api/v2/web/contents) — it is validated the same way. Nothing is charged.
+
+<Note>
+  Unlike the other `/price` endpoints, this one returns the price at the top level — `{"price": 0.0012}` — not inside `data`.
+</Note>
+
+The quote assumes every URL can be read. Pages that come back as `not_found` or `unknown` are not charged, so the actual `cost` can be lower than the quote, never higher.
