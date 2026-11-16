@@ -129,9 +129,9 @@ A failed job is normally refunded — `refunded: true` and `price.amount: 0`. No
 - The band is selected from the **whole video length, rounded up**: a 1:05 clip falls into the _up to 2 min_ band and costs 0.0225 USD.
 - The _over 10 min_ band is flat — a 12-minute and a 30-minute TikTok both cost 0.105 USD.
 
-Every other source — YouTube, X, Twitch, Kick, uploaded files — is billed by duration and runs on either model.
+Every other source — YouTube, X, Twitch, Kick, uploaded files — is billed by duration.
 
-**Segment timestamps are free.** `include_ts: true` with the default `ts_level: "segment"` costs the same as a plain transcription. On `WhisperLargeV3Ct2` only word-level timestamps (`ts_level: "word"`) and speaker diarization (`diarize: true`) add **+50%** to the transcription price — diarization carries that surcharge at any granularity, `segment` included. `WhisperLargeV3` does not charge for timestamps at all.
+**Segment timestamps are free.** `include_ts: true` with the default `ts_level: "segment"` costs the same as a plain transcription. On `WhisperLargeV3Ct2` only word-level timestamps (`ts_level: "word"`) and speaker diarization (`diarize: true`) add **+50%** to the transcription price — diarization carries that surcharge at any granularity, `segment` included.
 
 **Source metadata add-on (YouTube & TikTok)**
 
@@ -175,7 +175,7 @@ Both endpoints are synchronous and return the amount charged in the `cost` field
 [Web Contents](/api/v2/web/contents) (`POST /api/v2/web/contents`):
 
 - **0.0012 USD** per page for each content type requested — `text`, `excerpts` and `summary` each count once per page.
-- Pages that cannot be read (`status` `not_found` or `unknown`) are not charged.
+- Pages that cannot be read (any `status` other than `ok`) are not charged.
 - Example: 5 URLs with `text` and `summary`, all read → 5 × 2 × 0.0012 = **0.012 USD**.
 
 Use `POST /api/v2/web/search/price` and `POST /api/v2/web/contents/price` for an exact quote.

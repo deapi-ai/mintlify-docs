@@ -254,7 +254,7 @@ Three parameters change. Everything else — request format, response schema, er
 | `dall-e-3`, `gpt-image-1` (generations) | `Flux1schnell`, `Flux_2_Klein_4B_BF16`, `ZImageTurbo_INT8`, `ZAnimeDistill_8Step_INT8` |
 | `gpt-image-1` (edits) | `QwenImageEdit_Plus_NF4`, `Flux_2_Klein_4B_BF16` |
 | `tts-1`, `tts-1-hd`, `gpt-4o-mini-tts` | `Kokoro`, `Chatterbox`, `Qwen3_TTS_12Hz_1_7B_CustomVoice` |
-| `whisper-1`, `gpt-4o-transcribe` | `WhisperLargeV3`, `WhisperLargeV3Ct2` |
+| `whisper-1`, `gpt-4o-transcribe` | `WhisperLargeV3Ct2` |
 | `text-embedding-3-small` | `Bge_M3_FP16` |
 | `sora-2` | `Ltx2_5_22B_Dist_INT8`, `Ltx2_3_22B_Dist_INT8`, `MiniMaxH3_33B_Turbo_INT8`, `Ltxv_13B_0_9_8_Distilled_FP8` |
 
@@ -578,7 +578,6 @@ with open("meeting.mp3", "rb") as f:
 
 | Model | Formats | Timestamps | Diarization |
 | --- | --- | --- | --- |
-| `WhisperLargeV3` | `json`, `text`, `verbose_json` | Segment | No |
 | `WhisperLargeV3Ct2` | `json`, `text`, `verbose_json`, `diarized_json` | Segment + native word-level | Yes |
 
 | Field | Behaviour |
@@ -586,7 +585,7 @@ with open("meeting.mp3", "rb") as f:
 | `file`, `model` | Required |
 | `language` | Forwarded to the backend and affects the result; region subtags are trimmed (`en-US` → `en`) |
 | `response_format` | `json` (default), `text`, `verbose_json`, `diarized_json` |
-| `timestamp_granularities[]` | `word` requires a model that publishes word-level support; on `WhisperLargeV3` it is `400 timestamp_level_not_supported` rather than a silent fallback to segment timings |
+| `timestamp_granularities[]` | `word` requires a model that publishes word-level support; on a model without it the request is `400 timestamp_level_not_supported` rather than a silent fallback to segment timings |
 
 The gateway accepts a multipart body up to 50 MiB, but the platform caps a single audio file at **20 MB** and a single video file at **50 MB**, within a global 75 MB request body cap. See [Limits & Quotas → File Uploads](/limits-and-quotas#file-uploads).
 
@@ -664,12 +663,12 @@ Diarization is available on exactly one model (`WhisperLargeV3Ct2`). Requesting 
 
 ### Word timings come from the model, never from us
 
-`timestamp_granularities=["word"]` is served only by models that publish word-level support — today `WhisperLargeV3Ct2`. On `WhisperLargeV3` it is a `400`:
+`timestamp_granularities=["word"]` is served only by models that publish word-level support — today `WhisperLargeV3Ct2`. On a model without it the request is a `400`:
 
 ```json
 {
   "error": {
-    "message": "Model WhisperLargeV3 does not produce word-level timestamps — it reports [segment] granularity. Models with word timestamps: WhisperLargeV3Ct2.",
+    "message": "Model <model> does not produce word-level timestamps — it reports [segment] granularity. Models with word timestamps: WhisperLargeV3Ct2.",
     "type": "invalid_request_error",
     "param": "timestamp_granularities[]",
     "code": "timestamp_level_not_supported"
@@ -691,7 +690,7 @@ The shape is always complete so drop-in clients see a stable set of keys, but so
 | `seek`, `temperature`, `no_speech_prob` | Always `0` |
 | `tokens` | Always an empty array |
 
-The `language` field in the response is a real detection on `WhisperLargeV3Ct2` (the model's own detection wins over your hint, returned as a Whisper-style name such as `english`). On `WhisperLargeV3` it echoes your request instead.
+The `language` field in the response is a real detection on `WhisperLargeV3Ct2` (the model's own detection wins over your hint, returned as a Whisper-style name such as `english`). On a model without native detection it echoes your request instead.
 
 ### Rejected fields on transcription
 

@@ -13,8 +13,12 @@ Search the live web and get ranked results in a single call — optionally with 
 
 | `mode` | Use it for | `summary` |
 | --- | --- | --- |
-| `quick` | Lowest latency and price — autocomplete, agent tool calls, fact lookups | Not available (422) |
+| `quick` | Lowest latency and price — autocomplete, agent tool calls, fact lookups | Not available (422); `freshness_hours` is refused too |
 | `balanced` (default) | Better-ranked results for research and RAG | Available |
+
+### Query and goal
+
+`query` is what to search for, in natural language (up to 2,000 characters). Add the optional **`goal`** (up to 4,096 characters) to say what the results are for — for example `"I need peer-reviewed sources from the last year"`. The goal helps rank the results; it is not searched for itself and does not change the price.
 
 ### Getting page content with the results
 
@@ -23,14 +27,16 @@ Leave `include` out to get only `url`, `title` and whatever metadata the page ex
 - **`text`** — the page as clean text. `true` returns up to 20,000 characters; `{"max_length": 5000}` sets your own cap (1–100,000).
 - **`excerpts`** — the passages most relevant to your `query`. `{"query": "..."}` steers them towards a different question.
 - **`summary`** — an AI-written summary of each result (`balanced` mode only). `{"query": "..."}` focuses it on a question.
+- **`freshness_hours`** — how old a stored copy of a page may be, in hours (0–720), before it is fetched again; `0` always fetches the page live. Leave it out to accept the stored copy. `balanced` mode only — in `quick` mode it is refused with 422.
 
 Optional fields are **omitted** from a result when the page does not provide them — check for presence rather than `null`.
 
 ### Filters
 
-- **`only_domains`** — up to 50 bare hostnames (`deapi.ai`, `docs.deapi.ai`). No scheme, path, port or wildcard.
-- **`country`** — ISO 3166-1 alpha-2 code (`US`, `DE`, `PL`) to bias results towards a country.
-- **`published_after`** / **`published_before`** — ISO 8601 dates; `published_before` cannot be earlier than `published_after`.
+- **`only_domains`** — return results from these hostnames only. Up to 50 bare hostnames (`deapi.ai`, `docs.deapi.ai`); no scheme, path, port or wildcard.
+- **`skip_domains`** — never return results from these hostnames. Same format, up to 50.
+- **`published_after`** / **`published_before`** — ISO 8601 date or date-time; `published_before` cannot be earlier than `published_after`.
+- **`country`** — ISO 3166-1 alpha-2 code (`US`, `DE`, `PL`), any case. A **preference, not a filter**: it nudges the ranking towards that region, while the language of `query` weighs far more. To restrict results to a country, use `only_domains` or write the query in its language.
 
 ### Example
 
@@ -68,6 +74,17 @@ curl -X POST "https://api.deapi.ai/api/v2/web/search" \
   ]
 }
 ```
+
+### Errors
+
+A call that fails is not charged.
+
+| Status | When |
+| --- | --- |
+| `404` | Web search is not enabled for your account. |
+| `422` | Invalid parameter, `summary` or `freshness_hours` in `quick` mode, insufficient balance (`code: insufficient_balance`) or a query rejected by the content policy (`code: content_rejected`). |
+| `429` | Rate limit reached, or too many web calls of your account in progress at once (`code: concurrency_limited`) — wait for one to finish. Honour `Retry-After`. |
+| `503` | The search could not be completed. `code` says why: `capacity` (retry after `Retry-After`), `timeout`, `unavailable` or `upstream_error`. |
 
 ### Pricing
 

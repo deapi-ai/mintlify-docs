@@ -18,16 +18,16 @@ Unified transcription endpoint that replaces the five v1 endpoints (`vid2txt`, `
   **OpenAI SDK users:** This endpoint is also available via the OpenAI-compatible surface as `POST /v1/audio/transcriptions` at `https://oai.deapi.ai/v1`. Maximum file size per upload is **20 MB for audio** and **50 MB for video**, subject to a global **75 MB** request body cap. See [OpenAI Compatibility](/openai-compatibility) and [Limits & Quotas](/limits-and-quotas#file-uploads).
 </Tip>
 
-`WhisperLargeV3` supports `segment` timestamps only and does not support diarization. `WhisperLargeV3Ct2` adds `word`-level timestamps, per-segment confidence scores and speaker labels — and is the only model that accepts TikTok sources.
+`WhisperLargeV3Ct2` returns `segment`- and `word`-level timestamps, per-segment confidence scores and speaker labels — and is the only model that accepts TikTok sources.
 
 <Warning>
-  **TikTok requires `WhisperLargeV3Ct2`.** A TikTok `source_url` submitted with any other model — `WhisperLargeV3` included — is rejected with `422` before the job is queued, and nothing is charged. Every other source (YouTube, X, Twitch, Kick, X/Twitter Spaces and uploaded files) runs on both models. The same pairing applies to quotes: `platform: "tiktok"` on [`/price`](/api/v2/audio/transcriptions-price) is only valid with `WhisperLargeV3Ct2`.
+  **TikTok requires `WhisperLargeV3Ct2`.** A TikTok `source_url` submitted with any other model is rejected with `422` before the job is queued, and nothing is charged. The same pairing applies to quotes: `platform: "tiktok"` on [`/price`](/api/v2/audio/transcriptions-price) is only valid with `WhisperLargeV3Ct2`.
 </Warning>
 
 **Segment timestamps are free.** `include_ts: true` with the default `ts_level: "segment"` costs exactly the same as a plain transcription — on every model, `WhisperLargeV3Ct2` included. Only finer granularity is billed: on `WhisperLargeV3Ct2`, `ts_level: "word"` — and `diarize`, which carries the surcharge at *any* granularity, `segment` included — multiplies the duration-based price by 1.5. See [Pricing](/pricing).
 
 <Warning>
-  **Granularity is validated against the model.** The levels a model accepts are published as `info.limits.timestamp_levels` by [GET /api/v2/models](/api/v2/utilities/models). `WhisperLargeV3` publishes `["segment"]` and `supports_diarization: false`, so `ts_level: "word"` is rejected with `422` and an `errors.ts_level` entry, and `diarize: true` is rejected with `422` and an `errors.diarize` entry. `WhisperLargeV3Ct2` publishes `["segment", "word"]`. Read the model's advertised levels before sending anything other than `segment`. See [Errors](/api/v2/errors).
+  **Granularity is validated against the model.** The levels a model accepts are published as `info.limits.timestamp_levels` by [GET /api/v2/models](/api/v2/utilities/models). `WhisperLargeV3Ct2` publishes `["segment", "word"]` and supports diarization. A level the model does not publish is rejected with `422` and an `errors.ts_level` entry, and `diarize: true` on a model without diarization is rejected with `422` and an `errors.diarize` entry. Read the model's advertised levels before sending anything other than `segment`. See [Errors](/api/v2/errors).
 </Warning>
 
 **A source with no speech returns an empty result, not an error.** If the video or audio carries no recognisable words — silence, music only, ambient noise — the job still completes with `status: "done"` and the transcript comes back empty: no segments, no words, no speakers. Treat an empty transcript as a valid outcome and branch on it explicitly, rather than assuming the job failed. A job that genuinely failed reports `status: "error"` with an `error_reason` instead.

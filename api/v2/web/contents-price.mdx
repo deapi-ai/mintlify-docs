@@ -9,4 +9,4 @@ Estimate the cost of reading web pages before running the request. Send the same
   Unlike the other `/price` endpoints, this one returns the price at the top level — `{"price": 0.0012}` — not inside `data`.
 </Note>
 
-The quote assumes every URL can be read. Pages that come back as `not_found` or `unknown` are not charged, so the actual `cost` can be lower than the quote, never higher.
+The quote assumes every URL can be read. Pages that come back with any `status` other than `ok` are not charged, so the actual `cost` can be lower than the quote, never higher.
