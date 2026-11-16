@@ -2563,14 +2563,9 @@
                 "tags": [
                     "Client API v2"
                 ],
-                "summary": "Search the web",
-                "description": "Search the live web and get ranked results — optionally with each page's text, the most relevant excerpts and an AI-written summary — in a single synchronous call. The response is returned directly: there is no `request_id` to poll, no webhook and no job status. The amount charged is returned in `cost`.",
+                "summary": "Web search",
+                "description": "Search the web and get the results in the response. Synchronous: no job, no polling. Charged only for a completed call; quote it first with `POST /api/v2/web/search/price`. Available to accounts with web search enabled: for any other account this endpoint answers 404.",
                 "operationId": "webSearch",
-                "parameters": [
-                    {
-                        "$ref": "#/components/parameters/AcceptHeader"
-                    }
-                ],
                 "requestBody": {
                     "required": true,
                     "content": {
@@ -2583,37 +2578,19 @@
                 },
                 "responses": {
                     "200": {
-                        "description": "Search results.",
+                        "description": "The results.",
                         "headers": {
-                            "X-RateLimit-Policy": {
-                                "$ref": "#/components/headers/X-RateLimit-Policy"
-                            },
-                            "X-RateLimit-Source": {
-                                "$ref": "#/components/headers/X-RateLimit-Source"
-                            },
                             "X-RateLimit-Limit": {
                                 "$ref": "#/components/headers/X-RateLimit-Limit"
                             },
                             "X-RateLimit-Remaining": {
                                 "$ref": "#/components/headers/X-RateLimit-Remaining"
-                            },
-                            "X-RateLimit-Reset": {
-                                "$ref": "#/components/headers/X-RateLimit-Reset"
-                            },
-                            "X-RateLimit-Daily-Limit": {
-                                "$ref": "#/components/headers/X-RateLimit-Daily-Limit"
-                            },
-                            "X-RateLimit-Daily-Remaining": {
-                                "$ref": "#/components/headers/X-RateLimit-Daily-Remaining"
-                            },
-                            "X-RateLimit-Daily-Reset": {
-                                "$ref": "#/components/headers/X-RateLimit-Daily-Reset"
                             }
                         },
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/WebSearchResponse"
+                                    "$ref": "#/components/schemas/WebCallResponse"
                                 },
                                 "examples": {
                                     "quick": {
@@ -2660,36 +2637,56 @@
                         }
                     },
                     "401": {
-                        "description": "Missing, unknown, expired or deactivated key — `code` says which: `missing_key`, `invalid_key`, `key_expired` or `key_revoked`.",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/response_error_default"
-                                }
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Not found.",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/response_error_default"
-                                }
-                            }
-                        }
-                    },
-                    "422": {
-                        "$ref": "#/components/responses/ValidationError"
-                    },
-                    "429": {
-                        "$ref": "#/components/responses/RateLimitExceeded"
+                        "description": "Unauthorized user."
                     },
                     "402": {
                         "$ref": "#/components/responses/KeyLimitExceeded"
                     },
                     "403": {
                         "$ref": "#/components/responses/AccountSuspended"
+                    },
+                    "404": {
+                        "description": "Web search is not available for this account."
+                    },
+                    "422": {
+                        "description": "Validation failed — an invalid parameter, `summary`/`freshness_hours` in `quick` mode, insufficient balance (`code`: `insufficient_balance`), or a query rejected by the content policy (`code`: `content_rejected`).",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/response_error_default"
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "Too many requests: the per-tier rate limit, or (`code`: `concurrency_limited`) too many web calls of this account in progress at once — wait for one to finish. Honour `Retry-After`; a refused call is not counted against your limit.",
+                        "headers": {
+                            "Retry-After": {
+                                "$ref": "#/components/headers/Retry-After"
+                            }
+                        },
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/response_error_default"
+                                }
+                            }
+                        }
+                    },
+                    "503": {
+                        "description": "The call could not be completed and was not charged. `code` says why; on `capacity`, retry after `Retry-After`.",
+                        "headers": {
+                            "Retry-After": {
+                                "$ref": "#/components/headers/Retry-After"
+                            }
+                        },
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/WebError"
+                                }
+                            }
+                        }
                     }
                 },
                 "security": [
@@ -2704,14 +2701,9 @@
                 "tags": [
                     "Client API v2"
                 ],
-                "summary": "Estimate the price of a web search",
-                "description": "Estimate what a web search would cost. Accepts the same body as `POST /api/v2/web/search` and validates it the same way. Nothing is charged.",
-                "operationId": "estimateWebSearchPrice",
-                "parameters": [
-                    {
-                        "$ref": "#/components/parameters/AcceptHeader"
-                    }
-                ],
+                "summary": "Web search price",
+                "description": "What `POST /api/v2/web/search` would cost with this body, without running it. Free.",
+                "operationId": "webSearchPrice",
                 "requestBody": {
                     "required": true,
                     "content": {
@@ -2724,33 +2716,7 @@
                 },
                 "responses": {
                     "200": {
-                        "description": "Calculated price.",
-                        "headers": {
-                            "X-RateLimit-Policy": {
-                                "$ref": "#/components/headers/X-RateLimit-Policy"
-                            },
-                            "X-RateLimit-Source": {
-                                "$ref": "#/components/headers/X-RateLimit-Source"
-                            },
-                            "X-RateLimit-Limit": {
-                                "$ref": "#/components/headers/X-RateLimit-Limit"
-                            },
-                            "X-RateLimit-Remaining": {
-                                "$ref": "#/components/headers/X-RateLimit-Remaining"
-                            },
-                            "X-RateLimit-Reset": {
-                                "$ref": "#/components/headers/X-RateLimit-Reset"
-                            },
-                            "X-RateLimit-Daily-Limit": {
-                                "$ref": "#/components/headers/X-RateLimit-Daily-Limit"
-                            },
-                            "X-RateLimit-Daily-Remaining": {
-                                "$ref": "#/components/headers/X-RateLimit-Daily-Remaining"
-                            },
-                            "X-RateLimit-Daily-Reset": {
-                                "$ref": "#/components/headers/X-RateLimit-Daily-Reset"
-                            }
-                        },
+                        "description": "The price.",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -2768,24 +2734,10 @@
                         }
                     },
                     "401": {
-                        "description": "Missing, unknown, expired or deactivated key — `code` says which: `missing_key`, `invalid_key`, `key_expired` or `key_revoked`.",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/response_error_default"
-                                }
-                            }
-                        }
+                        "description": "Unauthorized user."
                     },
                     "404": {
-                        "description": "Not found.",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/response_error_default"
-                                }
-                            }
-                        }
+                        "description": "Web search is not available for this account."
                     },
                     "422": {
                         "$ref": "#/components/responses/ValidationError"
@@ -2806,14 +2758,9 @@
                 "tags": [
                     "Client API v2"
                 ],
-                "summary": "Read web pages",
-                "description": "Fetch up to 20 URLs and get clean page text, the most relevant excerpts and/or an AI-written summary of each — in a single synchronous call. Request at least one of `text`, `excerpts` or `summary`. Each page reports its own `status`; pages that could not be read are not charged. The response is returned directly — there is no job to poll.",
+                "summary": "Web page contents",
+                "description": "Fetch the text, excerpts or summary of known pages, in the response. Synchronous: no job, no polling. Billed per page that could be read (`status: ok`); quote it first with `POST /api/v2/web/contents/price`. Available to accounts with web search enabled: for any other account this endpoint answers 404.",
                 "operationId": "webContents",
-                "parameters": [
-                    {
-                        "$ref": "#/components/parameters/AcceptHeader"
-                    }
-                ],
                 "requestBody": {
                     "required": true,
                     "content": {
@@ -2826,37 +2773,19 @@
                 },
                 "responses": {
                     "200": {
-                        "description": "Page contents, one entry per requested URL.",
+                        "description": "One result per requested URL, each with its own `status`.",
                         "headers": {
-                            "X-RateLimit-Policy": {
-                                "$ref": "#/components/headers/X-RateLimit-Policy"
-                            },
-                            "X-RateLimit-Source": {
-                                "$ref": "#/components/headers/X-RateLimit-Source"
-                            },
                             "X-RateLimit-Limit": {
                                 "$ref": "#/components/headers/X-RateLimit-Limit"
                             },
                             "X-RateLimit-Remaining": {
                                 "$ref": "#/components/headers/X-RateLimit-Remaining"
-                            },
-                            "X-RateLimit-Reset": {
-                                "$ref": "#/components/headers/X-RateLimit-Reset"
-                            },
-                            "X-RateLimit-Daily-Limit": {
-                                "$ref": "#/components/headers/X-RateLimit-Daily-Limit"
-                            },
-                            "X-RateLimit-Daily-Remaining": {
-                                "$ref": "#/components/headers/X-RateLimit-Daily-Remaining"
-                            },
-                            "X-RateLimit-Daily-Reset": {
-                                "$ref": "#/components/headers/X-RateLimit-Daily-Reset"
                             }
                         },
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/WebContentsResponse"
+                                    "$ref": "#/components/schemas/WebCallResponse"
                                 },
                                 "examples": {
                                     "mixed": {
@@ -2887,36 +2816,56 @@
                         }
                     },
                     "401": {
-                        "description": "Missing, unknown, expired or deactivated key — `code` says which: `missing_key`, `invalid_key`, `key_expired` or `key_revoked`.",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/response_error_default"
-                                }
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Not found.",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/response_error_default"
-                                }
-                            }
-                        }
-                    },
-                    "422": {
-                        "$ref": "#/components/responses/ValidationError"
-                    },
-                    "429": {
-                        "$ref": "#/components/responses/RateLimitExceeded"
+                        "description": "Unauthorized user."
                     },
                     "402": {
                         "$ref": "#/components/responses/KeyLimitExceeded"
                     },
                     "403": {
                         "$ref": "#/components/responses/AccountSuspended"
+                    },
+                    "404": {
+                        "description": "Web search is not available for this account."
+                    },
+                    "422": {
+                        "description": "Validation failed — an invalid or duplicate URL, no content type requested, insufficient balance (`code`: `insufficient_balance`), or a request rejected by the content policy (`code`: `content_rejected`).",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/response_error_default"
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "Too many requests: the per-tier rate limit, or (`code`: `concurrency_limited`) too many web calls of this account in progress at once — wait for one to finish. Honour `Retry-After`; a refused call is not counted against your limit.",
+                        "headers": {
+                            "Retry-After": {
+                                "$ref": "#/components/headers/Retry-After"
+                            }
+                        },
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/response_error_default"
+                                }
+                            }
+                        }
+                    },
+                    "503": {
+                        "description": "The call could not be completed and was not charged. `code` says why; on `capacity`, retry after `Retry-After`.",
+                        "headers": {
+                            "Retry-After": {
+                                "$ref": "#/components/headers/Retry-After"
+                            }
+                        },
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/WebError"
+                                }
+                            }
+                        }
                     }
                 },
                 "security": [
@@ -2931,14 +2880,9 @@
                 "tags": [
                     "Client API v2"
                 ],
-                "summary": "Estimate the price of reading web pages",
-                "description": "Estimate what a web contents request would cost, assuming every URL can be read. Accepts the same body as `POST /api/v2/web/contents` and validates it the same way. Nothing is charged.",
-                "operationId": "estimateWebContentsPrice",
-                "parameters": [
-                    {
-                        "$ref": "#/components/parameters/AcceptHeader"
-                    }
-                ],
+                "summary": "Web page contents price",
+                "description": "What `POST /api/v2/web/contents` would cost with this body if every page can be read, without running it. Free.",
+                "operationId": "webContentsPrice",
                 "requestBody": {
                     "required": true,
                     "content": {
@@ -2951,33 +2895,7 @@
                 },
                 "responses": {
                     "200": {
-                        "description": "Calculated price.",
-                        "headers": {
-                            "X-RateLimit-Policy": {
-                                "$ref": "#/components/headers/X-RateLimit-Policy"
-                            },
-                            "X-RateLimit-Source": {
-                                "$ref": "#/components/headers/X-RateLimit-Source"
-                            },
-                            "X-RateLimit-Limit": {
-                                "$ref": "#/components/headers/X-RateLimit-Limit"
-                            },
-                            "X-RateLimit-Remaining": {
-                                "$ref": "#/components/headers/X-RateLimit-Remaining"
-                            },
-                            "X-RateLimit-Reset": {
-                                "$ref": "#/components/headers/X-RateLimit-Reset"
-                            },
-                            "X-RateLimit-Daily-Limit": {
-                                "$ref": "#/components/headers/X-RateLimit-Daily-Limit"
-                            },
-                            "X-RateLimit-Daily-Remaining": {
-                                "$ref": "#/components/headers/X-RateLimit-Daily-Remaining"
-                            },
-                            "X-RateLimit-Daily-Reset": {
-                                "$ref": "#/components/headers/X-RateLimit-Daily-Reset"
-                            }
-                        },
+                        "description": "The price.",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -2995,24 +2913,10 @@
                         }
                     },
                     "401": {
-                        "description": "Missing, unknown, expired or deactivated key — `code` says which: `missing_key`, `invalid_key`, `key_expired` or `key_revoked`.",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/response_error_default"
-                                }
-                            }
-                        }
+                        "description": "Unauthorized user."
                     },
                     "404": {
-                        "description": "Not found.",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/response_error_default"
-                                }
-                            }
-                        }
+                        "description": "Web search is not available for this account."
                     },
                     "422": {
                         "$ref": "#/components/responses/ValidationError"
@@ -6415,7 +6319,7 @@
                             "model": {
                                 "description": "The model to use for transcription.",
                                 "type": "string",
-                                "example": "WhisperLargeV3"
+                                "example": "WhisperLargeV3Ct2"
                             }
                         },
                         "type": "object"
@@ -6486,7 +6390,7 @@
                             "model": {
                                 "description": "The model to use for transcription.",
                                 "type": "string",
-                                "example": "WhisperLargeV3"
+                                "example": "WhisperLargeV3Ct2"
                             }
                         },
                         "type": "object"
@@ -6574,7 +6478,7 @@
                             "model": {
                                 "description": "The model to use for transcription.",
                                 "type": "string",
-                                "example": "WhisperLargeV3"
+                                "example": "WhisperLargeV3Ct2"
                             }
                         },
                         "type": "object"
@@ -8015,7 +7919,7 @@
                     "model": {
                         "description": "The model to use for transcription. Available models can be retrieved via the GET /api/v2/models endpoint.",
                         "type": "string",
-                        "example": "WhisperLargeV3"
+                        "example": "WhisperLargeV3Ct2"
                     },
                     "include_metadata": {
                         "description": "If true, the job-status response carries a `metadata` object describing the source — title, channel, uploader, upload date and engagement counts such as views, likes and comments. Only URL sources have any; an uploaded file returns null. YouTube resolves through the official Data API and returns a smaller block — id, title, channel, description, duration_seconds, extractor, view_count, like_count — because that API has no equivalent for the rest; the field names match the other platforms. Fields absent on a platform are null rather than omitted. On models that price metadata this carries a flat surcharge, charged only on sources that can return it — an upload, which has no source to describe, is never charged for the flag.",
@@ -10002,318 +9906,148 @@
                 "type": "object"
             },
             "WebTextOption": {
-                "description": "Return the page as clean text (Markdown-like). `true` uses the default length cap of 20,000 characters; an object lets you set your own cap. Longer pages are cut at the cap.",
+                "description": "Full page text. `true` returns up to **20 000 characters** per page; pass `{\"max_length\": N}` (1–100 000) for more or less. Longer pages are cut at the limit.",
                 "oneOf": [
                     {
-                        "type": "boolean"
+                        "type": "boolean",
+                        "example": true
                     },
                     {
-                        "type": "object",
-                        "additionalProperties": false,
                         "properties": {
                             "max_length": {
-                                "description": "Maximum number of characters of text returned per page.",
+                                "description": "Maximum number of characters of text returned per page. Longer pages are cut at the limit.",
                                 "type": "integer",
-                                "minimum": 1,
+                                "example": 60000,
+                                "default": 20000,
                                 "maximum": 100000,
-                                "example": 5000
+                                "minimum": 1
                             }
-                        }
+                        },
+                        "type": "object",
+                        "additionalProperties": false
                     }
-                ],
-                "example": {
-                    "max_length": 5000
-                }
+                ]
             },
-            "WebExcerptsOption": {
-                "description": "Return the passages of the page most relevant to your search (or to `query`, if you set one). `true` ranks passages against the search query; on the contents endpoint, which has no search query, pass an object with `query` to steer the selection.",
+            "WebQueryOption": {
+                "description": "`true`, or `{\"query\": \"…\"}` to steer it towards what you are looking for (up to 2000 characters).",
                 "oneOf": [
                     {
-                        "type": "boolean"
+                        "type": "boolean",
+                        "example": true
                     },
                     {
-                        "type": "object",
-                        "additionalProperties": false,
                         "properties": {
                             "query": {
-                                "description": "What the excerpts should be about.",
                                 "type": "string",
-                                "minLength": 1,
+                                "example": "key findings",
                                 "maxLength": 2000,
-                                "example": "pricing"
+                                "minLength": 1
                             }
-                        }
-                    }
-                ],
-                "example": true
-            },
-            "WebSummaryOption": {
-                "description": "Return a short AI-written summary of each page. `true` writes a general summary; an object with `query` focuses the summary on a question. Billed per page (see pricing).",
-                "oneOf": [
-                    {
-                        "type": "boolean"
-                    },
-                    {
-                        "type": "object",
-                        "additionalProperties": false,
-                        "properties": {
-                            "query": {
-                                "description": "Question or angle the summary should answer.",
-                                "type": "string",
-                                "minLength": 1,
-                                "maxLength": 2000,
-                                "example": "What does this company offer?"
-                            }
-                        }
-                    }
-                ],
-                "example": {
-                    "query": "What does this company offer?"
-                }
-            },
-            "WebSearchRequestBody": {
-                "type": "object",
-                "required": [
-                    "query"
-                ],
-                "properties": {
-                    "query": {
-                        "description": "What to search for, in natural language or as keywords.",
-                        "type": "string",
-                        "maxLength": 2000,
-                        "example": "open source text to image models 2026"
-                    },
-                    "mode": {
-                        "description": "`quick` is the fastest and cheapest; `balanced` takes a little longer, returns better-ranked results and is the only mode that can return `summary`. Defaults to `balanced`.",
-                        "type": "string",
-                        "enum": [
-                            "quick",
-                            "balanced"
-                        ],
-                        "default": "balanced",
-                        "example": "quick"
-                    },
-                    "limit": {
-                        "description": "Maximum number of results. The base price covers up to 10 results; every result above 10 adds to the price.",
-                        "type": "integer",
-                        "minimum": 1,
-                        "maximum": 25,
-                        "default": 10,
-                        "example": 5
-                    },
-                    "include": {
-                        "description": "Page content to return with each result. Leave it out to get only `url`, `title` and the metadata the page exposes.",
-                        "type": "object",
-                        "additionalProperties": false,
-                        "properties": {
-                            "text": {
-                                "$ref": "#/components/schemas/WebTextOption"
-                            },
-                            "excerpts": {
-                                "$ref": "#/components/schemas/WebExcerptsOption"
-                            },
-                            "summary": {
-                                "allOf": [
-                                    {
-                                        "$ref": "#/components/schemas/WebSummaryOption"
-                                    }
-                                ],
-                                "description": "AI-written summary of each result. Only available in `balanced` mode — in `quick` mode the request is refused with 422 (`include.summary`)."
-                            }
-                        }
-                    },
-                    "only_domains": {
-                        "description": "Return results from these domains only. Bare hostnames such as `deapi.ai` or `docs.deapi.ai` — no scheme, path, port or wildcard.",
-                        "type": "array",
-                        "maxItems": 50,
-                        "items": {
-                            "type": "string",
-                            "example": "deapi.ai"
                         },
-                        "example": [
-                            "deapi.ai",
-                            "docs.deapi.ai"
-                        ]
-                    },
-                    "country": {
-                        "description": "Bias results towards a country. ISO 3166-1 alpha-2 code, case-insensitive (e.g. `US`, `DE`, `PL`).",
-                        "type": "string",
-                        "minLength": 2,
-                        "maxLength": 2,
-                        "example": "US"
-                    },
-                    "published_after": {
-                        "description": "Only results published on or after this date (ISO 8601 date or date-time).",
-                        "type": "string",
-                        "format": "date",
-                        "example": "2026-01-01"
-                    },
-                    "published_before": {
-                        "description": "Only results published on or before this date (ISO 8601 date or date-time). Must not be earlier than `published_after`.",
-                        "type": "string",
-                        "format": "date",
-                        "example": "2026-11-01"
+                        "type": "object",
+                        "additionalProperties": false
                     }
-                }
+                ]
             },
-            "WebContentsRequestBody": {
+            "WebContentOptions": {
+                "description": "Page content to return with each search result. `text` and `excerpts` are included in the search price; `summary` is billed per result.",
                 "type": "object",
-                "required": [
-                    "urls"
-                ],
-                "description": "Request at least one of `text`, `excerpts` or `summary` — a request with none of them is refused with 422.",
+                "additionalProperties": false,
                 "properties": {
-                    "urls": {
-                        "description": "Pages to read. Full URLs including the scheme (`https://…`).",
-                        "type": "array",
-                        "minItems": 1,
-                        "maxItems": 20,
-                        "items": {
-                            "type": "string",
-                            "format": "uri"
-                        },
-                        "example": [
-                            "https://deapi.ai"
-                        ]
-                    },
                     "text": {
                         "$ref": "#/components/schemas/WebTextOption"
                     },
                     "excerpts": {
-                        "$ref": "#/components/schemas/WebExcerptsOption"
+                        "$ref": "#/components/schemas/WebQueryOption",
+                        "description": "The most relevant passages of each page."
                     },
                     "summary": {
-                        "$ref": "#/components/schemas/WebSummaryOption"
+                        "$ref": "#/components/schemas/WebQueryOption",
+                        "description": "A short summary of each page. Not available in `quick` mode."
+                    },
+                    "freshness_hours": {
+                        "description": "Re-fetch a page whose stored copy is older than this many hours; `0` always fetches it live. Not available in `quick` mode.",
+                        "type": "integer",
+                        "maximum": 720,
+                        "minimum": 0
                     }
                 }
             },
-            "WebSearchResult": {
-                "type": "object",
+            "WebPage": {
+                "description": "One result page. Fields the page does not have are left out, not `null`.",
                 "required": [
                     "url"
                 ],
-                "description": "One search hit. Every field except `url` is optional and omitted (not null) when unavailable.",
-                "properties": {
-                    "url": {
-                        "description": "Page URL.",
-                        "type": "string",
-                        "format": "uri",
-                        "example": "https://deapi.ai/"
-                    },
-                    "title": {
-                        "description": "Page title. Omitted when the page has none.",
-                        "type": "string",
-                        "example": "deAPI - One API for Open Source Generative AI Models"
-                    },
-                    "published_at": {
-                        "description": "Publication date, when the page exposes one. Omitted otherwise.",
-                        "type": "string",
-                        "format": "date-time",
-                        "example": "2026-10-20T08:48:00+00:00"
-                    },
-                    "author": {
-                        "description": "Author, when the page exposes one. Omitted otherwise.",
-                        "type": "string",
-                        "example": "deAPI"
-                    },
-                    "image": {
-                        "description": "Representative image (e.g. the Open Graph image), when the page has one. Omitted otherwise.",
-                        "type": "string",
-                        "format": "uri",
-                        "example": "https://deapi.ai/images/og/og-deapi.jpg"
-                    },
-                    "text": {
-                        "description": "Page text, present when `text` was requested. Cut at `max_length` (default 20,000 characters).",
-                        "type": "string"
-                    },
-                    "excerpts": {
-                        "description": "Most relevant passages, present when `excerpts` was requested.",
-                        "type": "array",
-                        "items": {
-                            "type": "string"
-                        }
-                    },
-                    "summary": {
-                        "description": "AI-written summary, present when `summary` was requested.",
-                        "type": "string"
-                    }
-                }
-            },
-            "WebContentsResult": {
                 "type": "object",
-                "required": [
-                    "url",
-                    "status"
-                ],
-                "description": "One requested page, in the order of `urls`. Optional fields are omitted (not null) when unavailable.",
                 "properties": {
                     "url": {
-                        "description": "Page URL.",
                         "type": "string",
-                        "format": "uri",
-                        "example": "https://deapi.ai/"
+                        "format": "uri"
                     },
                     "status": {
-                        "description": "`ok` — the page was read and the requested content is present. `not_found` — the page returned 404. `unknown` — the page could not be read for another reason (unreachable host, server error, blocked). Pages that are not `ok` carry only `url` and `status`, and are not charged.",
+                        "description": "Whether the page could be read. `ok` = content returned. `not_found` = the page does not exist. `target_error` = the site answered with an error. `timeout` = the site did not answer in time. `blocked` = the site cannot be fetched. `unsupported_url` = not a fetchable page. `unknown` = no content and no reason given for this page. On `/web/contents` a page that is not `ok` is not billed.",
                         "type": "string",
                         "enum": [
                             "ok",
                             "not_found",
+                            "target_error",
+                            "timeout",
+                            "blocked",
+                            "unsupported_url",
                             "unknown"
-                        ],
-                        "example": "ok"
+                        ]
                     },
                     "title": {
-                        "description": "Page title. Omitted when the page has none.",
-                        "type": "string",
-                        "example": "deAPI - One API for Open Source Generative AI Models"
+                        "type": "string"
                     },
                     "published_at": {
-                        "description": "Publication date, when the page exposes one. Omitted otherwise.",
                         "type": "string",
-                        "format": "date-time",
-                        "example": "2026-10-20T08:48:00+00:00"
+                        "format": "date-time"
                     },
                     "author": {
-                        "description": "Author, when the page exposes one. Omitted otherwise.",
-                        "type": "string",
-                        "example": "deAPI"
+                        "type": "string"
                     },
                     "image": {
-                        "description": "Representative image (e.g. the Open Graph image), when the page has one. Omitted otherwise.",
                         "type": "string",
-                        "format": "uri",
-                        "example": "https://deapi.ai/images/og/og-deapi.jpg"
+                        "format": "uri"
+                    },
+                    "favicon": {
+                        "type": "string",
+                        "format": "uri"
                     },
                     "text": {
-                        "description": "Page text, present when `text` was requested. Cut at `max_length` (default 20,000 characters).",
+                        "description": "Present when `text` was requested.",
                         "type": "string"
                     },
                     "excerpts": {
-                        "description": "Most relevant passages, present when `excerpts` was requested.",
+                        "description": "Present when `excerpts` was requested.",
                         "type": "array",
                         "items": {
                             "type": "string"
                         }
                     },
                     "summary": {
-                        "description": "AI-written summary, present when `summary` was requested.",
+                        "description": "Present when `summary` was requested.",
                         "type": "string"
                     }
                 }
             },
-            "WebSearchResponse": {
+            "WebCallResponse": {
+                "description": "The result, in the response itself: no job to poll and no webhook. Returned bare, without a `data` wrapper.",
+                "required": [
+                    "request_id",
+                    "cost",
+                    "results"
+                ],
                 "type": "object",
-                "description": "Returned directly — there is no `data` envelope and no job to poll.",
                 "properties": {
                     "request_id": {
-                        "description": "Identifier of this request, useful when contacting support.",
+                        "description": "Identifies this call in your usage report.",
                         "type": "string",
-                        "format": "uuid",
-                        "example": "ba1e1b58-a12c-4f83-9ec7-572e301fa1c2"
+                        "format": "uuid"
                     },
                     "cost": {
-                        "description": "What this request was charged, in USD. Matches the amount deducted from the balance and reported by the usage endpoints.",
+                        "description": "What this call was charged, in USD. `0` when it was not charged.",
                         "type": "number",
                         "format": "float",
                         "example": 0.0048
@@ -10321,46 +10055,163 @@
                     "results": {
                         "type": "array",
                         "items": {
-                            "$ref": "#/components/schemas/WebSearchResult"
-                        }
-                    }
-                }
-            },
-            "WebContentsResponse": {
-                "type": "object",
-                "description": "Returned directly — there is no `data` envelope and no job to poll.",
-                "properties": {
-                    "request_id": {
-                        "description": "Identifier of this request, useful when contacting support.",
-                        "type": "string",
-                        "format": "uuid",
-                        "example": "ba1e1b58-a12c-4f83-9ec7-572e301fa1c2"
-                    },
-                    "cost": {
-                        "description": "What this request was charged, in USD. Matches the amount deducted from the balance and reported by the usage endpoints.",
-                        "type": "number",
-                        "format": "float",
-                        "example": 0.0048
-                    },
-                    "results": {
-                        "type": "array",
-                        "items": {
-                            "$ref": "#/components/schemas/WebContentsResult"
+                            "$ref": "#/components/schemas/WebPage"
                         }
                     }
                 }
             },
             "WebPriceResponse": {
+                "description": "What the call would cost, in USD, before you make it. Returned bare, without a `data` wrapper.",
+                "required": [
+                    "price"
+                ],
                 "type": "object",
-                "description": "Unlike the other price endpoints, the price is returned at the top level, not inside `data`.",
                 "properties": {
                     "price": {
-                        "description": "What the request would cost, in USD. A quote only — nothing is charged by this endpoint.",
                         "type": "number",
                         "format": "float",
                         "example": 0.0048
                     }
                 }
+            },
+            "WebError": {
+                "description": "A web call that could not be completed. You were not charged.",
+                "required": [
+                    "message",
+                    "code"
+                ],
+                "type": "object",
+                "properties": {
+                    "message": {
+                        "type": "string",
+                        "example": "The service is at capacity. Please retry shortly."
+                    },
+                    "code": {
+                        "description": "`capacity` = at capacity, retry after `Retry-After`. `timeout` = the call took too long. `unavailable` = temporarily unavailable. `upstream_error` = the call could not be completed.",
+                        "type": "string",
+                        "enum": [
+                            "capacity",
+                            "timeout",
+                            "unavailable",
+                            "upstream_error"
+                        ]
+                    }
+                }
+            },
+            "WebContentsRequestBody": {
+                "description": "Fetch the content of known pages. `urls` is required, and at least one of `text`, `excerpts` or `summary` must be requested — each is billed separately, so asking for none would be a paid call for nothing (422). The same body is accepted by `POST /api/v2/web/contents/price`.",
+                "required": [
+                    "urls"
+                ],
+                "properties": {
+                    "urls": {
+                        "description": "Pages to fetch: http(s) URLs, no duplicates, each at most 2048 characters.",
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "format": "uri",
+                            "example": "https://arxiv.org/abs/2401.00001"
+                        },
+                        "maxItems": 20,
+                        "minItems": 1
+                    },
+                    "text": {
+                        "$ref": "#/components/schemas/WebTextOption"
+                    },
+                    "excerpts": {
+                        "$ref": "#/components/schemas/WebQueryOption"
+                    },
+                    "summary": {
+                        "$ref": "#/components/schemas/WebQueryOption"
+                    },
+                    "freshness_hours": {
+                        "description": "Re-fetch a page whose stored copy is older than this many hours; `0` always fetches it live. Omit to accept the stored copy.",
+                        "type": "integer",
+                        "example": 24,
+                        "maximum": 720,
+                        "minimum": 0
+                    }
+                },
+                "type": "object"
+            },
+            "WebSearchRequestBody": {
+                "description": "A web search. Only `query` is required. The same body is accepted by `POST /api/v2/web/search/price`, which quotes it without running it.",
+                "required": [
+                    "query"
+                ],
+                "properties": {
+                    "query": {
+                        "description": "What to search for, in natural language.",
+                        "type": "string",
+                        "example": "latest research on solid-state batteries",
+                        "maxLength": 2000,
+                        "minLength": 1
+                    },
+                    "goal": {
+                        "description": "Optional: what the results are for, in your own words. Helps rank them; it is not searched for itself.",
+                        "type": "string",
+                        "example": "I need peer-reviewed sources from the last year",
+                        "maxLength": 4096,
+                        "minLength": 1
+                    },
+                    "mode": {
+                        "description": "Search depth. **Default `balanced`** when omitted. `quick` is faster and cheaper; it does not support `include.summary` or `include.freshness_hours` (422). Prices differ per mode: quote with `/price`.",
+                        "type": "string",
+                        "example": "quick",
+                        "default": "balanced",
+                        "enum": [
+                            "quick",
+                            "balanced"
+                        ]
+                    },
+                    "limit": {
+                        "description": "Maximum number of results. Default 10.",
+                        "type": "integer",
+                        "example": 5,
+                        "default": 10,
+                        "maximum": 25,
+                        "minimum": 1
+                    },
+                    "only_domains": {
+                        "description": "Return results from these hostnames only (lower-cased, no scheme or path).",
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "example": "arxiv.org"
+                        },
+                        "maxItems": 50
+                    },
+                    "skip_domains": {
+                        "description": "Never return results from these hostnames.",
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "example": "example.com"
+                        },
+                        "maxItems": 50
+                    },
+                    "published_after": {
+                        "description": "Only pages published on or after this date (ISO 8601).",
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2026-01-01T00:00:00Z"
+                    },
+                    "published_before": {
+                        "description": "Only pages published on or before this date (ISO 8601). Must not be before `published_after`.",
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "country": {
+                        "description": "ISO 3166-1 alpha-2 country code of the user, any case. A **preference, not a filter**: it nudges ranking towards the region; the language of `query` weighs far more. To restrict results to a country, use `only_domains` or write the query in its language.",
+                        "type": "string",
+                        "example": "PL"
+                    },
+                    "include": {
+                        "$ref": "#/components/schemas/WebContentOptions",
+                        "description": "Page content to return with each result. Omit it for links, titles and metadata only."
+                    }
+                },
+                "type": "object"
             }
         },
         "responses": {

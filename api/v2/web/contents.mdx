@@ -17,6 +17,12 @@ Send at least one of these; a request with none of them is refused with **422**.
 - **`excerpts`** — the most relevant passages. Pass `{"query": "..."}` to say what they should be about.
 - **`summary`** — an AI-written summary. Pass `{"query": "..."}` to focus it on a question.
 
+`urls` takes 1–20 `http(s)` URLs, each up to 2,048 characters, with no duplicates — a repeated URL is refused with **422**.
+
+### Fresh or stored copy
+
+By default a page may be served from a stored copy. Set **`freshness_hours`** (0–720) to have a page fetched again when its stored copy is older than that many hours; `0` always fetches it live. It does not change the price.
+
 ### Per-page status
 
 Results come back in the same order as `urls`, each with its own `status`:
@@ -24,8 +30,12 @@ Results come back in the same order as `urls`, each with its own `status`:
 | `status` | Meaning |
 | --- | --- |
 | `ok` | The page was read; the requested fields are present. |
-| `not_found` | The page returned 404. |
-| `unknown` | The page could not be read for another reason — unreachable host, server error or blocked. |
+| `not_found` | The page does not exist. |
+| `target_error` | The site answered with an error. |
+| `timeout` | The site did not answer in time. |
+| `blocked` | The site cannot be fetched. |
+| `unsupported_url` | The URL is not a fetchable page. |
+| `unknown` | No content was returned and no reason was given for this page. |
 
 Pages that are not `ok` carry only `url` and `status` and **are not charged** — `cost` covers only the pages that were read. One failed URL does not fail the whole request.
 
@@ -63,6 +73,17 @@ curl -X POST "https://api.deapi.ai/api/v2/web/contents" \
   ]
 }
 ```
+
+### Errors
+
+A call that fails is not charged.
+
+| Status | When |
+| --- | --- |
+| `404` | Web search is not enabled for your account. |
+| `422` | Invalid or duplicate URL, no content type requested, insufficient balance (`code: insufficient_balance`) or a request rejected by the content policy (`code: content_rejected`). |
+| `429` | Rate limit reached, or too many web calls of your account in progress at once (`code: concurrency_limited`) — wait for one to finish. Honour `Retry-After`. |
+| `503` | The request could not be completed. `code` says why: `capacity` (retry after `Retry-After`), `timeout`, `unavailable` or `upstream_error`. |
 
 ### Pricing
 
