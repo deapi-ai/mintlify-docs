@@ -31,12 +31,25 @@ The full source code for the MCP server is available on GitHub: [github.com/deap
 
 ### Server Details
 
-| Property                | Value                      |
-| ----------------------- | -------------------------- |
-| **MCP Server URL**      | `https://mcp.deapi.ai/mcp` |
-| **OAuth Client ID**     | `deapi-mcp`                |
-| **OAuth Client Secret** | Your deAPI API key         |
-| **Transport**           | Streamed HTTP              |
+| Property                | Value                                                        |
+| ----------------------- | ------------------------------------------------------------ |
+| **MCP Server URL**      | `https://mcp.deapi.ai/mcp`                                   |
+| **Transport**           | Streamable HTTP (there is no SSE endpoint)                   |
+| **API key header**      | `Authorization: Bearer <key>` or `X-API-Key: <key>`          |
+| **OAuth Client ID**     | `deapi-mcp`                                                  |
+| **OAuth Client Secret** | Your deAPI API key                                           |
+| **Setup page**          | [mcp.deapi.ai](https://mcp.deapi.ai/): copy-ready setup for each client |
+
+Create an API key at [app.deapi.ai/settings/api-keys](https://app.deapi.ai/settings/api-keys). Jobs run on your deAPI balance, so treat the key like a password.
+
+### Authentication
+
+Every request carries your deAPI API key, in one of two ways:
+
+- **In a header** (Claude Code, Cursor, VS Code, Codex, Gemini CLI and most other clients): `Authorization: Bearer <key>`, or `X-API-Key: <key>` for a client that only lets you name one header. When both are sent, `Authorization` is used.
+- **Through OAuth with a pre-registered client** (claude.ai, Claude Desktop, ChatGPT, and Cursor if you prefer its sign-in): Client ID `deapi-mcp`, Client Secret = your API key. The server supports the Authorization Code flow with PKCE (S256). It does not support dynamic client registration, so a client must let you enter the Client ID and Secret yourself.
+
+The key is checked with deAPI when the client connects. A key deAPI does not accept is refused with `401` right away (or `invalid_client` during OAuth sign-in), so an authentication error from your client means the key needs fixing. Never put the key in the URL: the server only reads it from the headers above.
 
 ---
 
@@ -144,26 +157,28 @@ Generation tools wait for the job to finish and return its outcome in one call:
 
 ### How to Connect
 
-#### Claude (claude.ai)
+#### Claude (claude.ai and Claude Desktop)
 
-To use deAPI MCP tools directly in Claude conversations:
+claude.ai and the Claude Desktop app share the same connector settings. To use deAPI MCP tools in Claude conversations:
 
-**Step 1.** Get your API key from the [deAPI Dashboard](https://app.deapi.ai/dashboard)
+**Step 1.** Create an API key at [app.deapi.ai/settings/api-keys](https://app.deapi.ai/settings/api-keys)
 
-**Step 2.** Add the MCP connector in Claude settings:
+**Step 2.** Add the connector:
 
-- Go to **Settings** → **Connectors**
-- Click **Add Connector** or **Add MCP Server**
-- Select **New OAuth Connector**
-- Enter the following credentials:
+- Open **Customize** → **Connectors** and choose **Add custom connector**
+- Name it `deAPI` and enter the server URL `https://mcp.deapi.ai/mcp`
+- Open **Advanced settings**, choose **Use your own OAuth client**, and enter:
 
-| Field                   | Value                      |
-| ----------------------- | -------------------------- |
-| **OAuth Client ID**     | `deapi-mcp`                |
-| **OAuth Client Secret** | Your deAPI API key         |
-| **Server URL**          | `https://mcp.deapi.ai/mcp` |
+| Field                   | Value              |
+| ----------------------- | ------------------ |
+| **OAuth Client ID**     | `deapi-mcp`        |
+| **OAuth Client Secret** | Your deAPI API key |
 
-**Step 3.** Grant permissions — After adding the connector, Claude will ask you to authorize the connection. Click **Allow** to enable deAPI MCP tools in your conversations.
+**Step 3.** Click **Add**, then **Connect**. Claude signs in and lists the deAPI tools.
+
+<Note>
+  Where your plan offers **Request headers** for custom connectors, you can instead choose no sign-in and add the header `Authorization: Bearer <your key>`. On Team and Enterprise plans, an owner adds connectors under Organization settings.
+</Note>
 
 **Step 4.** Start using deAPI MCP by asking Claude to generate images, transcribe videos, or use any other capability. Make sure to mention "deAPI MCP" in your prompt so Claude knows to use the MCP tools.
 
@@ -178,34 +193,6 @@ To use deAPI MCP tools directly in Claude conversations:
 
 ---
 
-#### Claude Desktop
-
-To use deAPI MCP in the Claude Desktop app, configure it via the config file with a Bearer token. This is the recommended approach for desktop — no OAuth setup required.
-
-**Config file setup:**
-
-Edit your Claude Desktop configuration file:
-
-- **macOS**: `~/Library/Application Support/Claude/claude_desktop_config.json`
-- **Windows**: `%APPDATA%\Claude\claude_desktop_config.json`
-
-```json
-{
-  "mcpServers": {
-    "deapi": {
-      "url": "https://mcp.deapi.ai/mcp",
-      "headers": {
-        "Authorization": "Bearer YOUR_API_KEY"
-      }
-    }
-  }
-}
-```
-
-Replace `YOUR_API_KEY` with your actual deAPI key. Save the file and restart Claude Desktop.
-
----
-
 #### Cursor IDE
 
 To integrate deAPI MCP into Cursor for AI-assisted development:
@@ -214,7 +201,7 @@ To integrate deAPI MCP into Cursor for AI-assisted development:
   **Quick setup:** Press `Cmd+Shift+P` (macOS) or `Ctrl+Shift+P` (Windows/Linux), type **"MCP Settings"** and press Enter — this opens the MCP configuration file directly.
 </Tip>
 
-**Step 1.** Get your API key from the [deAPI Dashboard](https://app.deapi.ai/dashboard)
+**Step 1.** Create an API key at [app.deapi.ai/settings/api-keys](https://app.deapi.ai/settings/api-keys)
 
 **Step 2.** Open Cursor Settings:
 
@@ -225,16 +212,31 @@ To integrate deAPI MCP into Cursor for AI-assisted development:
 
 - Find the **MCP** or **Model Context Protocol** section
 - Add a custom MCP server configuration
-- Paste the following JSON (replace `YOUR_API_KEY` with your actual key):
+- Paste the following JSON into `~/.cursor/mcp.json` (or `.cursor/mcp.json` in a project). It reads the key from the `DEAPI_API_KEY` environment variable, so the key stays out of the file:
 
 ```json
 {
   "mcpServers": {
     "deapi": {
-      "name": "DEAPI MCP",
       "url": "https://mcp.deapi.ai/mcp",
       "headers": {
-        "Authorization": "Bearer YOUR_API_KEY"
+        "Authorization": "Bearer ${env:DEAPI_API_KEY}"
+      }
+    }
+  }
+}
+```
+
+If you prefer Cursor's OAuth sign-in, use the pre-registered client instead:
+
+```json
+{
+  "mcpServers": {
+    "deapi": {
+      "url": "https://mcp.deapi.ai/mcp",
+      "auth": {
+        "CLIENT_ID": "deapi-mcp",
+        "CLIENT_SECRET": "${env:DEAPI_API_KEY}"
       }
     }
   }
@@ -263,7 +265,7 @@ To use deAPI MCP tools in ChatGPT conversations:
   MCP is available in beta to **Pro, Plus, Business, Enterprise, and Education** accounts. The MCP apps work on both web and desktop, but Developer mode settings are only accessible in the **web version** at [chatgpt.com](https://chatgpt.com).
 </Info>
 
-**Step 1.** Get your API key from the [deAPI Dashboard](https://app.deapi.ai/dashboard)
+**Step 1.** Create an API key at [app.deapi.ai/settings/api-keys](https://app.deapi.ai/settings/api-keys)
 
 **Step 2.** Enable Developer mode:
 
@@ -306,10 +308,46 @@ To use deAPI MCP tools in ChatGPT conversations:
 To use deAPI MCP in Claude Code, open a terminal in your project directory and run:
 
 ```bash
-claude mcp add deapi -s user -t http https://mcp.deapi.ai/mcp --header "Authorization: Bearer YOUR_API_KEY"
+export DEAPI_API_KEY="YOUR_API_KEY"
+claude mcp add deapi -s user -t http https://mcp.deapi.ai/mcp --header "Authorization: Bearer $DEAPI_API_KEY"
 ```
 
 Replace `YOUR_API_KEY` with your actual deAPI key. The server will be available in all your Claude Code sessions.
+
+To share the server with a project, add it to `.mcp.json` instead; Claude Code expands `${DEAPI_API_KEY}` from the environment:
+
+```json
+{
+  "mcpServers": {
+    "deapi": {
+      "type": "http",
+      "url": "https://mcp.deapi.ai/mcp",
+      "headers": { "Authorization": "Bearer ${DEAPI_API_KEY}" }
+    }
+  }
+}
+```
+
+---
+
+#### VS Code (GitHub Copilot)
+
+Add the server to `.vscode/mcp.json`. VS Code asks for the key once and stores it securely:
+
+```json
+{
+  "inputs": [
+    { "type": "promptString", "id": "deapi-key", "description": "deAPI API key", "password": true }
+  ],
+  "servers": {
+    "deapi": {
+      "type": "http",
+      "url": "https://mcp.deapi.ai/mcp",
+      "headers": { "Authorization": "Bearer ${input:deapi-key}" }
+    }
+  }
+}
+```
 
 ---
 
@@ -322,13 +360,13 @@ Edit `~/.codex/config.toml` (user-level) or `.codex/config.toml` (project-level)
 ```toml
 [mcp_servers.deapi]
 url = "https://mcp.deapi.ai/mcp"
-bearer_token_env_var = "DEAPI_TOKEN"
+bearer_token_env_var = "DEAPI_API_KEY"
 ```
 
 Then set the environment variable with your deAPI key:
 
 ```bash
-export DEAPI_TOKEN="YOUR_API_KEY"
+export DEAPI_API_KEY="YOUR_API_KEY"
 ```
 
 Replace `YOUR_API_KEY` with your actual deAPI key.
@@ -343,7 +381,24 @@ To use deAPI MCP in Gemini CLI, open a terminal in your project directory and ru
 gemini mcp add --transport http --header "Authorization: Bearer YOUR_API_KEY" deapi https://mcp.deapi.ai/mcp
 ```
 
-Replace `YOUR_API_KEY` with your actual deAPI key.
+Replace `YOUR_API_KEY` with your actual deAPI key. To edit `~/.gemini/settings.json` by hand, use `httpUrl` (in Gemini CLI, `url` means the older SSE transport):
+
+```json
+{
+  "mcpServers": {
+    "deapi": {
+      "httpUrl": "https://mcp.deapi.ai/mcp",
+      "headers": { "Authorization": "Bearer YOUR_API_KEY" }
+    }
+  }
+}
+```
+
+---
+
+#### Any other MCP client
+
+Use the server URL `https://mcp.deapi.ai/mcp` with the Streamable HTTP transport (sometimes just called "HTTP") and send your key as `Authorization: Bearer <key>` or `X-API-Key: <key>`. A client that requires OAuth needs a field for a Client ID and Secret: enter `deapi-mcp` and your API key.
 
 ---
 
@@ -353,9 +408,9 @@ You can run the MCP server on your own infrastructure. The full source code is a
 
 #### Prerequisites
 
-- Python 3.10 or higher
+- Python 3.11 or higher
 - `uv`, `pip`, or `conda` for package management
-- A deAPI API key from the [Dashboard](https://app.deapi.ai/dashboard)
+- A deAPI API key from [app.deapi.ai/settings/api-keys](https://app.deapi.ai/settings/api-keys)
 
 #### Quick Start
 
@@ -366,14 +421,15 @@ cd mcp-server-deapi
 # Install dependencies (uv recommended)
 uv pip install -e .
 
-# Start the server
-python -m src.server_remote
+# Start the server on your machine only
+MCP_HOST=127.0.0.1 python -m deapi_mcp.server_remote
 ```
 
-The server will start on `http://localhost:8000` by default. For external access:
+The server will start on `http://localhost:8000`. For external access, set a fixed key for signing OAuth tokens first; the server refuses to start beyond localhost without one:
 
 ```bash
-MCP_HOST=0.0.0.0 MCP_PORT=8000 python -m src.server_remote
+export DEAPI_JWT_SECRET_KEY=$(python -c "import secrets; print(secrets.token_urlsafe(32))")
+MCP_HOST=0.0.0.0 MCP_PORT=8000 python -m deapi_mcp.server_remote
 ```
 
 #### Docker Deployment
@@ -381,7 +437,7 @@ MCP_HOST=0.0.0.0 MCP_PORT=8000 python -m src.server_remote
 ```bash
 # Build and run
 docker build -t mcp-server-deapi .
-docker run -d -p 8000:8000 --name mcp-server-deapi mcp-server-deapi
+docker run -d -p 8000:8000 -e DEAPI_JWT_SECRET_KEY="$DEAPI_JWT_SECRET_KEY" --name mcp-server-deapi mcp-server-deapi
 
 # Or with Docker Compose
 docker-compose up -d
@@ -492,9 +548,10 @@ Polling uses exponential backoff (1.5× multiplier by default), so jobs receive 
 
 The MCP server does **not** store your API token. Authentication works at the connection level:
 
-- **Remote hosted server**: OAuth 2.0 Authorization Code with PKCE, or Bearer token in HTTP headers
-- **Self-hosted server**: Bearer token forwarded per-request to the deAPI API
-- Tokens are never persisted or logged; tools do **not** accept `deapi_api_token` as a parameter
+- **Remote hosted server**: OAuth 2.0 Authorization Code with PKCE (pre-registered client `deapi-mcp`), or your API key in the `Authorization: Bearer` or `X-API-Key` header
+- **Key check**: the key is checked with deAPI when a client connects, and a key deAPI refuses gets `401` immediately
+- **Self-hosted server**: the key is forwarded per request to the deAPI API
+- Keys are never persisted or logged, and never read from the URL; tools do **not** accept `deapi_api_token` as a parameter
 
 ---
 
@@ -520,15 +577,16 @@ Use the **MCP server** when you want an AI agent to decide which tools to call, 
 
 - **Verify your API key** is valid and has sufficient balance
 - **Check the server URL** is exactly `https://mcp.deapi.ai/mcp`
-- **For Claude:** Ensure OAuth Client ID is `deapi-mcp` and Secret is your API key
-- **For Cursor / Claude Desktop:** Ensure Bearer token format — the Authorization header should be `Bearer YOUR_API_KEY`
+- **For Claude and ChatGPT:** Ensure OAuth Client ID is `deapi-mcp` and Secret is your API key
+- **For header-based clients:** The header should be `Authorization: Bearer YOUR_API_KEY` (with the `Bearer ` prefix) or `X-API-Key: YOUR_API_KEY`
+- **`401` or `invalid_client` when connecting:** deAPI did not accept the key. Copy it again from [app.deapi.ai/settings/api-keys](https://app.deapi.ai/settings/api-keys), or create a new one
 
 #### Tools Not Appearing
 
 - Restart your MCP client (Claude, ChatGPT, Cursor) after configuration changes
 - **In Claude:** Make sure you clicked **Allow** when prompted to grant permissions
 - **In ChatGPT:** Ensure Developer mode is enabled in Advanced settings
-- Verify JSON syntax in configuration files (Cursor, Claude Desktop)
+- Verify JSON syntax in configuration files (Cursor, VS Code, Claude Code)
 - Check that your API key has the necessary permissions
 
 #### Jobs Stuck in Processing
@@ -539,7 +597,7 @@ Use the **MCP server** when you want an AI agent to decide which tools to call, 
 
 #### Remote Connection Issues (Self-Hosted)
 
-- Test the endpoint: `curl -N http://your-server:8000/mcp`
+- Test the server: `curl http://your-server:8000/health` should return `{"status": "healthy", ...}`, and `POST /mcp` without a key should return `401`
 - Check server logs: `docker logs mcp-server-deapi` or `journalctl -u mcp-server-deapi`
 - Verify firewall rules allow the configured port
 - For SSL issues, confirm certificates are valid and paths are correct in your proxy config
