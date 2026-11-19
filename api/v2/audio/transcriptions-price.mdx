@@ -13,7 +13,7 @@ Quote from one of three inputs: `source_url`, `source_file`, or a bare `duration
 
 ### Quoting from `duration_seconds`
 
-This mode never fetches the source, so it cannot see which platform the media comes from. On models that price per platform — and on TikTok, which is priced from a fixed [length-band card](/pricing) rather than by the hour — pass `platform` alongside the duration:
+This mode never fetches the source, so it cannot see which platform the media comes from. On models that price per platform — and on TikTok and Instagram, which share a fixed [length-band card](/pricing) rather than being priced by the hour — pass `platform` alongside the duration:
 
 ```bash
 curl -X POST "https://api.deapi.ai/api/v2/audio/transcriptions/price" \
@@ -32,6 +32,10 @@ curl -X POST "https://api.deapi.ai/api/v2/audio/transcriptions/price" \
 
 Without `platform`, the quote uses the model base rate with no duration-band rounding.
 
+<Warning>
+  **TikTok and Instagram cannot be quoted from a URL.** A `source_url` from either platform is rejected with `422`. Quote them with `duration_seconds` and `platform: "tiktok"` or `platform: "instagram"` — both return the same price for the same length.
+</Warning>
+
 <Note>
   `platform: "tiktok"` is only valid with `model: "WhisperLargeV3Ct2"` — that is the only model that transcribes TikTok. Paired with any other model it is rejected with `422`, the same way the job itself would be. See [Audio/Video Transcription](/api/v2/audio/transcriptions).
 </Note>
@@ -40,6 +44,6 @@ Without `platform`, the quote uses the model base rate with no duration-band rou
 
 The quote is built in three steps, in this order:
 
-1. **Base amount** — the TikTok [length band](/pricing) for TikTok sources, otherwise the duration rate.
+1. **Base amount** — the shared [length band](/pricing) for TikTok and Instagram sources, otherwise the duration rate.
 2. **Timestamps** — segment-level timing is included in the base amount, so `include_ts: true` with the default `ts_level: "segment"` does not change the quote. The base amount is multiplied by 1.5 only when `ts_level` is `word`, or when `diarize` is set — diarization carries the surcharge at any granularity, `segment` included.
 3. **Metadata** — if `include_metadata` is set on a source that can return it, a flat `0.005` is added _after_ the multiplication.

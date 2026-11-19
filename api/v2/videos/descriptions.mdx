@@ -8,3 +8,23 @@ Describe visible events and scene boundaries in a video. Returns a `request_id` 
 <Note>
 **Prerequisite:** Consult the [Model Selection](/api/v2/utilities/models) endpoint to identify a valid model `slug` and check supported presets and duration limits.
 </Note>
+
+The model reads the picture, not the audio track — for speech, use [Audio/Video Transcription](/api/v2/audio/transcriptions). Pass a public video link in `video_url` (YouTube, X, Twitch, Kick, TikTok or Instagram), or upload a file in `video_file`.
+
+## TikTok and Instagram
+
+TikTok and Instagram videos are priced from the same fixed [length-band card](/pricing) as transcription, instead of by machine time. The `preset` scales the card:
+
+| Video length | `fast` (×0.75) | `balanced` (×1) | `detail` (×1.5) |
+| --- | --- | --- | --- |
+| up to 1 min | 0.01125 USD | 0.015 USD | 0.0225 USD |
+| up to 2 min | 0.016875 USD | 0.0225 USD | 0.03375 USD |
+| up to 3 min | 0.0225 USD | 0.030 USD | 0.045 USD |
+| up to 5 min | 0.03375 USD | 0.045 USD | 0.0675 USD |
+| up to 10 min | 0.061875 USD | 0.0825 USD | 0.12375 USD |
+
+- **10 minutes is the maximum.** A longer TikTok or Instagram video is rejected with `422`. Other sources follow the model's `max_video_duration_seconds`.
+- **Quotes need a duration.** [`/price`](/api/v2/videos/descriptions-price) rejects a TikTok or Instagram `video_url` with `422` — send `duration_seconds` with `platform: "tiktok"` or `platform: "instagram"`.
+- **Instagram links** follow the same rules as transcription: a single public reel, post or video is accepted, while profile links and stories are rejected with `422`. See [accepted Instagram links](/api/v2/audio/transcriptions#tiktok-and-instagram).
+
+`include_metadata: true` adds a flat 0.005 USD on URL sources and returns the same `metadata` object as transcription. See [Source metadata](/api/v2/audio/transcriptions#source-metadata) for the fields each platform returns.

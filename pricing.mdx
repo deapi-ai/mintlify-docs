@@ -24,8 +24,8 @@ Example pricing is shown below for reference; exact, up-to-date rates are always
 | Video Generation | video duration \+ resolution | 0.001737 USD for 2s, 256×256 | `POST /api/v2/videos/generations` |
 | Video Animation (Image-to-Video) | source image \+ motion interpolation | 0.001737 USD for 2s, 256×256 | `POST /api/v2/videos/animations` |
 | Transcription (URL \+ file, all sources) | duration | from 0.05 USD per hour | `POST /api/v2/audio/transcriptions` |
-| Transcription — TikTok (WhisperLargeV3Ct2) | video length band | 0.015–0.105 USD per video | `POST /api/v2/audio/transcriptions` |
-| Source metadata add-on (YouTube / TikTok) | per request | 0.005 USD | `include_metadata: true` |
+| Transcription — TikTok & Instagram (WhisperLargeV3Ct2) | video length band | 0.015–0.105 USD per video | `POST /api/v2/audio/transcriptions` |
+| Source metadata add-on (YouTube / TikTok / Instagram) | per request | 0.005 USD | `include_metadata: true` |
 | Word timestamps \+ diarization add-on (WhisperLargeV3Ct2) | \+50% of transcription price | segment timestamps are free | `ts_level: "word"`, `diarize: true` |
 | Image OCR | input resolution | 0.00928 USD per image at 1024×1024 | `POST /api/v2/images/ocr` |
 | Embeddings | number of tokens processed | 0.000084 USD per 1,000 tokens | `POST /api/v2/embeddings` |
@@ -114,9 +114,9 @@ A failed job is normally refunded — `refunded: true` and `price.amount: 0`. No
 - For 5 minutes, cost is estimated at **0.0089 USD**.
 - Supports timestamps, multilingual transcription, and batching for better throughput.
 
-**Transcription — WhisperLargeV3Ct2 (TikTok length bands)**
+**Transcription — WhisperLargeV3Ct2 (TikTok & Instagram length bands)**
 
-`WhisperLargeV3Ct2` adds word-level timestamps, per-segment confidence scores and speaker diarization. It is also the only model that transcribes TikTok — a TikTok URL sent with any other model is rejected with `422`. <br />The price list for TikTok transcription depends on the video length and is as follows:
+`WhisperLargeV3Ct2` adds word-level timestamps, per-segment confidence scores and speaker diarization. It is also the only model that transcribes TikTok — a TikTok URL sent with any other model is rejected with `422`. <br />TikTok and Instagram videos share one fixed price list. The price depends on the video length and is as follows:
 
 | Video length | Price per video |
 | --- | --- |
@@ -128,13 +128,16 @@ A failed job is normally refunded — `refunded: true` and `price.amount: 0`. No
 | over 10 min | 0.105 USD |
 
 - The band is selected from the **whole video length, rounded up**: a 1:05 clip falls into the _up to 2 min_ band and costs 0.0225 USD.
-- The _over 10 min_ band is flat — a 12-minute and a 30-minute TikTok both cost 0.105 USD.
+- The _over 10 min_ band is flat — a 12-minute and a 30-minute video both cost 0.105 USD.
+- The same bands apply to both platforms: a 41-second Instagram reel and a 41-second TikTok each cost 0.015 USD.
+
+- [Video Description](/api/v2/videos/descriptions) (`Marlin_2B`) uses the same card for TikTok and Instagram, scaled by the preset: ×0.75 for `fast`, ×1 for `balanced`, ×1.5 for `detail`. It accepts TikTok and Instagram videos up to 10 minutes, so the _over 10 min_ band does not apply there.
 
 Every other source — YouTube, X, Twitch, Kick, uploaded files — is billed by duration.
 
 **Segment timestamps are free.** `include_ts: true` with the default `ts_level: "segment"` costs the same as a plain transcription. On `WhisperLargeV3Ct2` only word-level timestamps (`ts_level: "word"`) and speaker diarization (`diarize: true`) add **+50%** to the transcription price — diarization carries that surcharge at any granularity, `segment` included.
 
-**Source metadata add-on (YouTube & TikTok)**
+**Source metadata add-on (YouTube, TikTok & Instagram)**
 
 - Setting `include_metadata: true` adds a flat **0.005 USD per request** on top of the transcription price.
 - The surcharge applies only to sources that can actually return metadata. An uploaded file has no source to describe, always returns `null`, and is never charged for the flag.

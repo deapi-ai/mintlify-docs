@@ -3273,7 +3273,7 @@
                     "Client API v2"
                 ],
                 "summary": "Estimate the price of a video description",
-                "description": "Quote a video description before submitting it. Priced on the machine time the description takes — which grows with the length of the video and with the `preset` — at the model's hourly rate, except on TikTok, where the price is a fixed card by length (up to 1, 2, 3, 5 or 10 minutes; 10 minutes is the maximum) scaled ×0.75 / ×1 / ×1.5 by the `preset`. `include_metadata` adds the same flat surcharge as on transcription, on URL sources only. Provide the source as a URL, an upload, or a known `duration_seconds`.",
+                "description": "Quote a video description before submitting it. Priced on the machine time the description takes — which grows with the length of the video and with the `preset` — at the model's hourly rate, except on TikTok and Instagram, where the price is a fixed card by length (up to 1, 2, 3, 5 or 10 minutes; 10 minutes is the maximum) scaled ×0.75 / ×1 / ×1.5 by the `preset`. `include_metadata` adds the same flat surcharge as on transcription, on URL sources only. Provide the source as a URL, an upload, or a known `duration_seconds`.",
                 "operationId": "estimateVideoDescriptionPrice",
                 "parameters": [
                     {
@@ -4603,7 +4603,7 @@
                     "Client API v2"
                 ],
                 "summary": "Transcribe audio or video to text",
-                "description": "Transcribe audio or video to text. Accepts either a source URL (YouTube, Twitter, Twitch, Kick, TikTok, Twitter Spaces) or a file upload (audio/video). The job type is auto-detected from the input.",
+                "description": "Transcribe audio or video to text. Accepts either a source URL (YouTube, Twitter, Twitch, Kick, TikTok, Instagram, Twitter Spaces) or a file upload (audio/video). The job type is auto-detected from the input.",
                 "operationId": "createTranscription",
                 "parameters": [
                     {
@@ -4694,7 +4694,7 @@
                     "Client API v2"
                 ],
                 "summary": "Describe what happens in a video",
-                "description": "Produce a timestamped index of what happens on screen — a list of events, each with `start`, `end` (seconds) and a `description` — plus scene boundaries and source metadata. Reads the picture, not the audio track; for speech use POST /api/v2/audio/transcriptions. Accepts either a video URL (YouTube, Twitter/X, Twitch, Kick, TikTok) or a file upload. The result is a JSON document: `{\"events\": [{\"start\", \"end\", \"description\", \"merged?\", \"edge_distance\"}], \"scenes\": [...], \"meta\": {\"duration\", \"preset\", ...}}`, delivered as `result_url` on the job (and as a serialized JSON string in `result` when `return_result_in_response` is set). Priced on machine time at the model's hourly rate — longer videos and higher presets cost more — or, for TikTok, on a fixed card by length capped at 10 minutes; see POST /api/v2/videos/descriptions/price.",
+                "description": "Produce a timestamped index of what happens on screen — a list of events, each with `start`, `end` (seconds) and a `description` — plus scene boundaries and source metadata. Reads the picture, not the audio track; for speech use POST /api/v2/audio/transcriptions. Accepts either a video URL (YouTube, Twitter/X, Twitch, Kick, TikTok, Instagram) or a file upload. The result is a JSON document: `{\"events\": [{\"start\", \"end\", \"description\", \"merged?\", \"edge_distance\"}], \"scenes\": [...], \"meta\": {\"duration\", \"preset\", ...}}`, delivered as `result_url` on the job (and as a serialized JSON string in `result` when `return_result_in_response` is set). Priced on machine time at the model's hourly rate — longer videos and higher presets cost more — or, for TikTok and Instagram, on a fixed card by length capped at 10 minutes; see POST /api/v2/videos/descriptions/price.",
                 "operationId": "createVideoDescription",
                 "parameters": [
                     {
@@ -6409,7 +6409,7 @@
                                 "minimum": 0.1
                             },
                             "platform": {
-                                "description": "The platform the source comes from. Valid ONLY on this variant, where there is no URL to derive it from — with `source_url` or `source_file` it is rejected, because the platform is taken from the source itself. Some models price per platform, and TikTok is priced from a length-band card, so a duration-only quote that omits this is priced at the model base rate and can come in under the amount charged. Pass the platform you will actually submit.",
+                                "description": "The platform the source comes from. Valid ONLY on this variant, where there is no URL to derive it from — with `source_url` or `source_file` it is rejected, because the platform is taken from the source itself. Some models price per platform, and TikTok and Instagram are priced from a length-band card, so a duration-only quote that omits this is priced at the model base rate and can come in under the amount charged. Pass the platform you will actually submit.",
                                 "type": [
                                     "string",
                                     "null"
@@ -6421,6 +6421,7 @@
                                     "twitch",
                                     "kick",
                                     "tiktok",
+                                    "instagram",
                                     null
                                 ]
                             },
@@ -6574,12 +6575,12 @@
                         ],
                         "properties": {
                             "video_url": {
-                                "description": "URL of the video to quote. Mutually exclusive with `video_file` and `duration_seconds`; `platform` must NOT be sent with it, as it is derived from the URL. Quotes from a TikTok URL are refused (the lookup itself costs money) — quote TikTok by `duration_seconds` + `platform: tiktok` instead.",
+                                "description": "URL of the video to quote. Mutually exclusive with `video_file` and `duration_seconds`; `platform` must NOT be sent with it, as it is derived from the URL. Quotes from a TikTok or Instagram URL are refused (the lookup itself costs money) — quote them by `duration_seconds` + `platform: tiktok` or `platform: instagram` instead.",
                                 "type": "string",
                                 "example": "https://www.youtube.com/watch?v=jNQXAC9IVRw"
                             },
                             "preset": {
-                                "description": "The preset you will submit. It sets how much machine time the description takes (`detail` is roughly 3.75× `fast` per hour of material), which is what the price follows; on a TikTok, where the price is a fixed card, it multiplies the card ×0.75 / ×1 / ×1.5 for `fast` / `balanced` / `detail`. Omitted quotes at the model default (`balanced`). Ignored on a model without `info.features.supports_presets`.",
+                                "description": "The preset you will submit. It sets how much machine time the description takes (`detail` is roughly 3.75× `fast` per hour of material), which is what the price follows; on a TikTok or Instagram video, where the price is a fixed card, it multiplies the card ×0.75 / ×1 / ×1.5 for `fast` / `balanced` / `detail`. Omitted quotes at the model default (`balanced`). Ignored on a model without `info.features.supports_presets`.",
                                 "type": [
                                     "string",
                                     "null"
@@ -6622,7 +6623,7 @@
                                 "format": "binary"
                             },
                             "preset": {
-                                "description": "The preset you will submit. It sets how much machine time the description takes (`detail` is roughly 3.75× `fast` per hour of material), which is what the price follows; on a TikTok, where the price is a fixed card, it multiplies the card ×0.75 / ×1 / ×1.5 for `fast` / `balanced` / `detail`. Omitted quotes at the model default (`balanced`). Ignored on a model without `info.features.supports_presets`.",
+                                "description": "The preset you will submit. It sets how much machine time the description takes (`detail` is roughly 3.75× `fast` per hour of material), which is what the price follows; on a TikTok or Instagram video, where the price is a fixed card, it multiplies the card ×0.75 / ×1 / ×1.5 for `fast` / `balanced` / `detail`. Omitted quotes at the model default (`balanced`). Ignored on a model without `info.features.supports_presets`.",
                                 "type": [
                                     "string",
                                     "null"
@@ -6666,7 +6667,7 @@
                                 "minimum": 0.1
                             },
                             "platform": {
-                                "description": "The platform the source comes from. Valid ONLY on this variant, where there is no URL to derive it from — with `video_url` or `video_file` it is rejected. It changes the price: `tiktok` is quoted on the fixed length card (and capped at 10 minutes), every other value on machine time, and `platform` also decides whether `include_metadata` carries its surcharge — only platform sources can return metadata. A duration-only quote that omits it is priced as an upload, so for a URL job it can come in under the amount actually charged.",
+                                "description": "The platform the source comes from. Valid ONLY on this variant, where there is no URL to derive it from — with `video_url` or `video_file` it is rejected. It changes the price: `tiktok` and `instagram` are quoted on the fixed length card (and capped at 10 minutes), every other value on machine time, and `platform` also decides whether `include_metadata` carries its surcharge — only platform sources can return metadata. A duration-only quote that omits it is priced as an upload, so for a URL job it can come in under the amount actually charged.",
                                 "type": [
                                     "string",
                                     "null"
@@ -6678,11 +6679,12 @@
                                     "twitch",
                                     "kick",
                                     "tiktok",
+                                    "instagram",
                                     null
                                 ]
                             },
                             "preset": {
-                                "description": "The preset you will submit. It sets how much machine time the description takes (`detail` is roughly 3.75× `fast` per hour of material), which is what the price follows; on a TikTok, where the price is a fixed card, it multiplies the card ×0.75 / ×1 / ×1.5 for `fast` / `balanced` / `detail`. Omitted quotes at the model default (`balanced`). Ignored on a model without `info.features.supports_presets`.",
+                                "description": "The preset you will submit. It sets how much machine time the description takes (`detail` is roughly 3.75× `fast` per hour of material), which is what the price follows; on a TikTok or Instagram video, where the price is a fixed card, it multiplies the card ×0.75 / ×1 / ×1.5 for `fast` / `balanced` / `detail`. Omitted quotes at the model default (`balanced`). Ignored on a model without `info.features.supports_presets`.",
                                 "type": [
                                     "string",
                                     "null"
@@ -7865,7 +7867,7 @@
                 ],
                 "properties": {
                     "source_url": {
-                        "description": "URL of video/audio to transcribe (YouTube, Twitter/X, Twitch, Kick, TikTok, Twitter Spaces). Mutually exclusive with source_file.",
+                        "description": "URL of video/audio to transcribe (YouTube, Twitter/X, Twitch, Kick, TikTok, Instagram, Twitter Spaces). Mutually exclusive with source_file.",
                         "type": "string",
                         "example": "https://www.youtube.com/watch?v=jNQXAC9IVRw"
                     },
@@ -7985,7 +7987,7 @@
                 ],
                 "properties": {
                     "video_url": {
-                        "description": "URL of the video to describe (YouTube, Twitter/X, Twitch, Kick, TikTok — the same platforms as transcription). Audio-only sources such as Twitter Spaces are rejected. Live streams are rejected. Mutually exclusive with video_file.",
+                        "description": "URL of the video to describe (YouTube, Twitter/X, Twitch, Kick, TikTok, Instagram — the same platforms as transcription). Audio-only sources such as Twitter Spaces are rejected. Live streams are rejected. Mutually exclusive with video_file.",
                         "type": "string",
                         "example": "https://www.youtube.com/watch?v=jNQXAC9IVRw"
                     },
@@ -8000,7 +8002,7 @@
                         "example": "Marlin_2B"
                     },
                     "preset": {
-                        "description": "Detail level. A preset is the per-frame pixel budget the model reads the video at: `fast` reads a small frame over long windows, `detail` a large frame over short windows, so higher presets read more of what is on screen (small text, brand names) and cost more — roughly ×1 / ×1.7 / ×3.75 machine time for `fast` / `balanced` / `detail` (×0.75 / ×1 / ×1.5 on the TikTok card). Omit for the default (`balanced`, or the cheapest preset the model offers if it does not offer `balanced`). Only honoured on a model whose `info.features.supports_presets` is true; such a model publishes the presets it offers as `info.limits.available_presets` and rejects any other. On a model without the flag the field is ignored.",
+                        "description": "Detail level. A preset is the per-frame pixel budget the model reads the video at: `fast` reads a small frame over long windows, `detail` a large frame over short windows, so higher presets read more of what is on screen (small text, brand names) and cost more — roughly ×1 / ×1.7 / ×3.75 machine time for `fast` / `balanced` / `detail` (×0.75 / ×1 / ×1.5 on the TikTok and Instagram card). Omit for the default (`balanced`, or the cheapest preset the model offers if it does not offer `balanced`). Only honoured on a model whose `info.features.supports_presets` is true; such a model publishes the presets it offers as `info.limits.available_presets` and rejects any other. On a model without the flag the field is ignored.",
                         "type": [
                             "string",
                             "null"

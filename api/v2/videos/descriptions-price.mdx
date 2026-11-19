@@ -4,3 +4,25 @@ openapi: "/openapi.json POST /api/v2/videos/descriptions/price"
 ---
 
 Estimate the cost of a video description job before submitting it.
+
+Quote from one of three inputs: `video_url`, `video_file`, or a bare `duration_seconds`. Pass the `preset` and `include_metadata` values you will send with the job, because both change the price.
+
+<Warning>
+  **TikTok and Instagram cannot be quoted from a URL.** A `video_url` from either platform is rejected with `422`. Quote them with `duration_seconds` and `platform: "tiktok"` or `platform: "instagram"`. Both use the same fixed [length-band card](/api/v2/videos/descriptions#tiktok-and-instagram), and a duration over 10 minutes is rejected with `422`.
+</Warning>
+
+```bash
+curl -X POST "https://api.deapi.ai/api/v2/videos/descriptions/price" \
+  -H "Authorization: Bearer $DEAPI_API_KEY" \
+  -H "Content-Type: application/json" \
+  -H "Accept: application/json" \
+  -d '{
+    "duration_seconds": 41,
+    "platform": "instagram",
+    "model": "Marlin_2B",
+    "preset": "balanced",
+    "include_metadata": true
+  }'
+```
+
+This returns `0.02`: the 0.015 USD band for a video up to 1 minute, plus 0.005 USD for metadata. Without `platform`, a duration-only quote is priced as an upload, on machine time.

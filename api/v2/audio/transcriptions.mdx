@@ -1,7 +1,7 @@
 ---
 title: "Audio/Video Transcription"
 openapi: "/openapi.json POST /api/v2/audio/transcriptions"
-description: "Unified transcription — auto-detects URL or file upload for audio and video sources (YouTube, X, Twitch, Kick, TikTok, X/Twitter Spaces)."
+description: "Unified transcription — auto-detects URL or file upload for audio and video sources (YouTube, X, Twitch, Kick, TikTok, Instagram, X/Twitter Spaces)."
 ---
 
 Unified transcription endpoint that replaces the five v1 endpoints (`vid2txt`, `aud2txt`, `videofile2txt`, `audiofile2txt`, `transcribe`). Accepts URLs or multipart file uploads. Returns a `request_id` for status polling.
@@ -24,13 +24,28 @@ Unified transcription endpoint that replaces the five v1 endpoints (`vid2txt`, `
   **TikTok requires `WhisperLargeV3Ct2`.** A TikTok `source_url` submitted with any other model is rejected with `422` before the job is queued, and nothing is charged. The same pairing applies to quotes: `platform: "tiktok"` on [`/price`](/api/v2/audio/transcriptions-price) is only valid with `WhisperLargeV3Ct2`.
 </Warning>
 
-**Segment timestamps are free.** `include_ts: true` with the default `ts_level: "segment"` costs exactly the same as a plain transcription — on every model, `WhisperLargeV3Ct2` included. Only finer granularity is billed: on `WhisperLargeV3Ct2`, `ts_level: "word"` — and `diarize`, which carries the surcharge at *any* granularity, `segment` included — multiplies the duration-based price by 1.5. See [Pricing](/pricing).
+**Segment timestamps are free.** `include_ts: true` with the default `ts_level: "segment"` costs exactly the same as a plain transcription — on every model, `WhisperLargeV3Ct2` included. Only finer granularity is billed: on `WhisperLargeV3Ct2`, `ts_level: "word"` — and `diarize`, which carries the surcharge at *any* granularity, `segment` included — multiplies the transcription price by 1.5, on the TikTok and Instagram card as well. See [Pricing](/pricing).
 
 <Warning>
   **Granularity is validated against the model.** The levels a model accepts are published as `info.limits.timestamp_levels` by [GET /api/v2/models](/api/v2/utilities/models). `WhisperLargeV3Ct2` publishes `["segment", "word"]` and supports diarization. A level the model does not publish is rejected with `422` and an `errors.ts_level` entry, and `diarize: true` on a model without diarization is rejected with `422` and an `errors.diarize` entry. Read the model's advertised levels before sending anything other than `segment`. See [Errors](/api/v2/errors).
 </Warning>
 
 **A source with no speech returns an empty result, not an error.** If the video or audio carries no recognisable words — silence, music only, ambient noise — the job still completes with `status: "done"` and the transcript comes back empty: no segments, no words, no speakers. Treat an empty transcript as a valid outcome and branch on it explicitly, rather than assuming the job failed. A job that genuinely failed reports `status: "error"` with an `error_reason` instead.
+
+## TikTok and Instagram
+
+TikTok and Instagram videos are priced from one fixed [length-band card](/pricing), from 0.015 USD for a video up to 1 minute to 0.105 USD for anything over 10 minutes, instead of by duration. Neither platform can be quoted from a URL: [`/price`](/api/v2/audio/transcriptions-price) rejects a TikTok or Instagram `source_url` with `422`, so quote with `duration_seconds` and `platform: "tiktok"` or `platform: "instagram"`.
+
+For Instagram, pass the link to a single public video:
+
+| Instagram link | Accepted |
+| --- | :-: |
+| `instagram.com/reel/{id}/` and `instagram.com/reels/{id}/` | ✅ |
+| `instagram.com/p/{id}/` and `instagram.com/tv/{id}/` | ✅ |
+| `instagram.com/{username}/reel/{id}/` | ✅ |
+| Profile links, stories and `instagr.am` short links | ❌ |
+
+Tracking parameters such as `?igsh=…` are accepted. A link that is not a single video is rejected with `422`, and so is a private or removed video (`This video is private or unavailable and cannot be processed.`). Nothing is charged in either case.
 
 ## Source metadata
 
@@ -42,19 +57,24 @@ Set `include_metadata: true` to have the job-status response carry a `metadata` 
 
 Only URL sources have metadata, and how much you get depends on the platform. The field names are the same either way, and anything a platform does not expose comes back as `null` rather than being omitted.
 
-| Metadata | TikTok | YouTube |
-| --- | :-: | :-: |
-| `id`, `title`, `description`, `channel` | ✅ | ✅ |
-| `duration_seconds`, `extractor` | ✅ | ✅ |
-| `view_count`, `like_count` | ✅ | ✅ |
-| `comment_count` | ✅ | ❌ |
-| `repost_count`, `save_count` | ✅ | ❌ |
-| `uploader`, `uploader_url` | ✅ | ❌ |
-| `channel_id`, `channel_url` | ✅ | ❌ |
-| `webpage_url` | ✅ | ❌ |
-| `timestamp`, `upload_date` | ✅ | ❌ |
-| `thumbnails[]` | ✅ | ❌ |
-| `fulltitle`, `has_audio`, `is_live` | ✅ | ❌ |
-| `tags`, `categories`, `chapters`, `heatmap`, `availability`, `channel_follower_count` | ✅\* | ❌ |
+| Metadata | TikTok | Instagram | YouTube |
+| --- | :-: | :-: | :-: |
+| `id`, `title`, `channel` | ✅ | ✅ | ✅ |
+| `description` | ✅ | ❌ | ✅ |
+| `duration_seconds`, `extractor` | ✅ | ✅ | ✅ |
+| `like_count` | ✅ | ✅ | ✅ |
+| `view_count` | ✅ | ❌ | ✅ |
+| `comment_count` | ✅ | ✅ | ❌ |
+| `repost_count`, `save_count` | ✅ | ❌ | ❌ |
+| `uploader` | ✅ | ✅ | ❌ |
+| `uploader_url` | ✅ | ❌ | ❌ |
+| `channel_id`, `channel_url` | ✅ | ❌ | ❌ |
+| `webpage_url` | ✅ | ✅ | ❌ |
+| `timestamp`, `upload_date` | ✅ | ✅ | ❌ |
+| `thumbnails[]` | ✅ | ✅ | ❌ |
+| `fulltitle`, `has_audio`, `is_live` | ✅ | ✅ | ❌ |
+| `tags`, `categories`, `chapters`, `heatmap`, `availability`, `channel_follower_count` | ✅\* | ❌ | ❌ |
 
 \* Present in the response schema, but may come back `null` depending on the individual TikTok video.
+
+On Instagram, `title` and `fulltitle` are generated from the account name (for example `Video by {username}`), and `channel` is the account's username.
