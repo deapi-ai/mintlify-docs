@@ -1,0 +1,246 @@
+---
+title: "Raycast"
+description: "Use the deAPI extension for Raycast to generate images, videos and speech, transcribe links and files, and edit, upscale or remove backgrounds from images, from the Raycast launcher on macOS and Windows."
+---
+
+The [deAPI extension for Raycast](https://www.raycast.com/deapi/deapi) runs deAPI models from the Raycast launcher. It adds eight commands and three tools for Raycast AI, and works on macOS and Windows. Results are saved to a folder on your computer.
+
+The extension is open source. Its code is in the [Raycast extensions repository](https://github.com/raycast/extensions/tree/main/extensions/deapi).
+
+Every request the commands send was run against the live deAPI API to write this page.
+
+---
+
+### Prerequisites
+
+- [Raycast](https://www.raycast.com) on macOS or Windows
+- A deAPI account with credits. deAPI charges per request, with no subscription; see [Pricing](/pricing).
+- A deAPI API key from the [deAPI Dashboard](https://app.deapi.ai/settings/api-keys). See [API Keys](/api-keys).
+
+---
+
+### Install and set up
+
+1. Open the [deAPI extension page](https://www.raycast.com/deapi/deapi) and click **Install Extension**, or search for **deAPI** in the Raycast Store.
+2. Open Raycast and run any deAPI command, for example **Generate Image**.
+3. Paste your key into **deAPI API Key** when Raycast asks for it.
+
+Raycast stores the key in its encrypted preferences. The extension sends it only to `api.deapi.ai`.
+
+<Tip>
+  Create a separate key for Raycast and set a **spend limit** on it. See [Key restrictions](/api-keys#key-restrictions).
+</Tip>
+
+---
+
+### Commands
+
+| Command | What it does |
+| --- | --- |
+| **Generate Image** | Creates an image from a text prompt. |
+| **Edit Image** | Changes an image with a text instruction. Takes up to two more images as references. |
+| **Generate Video** | Creates a short video from a prompt, or animates an image. |
+| **Text to Speech** | Turns text into an MP3. |
+| **Transcribe** | Transcribes a YouTube, X, TikTok, Twitch or Kick link, or an audio or video file. |
+| **Remove Background** | Returns the image as a transparent PNG. |
+| **Upscale Image** | Returns the image at four times the width and height. |
+| **Generation History** | Lists your results and running jobs, and shows your balance. |
+
+The **Model** dropdown in each command lists the models your API key can use for that task. The model the extension suggests comes first.
+
+#### Generate Image
+
+Type a prompt after the command name in Raycast, or fill in the form.
+
+| Field | Notes |
+| --- | --- |
+| **Prompt** | Required. |
+| **Model** | Z-Image-Turbo is first, followed by FLUX.1 Schnell and FLUX.2 Klein. |
+| **Aspect Ratio** | Square (1:1), Landscape (16:9), Portrait (9:16), Landscape (4:3) or Portrait (3:4). Square is the default. |
+| **Seed** | The same seed and prompt give the same image. Leave empty for a random seed. |
+
+The extension picks a width and height the model accepts for the chosen ratio and shows them under **Output** before you submit.
+
+| Model | 1:1 | 16:9 | 9:16 | 4:3 | 3:4 |
+| --- | --- | --- | --- | --- | --- |
+| Z-Image-Turbo INT8 | 768 × 768 | 1024 × 576 | 576 × 1024 | 880 × 672 | 672 × 880 |
+| FLUX.1 Schnell | 768 × 768 | 1024 × 640 | 640 × 1024 | 896 × 640 | 640 × 896 |
+| FLUX.2 Klein 4B BF16 | 1024 × 1024 | 1360 × 768 | 768 × 1360 | 1184 × 880 | 880 × 1184 |
+
+In testing, a 1024 × 576 image from Z-Image-Turbo was ready in about 13 seconds.
+
+#### Edit Image
+
+Select an image in Finder or File Explorer before you run the command and it is filled in for you.
+
+| Field | Notes |
+| --- | --- |
+| **Images** | Required. The image to change, as PNG, JPG or WEBP. Add up to two more as references, for example a product or a style. |
+| **Instruction** | Required. What to change, such as "Make it a rainy night with neon reflections". |
+| **Model** | FLUX.2 Klein is first. It accepts up to three images. Qwen-Image-Edit Plus accepts one. |
+| **Seed** | Leave empty for a random seed. |
+
+In testing, FLUX.2 Klein returned an edit of one image in about 10 seconds and combined two images in about 8 seconds.
+
+#### Generate Video
+
+| Field | Notes |
+| --- | --- |
+| **Prompt** | Required. |
+| **First Frame** | Optional. Choose an image to animate it. Without one, the video starts from the prompt only. |
+| **Model** | LTX-2.5 22B Distilled is first, followed by MiniMax H3 33B Turbo. The list shows only models that fit your input: text-to-video models, or image-to-video models when **First Frame** is set. |
+| **Aspect Ratio** | The same five ratios as for images. Landscape (16:9) is the default. |
+| **Length** | Whole seconds the model supports. LTX-2.5 offers 3 to 10 seconds, with 5 as the default. |
+
+In testing, LTX-2.5 returned a 5-second 1024 × 576 video in about 18 seconds for \$0.058, and animated a 768 × 768 image for 3 seconds in about 16 seconds for \$0.054.
+
+#### Text to Speech
+
+Select text in any app before you run the command and it is filled in for you.
+
+| Field | Notes |
+| --- | --- |
+| **Text** | Required. Each model has a length limit: 3 to 10,001 characters for Kokoro, 10 to 5,000 for Qwen3 TTS CustomVoice and 10 to 2,000 for Chatterbox. |
+| **Model** | Kokoro is first, followed by Qwen3 TTS CustomVoice and Chatterbox. |
+| **Voice** | Kokoro has 41 voices in 7 languages: American English, British English, Spanish, French, Hindi, Italian and Brazilian Portuguese. Qwen3 TTS CustomVoice has 9 voices. |
+| **Speed** | 0.5× to 2×. Shown for Kokoro, the model with adjustable speed. |
+
+<Tip>
+  Each Kokoro voice speaks one language, shown next to its name. Pick a voice that matches the language of your text.
+</Tip>
+
+The extension does not offer the Qwen3 TTS voice cloning and voice design models, because they need inputs the form does not collect.
+
+#### Transcribe
+
+Type a link after the command name. If you leave it out, the command takes a supported link from your selected text or from the clipboard.
+
+| Field | Notes |
+| --- | --- |
+| **Link** | A public YouTube, X, TikTok, Twitch or Kick video. |
+| **Or a File** | An audio or video file. Used when **Link** is empty. |
+| **Include timestamps** | Adds start and end times to the transcript. |
+| **Model** | Shown when more than one transcription model is available. |
+
+deAPI accepts audio files up to 20 MB and video files up to 50 MB. In testing, MP3, WAV, FLAC and M4A files were transcribed, and a 19-second YouTube video took about 8 seconds.
+
+The transcript opens in Raycast. From there you can copy it, paste it into the app in front, or save it as a snippet. Transcripts are kept in **Generation History** and are not written to the output folder.
+
+#### Remove Background and Upscale Image
+
+Both commands take one image as PNG, JPG or WEBP. An image selected in Finder or File Explorer is filled in for you.
+
+**Remove Background** uses Ben2 and returns a PNG with a transparent background. **Upscale Image** uses RealESRGAN x4. In testing, it turned a 768 × 768 image into 3072 × 3072 in about 13 seconds. Both models accept images from 128 × 128 to 2048 × 2048 pixels.
+
+---
+
+### Results
+
+While a job runs, the command shows its status and progress. You can close the window: the job keeps running on deAPI, and the result appears in **Generation History**. A command waits up to 10 minutes for a job before it points you to the history.
+
+Finished files are saved to your **Downloads** folder, or to the folder you set in the extension preferences. File names start with `deapi-`, followed by the type and the first characters of the request ID, for example `deapi-image-18688128.png`.
+
+| Result | Actions |
+| --- | --- |
+| Image | Open, Copy Image, Show in Finder, Copy Result URL, Copy Prompt |
+| Video or speech | Play, Show in Finder, Copy Result URL |
+| Transcript | Copy Transcript, Paste Transcript, Save as Snippet |
+
+From any image result you can continue with **Edit Image**, **Animate into Video**, **Remove Background** or **Upscale Image** without choosing the file again.
+
+<Note>
+  **Copy Result URL** gives a signed link that expires after 5 hours. The file saved on your computer stays.
+</Note>
+
+---
+
+### Generation History
+
+**Generation History** lists up to 200 of your latest results, newest first. You can search by prompt or model and filter by type.
+
+- **Running jobs** are checked when you open the command. Use **Follow Job** to watch one, or **Check Status** to refresh it.
+- **Balance** is shown above the list. It needs a key with the **ADMIN** role; a key with the **API** role cannot read the balance, so nothing is shown.
+- **Remove from History** and **Clear History** delete entries from the list. The saved files stay on your computer.
+
+The history is stored locally in Raycast. It is not synced with your deAPI account and does not include jobs started elsewhere.
+
+---
+
+### Raycast AI
+
+Mention `@deapi` in Raycast AI to use deAPI in a chat:
+
+- `@deapi draw a watercolor fox sleeping under a maple tree`
+- `@deapi what is this video about? https://www.youtube.com/watch?v=…`
+- `@deapi read this aloud: Welcome to the team, we're glad you're here.`
+
+| Tool | What it does | Asks first |
+| --- | --- | --- |
+| **Generate Image** | Generates an image with the first model in the list, in any of the five aspect ratios, saves it and shows it in the chat. | No |
+| **Transcribe Link** | Transcribes a YouTube, X, TikTok, Twitch or Kick link and gives the text to Raycast AI, which can then summarize it or answer questions about it. | Yes |
+| **Generate Speech** | Reads text aloud with Kokoro and saves an MP3. | Yes |
+
+Image generation runs right away. Transcribing a link and generating speech ask for confirmation first, because they can cost more. Everything the tools create also appears in **Generation History**.
+
+---
+
+### deAPI in the Raycast MCP Registry
+
+Separately from the extension, the deAPI MCP server is listed in the [Model Context Protocol Registry](https://www.raycast.com/raycast/model-context-protocol-registry), a Raycast extension for finding and installing MCP servers in Raycast and in other MCP clients such as Claude or Cursor. The registry extension is available for macOS.
+
+| | deAPI extension | deAPI in the MCP Registry |
+| --- | --- | --- |
+| **Works as** | Commands with forms, plus three Raycast AI tools | 39 tools for Raycast AI and other MCP clients |
+| **Covers** | Images, video, speech, transcription, background removal, upscaling | The same, plus music, OCR, video upscaling, video descriptions, embeddings, prompt enhancement and price checks |
+| **Needs** | Raycast | Raycast and [Node.js](https://nodejs.org/en/download), because the entry runs through `npx` |
+
+To install it:
+
+1. Install the [Model Context Protocol Registry](https://www.raycast.com/raycast/model-context-protocol-registry) extension.
+2. Run **Search Servers** and find **deAPI**.
+3. Install it into Raycast or another client.
+4. In the server's environment, set `DEAPI_AUTH_HEADER` to `Bearer` followed by a space and your API key. Keep the `Bearer` prefix.
+
+The entry connects to `https://mcp.deapi.ai/mcp` through `mcp-remote` and sends the key as an `Authorization` header. In testing, the same command connected, listed 39 tools and returned the account balance. The tools are described in [MCP Server](/execution-modes-and-integrations/mcp-server).
+
+---
+
+### Preferences
+
+Open Raycast Settings → **Extensions** → **deAPI** to change them.
+
+| Preference | Description |
+| --- | --- |
+| **deAPI API Key** | Required. Your deAPI key. |
+| **Save Results To** | Optional. Folder for generated files. Defaults to your Downloads folder. |
+
+---
+
+### Privacy
+
+The extension sends your prompts, text, links and the files you choose to deAPI to run the request. The API key is stored in Raycast's encrypted preferences and is sent only to `api.deapi.ai`.
+
+---
+
+### Troubleshooting
+
+| Message | Cause and fix |
+| --- | --- |
+| `deAPI rejected the API key. Check it in the extension preferences.` | The key is wrong, disabled or deleted. Copy it again from the dashboard and update the preference. |
+| `Your deAPI balance is too low. Top up at app.deapi.ai.` | The account balance is too low, or the key reached its spend limit. |
+| `deAPI rate limit reached. Try again in a moment.` | Too many requests in a short time. See [Limits & Quotas](/limits-and-quotas). |
+| `No deAPI models available` | No model for this task could be loaded. Check the API key and your connection, then reopen the command. |
+| `The job is still running. Check it later in Generation History.` | The job took longer than the command waits. Open **Generation History** to pick up the result. |
+| `Could not use the output folder …` | The folder in **Save Results To** cannot be created or written to. Choose another folder in the preferences. |
+| `Use a YouTube, X, TikTok, Twitch or Kick link` | **Transcribe** does not support links from other sites. Download the file and use **Or a File** instead. |
+| `The job failed: …` | deAPI could not finish the job. The message gives the reason and says when the charge was refunded. |
+
+---
+
+### Resources
+
+- [deAPI on the Raycast Store](https://www.raycast.com/deapi/deapi)
+- [Source code](https://github.com/raycast/extensions/tree/main/extensions/deapi)
+- [API Keys](/api-keys)
+- [Pricing](/pricing)
+- [Models](/models)

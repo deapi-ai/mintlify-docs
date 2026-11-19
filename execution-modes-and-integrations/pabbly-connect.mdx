@@ -1,0 +1,287 @@
+---
+title: "Pabbly Connect"
+description: "Use the deAPI app for Pabbly Connect to generate and edit images, create videos, speech and music, transcribe links and files, remove backgrounds and upscale images in your workflows, without code."
+---
+
+The [deAPI app for Pabbly Connect](https://connect.pabbly.com/integrations/deapi) adds deAPI models as action steps in your Pabbly workflows. Start a workflow from another app or a webhook, run a deAPI action on the data, and pass the result to the next step.
+
+The app has 12 actions and no triggers of its own.
+
+The requests each action sends were run against the live deAPI API to write this page.
+
+---
+
+### What you can do
+
+| Action | What it does | Returns |
+| --- | --- | --- |
+| **Generate Image** | Creates images from a text prompt | A link to the PNG |
+| **Edit Image** | Changes an image with a text instruction | A link to the PNG |
+| **Generate Video** | Creates a short video from a text prompt | A Request ID |
+| **Animate Image** | Turns a still image into a short video | A Request ID |
+| **Text To Speech** | Turns text into an MP3 | A Request ID |
+| **Generate Music** | Creates a song or an instrumental track | A Request ID |
+| **Transcribe Video Link** | Transcribes a YouTube, X, X Spaces, TikTok, Twitch or Kick link | A Request ID |
+| **Transcribe Audio File** | Transcribes an audio or video file from a public link | A Request ID |
+| **Remove Background** | Removes the background from an image | A Request ID |
+| **Upscale Image** | Upscales an image to a higher resolution | A Request ID |
+| **Get Job Result** | Gets the status and result of a job by its Request ID | The result link or text |
+| **Get Account Balance** | Gets the current deAPI balance | The balance |
+
+The two image actions wait for the image and return its link in the same step. Every other generation action starts a job and returns a **Request ID**. Add a **Get Job Result** step to collect the result. See [Collect results](#collect-results).
+
+---
+
+### Prerequisites
+
+- A [Pabbly Connect](https://www.pabbly.com/connect/) account
+- A deAPI account with credits. deAPI charges per job; see [Pricing](/pricing).
+- A deAPI API key from the [deAPI Dashboard](https://app.deapi.ai/settings/api-keys). A key with the **API** role is enough for every action except **Get Account Balance**, which needs an **ADMIN** key. See [API Keys](/api-keys).
+
+<Tip>
+  Create a separate key for Pabbly Connect and set a **spend limit** on it. See [Key restrictions](/api-keys#key-restrictions).
+</Tip>
+
+---
+
+### Connect deAPI to Pabbly Connect
+
+1. In a workflow, add an action step and choose **deAPI** as the app.
+2. Pick an **Action Event**, for example **Generate Image**, and click **Connect**.
+3. Choose **Add New Connection** and give the connection a name.
+4. Paste your deAPI API key into **Token** and click **Save**.
+
+Pabbly Connect checks the key with deAPI when you save. For later steps, choose **Select Existing Connection**.
+
+---
+
+### Example: generate an image
+
+1. Add a trigger, for example **Webhook by Pabbly** or a new row in Google Sheets.
+2. Add an action step: **deAPI**, **Generate Image**.
+   - **Model:** pick **Z-Image Turbo (photorealistic)**.
+   - **Prompt:** map the text from the trigger.
+   - **Size:** pick `768x768`, or leave it empty for the model's default.
+3. Click **Save & Send Test Request**. The response contains the link to the image in the `url` field.
+4. Add a step that uses the link, for example an upload to Google Drive or a message in Slack.
+
+In testing, a 768 × 768 image from Z-Image Turbo came back in about 14 seconds.
+
+---
+
+### Collect results
+
+Actions that return a **Request ID** start a job and finish right away. To get the result:
+
+1. Add a **Delay (Pabbly)** step after the action. Pick a wait longer than the job usually takes.
+2. Add a **deAPI → Get Job Result** step and map **Request ID** from the action.
+3. Use the fields of the response in the next steps.
+
+| Field in the response | Meaning |
+| --- | --- |
+| `status` | `pending`, `processing`, `done` or `error` |
+| `result_url` | Link to the result file (MP3, MP4, PNG, or the transcript file) |
+| `result` | The transcript, for the two transcription actions |
+| `price` | The amount charged for the job |
+| `error_code`, `error_reason` | Why a job failed |
+
+How long jobs took in testing:
+
+| Action | Model | Time |
+| --- | --- | --- |
+| Text To Speech | Kokoro, one sentence | 6 seconds |
+| Generate Music | ACE-Step 1.5 Turbo, 30 seconds | 5 seconds |
+| Transcribe Video Link | Whisper Large V3 CT2, 19-second video | 8 seconds |
+| Transcribe Audio File | Whisper Large V3 CT2, 11-second file | 6 seconds |
+| Generate Video | LTX-2.5 22B Distilled, 5 seconds | 88 seconds |
+| Animate Image | LTX-2.5 22B Distilled, 5 seconds | 69 seconds |
+
+Times vary with load. If **Get Job Result** returns `pending` or `processing`, the job is still running: use a longer delay, or add another **Delay** and **Get Job Result** pair.
+
+<Warning>
+  Result links are signed and expire after 5 hours. To keep a file, save it in the same workflow, for example with a Google Drive upload step.
+</Warning>
+
+---
+
+### Action reference
+
+Fields marked **Required** must be filled in. Leave any other field empty to use the model's default.
+
+#### Generate Image
+
+| Field | Notes |
+| --- | --- |
+| **Model** | Required. Z-Image Turbo (photorealistic), FLUX.1 schnell, FLUX.2 Klein 4B or Z-Anime (anime style). |
+| **Prompt** | Required. |
+| **Size** | `512x512`, `768x768`, `1024x1024`, `1024x1536` or `1536x1024`. The last two work only with FLUX models. |
+| **Quality** | Low, Medium or High. Higher quality uses more steps and costs more. |
+| **Number of Images** | 1 to 4. FLUX.2 Klein creates up to 2. |
+
+#### Edit Image
+
+| Field | Notes |
+| --- | --- |
+| **Model** | Required. FLUX.2 Klein 4B. |
+| **Instruction** | Required. What to change in the image. |
+| **Image URL** | Required. A public link to a PNG, JPG or WebP image, up to 10 MB. |
+| **Quality** | Low, Medium or High. |
+| **Size** | Output size as `WIDTHxHEIGHT`, for example `1024x1024`. |
+| **Number of Images** | 1 or 2. |
+
+In testing, FLUX.2 Klein returned an edit in about 13 seconds.
+
+#### Generate Video
+
+| Field | Notes |
+| --- | --- |
+| **Prompt** | Required. |
+| **Model** | Required. Text-to-video models available to your key. |
+| **Negative Prompt** | Things to avoid. Ignored by models that do not support it. |
+| **Width**, **Height** | Pixels. |
+| **Frames** | Number of frames. Together with the frame rate it sets the length. |
+| **Seed** | A number for repeatable results. |
+| **Enhance Prompt** | Lets deAPI improve the prompt first, on models that support it. |
+| **Webhook URL** | See [Webhook URL](#webhook-url). |
+
+With the size and frames left empty, LTX-2.5 22B Distilled produced a 768 × 768 video of 5 seconds for \$0.058.
+
+<Note>
+  The **Model** list shows every video model your key can use. Prices differ a lot between models, so check the model on the [Pricing](/pricing) page before you run a workflow at volume.
+</Note>
+
+#### Animate Image
+
+| Field | Notes |
+| --- | --- |
+| **Image URL** | Required. A public link to the image that becomes the first frame. JPG, PNG or WebP, up to 10 MB. |
+| **Prompt** | Required. Describe the motion and the scene. |
+| **Model** | Required. Image-to-video models available to your key. |
+| **Last Frame Image URL** | A public link to an image for the last frame, on models that support it. |
+| **Negative Prompt**, **Width**, **Height**, **Frames**, **Seed** | As in **Generate Video**. |
+| **Webhook URL** | See [Webhook URL](#webhook-url). |
+
+#### Text To Speech
+
+| Field | Notes |
+| --- | --- |
+| **Text** | Required. |
+| **Model** | Required. Speech models available to your key. |
+| **Voice** | A voice name for models with preset voices, for example `af_sky` or `am_adam` for Kokoro. |
+| **Language** | A language code such as `en-us`. |
+| **Speed** | 1 is normal speed. Kokoro accepts 0.5 to 2. |
+| **Voice Description** | Required for Qwen3 TTS VoiceDesign: describe the voice, for example "a warm female voice with a British accent". |
+| **Audio Format** | Output format such as `mp3`. |
+| **Webhook URL** | See [Webhook URL](#webhook-url). |
+
+<Note>
+  Qwen3 TTS VoiceClone appears in the **Model** list but does not work in this app, because it needs an uploaded voice sample. Choose a preset-voice model or Qwen3 TTS VoiceDesign.
+</Note>
+
+<Tip>
+  Kokoro voices are tied to one language. Set **Voice** and **Language** to match the text, for example `ef_dora` with `es` for Spanish.
+</Tip>
+
+#### Generate Music
+
+| Field | Notes |
+| --- | --- |
+| **Music Description** | Required. The style and mood of the music. |
+| **Model** | Required. Music models available to your key. |
+| **Lyrics** | Lyrics to sing. Leave empty for an instrumental track. |
+| **Duration (Seconds)** | Length of the track. Leave empty for 30 seconds. |
+| **BPM** | Tempo in beats per minute. |
+| **Key** | Musical key, for example `C major` or `F# minor`. |
+| **Time Signature** | 2/4, 3/4, 4/4 or 6/8. |
+| **Vocal Language** | Language code of the vocals, for example `en` or `es`. |
+| **Seed** | A number for repeatable results. |
+| **Webhook URL** | See [Webhook URL](#webhook-url). |
+
+In testing, a 30-second instrumental track from ACE-Step 1.5 Turbo cost \$0.0006.
+
+#### Transcribe Video Link
+
+| Field | Notes |
+| --- | --- |
+| **Video Link** | Required. A YouTube, X, TikTok, Twitch or Kick video, or an X Space. |
+| **Model** | Required. Pick **Whisper Large V3 CT2**. |
+| **Language** | A code such as `en` or `pl`. Leave empty to detect the language. |
+| **Include Timestamps** | Adds timestamps to the result. |
+| **Timestamp Detail** | Segment, Word or Character. Used only with **Include Timestamps**. |
+| **Identify Speakers** | Labels who is speaking, on models that support it. |
+| **Include Video Details** | Also returns the video title, channel and view counts. |
+| **Webhook URL** | See [Webhook URL](#webhook-url). |
+
+#### Transcribe Audio File
+
+| Field | Notes |
+| --- | --- |
+| **File URL** | Required. A public link to an audio file (MP3, WAV, OGG, FLAC, AAC, WebM) or a video file (MP4, MOV, AVI), up to 50 MB. |
+| **Model** | Required. Pick **Whisper Large V3 CT2**. |
+| **Language**, **Include Timestamps**, **Timestamp Detail**, **Identify Speakers** | As in **Transcribe Video Link**. |
+| **Webhook URL** | See [Webhook URL](#webhook-url). |
+
+With Whisper Large V3 CT2, **Get Job Result** returns the transcript as separate fields: the text in `result text`, the detected language in `result language`, and the segments when timestamps are on.
+
+#### Remove Background and Upscale Image
+
+| Field | Notes |
+| --- | --- |
+| **Image URL** | Required. A public link to a JPG, PNG or WebP image, up to 10 MB. |
+| **Model** | Required. Ben2 for background removal, RealESRGAN x4 for upscaling. |
+| **Webhook URL** | See [Webhook URL](#webhook-url). |
+
+**Remove Background** produces a transparent PNG. **Upscale Image** returns the image at four times the width and height.
+
+#### Get Job Result
+
+| Field | Notes |
+| --- | --- |
+| **Request ID** | Required. Map the Request ID returned by an earlier deAPI step. |
+
+Checking a job is free.
+
+#### Get Account Balance
+
+No fields. Returns the balance of the account in USD. It needs a key with the **ADMIN** role; with an **API** key the step fails with `403`.
+
+---
+
+### Files
+
+Pabbly Connect passes files to deAPI as links. The link must be public: deAPI's side of the app downloads the file and then submits it. A link that needs a sign-in, such as a private Google Drive link, fails with `Could not download the file from the link`.
+
+---
+
+### Webhook URL
+
+Most actions have an optional **Webhook URL** field. Put an HTTPS address there and deAPI notifies it when the job is ready, so the workflow does not need a **Delay** step. A common setup is a second workflow that starts with **Webhook by Pabbly**: paste its address into **Webhook URL**, and continue from the notification in that workflow. The payload is described in [Webhooks](/execution-modes-and-integrations/webhooks).
+
+---
+
+### Troubleshooting
+
+| Message or symptom | Cause and fix |
+| --- | --- |
+| The connection is not saved | The key is wrong, disabled or deleted. Copy it again from the dashboard. |
+| `Choose a model.` | **Model** is empty. Pick one from the list. |
+| `Model … is not available for this job type on your account.` | The model was removed or is not available to your key. Pick another one. |
+| `Could not download the file from the link (HTTP …). Make sure the link is public.` | The file link needs a sign-in or does not exist. Use a public link. |
+| `The file is larger than 50 MB.` | Use a smaller file. |
+| `This model only clones a voice from an uploaded recording …` | Qwen3 TTS VoiceClone is not supported here. Pick another speech model. |
+| `This model designs a voice from a description. Fill in Voice Description …` | Qwen3 TTS VoiceDesign needs **Voice Description**. |
+| **Get Job Result** returns `pending` or `processing` | The job is still running. Use a longer **Delay**. |
+| **Get Account Balance** fails with `403` | The connection uses a key with the **API** role. Use an **ADMIN** key. |
+| `402` | The deAPI balance is too low, or the key reached its spend limit. |
+| `429` | Too many requests in a short time. See [Limits & Quotas](/limits-and-quotas). |
+
+---
+
+### Resources
+
+- [deAPI on Pabbly Connect](https://connect.pabbly.com/integrations/deapi)
+- [API Keys](/api-keys)
+- [Pricing](/pricing)
+- [Models](/models)
+- [Webhooks](/execution-modes-and-integrations/webhooks)
+- [Zapier](/execution-modes-and-integrations/zapier)

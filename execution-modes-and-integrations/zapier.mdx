@@ -1,0 +1,279 @@
+---
+title: "Zapier"
+description: "Use the deAPI app for Zapier to generate images and speech, transcribe audio and video, remove backgrounds, upscale images and read text from images in your Zaps, without code."
+---
+
+The [deAPI app for Zapier](https://zapier.com/apps/deapi/integrations) adds deAPI models as steps in your Zaps. Start a Zap from another app, such as a new Google Sheets row, a new file in Google Drive or a new Slack message, run a deAPI action on it, and pass the result to the next step.
+
+The app is in **Beta** on Zapier. It has six actions and one search, and no triggers of its own.
+
+Every action below was run against the live deAPI API with the same code the Zapier app uses.
+
+---
+
+### What you can do
+
+| Event | Type | What it does | Default model |
+| --- | --- | --- | --- |
+| **Generate Image** | Action | Creates an image from a text prompt | FLUX.1 Schnell |
+| **Transcribe Audio or Video** | Action | Transcribes a file, or a YouTube, X, X Spaces, Twitch, Kick or TikTok link | Whisper Large V3 CT2 |
+| **Generate Speech** | Action | Turns text into an MP3 | Kokoro |
+| **Remove Background** | Action | Returns the image as a transparent PNG | Ben2 |
+| **Upscale Image** | Action | Returns the image at four times the width and height | RealESRGAN x4 |
+| **Extract Text From Image** | Action | Reads the text in an image (OCR) | Nanonets Ocr S F16 |
+| **Find Job** | Search | Gets the status and result of a deAPI job by its Request ID, and can wait for it to finish | n/a |
+
+The **Model** dropdown in each action lists the models your API key can use for that task. Options that depend on the model, such as size limits, steps, voices and timestamp levels, load after you pick one.
+
+<Note>
+  Video generation is not available in the Zapier app. Use the [API](/api/v2/videos/generations), the [n8n node](/execution-modes-and-integrations/n8n-deapi-node) or the [Raycast extension](/execution-modes-and-integrations/raycast) for video.
+</Note>
+
+---
+
+### Prerequisites
+
+- A [Zapier](https://zapier.com) account
+- A deAPI account with credits. deAPI charges per job; see [Pricing](/pricing).
+- A deAPI API key from the [deAPI Dashboard](https://app.deapi.ai/settings/api-keys). A key with the **API** role is enough. See [API Keys](/api-keys).
+
+<Tip>
+  Create a separate key for Zapier and set a **spend limit** on it. You can then see what your Zaps spend and cap it. See [Key restrictions](/api-keys#key-restrictions).
+</Tip>
+
+---
+
+### Connect deAPI to Zapier
+
+1. In the Zap editor, add a step and search for **deAPI**.
+2. Choose an event, for example **Generate Image**.
+3. Under **Account**, click **Sign in** and paste your API key into **API Key**.
+4. Zapier checks the key and names the connection after it: the key's name followed by a short preview, for example `zapier (sk-dp-1234-...f9a)`. The full key is not shown again.
+
+You connect once. Every deAPI step in every Zap can use the same connection.
+
+---
+
+### Start from a template
+
+These ready-made Zaps are listed on the [deAPI page on Zapier](https://zapier.com/apps/deapi/integrations). Open one, click **Try it**, connect your accounts and pick the folder, sheet or channel to use.
+
+| Template | Steps |
+| --- | --- |
+| [Create Google Docs transcripts of new YouTube videos](https://zapier.com/apps/google-docs/integrations/youtube/255737658/create-google-docs-transcripts-of-new-youtube-videos-with-deapi) | YouTube → deAPI **Transcribe Audio or Video** → Google Docs |
+| [Save deAPI images generated from new Google Sheets rows to Google Drive](https://zapier.com/apps/google-drive/integrations/google-sheets/255737659/save-deapi-images-generated-from-new-google-sheets-rows-to-google-drive) | Google Sheets → deAPI **Generate Image** → Google Drive |
+| [Save background-free copies of new Google Drive images](https://zapier.com/apps/google-drive/integrations/google-drive/255737660/save-background-free-copies-of-new-google-drive-images-with-deapi) | Google Drive → deAPI **Remove Background** → Google Drive |
+| [Create Google Docs transcripts of new audio files in Google Drive](https://zapier.com/apps/google-docs/integrations/google-drive/255737661/create-google-docs-transcripts-of-new-audio-files-in-google-drive-with-deapi) | Google Drive → deAPI **Transcribe Audio or Video** → Google Docs |
+| [Create Google Docs transcripts of video links from new Google Sheets rows](https://zapier.com/apps/google-docs/integrations/google-sheets/255737662/create-google-docs-transcripts-of-video-links-from-new-google-sheets-rows-with-deapi) | Google Sheets → deAPI **Transcribe Audio or Video** → Google Docs |
+| [Post deAPI images in Slack for new messages in Slack channels](https://zapier.com/apps/slack/integrations/slack/255737663/post-deapi-images-in-slack-for-new-messages-in-slack-channels) | Slack → deAPI **Generate Image** → Slack |
+| [Create audio versions of new RSS feed items in Google Drive](https://zapier.com/apps/google-drive/integrations/rss/255737664/create-audio-versions-of-new-rss-feed-items-in-google-drive-with-deapi) | RSS by Zapier → deAPI **Generate Speech** → Google Drive |
+
+<Tip>
+  In the Google Drive templates, use one folder for incoming files and another for results. Otherwise each saved result is picked up as a new file and processed again. In the Slack template, use a channel made for prompts, because every message posted there becomes one.
+</Tip>
+
+---
+
+### Example: images from a list of prompts
+
+This Zap generates an image for every new row in a spreadsheet and saves it to Google Drive.
+
+1. **Trigger:** Google Sheets, **New Spreadsheet Row**. Pick the spreadsheet and worksheet. Keep the prompts in one column.
+2. **Action:** deAPI, **Generate Image**.
+   - **Model:** keep **FLUX.1 Schnell**, or pick another one.
+   - **Prompt:** map the prompt column from step 1.
+   - **Width** and **Height:** keep the model's defaults or set your own. The allowed range is shown under each field.
+3. **Action:** Google Drive, **Upload File**.
+   - **File:** map **Image URL (JPG)** from step 2, or **Image URL** for the PNG.
+   - **File Name:** map the prompt column.
+4. Test each step, then publish the Zap.
+
+In testing, the deAPI step returned a 768 × 768 image from FLUX.1 Schnell in about 15 seconds.
+
+---
+
+### Action reference
+
+#### Generate Image
+
+| Field | Notes |
+| --- | --- |
+| **Model** | Required. Text-to-image models available to your key. |
+| **Prompt** | Required. |
+| **Width**, **Height** | Pixels. Default to the model's own size, for example 768 × 768 for FLUX.1 Schnell and 1024 × 1024 for FLUX.2 Klein. |
+| **Negative Prompt** | Shown for models that support it. |
+| **Steps** | Shown for models where the number of steps can be changed. |
+| **Quality** | Shown for models that have quality levels. |
+| **LoRA Style**, **LoRA Weight** | Shown for models with published LoRA styles. |
+| **Seed** | The same seed and prompt give the same image. Leave empty for a random seed. |
+| **Max Price (USD)** | Optional. See [Prices and budget control](#prices-and-budget-control). |
+
+Returns **Image URL** (PNG), **Image URL (JPG)** and **Image URL (WebP)**.
+
+#### Transcribe Audio or Video
+
+| Field | Notes |
+| --- | --- |
+| **Model** | Required. **Whisper Large V3 CT2** is the default. It handles every source type and offers word-level timestamps and speaker labels. |
+| **Source URL** | A YouTube, X, X Spaces, Twitch, Kick or TikTok link. Leave empty when you use **Source File**. |
+| **Source File** | An audio file up to 20 MB (MP3, WAV, FLAC, OGG, AAC, WebM) or a video file up to 50 MB (MP4, MOV, AVI, WMV). |
+| **Language** | A code such as `en` or `pl`. Leave empty to detect the language. |
+| **Include Timestamps** | Asks for timestamps. **Transcript** stays plain text; the timestamped segments are in the file behind **Transcript URL**. Segment timestamps are free. |
+| **Timestamp Level** | `segment` or `word`. Shown for models that offer more than one level. Word-level timestamps cost 1.5 times the base price. |
+| **Label Speakers** | Marks who is speaking and turns timestamps on. Shown for models that support it. Costs 1.5 times the base price. |
+| **Include Source Metadata** | Links only. Adds the title, channel and view counts in the **metadata** output. Costs \$0.005 extra. |
+| **Max Price (USD)** | Optional. |
+
+Fill in either **Source URL** or **Source File**, not both. Returns the text as **Transcript** and a link to the result file as **Transcript URL**.
+
+<Note>
+  TikTok links cannot be priced before the job runs. They work when **Max Price** is empty. With **Max Price** set, the step stops, because the limit cannot be checked.
+</Note>
+
+#### Generate Speech
+
+| Field | Notes |
+| --- | --- |
+| **Model** | Required. The fields below change with the model. |
+| **Text** | Required. The allowed length is shown for the chosen model, for example 3 to 10,001 characters for Kokoro and 10 to 2,000 for Chatterbox. |
+| **Language**, **Voice** | For models with preset voices: Kokoro, Chatterbox and Qwen3 TTS CustomVoice. The voice list follows the language. |
+| **Style Instructions** | Optional style or emotion, such as "speak slowly and warmly". Only some models use it. |
+| **Reference Audio**, **Reference Transcript** | For Qwen3 TTS VoiceClone: a short sample of the voice to clone. |
+| **Voice Description** | For Qwen3 TTS VoiceDesign: a description of the voice, such as "a warm female voice with a British accent". |
+| **Speed** | Shown for models with adjustable speed. Kokoro accepts 0.5 to 2. |
+| **Max Price (USD)** | Optional. |
+
+Returns **Audio URL**, a link to the MP3.
+
+<Tip>
+  Kokoro voices are tied to one language and the model does not detect the language of the text. Set **Language** to match the text you send.
+</Tip>
+
+#### Remove Background, Upscale Image and Extract Text From Image
+
+| Field | Notes |
+| --- | --- |
+| **Model** | Required. |
+| **Image** | Required. A file from an earlier step or a public URL. JPG, PNG, GIF, BMP or WebP, up to 10 MB. The size range the model accepts is shown above the field. |
+| **Language** | **Extract Text From Image** only. A code such as `en`. Leave empty to detect the language. |
+| **Max Price (USD)** | Optional. |
+
+**Remove Background** and **Upscale Image** return **Image URL** with JPG and WebP versions. The background-free PNG keeps its transparency; the JPG version does not. **Extract Text From Image** returns the text as **Text**.
+
+In testing, RealESRGAN x4 turned a 768 × 768 image into 3072 × 3072.
+
+#### Find Job
+
+| Field | Notes |
+| --- | --- |
+| **Request ID** | Required. Map the **Request ID** from an earlier deAPI step. |
+| **Wait for Completion** | On by default. While the job is running, Zapier checks again every minute until it finishes. |
+
+Checking a job is free and never starts a new one.
+
+---
+
+### Output fields
+
+Every action and **Find Job** return the same set of fields.
+
+| Field | Description |
+| --- | --- |
+| **Request ID** | The deAPI job ID. Use it with **Find Job**. |
+| **Status** | `done`, or `pending` / `processing` when the job outlived the step. |
+| **Image URL**, **Audio URL**, **Transcript URL** | Link to the result file. |
+| **Image URL (JPG)**, **Image URL (WebP)** | The same image in other formats. Image actions only. |
+| **Transcript**, **Text** | The result as text. Transcription and OCR only. |
+| **Estimated Price (USD)** | The quote deAPI gave before the job ran. |
+| **Estimated Price Is Approximate** | `true` when the quote is an estimate and the final price can differ. |
+| **Price (USD)** | The amount charged for the job. |
+| **Error Code**, **Error Reason** | Why a job failed. |
+
+<Warning>
+  Result links are signed and expire after 5 hours. To keep a file, save it in the same Zap, for example with a Google Drive or Dropbox upload step.
+</Warning>
+
+---
+
+### Prices and budget control
+
+Before it submits a job, every deAPI action asks deAPI for a price quote. Quotes are free. The quote comes back as **Estimated Price (USD)** and the amount actually charged as **Price (USD)**.
+
+Set **Max Price (USD)** on an action to cap a single run. If the quote is higher, the step stops with a message such as `Estimated price $0.0019 is above your Max Price of $0.0001; the job was not submitted.` Nothing is submitted and nothing is charged.
+
+Prices from test runs, to give a sense of scale:
+
+| Action | Model | Input | Price |
+| --- | --- | --- | --- |
+| Generate Image | FLUX.1 Schnell | 768 × 768, 4 steps | \$0.0019 |
+| Generate Speech | Kokoro | One short sentence | Under \$0.0001 |
+| Transcribe Audio or Video | Whisper Large V3 CT2 | 19-second YouTube video | \$0.0052 |
+| Remove Background | Ben2 | 768 × 768 | \$0.0003 |
+| Upscale Image | RealESRGAN x4 | 768 × 768 | \$0.0010 |
+| Extract Text From Image | Nanonets Ocr S F16 | 900 × 400 | \$0.0035 |
+
+deAPI bills these to your deAPI balance. The task limits of your Zapier plan apply separately. Current rates are on the [Pricing](/pricing) page.
+
+---
+
+### Long-running jobs
+
+A deAPI action waits up to about 25 seconds for the result, because Zapier limits how long one step can run. In testing, images, speech, OCR, background removal, upscaling and short transcriptions finished in 6 to 16 seconds.
+
+When a job takes longer, such as the transcription of a long video or any job during a busy period, the action returns **Status** `pending` or `processing` together with the **Request ID**. The job keeps running and is charged once. To collect the result:
+
+1. Add a **deAPI → Find Job** step after the action.
+2. Map **Request ID** from the action.
+3. Keep **Wait for Completion** on.
+
+**Find Job** then returns the finished job with the same output fields. When the action has already finished, **Find Job** returns the result right away, so you can add it to any Zap that must not continue without a result.
+
+---
+
+### Use deAPI actions from AI tools and code
+
+The same actions are available outside the Zap editor:
+
+- **[Zapier MCP](https://zapier.com/mcp/deapi)** lets an MCP client such as Claude, ChatGPT or Cursor call deAPI actions through your Zapier connection.
+- The **Zapier SDK** (`@zapier/zapier-sdk`) runs an action from your own code. Actions use the keys `generate_image`, `transcribe`, `generate_speech`, `remove_background`, `upscale_image`, `extract_text` and `find_job`.
+
+If you are building for an AI agent and do not need Zapier, the [deAPI MCP server](/execution-modes-and-integrations/mcp-server) connects to deAPI directly.
+
+---
+
+### Troubleshooting
+
+| Message or symptom | Cause and fix |
+| --- | --- |
+| `The API key is invalid or revoked.` | The key was mistyped, disabled or deleted. Create a new key in the dashboard and reconnect the account in Zapier. |
+| `Estimated price … is above your Max Price …` | The quote is over your limit. Raise **Max Price**, or choose a cheaper model or a smaller size. |
+| `The price of this job can't be estimated in advance …` | The job cannot be quoted, for example a TikTok link. Clear **Max Price** to run it. |
+| `Fill in either Source URL or Source File (not both).` | **Transcribe Audio or Video** needs exactly one of the two. |
+| `Could not download the file from …` | The file link is not public. Map the file field from the earlier step instead of a private link. |
+| `This model takes N–M characters of text` | The text is too short or too long for the speech model. Change the text or pick another model. |
+| `Model "…" is not available for this API key.` | The model was removed or is not available to your key. Pick another one in the **Model** dropdown. |
+| A message ending in `Top up your balance at https://app.deapi.ai.` | The deAPI balance is too low, or the key reached its spend limit. |
+| **Status** is `pending` or `processing` | The job outlived the step. Add **Find Job** as described in [Long-running jobs](#long-running-jobs). |
+| The step is delayed after a rate limit | deAPI returned `429`. Zapier retries the step after the wait. See [Limits & Quotas](/limits-and-quotas). |
+
+---
+
+### FAQ
+
+**Does Zapier charge me for deAPI usage?** No. deAPI bills each job to your deAPI balance. Zapier's own plan limits still apply to the steps your Zaps run.
+
+**Can a Zap start from a deAPI event?** No. The app has no triggers. Start the Zap from another app and use deAPI as an action.
+
+**Which models can I use?** The ones available to your API key, filtered for each action. The full list is on the [Models](/models) page.
+
+**Can I generate video?** Not in the Zapier app. Use the [API](/api/v2/videos/generations) or the [n8n node](/execution-modes-and-integrations/n8n-deapi-node).
+
+---
+
+### Resources
+
+- [deAPI on Zapier](https://zapier.com/apps/deapi/integrations)
+- [API Keys](/api-keys)
+- [Pricing](/pricing)
+- [Models](/models)
+- [n8n deAPI node](/execution-modes-and-integrations/n8n-deapi-node)

@@ -173,7 +173,11 @@
               "execution-modes-and-integrations/mcp-server",
               "execution-modes-and-integrations/n8n-integration",
               "execution-modes-and-integrations/n8n-deapi-node",
-              "execution-modes-and-integrations/open-webui"
+              "execution-modes-and-integrations/open-webui",
+              "execution-modes-and-integrations/zapier",
+              "execution-modes-and-integrations/pabbly-connect",
+              "execution-modes-and-integrations/raycast",
+              "execution-modes-and-integrations/wordpress"
             ]
           },
           {
