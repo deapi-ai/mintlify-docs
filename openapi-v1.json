@@ -3469,7 +3469,7 @@
                 "tags": [
                     "Client API"
                 ],
-                "description": "Unified endpoint for requesting audio/video transcription. Accepts either a source URL (YouTube, Twitter, Twitch, Kick, TikTok, Twitter Spaces) or a file upload (audio/video). The job type is auto-detected from the input. TikTok sources are served by `WhisperLargeV3Ct2` only.",
+                "description": "Unified endpoint for requesting audio/video transcription. Accepts either a source URL (YouTube, Twitter, Twitch, Kick, TikTok, Instagram, Twitter Spaces) or a file upload (audio/video). The job type is auto-detected from the input. TikTok sources are served by `WhisperLargeV3Ct2` only.",
                 "operationId": "requestTranscribe",
                 "parameters": [
                     {
@@ -3491,7 +3491,7 @@
                                         ],
                                         "properties": {
                                             "source_url": {
-                                                "description": "URL of video/audio to transcribe (YouTube, Twitter/X, Twitch, Kick, TikTok, Twitter Spaces). Mutually exclusive with source_file. A TikTok URL is only accepted with `model: WhisperLargeV3Ct2` — paired with any other model it is rejected with `422`.",
+                                                "description": "URL of video/audio to transcribe (YouTube, Twitter/X, Twitch, Kick, TikTok, Instagram, Twitter Spaces). Mutually exclusive with source_file. A TikTok URL is only accepted with `model: WhisperLargeV3Ct2` — paired with any other model it is rejected with `422`.",
                                                 "type": "string",
                                                 "example": "https://www.youtube.com/watch?v=jNQXAC9IVRw"
                                             },
@@ -4501,7 +4501,7 @@
                                 ],
                                 "properties": {
                                     "video_url": {
-                                        "description": "Public video URL to transcribe. Supported platforms: YouTube, TikTok, Twitch, Kick, X. A TikTok URL is only accepted with `model: WhisperLargeV3Ct2` — paired with any other model it is rejected with `422`.",
+                                        "description": "Public video URL to transcribe. Supported platforms: YouTube, TikTok, Instagram, Twitch, Kick, X. A TikTok URL is only accepted with `model: WhisperLargeV3Ct2` — paired with any other model it is rejected with `422`.",
                                         "type": "string",
                                         "example": "https://www.youtube.com/watch?v=jNQXAC9IVRw"
                                     },

@@ -1,7 +1,7 @@
 ---
 title: "Transcribe (Unified Transcription)"
 openapi: "/openapi-v1.json POST /api/v1/client/transcribe"
-description: "A single endpoint for all transcription needs — URL-based (YouTube, X, Twitch, Kick, TikTok, X Spaces) and file uploads (audio & video). Replaces vid2txt, aud2txt, videofile2txt, and audiofile2txt with automatic source detection."
+description: "A single endpoint for all transcription needs — URL-based (YouTube, X, Twitch, Kick, TikTok, Instagram, X Spaces) and file uploads (audio & video). Replaces vid2txt, aud2txt, videofile2txt, and audiofile2txt with automatic source detection."
 ---
 
 <Warning>
@@ -16,7 +16,7 @@ description: "A single endpoint for all transcription needs — URL-based (YouTu
 
 Provide exactly **one** of:
 
-- `source_url` — a URL to transcribe (YouTube, X/Twitter, Twitch, Kick, TikTok, or X Spaces)
+- `source_url` — a URL to transcribe (YouTube, X/Twitter, Twitch, Kick, TikTok, Instagram, or X Spaces)
 - `source_file` — an uploaded audio or video file
 
 The endpoint auto-detects the source type and routes the job accordingly. All existing transcription features (timestamps, webhook notifications) are fully supported.
