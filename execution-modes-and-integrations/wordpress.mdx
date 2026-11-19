@@ -1,0 +1,189 @@
+---
+title: "WordPress"
+description: "Use the AI Provider for deAPI plugin to make deAPI a provider for the WordPress AI Client: image generation and editing, video generation, text-to-speech and embeddings for any plugin built on it."
+---
+
+[AI Provider for deAPI](https://wordpress.org/plugins/ai-provider-for-deapi/) is a WordPress plugin that adds deAPI as a provider for the WordPress AI Client, which is part of WordPress 7.0. Once the plugin is active and an API key is saved, any plugin built on the AI Client can generate and edit images, generate videos, create speech and compute embeddings with deAPI.
+
+The plugin is open source. Its code is on [GitHub](https://github.com/deapi-ai/ai-provider-for-deapi).
+
+<Note>
+  deAPI has no chat models in this plugin. Text features, such as title or excerpt generation, keep using your other AI providers.
+</Note>
+
+The plugin was tested for this page on WordPress 7.1 with version 0.1.0 from WordPress.org, by running each capability through the AI Client against the live deAPI API.
+
+---
+
+### What it adds
+
+| Capability | Models | Output |
+| --- | --- | --- |
+| Image generation | FLUX.1 [schnell], Z-Image Turbo, FLUX.2 [klein] 4B, Z-Anime Distill | PNG |
+| Image editing | FLUX.2 [klein] 4B, with up to three input images | PNG |
+| Video generation | LTX-2.5 22B Distilled (3 to 10 seconds), MiniMax H3 33B Turbo (8 seconds), from text or from a first-frame image | MP4 |
+| Text-to-speech | Kokoro (41 voices in 7 languages), Chatterbox, Qwen3 TTS CustomVoice | MP3 |
+| Embeddings | BGE-M3 (1024 dimensions). Requires WordPress 7.2 or later. | Vectors |
+
+The plugin lists only the models available to your deAPI account. Transcription, music generation and the other deAPI endpoints are not part of the plugin, because the AI Client has no matching capability for them yet.
+
+---
+
+### Prerequisites
+
+- WordPress 7.0 or later. The plugin loads on WordPress 6.9, but does nothing without the AI Client.
+- PHP 7.4 or later
+- A deAPI account with credits. deAPI charges per request; see [Pricing](/pricing).
+- A deAPI API key from the [deAPI Dashboard](https://app.deapi.ai/settings/api-keys). A key with the **API** role is enough. See [API Keys](/api-keys).
+
+---
+
+### Install and connect
+
+1. In the WordPress admin, open **Plugins**, add a new plugin, search for **AI Provider for deAPI**, then install and activate it.
+2. Go to **Settings → Connectors** and find **deAPI**.
+3. Paste your API key and save. WordPress checks the key with deAPI when you save it.
+
+You can also set the key outside the database, with the `DEAPI_API_KEY` environment variable or a constant in `wp-config.php`:
+
+```php
+define( 'DEAPI_API_KEY', 'YOUR_API_KEY' );
+```
+
+<Tip>
+  Create a separate key for each site and set a **spend limit** on it. See [Key restrictions](/api-keys#key-restrictions).
+</Tip>
+
+---
+
+### Try it with the AI plugin
+
+The plugin has no screens of its own. To see deAPI at work, use a plugin built on the AI Client, such as the [AI](https://wordpress.org/plugins/ai/) plugin from the WordPress AI Team:
+
+1. Install and activate the **AI** plugin.
+2. Under **Settings → AI**, turn on **Image Generation and Editing**.
+3. Open **Media → Generate Image**, type a prompt and generate. The image comes from deAPI.
+4. To change a generated image, refine it with a text instruction. deAPI edits it with FLUX.2 [klein].
+
+The **Text to Speech** feature of the AI plugin also works with deAPI. It creates an audio version of a post from the editor sidebar.
+
+---
+
+### Use it from code
+
+Every call goes through the AI Client. Name `deapi` and the model in the model preference.
+
+```php
+use WordPress\AiClient\Files\Enums\MediaOrientationEnum;
+use WordPress\AiClient\Providers\Models\DTO\ModelConfig;
+
+// Image
+$image = wp_ai_client_prompt( 'A red fox in a snowy forest at golden hour' )
+	->using_model_preference( array( 'deapi', 'Flux1schnell' ) )
+	->as_output_media_orientation( MediaOrientationEnum::landscape() )
+	->generate_image();
+
+// Edit: add the source image to the prompt
+$edited = wp_ai_client_prompt( 'Make it night with a full moon' )
+	->with_file( $image )
+	->using_model_preference( array( 'deapi', 'Flux_2_Klein_4B_BF16' ) )
+	->generate_image();
+
+// Video
+$video = wp_ai_client_prompt( 'A paper boat drifting down a rain-soaked street' )
+	->using_model_preference( array( 'deapi', 'Ltx2_5_22B_Dist_INT8' ) )
+	->using_model_config( ModelConfig::fromArray( array( 'customOptions' => array( 'seconds' => 5 ) ) ) )
+	->as_output_media_aspect_ratio( '16:9' )
+	->generate_video();
+
+// Speech
+$mp3 = wp_ai_client_prompt( 'Hello from deAPI.' )
+	->using_model_preference( array( 'deapi', 'Kokoro' ) )
+	->as_output_speech_voice( 'af_nova' )
+	->convert_text_to_speech();
+```
+
+Each call returns a file object, or a `WP_Error` when the request fails.
+
+#### Images
+
+| Option | Values |
+| --- | --- |
+| Model | `Flux1schnell`, `ZImageTurbo_INT8`, `Flux_2_Klein_4B_BF16`, `ZAnimeDistill_8Step_INT8` |
+| Orientation | Square on every model. FLUX.1 [schnell] also supports landscape (`1536x1024`) and portrait (`1024x1536`). |
+| Square sizes | 512, 768 and 1024 pixels |
+| Editing | Add up to three images to the prompt with `with_file()`. Only `Flux_2_Klein_4B_BF16` edits images. Images can be inline or public links. |
+
+deAPI waits for the GPU job to finish before it answers, so an image call takes several seconds. The plugin allows up to 5 minutes per request. In testing, a landscape image from FLUX.1 [schnell] took 24 seconds and an edit with FLUX.2 [klein] took 16 seconds.
+
+#### Video
+
+| Option | Values |
+| --- | --- |
+| Model | `Ltx2_5_22B_Dist_INT8` (3 to 10 seconds), `MiniMaxH3_33B_Turbo_INT8` (8 seconds) |
+| Aspect ratio | `1:1` (768 × 768), `16:9` (1344 × 768), `9:16` (768 × 1344), `4:3` (1024 × 768), `3:4` (768 × 1024) |
+| Length | The `seconds` custom option, for example `array( 'customOptions' => array( 'seconds' => 5 ) )` |
+| First frame | Add one image to the prompt with `with_file()` to animate it |
+
+A video call blocks until the MP4 is ready. The plugin checks the job every 5 seconds and waits up to 10 minutes.
+
+| Test | Time | File size |
+| --- | --- | --- |
+| LTX-2.5, text to video, 3 seconds | 54 seconds | 1 MB |
+| LTX-2.5, first-frame image, 3 seconds, 16:9 | 68 seconds | 2 MB |
+| MiniMax H3, text to video, 8 seconds, 16:9 | 136 seconds | 31 MB |
+
+<Warning>
+  Run video generation from WP-CLI, a cron event or a background job. A normal page request is usually stopped by the PHP time limit, often 30 seconds, before the video is ready.
+</Warning>
+
+#### Speech
+
+| Option | Values |
+| --- | --- |
+| Model | `Kokoro`, `Chatterbox`, `Qwen3_TTS_12Hz_1_7B_CustomVoice` |
+| Voice | A voice ID, for example `af_nova` or `bm_george` for Kokoro. The OpenAI voice names `alloy`, `echo`, `fable`, `onyx`, `nova` and `shimmer` also work. The default is `alloy`. |
+| Other options | Custom options are passed to the API, for example `speed` (Kokoro accepts 0.5 to 2). |
+
+Output is always MP3. In testing, two sentences with Kokoro took 5 seconds. Voice lists are in [Text-to-speech](/openai-compatibility#text-to-speech).
+
+#### Embeddings
+
+`Bge_M3_FP16` returns 1024-dimensional vectors. It is listed when the site's AI Client supports embeddings, which the plugin's listing puts at WordPress 7.2 or later.
+
+---
+
+### What the plugin sends
+
+The plugin talks to deAPI's OpenAI-compatible endpoint at `https://oai.deapi.ai/v1`. Nothing is sent until an API key is configured.
+
+- When you save the key, and when the AI Client needs the model list, the plugin sends the key to `/v1/models`.
+- When a plugin asks the AI Client for an image, an edit, a video, speech or embeddings and deAPI is selected, the plugin sends the key, the prompt or input text, any source images and the requested options to the matching endpoint.
+- Generated images can come back as links to `results.deapi.ai`, which the AI Client may download.
+
+The plugin sends no other data and makes no requests in the background. Endpoints, models and fields are described in [OpenAI Compatibility](/openai-compatibility).
+
+---
+
+### Troubleshooting
+
+| Symptom | Cause and fix |
+| --- | --- |
+| deAPI is missing under **Settings → Connectors** | The site runs WordPress 6.9 or the plugin is not active. The AI Client needs WordPress 7.0 or later. |
+| The key is not accepted | The key is wrong, disabled or deleted. Copy it again from the dashboard. |
+| A model is missing | The plugin lists only models available to your deAPI account, and only the ones in the table above. |
+| Text features do not use deAPI | deAPI has no chat models in this plugin. Keep another provider for text. |
+| Video generation stops with a timeout | The request hit the PHP time limit. Run it from WP-CLI, cron or a background job. |
+| `deAPI text to speech only produces audio/mpeg` | The caller asked for another audio format. Request MP3. |
+| `deAPI image edits accept at most 3 input images.` | Remove images from the prompt. |
+| `deAPI generates one video per request.` | Ask for one video at a time. |
+
+---
+
+### Resources
+
+- [AI Provider for deAPI on WordPress.org](https://wordpress.org/plugins/ai-provider-for-deapi/)
+- [Source code](https://github.com/deapi-ai/ai-provider-for-deapi)
+- [OpenAI Compatibility](/openai-compatibility)
+- [API Keys](/api-keys)
+- [Pricing](/pricing)

@@ -184,6 +184,27 @@ Image generation runs right away. Transcribing a link and generating speech ask 
 
 ---
 
+### deAPI in the Raycast MCP Registry
+
+Separately from the extension, the deAPI MCP server is listed in the [Model Context Protocol Registry](https://www.raycast.com/raycast/model-context-protocol-registry), a Raycast extension for finding and installing MCP servers in Raycast and in other MCP clients such as Claude or Cursor. The registry extension is available for macOS.
+
+| | deAPI extension | deAPI in the MCP Registry |
+| --- | --- | --- |
+| **Works as** | Commands with forms, plus three Raycast AI tools | 39 tools for Raycast AI and other MCP clients |
+| **Covers** | Images, video, speech, transcription, background removal, upscaling | The same, plus music, OCR, video upscaling, video descriptions, embeddings, prompt enhancement and price checks |
+| **Needs** | Raycast | Raycast and [Node.js](https://nodejs.org/en/download), because the entry runs through `npx` |
+
+To install it:
+
+1. Install the [Model Context Protocol Registry](https://www.raycast.com/raycast/model-context-protocol-registry) extension.
+2. Run **Search Servers** and find **deAPI**.
+3. Install it into Raycast or another client.
+4. In the server's environment, set `DEAPI_AUTH_HEADER` to `Bearer` followed by a space and your API key. Keep the `Bearer` prefix.
+
+The entry connects to `https://mcp.deapi.ai/mcp` through `mcp-remote` and sends the key as an `Authorization` header. In testing, the same command connected, listed 39 tools and returned the account balance. The tools are described in [MCP Server](/execution-modes-and-integrations/mcp-server).
+
+---
+
 ### Preferences
 
 Open Raycast Settings → **Extensions** → **deAPI** to change them.
