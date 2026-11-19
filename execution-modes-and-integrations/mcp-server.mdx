@@ -309,6 +309,14 @@ claude mcp add deapi -s user -t http https://mcp.deapi.ai/mcp --header "Authoriz
 
 Replace `YOUR_API_KEY` with your actual deAPI key. The server will be available in all your Claude Code sessions.
 
+To sign in with the deAPI sign-in window instead of keeping the key in a header, add the server without `--header`:
+
+```bash
+claude mcp add deapi -s user -t http https://mcp.deapi.ai/mcp
+```
+
+Then run `/mcp` in Claude Code, pick `deapi` and choose **Authenticate**. The deAPI sign-in window opens in your browser: paste your API key and choose **Allow access**. Claude Code keeps the session and refreshes it on its own.
+
 To share the server with a project, add it to `.mcp.json` instead; Claude Code expands `${DEAPI_API_KEY}` from the environment:
 
 ```json
