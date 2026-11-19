@@ -47,7 +47,8 @@ Create an API key at [app.deapi.ai/settings/api-keys](https://app.deapi.ai/setti
 Every request carries your deAPI API key, in one of two ways:
 
 - **In a header** (Claude Code, Cursor, VS Code, Codex, Gemini CLI and most other clients): `Authorization: Bearer <key>`, or `X-API-Key: <key>` for a client that only lets you name one header. When both are sent, `Authorization` is used.
-- **Through OAuth with a pre-registered client** (claude.ai, Claude Desktop, ChatGPT, and Cursor if you prefer its sign-in): Client ID `deapi-mcp`, Client Secret = your API key. The server supports the Authorization Code flow with PKCE (S256). It does not support dynamic client registration, so a client must let you enter the Client ID and Secret yourself.
+- **Through OAuth with the deAPI sign-in window** (claude.ai, Claude Desktop, ChatGPT, and any client that registers itself): add the server URL and connect. A deAPI sign-in window opens, shows which application is asking and where the access goes, and asks for your API key. The server supports dynamic client registration and client ID metadata documents, with the Authorization Code flow and PKCE (S256).
+- **Through OAuth with the pre-registered client** (for clients where you enter OAuth credentials yourself): Client ID `deapi-mcp`, Client Secret = your API key. No sign-in window is shown.
 
 The key is checked with deAPI when the client connects. A key deAPI does not accept is refused with `401` right away (or `invalid_client` during OAuth sign-in), so an authentication error from your client means the key needs fixing. Never put the key in the URL: the server only reads it from the headers above.
 
@@ -167,17 +168,11 @@ claude.ai and the Claude Desktop app share the same connector settings. To use d
 
 - Open **Customize** → **Connectors** and choose **Add custom connector**
 - Name it `deAPI` and enter the server URL `https://mcp.deapi.ai/mcp`
-- Open **Advanced settings**, choose **Use your own OAuth client**, and enter:
 
-| Field                   | Value              |
-| ----------------------- | ------------------ |
-| **OAuth Client ID**     | `deapi-mcp`        |
-| **OAuth Client Secret** | Your deAPI API key |
-
-**Step 3.** Click **Add**, then **Connect**. Claude signs in and lists the deAPI tools.
+**Step 3.** Click **Add**, then **Connect**. A deAPI sign-in window opens: paste your API key and choose **Allow access**. Claude then lists the deAPI tools.
 
 <Note>
-  Where your plan offers **Request headers** for custom connectors, you can instead choose no sign-in and add the header `Authorization: Bearer <your key>`. On Team and Enterprise plans, an owner adds connectors under Organization settings.
+  To skip the sign-in window, open **Advanced settings** before adding the connector, choose **Use your own OAuth client**, and enter Client ID `deapi-mcp` with your API key as Client Secret. Where your plan offers **Request headers** for custom connectors, you can also choose no sign-in and add the header `Authorization: Bearer <your key>`. On Team and Enterprise plans, an owner adds connectors under Organization settings.
 </Note>
 
 **Step 4.** Start using deAPI MCP by asking Claude to generate images, transcribe videos, or use any other capability. Make sure to mention "deAPI MCP" in your prompt so Claude knows to use the MCP tools.
@@ -285,8 +280,8 @@ To use deAPI MCP tools in ChatGPT conversations:
 | **Description**         | `deAPI MCP` (optional)           |
 | **MCP Server URL**      | `https://mcp.deapi.ai/mcp`       |
 | **Authentication**      | `OAuth`                          |
-| **OAuth Client ID**     | `deapi-mcp`                      |
-| **OAuth Client Secret** | Your deAPI API key               |
+
+Leave the OAuth client fields empty: ChatGPT registers itself, and a deAPI sign-in window asks for your API key. If ChatGPT asks for client credentials, enter Client ID `deapi-mcp` and your API key as Client Secret.
 
 **Step 4.** Check the risk acknowledgment checkbox ("I understand and want to continue")
 
@@ -398,7 +393,7 @@ Replace `YOUR_API_KEY` with your actual deAPI key. To edit `~/.gemini/settings.j
 
 #### Any other MCP client
 
-Use the server URL `https://mcp.deapi.ai/mcp` with the Streamable HTTP transport (sometimes just called "HTTP") and send your key as `Authorization: Bearer <key>` or `X-API-Key: <key>`. A client that requires OAuth needs a field for a Client ID and Secret: enter `deapi-mcp` and your API key.
+Use the server URL `https://mcp.deapi.ai/mcp` with the Streamable HTTP transport (sometimes just called "HTTP") and send your key as `Authorization: Bearer <key>` or `X-API-Key: <key>`. A client that uses OAuth needs no setup: it registers itself and opens the deAPI sign-in window, where you paste your key. A client with fixed OAuth credentials can use Client ID `deapi-mcp` with your API key as Client Secret.
 
 ---
 
@@ -577,7 +572,8 @@ Use the **MCP server** when you want an AI agent to decide which tools to call, 
 
 - **Verify your API key** is valid and has sufficient balance
 - **Check the server URL** is exactly `https://mcp.deapi.ai/mcp`
-- **For Claude and ChatGPT:** Ensure OAuth Client ID is `deapi-mcp` and Secret is your API key
+- **For Claude and ChatGPT:** If the deAPI sign-in window says the key was not accepted, copy the key again; if you entered OAuth credentials yourself, the Client ID must be `deapi-mcp` and the Secret your API key
+- **"Unverified application" in the sign-in window:** the application registered itself and deAPI cannot confirm who runs it. Continue only if you started the connection and recognise the address shown under **Access goes to**
 - **For header-based clients:** The header should be `Authorization: Bearer YOUR_API_KEY` (with the `Bearer ` prefix) or `X-API-Key: YOUR_API_KEY`
 - **`401` or `invalid_client` when connecting:** deAPI did not accept the key. Copy it again from [app.deapi.ai/settings/api-keys](https://app.deapi.ai/settings/api-keys), or create a new one
 
