@@ -1,43 +1,47 @@
 ---
 title: "SDKs & Integrations"
-description: "Use deAPI from your code with the official Python SDK or the OpenAI SDK as a drop-in client: installation, quick start and supported features."
+description: "Use deAPI from your code with the official Python SDK (deapi-sdk on PyPI), the OpenAI SDK as a drop-in client, or the MCP server for AI assistants."
 ---
 
 ## Python SDK
 
 The official Python SDK for deAPI. Generate images, videos, audio, transcriptions, embeddings, and more — through a type-safe Python interface with sync and async support.
 
-<Card icon="github" href="https://github.com/deapi-ai/deapi-python-sdk" title="GitHub Repository">
-  deapi-ai/deapi-python-sdk
-</Card>
+<CardGroup cols={2}>
+  <Card icon="python" href="https://pypi.org/project/deapi-sdk/" title="PyPI">
+    deapi-sdk
+  </Card>
+  <Card icon="github" href="https://github.com/deapi-ai/deapi-python-sdk" title="GitHub Repository">
+    deapi-ai/deapi-python-sdk
+  </Card>
+</CardGroup>
 
 ### Installation
 
 ```bash
-pip install git+https://github.com/deapi-ai/deapi-python-sdk.git
+pip install deapi-sdk
 ```
 
-**Requirements:** Python 3.9+
+**Requirements:** Python 3.11+
 
-<Warning>
-  The SDK is not on PyPI yet, so install it from GitHub as shown above. `pip install deapi` installs an unrelated package with the same import name.
-</Warning>
+<Note>
+  The package is `deapi-sdk` and you import it as `deapi_sdk`. `pip install deapi` installs an unrelated package.
+</Note>
 
 ### Quick Start
 
 ```python
-from deapi import DeapiClient
+from deapi_sdk import DeapiClient
 
-client = DeapiClient(api_key="YOUR_API_KEY")  # your deAPI key, e.g. "sk-dp-1234-AbCdEf..."
+# Reads the key from the DEAPI_API_KEY environment variable,
+# or pass it: DeapiClient(api_key="sk-dp-...")
+client = DeapiClient()
 
-# Generate an image
+# Generate an image. Width, height and steps come from the model's own defaults
+# unless you set them.
 job = client.images.generate(
     prompt="a cat floating in a nebula, photorealistic",
     model="Flux_2_Klein_4B_BF16",
-    width=1024,
-    height=1024,
-    steps=4,
-    seed=-1,
 )
 
 # Wait for the result (polls with exponential backoff)
@@ -45,18 +49,35 @@ result = job.wait()
 print(result.result_url)
 ```
 
+Async works the same way with `AsyncDeapiClient`:
+
+```python
+import asyncio
+from deapi_sdk import AsyncDeapiClient
+
+async def main():
+    async with AsyncDeapiClient() as client:
+        job = await client.images.generate(prompt="a lighthouse at dusk", model="Flux1schnell")
+        result = await job.wait()
+        print(result.result_url)
+
+asyncio.run(main())
+```
+
 ### Features
 
-- **Full API coverage** — images, video, audio (TTS, voice cloning, music), transcription, embeddings, OCR, prompt enhancement
+- **Full API coverage** — images, video, audio (TTS, voice cloning, music), transcription, embeddings, OCR, prompt enhancement, models, account, usage and API keys
 - **Sync + Async** — `DeapiClient` and `AsyncDeapiClient`
+- **Model defaults** — parameters you leave out are filled from the model's own card
 - **Job polling** — automatic exponential backoff with `.wait()`
-- **Auto-retry** — built-in retry on rate limits (429) and server errors (5xx)
+- **Auto-retry** — built-in retry on rate limits (429) and server errors (5xx), honouring `Retry-After`
+- **Typed errors** — e.g. `AuthenticationError`, `InsufficientBalanceError`, `RateLimitError`, `NotFoundError`
 - **Type-safe** — full type hints, Pydantic v2 models, `py.typed` marker
 - **Webhook verification** — HMAC-SHA256 signature validation
 - **Price calculation** — every method has a `_price` counterpart to check cost before submitting
 
 <Tip>
-  For full documentation, configuration options, usage examples, and API reference, visit the [GitHub repository](https://github.com/deapi-ai/deapi-python-sdk).
+  For full documentation, configuration options, usage examples, and API reference, visit the [GitHub repository](https://github.com/deapi-ai/deapi-python-sdk). Changes are listed in the [changelog](https://github.com/deapi-ai/deapi-python-sdk/blob/main/CHANGELOG.md).
 </Tip>
 
 ---
@@ -78,6 +99,16 @@ response = client.images.generate(model="Flux1schnell", prompt="...", size="1024
 
 <Card icon="plug" href="/openai-compatibility" title="OpenAI Compatibility — full guide">
   Migration examples, supported endpoints, framework integrations, and known differences
+</Card>
+
+---
+
+## MCP Server
+
+For AI assistants and coding tools (Claude, ChatGPT, Cursor, VS Code, Claude Code, Codex, Gemini CLI), deAPI runs a hosted MCP server at `https://mcp.deapi.ai/mcp`: the assistant calls deAPI as tools, and you sign in with your API key in a deAPI window. The server is open source and published as [`deapi-mcp`](https://pypi.org/project/deapi-mcp/) for self-hosting.
+
+<Card icon="robot" href="/execution-modes-and-integrations/mcp-server" title="MCP Server — setup for each client">
+  Connect your assistant, the list of tools, and self-hosting
 </Card>
 
 ---
