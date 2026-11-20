@@ -21,6 +21,7 @@ With deAPI's MCP server, Claude, ChatGPT, Cursor, and other MCP-compatible clien
 - Transcribe YouTube / X / Twitch / Kick / TikTok videos or audio files
 - Remove image backgrounds and upscale images and videos
 - Check pricing before running expensive operations
+- Check your balance, usage and API keys
 - Access all deAPI capabilities through natural language
 
 New tools and capabilities will be added as the MCP server evolves. Follow our [Discord](https://discord.com/invite/UFfK5YRBsr) for updates and to share feature requests.
@@ -35,8 +36,9 @@ The full source code for the MCP server is available on GitHub: [github.com/deap
 | ----------------------- | ------------------------------------------------------------ |
 | **MCP Server URL**      | `https://mcp.deapi.ai/mcp`                                   |
 | **Transport**           | Streamable HTTP (there is no SSE endpoint)                   |
+| **Sign-in**             | OAuth with the deAPI sign-in window, no client setup needed  |
 | **API key header**      | `Authorization: Bearer <key>` or `X-API-Key: <key>`          |
-| **OAuth Client ID**     | `deapi-mcp`                                                  |
+| **OAuth Client ID**     | `deapi-mcp` (only for clients where you enter OAuth credentials yourself) |
 | **OAuth Client Secret** | Your deAPI API key                                           |
 | **Setup page**          | [mcp.deapi.ai](https://mcp.deapi.ai/): copy-ready setup for each client |
 
@@ -172,7 +174,7 @@ Generation tools wait for the job to finish and return its outcome in one call:
 
 **Pricing a URL transcription.** `video_url_transcription_price` accepts either `video_url` or `duration_seconds`, not both. With a URL, the price is read from the source itself. TikTok links can't be quoted by URL — pass `duration_seconds` together with `platform: "tiktok"`. The platform changes the price, so set `platform` whenever you quote by duration.
 
-**Webhooks.** All 18 generation tools accept `webhook_url` and an optional `webhook_secret`, and pass them to the API. deAPI then calls your endpoint when the job finishes, so your own systems are notified as well. The tool still waits and returns the result in the conversation. See [Webhooks](/execution-modes-and-integrations/webhooks) for the payload and signature.
+**Webhooks.** All 17 job tools accept `webhook_url` and an optional `webhook_secret`, and pass them to the API. deAPI then calls your endpoint when the job finishes, so your own systems are notified as well. The tool still waits and returns the result in the conversation. See [Webhooks](/execution-modes-and-integrations/webhooks) for the payload and signature.
 
 ---
 
@@ -490,14 +492,21 @@ You can run the MCP server on your own infrastructure. The full source code is a
 
 #### Quick Start
 
+The server is published on PyPI as [`deapi-mcp`](https://pypi.org/project/deapi-mcp/):
+
+```bash
+pip install deapi-mcp
+
+# Start the server on your machine only
+MCP_HOST=127.0.0.1 python -m deapi_mcp.server_remote
+```
+
+Or from source:
+
 ```bash
 git clone https://github.com/deapi-ai/mcp-server-deapi.git
 cd mcp-server-deapi
-
-# Install dependencies (uv recommended)
 uv pip install -e .
-
-# Start the server on your machine only
 MCP_HOST=127.0.0.1 python -m deapi_mcp.server_remote
 ```
 
@@ -507,6 +516,8 @@ The server will start on `http://localhost:8000`. For external access, set a fix
 export DEAPI_JWT_SECRET_KEY=$(python -c "import secrets; print(secrets.token_urlsafe(32))")
 MCP_HOST=0.0.0.0 MCP_PORT=8000 python -m deapi_mcp.server_remote
 ```
+
+Behind a proxy or load balancer, also set `PUBLIC_BASE_URL` to the address clients use (for example `https://mcp.example.com`), so OAuth discovery and the sign-in window point there.
 
 #### Docker Deployment
 
@@ -548,18 +559,19 @@ The MCP server provides access to all deAPI models. The tools take the same mode
 
 | Tool | Models (slug) |
 | --- | --- |
-| `text_to_image` | `Flux_2_Klein_4B_BF16`, `Flux1schnell`, `ZImageTurbo_INT8`, `ZAnimeDistill_8Step_INT8` · partner: `gpt-image-1.5`, `gpt-image-2`, `gpt-image-2.5`, `nano-banana-2`, `nano-banana-2.1` |
-| `image_to_image` | `Flux_2_Klein_4B_BF16`, `QwenImageEdit_Plus_NF4` · partner: `gpt-image-1.5`, `gpt-image-2`, `gpt-image-2.5`, `nano-banana-2.1` |
+| `text_to_image` | `Flux_2_Klein_4B_BF16`, `Flux1schnell`, `ZImageTurbo_INT8`, `ZAnimeDistill_8Step_INT8` · partner: `gpt-image-1.5`, `gpt-image-2`, `gpt-image-2.5`, `gpt-image-2.6`, `nano-banana-2`, `nano-banana-2.1` |
+| `image_to_image` | `Flux_2_Klein_4B_BF16`, `QwenImageEdit_Plus_NF4` · partner: `gpt-image-1.5`, `gpt-image-2`, `gpt-image-2.5`, `gpt-image-2.6`, `nano-banana-2.1` |
 | `image_to_text` (OCR) | `Nanonets_Ocr_S_F16`, `LightOnOcr_3_4B_Q8` |
 | `image_remove_background` | `Ben2` |
 | `image_upscale` | `RealESRGAN_x4` |
-| `text_to_video`, `image_to_video` | `Ltx2_5_22B_Dist_INT8`, `Ltx2_3_22B_Dist_INT8`, `MiniMaxH3_33B_Turbo_INT8`, `Ltxv_13B_0_9_8_Distilled_FP8` · partner: `seedance-2.5` |
+| `text_to_video`, `image_to_video` | `Ltx2_5_22B_Dist_INT8`, `Ltx2_3_22B_Dist_INT8`, `MiniMaxH3_33B_Turbo_INT8`, `Ltxv_13B_0_9_8_Distilled_FP8` · partner: `seedance-2.5`, `kling-4` |
+| `text_to_video` only | partner: `veo-3.1`, `veo-3.1-fast` |
 | `audio_to_video` | `Ltx2_5_22B_Dist_INT8`, `Ltx2_3_22B_Dist_INT8` |
 | `video_upscale` | `RealESRGAN_Vid_x2`, `RealESRGAN_Vid_x4`, `FlashVSR_Tiny` |
 | `video_description` | `Marlin_2B` |
 | `text_to_audio` | `Kokoro`, `Chatterbox`, `Qwen3_TTS_12Hz_1_7B_CustomVoice`, `Qwen3_TTS_12Hz_1_7B_Base` (voice cloning), `Qwen3_TTS_12Hz_1_7B_VoiceDesign` |
-| `text_to_music` | `AceStep_1_5_XL_Turbo_INT8` (recommended), `AceStep_1_5_XL_Base_INT8` (recommended), `AceStep_1_5_Turbo` |
-| Transcription tools | `WhisperLargeV3Ct2` |
+| `text_to_music` | `AceStep_1_5_XL_Turbo_INT8` (recommended), `MiniMaxMusic3_11B_INT8`, `AceStep_1_5_Turbo` |
+| Transcription tools | `WhisperLargeV3Ct2` (default), `WhisperLargeV3` |
 | `text_to_embedding` | `Bge_M3_FP16` |
 
 <Note>
@@ -624,7 +636,7 @@ Polling uses exponential backoff (1.5× multiplier by default), so jobs receive 
 
 The MCP server does **not** store your API token. Authentication works at the connection level:
 
-- **Remote hosted server**: OAuth 2.0 Authorization Code with PKCE (pre-registered client `deapi-mcp`), or your API key in the `Authorization: Bearer` or `X-API-Key` header
+- **Remote hosted server**: OAuth 2.0 Authorization Code with PKCE, through the deAPI sign-in window (clients register themselves) or the pre-registered client `deapi-mcp`; or your API key in the `Authorization: Bearer` or `X-API-Key` header. With OAuth the key travels only encrypted inside the client's tokens
 - **Key check**: the key is checked with deAPI when a client connects, and a key deAPI refuses gets `401` immediately
 - **Self-hosted server**: the key is forwarded per request to the deAPI API
 - Keys are never persisted or logged, and never read from the URL; tools do **not** accept `deapi_api_token` as a parameter
@@ -657,14 +669,16 @@ Use the **MCP server** when you want an AI agent to decide which tools to call, 
 - **"Unverified application" in the sign-in window:** the application registered itself and deAPI cannot confirm who runs it. Continue only if you started the connection and recognise the address shown under **Access goes to**
 - **For header-based clients:** The header should be `Authorization: Bearer YOUR_API_KEY` (with the `Bearer ` prefix) or `X-API-Key: YOUR_API_KEY`
 - **`401` or `invalid_client` when connecting:** deAPI did not accept the key. Copy it again from [app.deapi.ai/settings/api-keys](https://app.deapi.ai/settings/api-keys), or create a new one
+- **"This application is not registered" in the sign-in window:** start the connection again from your client. If it keeps happening, update the client or use the key in a header instead, and let us know on [Discord](https://discord.com/invite/UFfK5YRBsr)
 
 #### Tools Not Appearing
 
 - Restart your MCP client (Claude, ChatGPT, Cursor) after configuration changes
-- **In Claude:** Make sure you clicked **Allow** when prompted to grant permissions
+- **In Claude:** Make sure you chose **Allow access** in the deAPI sign-in window
 - **In ChatGPT:** Ensure Developer mode is enabled in Advanced settings
 - Verify JSON syntax in configuration files (Cursor, VS Code, Claude Code)
-- Check that your API key has the necessary permissions
+- The account and key tools need an ADMIN key; an API key can only read its own details and usage
+- Creating, changing and deleting keys is off on mcp.deapi.ai: those tools answer with a link to the dashboard
 
 #### Jobs Stuck in Processing
 
