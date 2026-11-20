@@ -1,15 +1,11 @@
 ---
 title: "Open WebUI"
-description: "Use deAPI for image generation and editing, text-to-speech, speech-to-text and document embeddings in Open WebUI, through the OpenAI-compatible endpoint."
+description: "Use deAPI for chat with 13 LLMs, image generation and editing, text-to-speech, speech-to-text and document embeddings in Open WebUI, through the OpenAI-compatible endpoint."
 ---
 
-[Open WebUI](https://openwebui.com) is a self-hosted chat interface for local and hosted models. Its image, voice and document features can call any OpenAI-compatible API, so you can point them at deAPI and keep your chat model where it is: Ollama, OpenAI or any other connection.
+[Open WebUI](https://openwebui.com) is a self-hosted chat interface for local and hosted models. Its chat, image, voice and document features can all call any OpenAI-compatible API, so you can point them at deAPI. Use deAPI for chat with its LLMs, or keep your chat model where it is (Ollama, OpenAI or any other connection) and use deAPI for images, speech, transcription and embeddings only.
 
-<Note>
-  deAPI does not serve `/v1/chat/completions`. Keep your existing chat connection and use deAPI for images, speech, transcription and embeddings.
-</Note>
-
-Every step below was checked by sending deAPI the exact requests that Open WebUI v0.13 sends.
+The image, voice and document steps below were checked by sending deAPI the exact requests that Open WebUI v0.13 sends. For chat, the streaming requests an OpenAI connection makes were tested against the live API.
 
 ---
 
@@ -24,6 +20,23 @@ Every setting below lives under **Admin Panel → Settings** and uses the same t
 | --- | --- |
 | **API Base URL** | `https://oai.deapi.ai/v1` |
 | **API Key** | Your deAPI key, e.g. `sk-dp-1234-AbCdEf...` |
+
+---
+
+### Chat with deAPI LLMs
+
+1. Open **Admin Panel → Settings → Connections**.
+2. Under **OpenAI API**, click **+** to add a connection.
+3. Enter the **API Base URL** and **API Key** and save.
+4. Choose a model in the model picker at the top of a new chat, e.g. `qwen3.8-flash`.
+
+Open WebUI fills the picker from `GET /v1/models`, which lists every deAPI model on the gateway: the LLMs and also the image, audio, embedding and video models. Only these 13 work in chat:
+
+`deepseek-v4.1-flash`, `deepseek-v4.1-flash:economy`, `glm-5.3`, `glm-5.3-flash`, `gpt-6-luna`, `hy3`, `kimi-k3`, `qwen3.8-flash`, `qwen3.8-max`, `seed-2.0-lite`, `seed-2.0-mini`, `seed-2.0-pro`, `seed-2.1-turbo`
+
+To hide the rest, type these names into the connection's **Model IDs** list. Picking a non-chat model such as `Flux1schnell` for a chat answers `404 model_not_found` with `is not a chat model`.
+
+`glm-5.3` and `hy3` take text only. Attach images in chat only to the other models. For prices and per-model limits, see [Chat completions](/openai-compatibility#chat-completions-llms).
 
 ---
 
@@ -103,7 +116,9 @@ Voice input is now transcribed by deAPI. In testing, WebM (what Chrome records),
 | Symptom | Cause and fix |
 | --- | --- |
 | `400 size_not_supported` | The **Image Size** is not on the model's list. The error message lists the sizes the model accepts. |
-| `404 model_not_found` | Model names are case-sensitive and there are no OpenAI aliases. Use `Flux1schnell`, not `dall-e-3`. |
+| `404 model_not_found` | Model names are case-sensitive and there are no OpenAI aliases. Use `Flux1schnell`, not `dall-e-3`. In chat, the message `is not a chat model` means an image, audio or video model was picked as the chat model. |
+| `400 unsupported_content` in chat | An image was attached to a text-only model (`glm-5.3`, `hy3`). Switch to another LLM. |
+| `400 unsupported_parameter` in chat | A chat setting (e.g. **Stop Sequence**) is not supported by the selected model. Clear it in the chat's advanced parameters, or pick another model. |
 | `401 missing_api_key` or `401 invalid_api_key` | The **API Key** field is empty or the key is wrong. Copy it again from the dashboard. |
 | Requests stop after a fixed time | deAPI keeps the connection open until the job finishes, which can take minutes for heavy edits. Open WebUI sets no timeout by default; if you set `AIOHTTP_CLIENT_TIMEOUT`, keep it above 600 seconds. |
 

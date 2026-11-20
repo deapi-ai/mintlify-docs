@@ -19,6 +19,7 @@ Under the hood, deAPI runs on a global, decentralized GPU network, allowing sign
 
 With deAPI, you can power a wide range of AI applications:
 
+- **Chat & LLMs** — 13 large language models (Qwen, DeepSeek, GLM, Kimi, Seed and more) through the OpenAI-compatible `/v1/chat/completions`, with streaming, tool calling, structured outputs and image input
 - **Image generation** — Create and edit images using modern diffusion models
 - **Text-to-speech** — Generate natural-sounding speech with preset voices, voice cloning, or voice design
 - **Music generation** — Create music tracks with lyrics, tempo, key, and style control
@@ -38,7 +39,7 @@ A full, up-to-date list of supported models is available here:
 
 ## Already using the OpenAI SDK?
 
-deAPI exposes an OpenAI-compatible endpoint at `https://oai.deapi.ai/v1`. Change two parameters (`base_url` and `api_key`), keep your existing OpenAI SDK code, and route image generation, TTS, transcription, embeddings, and video generation to deAPI.
+deAPI exposes an OpenAI-compatible endpoint at `https://oai.deapi.ai/v1`. Change two parameters (`base_url` and `api_key`), keep your existing OpenAI SDK code, and route chat completions (LLMs), image generation, TTS, transcription, embeddings, and video generation to deAPI.
 
 <Card icon="plug" href="/openai-compatibility" title="OpenAI Compatibility">
   Drop-in replacement for the OpenAI SDK — migrate in two lines

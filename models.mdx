@@ -69,6 +69,28 @@ See the full endpoint spec → [Model Selection](/api/v2/utilities/models)
 
 ---
 
+## LLMs (chat models)
+
+deAPI also runs **13 large language models** for chat: `deepseek-v4.1-flash`, `deepseek-v4.1-flash:economy`, `glm-5.3`, `glm-5.3-flash`, `gpt-6-luna`, `hy3`, `kimi-k3`, `qwen3.8-flash`, `qwen3.8-max`, `seed-2.0-lite`, `seed-2.0-mini`, `seed-2.0-pro` and `seed-2.1-turbo`.
+
+They work differently from the rest of the catalogue:
+
+- **They are served only through the OpenAI-compatible API**, at `POST https://oai.deapi.ai/v1/chat/completions`, with the same API key. The native API has no chat endpoint.
+- **They are not in the native catalogue.** `GET /api/v2/models` does not list them. Get them from `GET https://oai.deapi.ai/v1/models`, where each LLM entry has `context_length`, input modalities, `supported_parameters` and per-token `pricing`.
+- **They are priced per token**, not through a `/price` endpoint. Every response reports its own cost in `usage.cost`.
+- Streaming, tool calling, structured outputs (JSON Schema), image input (on 11 of the 13) and `reasoning_effort` are supported.
+
+```bash
+curl -s https://oai.deapi.ai/v1/chat/completions \
+  -H "Authorization: Bearer $DEAPI_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"model":"qwen3.8-flash","messages":[{"role":"user","content":"Hello!"}]}'
+```
+
+The model table with context sizes, prices and supported features is in [Chat completions](/openai-compatibility#chat-completions-llms).
+
+---
+
 ## Partner (external) models
 
 Alongside the models running on deAPI's own decentralized GPU network, the model list also includes **partner models** — large, heavy models that run on our partners' infrastructure. These are typically models that can't run on consumer GPUs (very high VRAM requirements, proprietary weights, or specialized hardware), so we make them available through the same unified API.
@@ -281,6 +303,7 @@ If you are an AI agent, MCP client, or LLM integrating with deAPI:
 3. **Read** `info.limits` and `info.defaults` from the response to construct valid request parameters. Also consult the task endpoint docs for required fields that may not appear in the model response (e.g. `seed` for image generation).
 4. **Pass** the `slug` field (not `name`) as the `model` parameter in task endpoints.
 5. **If a model slug returns an error**, re-fetch the model list — the model may have been deprecated or replaced.
+6. **For chat / text generation**, use the LLMs on the OpenAI-compatible API: list them with `GET https://oai.deapi.ai/v1/models` (entries with `context_length`) and call `POST https://oai.deapi.ai/v1/chat/completions`. They do not appear in `/api/v2/models`. See [LLMs (chat models)](#llms-chat-models).
 
 ---
 
@@ -289,4 +312,4 @@ If you are an AI agent, MCP client, or LLM integrating with deAPI:
 - [Model Selection endpoint](/api/v2/utilities/models) — the live API spec for fetching models.
 - [Pricing](/pricing) — cost per task and model tier.
 - [Execution Modes](/execution-modes-and-integrations/execution-modes-and-http-queue) — sync, async, webhooks, WebSockets.
-- [OpenAI Compatibility](/openai-compatibility) — call deAPI with the OpenAI SDK using native model slugs.
+- [OpenAI Compatibility](/openai-compatibility) — call deAPI with the OpenAI SDK, including chat completions with LLMs.

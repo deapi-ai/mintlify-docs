@@ -1,9 +1,9 @@
 ---
 title: "OpenAI Compatibility"
-description: "Point the official OpenAI SDK at deAPI — images, audio, embeddings and video with the request and response shapes you already know."
+description: "Point the official OpenAI SDK at deAPI — chat completions with 13 LLMs, plus images, audio, embeddings and video, with the request and response shapes you already know."
 ---
 
-deAPI exposes an OpenAI-compatible `/v1/*` API. Point the official OpenAI SDK (Python, Node, or plain cURL) at our base URL, use your deAPI token as the API key, and call our models with the request and response shapes you already know.
+deAPI exposes an OpenAI-compatible `/v1/*` API. Point the official OpenAI SDK (Python, Node, or plain cURL) at our base URL, use your deAPI token as the API key, and call our models — LLMs for chat, plus image, audio, embedding and video models — with the request and response shapes you already know.
 
 This is a translation layer over the deAPI inference network — not a rebrand of OpenAI's models. Everything below documents exactly where the two contracts match and where they deliberately differ. It is the same approach used by Groq, Together AI, and Fireworks AI.
 
@@ -11,10 +11,10 @@ This is a translation layer over the deAPI inference network — not a rebrand o
 
 | Area | Where we stand |
 | --- | --- |
-| **Works today** | Models, embeddings, image generation, image editing, text-to-speech, transcription, video generation |
-| **Not available** | `/v1/chat/completions`, `/v1/files`, voice cloning, moderation, translations |
-| **Model IDs** | Native only — `Flux1schnell`, `Kokoro`, `WhisperLargeV3Ct2`, … There are no `dall-e-3` / `tts-1` / `whisper-1` aliases |
-| **Streaming** | Not supported on any endpoint |
+| **Works today** | Chat completions (LLMs), models, embeddings, image generation, image editing, text-to-speech, transcription, video generation |
+| **Not available** | `/v1/responses`, `/v1/files`, voice cloning, moderation, translations |
+| **Model IDs** | deAPI IDs only — `qwen3.8-flash`, `Flux1schnell`, `Kokoro`, `WhisperLargeV3Ct2`, … There are no `gpt-4o` / `dall-e-3` / `tts-1` / `whisper-1` aliases |
+| **Streaming** | Chat completions only (`stream: true`, server-sent events). Every other endpoint rejects it |
 
 ---
 
@@ -139,6 +139,8 @@ Image, audio and edit jobs run on a distributed GPU network and the gateway hold
 
 Video generation is the exception — it is asynchronous by design and returns immediately. See [Video](#video).
 
+Chat completions do not go through the GPU job queue. A short answer comes back in one to a few seconds (1–7 s across all 13 models in our tests), and `stream: true` starts sending tokens straight away. Long answers from reasoning models take longer, so keep the SDK's default timeout and don't lower it for chat.
+
 ---
 
 ## Supported endpoints
@@ -147,6 +149,7 @@ Video generation is the exception — it is asynchronous by design and returns i
 | --- | --- | --- |
 | `/v1/models` | `GET` | Synchronous |
 | `/v1/models/{model}` | `GET` | Synchronous |
+| `/v1/chat/completions` | `POST` | Synchronous, or streamed with `stream: true` |
 | `/v1/embeddings` | `POST` | Synchronous |
 | `/v1/images/generations` | `POST` | Job — the connection is held until it completes |
 | `/v1/images/edits` | `POST` | Job — the connection is held until it completes |
@@ -185,6 +188,18 @@ Entries used to report `0` unless the model was also listed on OpenRouter. Every
 
 Catalog reads are cached for 5 minutes, so a model added or removed on the deAPI side appears (or disappears) within that window.
 
+**LLM entries carry more fields.** The chat models (lowercase IDs such as `qwen3.8-flash`, listed in [Chat completions](#chat-completions-llms)) add the fields OpenRouter-style clients read:
+
+| Field | Meaning |
+| --- | --- |
+| `context_length` | Maximum context window, in tokens |
+| `architecture.input_modalities` | `["text"]` or `["text", "image"]`. Only models with `image` accept `image_url` parts |
+| `top_provider.max_completion_tokens` | Largest `max_tokens` / `max_completion_tokens` the model accepts |
+| `supported_parameters` | The request fields this model accepts. Any other optional field from the list in [Request fields](#request-fields) is rejected with `400 unsupported_parameter` |
+| `pricing` | USD **per token**, as decimal strings: `prompt`, `completion`, `input_cache_read`, and `input_cache_write` where the model bills it. Multiply by 1,000,000 for the price per 1M tokens |
+
+To list only the chat models, keep the entries that have a `context_length`. Image, audio, embedding and video models do not have it.
+
 <CodeGroup>
 ```json GET /v1/models → 200
 {
@@ -195,7 +210,18 @@ Catalog reads are cached for 5 minutes, so a model added or removed on the deAPI
     {"id": "Bge_M3_FP16", "object": "model", "created": 1776902400, "owned_by": "deapi"},
     {"id": "QwenImageEdit_Plus_NF4", "object": "model", "created": 1776902400, "owned_by": "deapi"},
     {"id": "Ltx2_3_22B_Dist_INT8", "object": "model", "created": 1777334400, "owned_by": "deapi"},
-    {"id": "WhisperLargeV3Ct2", "object": "model", "created": 1787011200, "owned_by": "deapi"}
+    {"id": "WhisperLargeV3Ct2", "object": "model", "created": 1787011200, "owned_by": "deapi"},
+    {
+      "id": "qwen3.8-flash",
+      "object": "model",
+      "created": 1787761130,
+      "owned_by": "deapi",
+      "context_length": 1000000,
+      "architecture": {"input_modalities": ["text", "image"], "output_modalities": ["text"]},
+      "top_provider": {"context_length": 1000000, "max_completion_tokens": 131072},
+      "supported_parameters": ["max_tokens", "max_completion_tokens", "temperature", "top_p", "presence_penalty", "frequency_penalty", "stop", "tools", "tool_choice", "parallel_tool_calls", "response_format", "structured_outputs", "reasoning_effort"],
+      "pricing": {"prompt": "0.0000001575", "completion": "0.0000004935", "input_cache_read": "0.0000000168"}
+    }
   ]
 }
 ```
@@ -233,6 +259,8 @@ A name your account cannot use fails in one of three ways, and the code says whi
 | It knows the name, but not on this endpoint | `400 model_wrong_endpoint` | The message names the endpoint type it does serve, e.g. `endpoint_type=video_generation` |
 | It knows the name and the endpoint, but does not run it for your account | `400 invalid_value` | `message` carries the reason |
 
+Chat models and the other models never cross over, and the answer is `404 model_not_found` in both directions, not `model_wrong_endpoint`. A non-chat model on `/v1/chat/completions` gets a message that says so (`The model 'Flux1schnell' is not a chat model and cannot be used with /v1/chat/completions.`). An LLM sent to `/v1/images/generations` or `/v1/embeddings` gets the generic `is not available on this gateway`.
+
 Build your integration against `GET /v1/models`. It is already filtered to your account, so every name in it resolves on the endpoint it belongs to — which makes it the list to check first when a model name is refused.
 
 ### Why there are no OpenAI model aliases
@@ -247,16 +275,293 @@ Three parameters change. Everything else — request format, response schema, er
 | --- | --- | --- |
 | `base_url` / `baseURL` | `https://api.openai.com/v1` | `https://oai.deapi.ai/v1` |
 | `api_key` / `apiKey` | `sk-...` | `sk-dp-<id>-<secret>` — your deAPI key as is |
-| `model` | `dall-e-3`, `tts-1`, … | Native model ID (see below) |
+| `model` | `gpt-4o`, `dall-e-3`, `tts-1`, … | deAPI model ID (see below) |
 
 | If you were calling | Use instead |
 | --- | --- |
+| `gpt-4o-mini`, `gpt-4.1-mini` (chat, low cost) | `qwen3.8-flash`, `glm-5.3-flash`, `gpt-6-luna`, `seed-2.0-mini`, `hy3`: all at or under $0.56 per 1M output tokens |
+| `gpt-4o`, `gpt-4.1`, `o3` (chat, larger models) | `kimi-k3`, `qwen3.8-max`, `glm-5.3`, `seed-2.0-pro`. See [Chat completions](#chat-completions-llms) for prices |
 | `dall-e-3`, `gpt-image-1` (generations) | `Flux1schnell`, `Flux_2_Klein_4B_BF16`, `ZImageTurbo_INT8`, `ZAnimeDistill_8Step_INT8` |
 | `gpt-image-1` (edits) | `QwenImageEdit_Plus_NF4`, `Flux_2_Klein_4B_BF16` |
 | `tts-1`, `tts-1-hd`, `gpt-4o-mini-tts` | `Kokoro`, `Chatterbox`, `Qwen3_TTS_12Hz_1_7B_CustomVoice` |
 | `whisper-1`, `gpt-4o-transcribe` | `WhisperLargeV3Ct2` |
 | `text-embedding-3-small` | `Bge_M3_FP16` |
 | `sora-2` | `Ltx2_5_22B_Dist_INT8`, `Ltx2_3_22B_Dist_INT8`, `MiniMaxH3_33B_Turbo_INT8`, `Ltxv_13B_0_9_8_Distilled_FP8` |
+
+---
+
+## Chat completions (LLMs)
+
+`POST /v1/chat/completions` runs large language models through the standard OpenAI Chat Completions contract: messages, streaming, tool calling, structured outputs, image input and reasoning. The official SDKs work without changes. Point `base_url` at deAPI and pass one of the model IDs below.
+
+<Tabs>
+  <Tab title="Python">
+    ```python
+    from openai import OpenAI
+
+    client = OpenAI(api_key="sk-dp-1234-AbCdEf...", base_url="https://oai.deapi.ai/v1")
+
+    r = client.chat.completions.create(
+        model="qwen3.8-flash",
+        messages=[
+            {"role": "system", "content": "You are a concise assistant."},
+            {"role": "user", "content": "Explain RAG in one sentence."},
+        ],
+        max_tokens=500,
+    )
+    print(r.choices[0].message.content)
+    print(r.usage)          # includes usage.cost in USD
+    ```
+  </Tab>
+  <Tab title="Node.js / TypeScript">
+    ```typescript
+    import OpenAI from "openai";
+
+    const client = new OpenAI({ apiKey: "sk-dp-1234-AbCdEf...", baseURL: "https://oai.deapi.ai/v1" });
+
+    const r = await client.chat.completions.create({
+      model: "qwen3.8-flash",
+      messages: [
+        { role: "system", content: "You are a concise assistant." },
+        { role: "user", content: "Explain RAG in one sentence." },
+      ],
+      max_tokens: 500,
+    });
+    console.log(r.choices[0].message.content);
+    ```
+  </Tab>
+  <Tab title="cURL">
+    ```bash
+    curl -s https://oai.deapi.ai/v1/chat/completions \
+      -H "Authorization: Bearer sk-dp-1234-AbCdEf..." \
+      -H "Content-Type: application/json" \
+      -d '{
+        "model": "qwen3.8-flash",
+        "messages": [
+          {"role": "system", "content": "You are a concise assistant."},
+          {"role": "user", "content": "Explain RAG in one sentence."}
+        ],
+        "max_tokens": 500
+      }'
+    ```
+  </Tab>
+</Tabs>
+
+```json 200
+{
+  "id": "chatcmpl-01a1f85a-8717-7612-bd31-aa5ef2136345",
+  "object": "chat.completion",
+  "created": 1795168045,
+  "model": "qwen3.8-flash",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "RAG (Retrieval-Augmented Generation) improves a language model by retrieving relevant external information and using it as context to generate more accurate, up-to-date answers.",
+        "reasoning_content": "We need to respond to user: \"Explain RAG in one sentence.\" … RAG = Retrieval-Augmented Generation. concise. Ensure one sentence. …"
+      },
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 67,
+    "completion_tokens": 121,
+    "total_tokens": 188,
+    "prompt_tokens_details": {"cached_tokens": 0},
+    "completion_tokens_details": {"reasoning_tokens": 84},
+    "cost": 0.00007027
+  }
+}
+```
+
+### Available LLMs
+
+Prices are in USD per **1M tokens**, read from `pricing` in `GET /v1/models` on 20 November 2026. The catalog is the source of truth, so read prices from there in code and don't copy them from this table.
+
+| Model | Context (tokens) | Max output (tokens) | Input | Input price | Output price | Cached input | `json_schema` | `stop` |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| `deepseek-v4.1-flash` | 1,000,000 | 393,216 | text + image | $0.315 | $1.26 | $0.0063 | ✓ | ✓ |
+| `deepseek-v4.1-flash:economy` | 1,048,576 | 393,216 | text + image | $0.252 | $1.008 | $0.00525 | ✓ | ✓ |
+| `glm-5.3` | 1,000,000 | 131,072 | text | $1.47 | $4.62 | $0.294 | — | — |
+| `glm-5.3-flash` | 1,048,576 | 131,072 | text + image | $0.1575 | $0.525 | $0.0315 | ✓ | ✓ |
+| `gpt-6-luna` | 1,050,000 | 128,000 | text + image | $0.105 | $0.525 | $0.0105 | ✓ | — |
+| `hy3` | 262,144 | 131,072 | text | $0.1386 | $0.5544 | $0.03465 | ✓ | ✓ |
+| `kimi-k3` | 1,000,000 | 131,072 | text + image | $3.15 | $15.75 | $0.315 | ✓ | ✓ |
+| `qwen3.8-flash` | 1,000,000 | 131,072 | text + image | $0.1575 | $0.4935 | $0.0168 | ✓ | ✓ |
+| `qwen3.8-max` | 1,000,000 | 131,072 | text + image | $2.1 | $6.3 | $0.2625 | ✓ | ✓ |
+| `seed-2.0-lite` | 262,144 | 131,072 | text + image | $0.2625 | $2.1 | $0.0525 | ✓ | ✓ |
+| `seed-2.0-mini` | 262,144 | 131,072 | text + image | $0.105 | $0.42 | $0.021 | ✓ | ✓ |
+| `seed-2.0-pro` | 262,144 | 131,072 | text + image | $0.525 | $3.15 | $0.105 | ✓ | ✓ |
+| `seed-2.1-turbo` | 262,144 | 262,144 | text + image | $0.525 | $2.625 | $0.105 | ✓ | ✓ |
+
+- `gpt-6-luna` also bills cache writes, at $0.13125 per 1M tokens (`pricing.input_cache_write`).
+- `deepseek-v4.1-flash:economy` is the same model as `deepseek-v4.1-flash` at a 20% lower price. It is a separate model ID, so pass the whole string, `:economy` included.
+- `json_schema` means the model lists `structured_outputs`, and `stop` means it lists `stop`, in `supported_parameters`. `glm-5.3` takes neither: it accepts `response_format: {"type": "json_object"}` but answers `400` to `json_schema` and to `stop`. `gpt-6-luna` answers `400` to `stop`.
+- LLMs are served only through this gateway. They are not in the native catalog at `GET /api/v2/models`, and the native API has no chat endpoint.
+
+### Request fields
+
+| Field | Behaviour |
+| --- | --- |
+| `model`, `messages` | Required. A missing one answers `400 missing_required_parameter` |
+| `messages[].role` | `system`, `developer`, `user`, `assistant`, `tool` |
+| `max_tokens`, `max_completion_tokens` | Cap on generated tokens, **reasoning tokens included** (see [Reasoning](#reasoning)). Up to the model's `top_provider.max_completion_tokens` |
+| `temperature` | 0–2. Outside that range → `400 invalid_value` |
+| `top_p`, `presence_penalty`, `frequency_penalty` | Standard |
+| `stop` | Only on models that list it, see the table above |
+| `tools`, `tool_choice`, `parallel_tool_calls` | Function calling, see [Tool calling](#tool-calling) |
+| `response_format` | `json_object` on every model. `json_schema` on models that list `structured_outputs` |
+| `reasoning_effort` | `none`, `minimal`, `low`, `medium`, `high`, `xhigh`. Any other value → `400 invalid_value` |
+| `stream`, `stream_options.include_usage` | Server-sent events, see [Streaming](#streaming) |
+| `n` | Only `1`. Anything else → `400 unsupported_parameter` (`Only n=1 is supported.`) |
+| `logprobs`, `top_logprobs` | Rejected with `400 unsupported_parameter` (`'logprobs' is not supported.`) |
+| `seed`, `user`, `metadata`, `store`, `service_tier` | Accepted without an error. Nothing in the response confirms they have any effect, so don't rely on them |
+
+A field from this table that the model does not list in `supported_parameters` is rejected, not dropped. For example, `stop` on `gpt-6-luna` answers `400` `unsupported_parameter` with `'stop' is not supported with this model.`
+
+### Streaming
+
+Set `stream: true` to get the answer as server-sent events (`Content-Type: text/event-stream`). Each event is a `chat.completion.chunk`, and the stream ends with `data: [DONE]`. Add `stream_options: {"include_usage": true}` to get a final chunk with empty `choices` and the full `usage` object, `cost` included.
+
+```python
+stream = client.chat.completions.create(
+    model="qwen3.8-flash",
+    messages=[{"role": "user", "content": "Write a haiku about GPUs."}],
+    stream=True,
+    stream_options={"include_usage": True},
+)
+for chunk in stream:
+    if chunk.choices and chunk.choices[0].delta.content:
+        print(chunk.choices[0].delta.content, end="")
+    if chunk.usage:
+        print("\n", chunk.usage)
+```
+
+On reasoning models the first chunks carry `delta.reasoning_content` and no `delta.content`. Print only `content` if you don't want to show the model's thinking.
+
+```text
+data: {"id":"chatcmpl-01a1f85a-92b2-…","object":"chat.completion.chunk","created":1795168048,"model":"qwen3.8-flash","choices":[{"index":0,"delta":{"role":"assistant","reasoning_content":"We"},"finish_reason":null}]}
+
+…
+
+data: {"id":"chatcmpl-01a1f85a-92b2-…","object":"chat.completion.chunk","created":1795168048,"model":"qwen3.8-flash","choices":[{"index":0,"delta":{"content":"Silent fans"},"finish_reason":null}]}
+
+…
+
+data: {"id":"chatcmpl-01a1f85a-92b2-…","object":"chat.completion.chunk","created":1795168048,"model":"qwen3.8-flash","choices":[],"usage":{"prompt_tokens":68,"completion_tokens":224,"total_tokens":292,"prompt_tokens_details":{"cached_tokens":0},"completion_tokens_details":{"reasoning_tokens":203},"cost":0.00012125}}
+
+data: [DONE]
+```
+
+### Tool calling
+
+`tools` takes OpenAI function definitions. When the model decides to call one, `finish_reason` is `tool_calls` and `message.tool_calls` holds the call. Run the function yourself, append the assistant message and a `tool` message with the result, and call the endpoint again.
+
+```python
+tools = [{
+    "type": "function",
+    "function": {
+        "name": "get_weather",
+        "description": "Current weather for a city",
+        "parameters": {
+            "type": "object",
+            "properties": {"city": {"type": "string"}},
+            "required": ["city"],
+        },
+    },
+}]
+
+messages = [{"role": "user", "content": "What is the weather in Warsaw?"}]
+r = client.chat.completions.create(model="qwen3.8-flash", messages=messages, tools=tools)
+call = r.choices[0].message.tool_calls[0]       # get_weather({"city": "Warsaw"})
+
+messages.append(r.choices[0].message)
+messages.append({"role": "tool", "tool_call_id": call.id, "content": '{"temp_c": 4, "sky": "cloudy"}'})
+r = client.chat.completions.create(model="qwen3.8-flash", messages=messages, tools=tools)
+print(r.choices[0].message.content)              # "The weather in Warsaw is currently cloudy with a temperature of 4°C."
+```
+
+### Structured outputs
+
+`response_format: {"type": "json_object"}` works on every model. To make the model follow a JSON Schema, use `json_schema` on a model with ✓ in the `json_schema` column above:
+
+```python
+r = client.chat.completions.create(
+    model="deepseek-v4.1-flash",
+    messages=[{"role": "user", "content": "Give the capital of France."}],
+    response_format={
+        "type": "json_schema",
+        "json_schema": {
+            "name": "capital",
+            "strict": True,
+            "schema": {
+                "type": "object",
+                "properties": {"country": {"type": "string"}, "capital": {"type": "string"}},
+                "required": ["country", "capital"],
+                "additionalProperties": False,
+            },
+        },
+    },
+)
+print(r.choices[0].message.content)   # {"country":"France","capital":"Paris"}
+```
+
+`json_schema` on `glm-5.3` answers `400 unsupported_parameter`: `The model does not support 'response_format' as requested.`
+
+### Image input
+
+Models with `image` in `architecture.input_modalities` accept `image_url` content parts, the same as OpenAI vision.
+
+```python
+r = client.chat.completions.create(
+    model="seed-2.0-mini",
+    messages=[{
+        "role": "user",
+        "content": [
+            {"type": "text", "text": "What is in this image?"},
+            {"type": "image_url", "image_url": {"url": "data:image/png;base64,iVBORw0KGgo..."}},
+        ],
+    }],
+)
+```
+
+- **Base64 data URLs are the reliable option.** A public URL works only if the model provider can download it. Hosts that block automated downloads fail with `400 invalid_image_url` (`An image in 'image_url' could not be downloaded by the model provider.`).
+- An image sent to a text-only model (`glm-5.3`, `hy3`) answers `400 unsupported_content`: `The model 'hy3' does not accept image input.`
+- Images count as input tokens. In our tests, one 32×32 PNG added about 1,300 prompt tokens on `seed-2.0-mini`.
+
+### Reasoning
+
+Most of these models think before they answer. The thinking comes back in `message.reasoning_content`, or in `delta.reasoning_content` when streaming, and is counted in `usage.completion_tokens_details.reasoning_tokens`.
+
+<Warning>
+  **`max_tokens` covers reasoning and answer together.** With a small cap, the model can spend all of it on thinking and return `content: ""` with `finish_reason: "length"`, and you are still billed for those tokens. In our tests, `glm-5.3-flash` with `max_tokens: 16` returned an empty answer this way. Leave room for the reasoning, or lower `reasoning_effort`.
+</Warning>
+
+`reasoning_effort` controls how much the model thinks. `none` turns thinking off on models that support that, and `low` is a good default for short, simple tasks. On `qwen3.8-flash`, the same question used 0 reasoning tokens at `none` and 80 at `high`.
+
+### Usage and cost
+
+Every response reports what it cost, so you don't have to work it out from token counts:
+
+- `usage.cost`: the charge for this request in USD. When streaming, it is in the final usage chunk (`stream_options.include_usage`).
+- The `X-DeAPI-Cost` response header has the same value on non-streamed responses.
+- `usage.prompt_tokens_details.cached_tokens`: the part of the prompt billed at the cached-input price.
+
+### Errors on chat completions
+
+| Code | HTTP | When |
+| --- | --- | --- |
+| `missing_required_parameter` | 400 | `model` or `messages` missing |
+| `unsupported_parameter` | 400 | A field the model does not list in `supported_parameters`, `n` other than 1, `logprobs`, or `json_schema` on a model without structured outputs |
+| `invalid_value` | 400 | A value out of range, e.g. `temperature: 5` or `reasoning_effort: "bogus"` |
+| `unsupported_content` | 400 | `image_url` sent to a text-only model |
+| `invalid_image_url` | 400 | The model provider could not download the image |
+| `model_not_found` | 404 | Unknown model, an OpenAI ID such as `gpt-4o`, or a non-chat model such as `Flux1schnell` |
+
+<Note>
+  **No idempotency on chat completions.** `Idempotency-Key` is ignored on this endpoint. Two requests with the same key both run and are both billed. Retry chat requests only when you are willing to pay for the second answer.
+</Note>
 
 ---
 
@@ -923,7 +1228,10 @@ Build your handling on `code`, not on `message`. `param` and `code` are omitted 
 | `endpoint_not_found` | 404 | Extra segments below a route we do own, e.g. `/v1/videos/foo/bar` |
 | `insufficient_quota` | 429 | The account is out of credit — not a rate limit, and waiting will not help. Used to be reported as `400`, which wrongly blamed your payload |
 | `timestamp_level_not_supported` | 400 | Word-level timestamps asked of a segment-only model; the message names one that can |
-| `stream_not_supported` | 400 | Streaming was requested; we do not open streams |
+| `stream_not_supported` | 400 | Streaming was requested on an endpoint other than `/v1/chat/completions` |
+| `unsupported_parameter` | 400 | Chat completions: a field the model does not list in `supported_parameters`, `n` other than 1, or `logprobs` |
+| `unsupported_content` | 400 | Chat completions: `image_url` sent to a text-only model |
+| `invalid_image_url` | 400 | Chat completions: the model provider could not download the image |
 | `idempotency_key_reuse` | 422 | Same `Idempotency-Key`, different request body |
 | `invalid_value` | 400 / 401 / 403 / 404 / 409 | The backend rejected the request; `message` explains. `param` names the field **as you sent it** — the backend's internal field names are translated back into the OpenAI ones. Was `upstream_validation_error` |
 | `upstream_unavailable` | 503 | A retryable failure — capacity, not your request |
@@ -970,6 +1278,8 @@ Every response, including errors, carries an `X-Request-Id` header. Quote it in 
 
 Endpoints that enqueue work also return `X-DeAPI-Request-Id` with the backend job identifier — one value for single-job endpoints (`audio/speech`, `audio/transcriptions`, `videos`), or a comma-separated list where the request fans out (`embeddings`, `images/generations`, `images/edits`). It is set before the status code, so it is present on error responses too.
 
+Responses from `/v1/chat/completions` (non-streamed) and `/v1/embeddings` also carry `X-DeAPI-Cost`: the charge for the request in USD. On chat it equals `usage.cost`.
+
 ---
 
 ## Rate limits
@@ -1008,9 +1318,20 @@ A **per-minute** limit is deliberately left retryable: waiting is the right resp
 
 The header is withheld when the delay is something your client can sensibly wait out, including a daily limit hit just before the window rolls over. The real `Retry-After` is always sent, so you can schedule your own retry either way.
 
-<Warning>
-  **You cannot track headroom from a successful response here.** The native API returns `X-RateLimit-Limit` and `X-RateLimit-Remaining` on `200`s, so you can throttle before you are throttled. This gateway does not: a successful `/v1/*` response carries `X-Request-Id` and nothing else about limits (measured over 351 consecutive calls — no `X-RateLimit-*` header on any of them). If you need to watch the counter, read it from the [native API](/api/v2/overview); here, handle the `429` when it arrives.
-</Warning>
+**Successful responses carry the counters too**, so you can slow down before you hit the limit. A `200` from `/v1/embeddings` returns the full set:
+
+```http
+X-RateLimit-Limit: 190
+X-RateLimit-Remaining: 189
+X-RateLimit-Reset: 1795167858
+X-RateLimit-Daily-Limit: 55000
+X-RateLimit-Daily-Remaining: 54992
+X-RateLimit-Daily-Reset: 1795179249
+X-RateLimit-Policy: 190;w=60, 55000;w=86400
+X-RateLimit-Source: model
+```
+
+`/v1/chat/completions` has its own per-minute limit and returns only `X-RateLimit-Limit` and `X-RateLimit-Remaining` (`300` per minute on the account we tested with). The limits depend on your plan and the model, so read the headers instead of hard-coding the numbers.
 
 ---
 
@@ -1042,6 +1363,7 @@ What you should know about the mechanics:
 - **Bodies over 1 MiB bypass the mechanism entirely** — in practice, multipart uploads (`images/edits`, `audio/transcriptions`). Responses over 1 MiB are not stored either: the request runs normally, it simply cannot be replayed.
 - **Two concurrent requests with the same key both execute.** There is no in-flight lock; the last one to finish wins. Sequential SDK retries — the common case — are protected.
 - **A replayed response carries a fresh `X-Request-Id`**, not the original one.
+- **`POST /v1/chat/completions` is not covered.** The header is ignored there, and a repeated request runs and is billed again.
 - **`POST /v1/videos` is covered too.** A retried create would otherwise produce a second job whose `id` you never learn, orphaned and billed. With a key, the same `id` comes back.
 
 Entries live for one hour.
@@ -1055,7 +1377,13 @@ Because deAPI uses the OpenAI API format, it works with any framework that accep
 <Tabs>
   <Tab title="LangChain">
     ```python
-    from langchain_openai import OpenAIEmbeddings
+    from langchain_openai import ChatOpenAI, OpenAIEmbeddings
+
+    llm = ChatOpenAI(
+        api_key="sk-dp-1234-AbCdEf...",
+        base_url="https://oai.deapi.ai/v1",
+        model="qwen3.8-flash",
+    )
 
     embeddings = OpenAIEmbeddings(
         openai_api_key="sk-dp-1234-AbCdEf...",
@@ -1083,11 +1411,14 @@ Because deAPI uses the OpenAI API format, it works with any framework that accep
       apiKey: "sk-dp-1234-AbCdEf...",
       baseURL: "https://oai.deapi.ai/v1",
     });
+
+    // Chat Completions API, not the Responses API (deAPI has no /v1/responses)
+    const model = deapi.chat("qwen3.8-flash");
     ```
   </Tab>
 </Tabs>
 
-Using Open WebUI? The [Open WebUI guide](/execution-modes-and-integrations/open-webui) walks through its image, voice and document settings.
+Using Open WebUI? The [Open WebUI guide](/execution-modes-and-integrations/open-webui) walks through its chat, image, voice and document settings.
 
 If your codebase already uses the standard OpenAI environment variables, override them at the process level — zero code changes required:
 
@@ -1096,7 +1427,7 @@ export OPENAI_API_KEY="sk-dp-1234-AbCdEf..."
 export OPENAI_BASE_URL="https://oai.deapi.ai/v1"
 ```
 
-For multi-provider setups (e.g. OpenAI for chat, deAPI for images and audio), instantiate separate clients:
+For multi-provider setups (e.g. OpenAI for some chat models, deAPI for everything else), instantiate separate clients:
 
 ```python
 import os
@@ -1109,8 +1440,8 @@ deapi_client = OpenAI(
     base_url="https://oai.deapi.ai/v1",
 )
 
-# openai_client → GPT models
-# deapi_client  → images, audio, video, embeddings
+# openai_client → OpenAI's own models
+# deapi_client  → deAPI LLMs (qwen3.8-flash, kimi-k3, …), images, audio, video, embeddings
 ```
 
 ---
@@ -1121,9 +1452,10 @@ A single list of everything that will not behave the way the OpenAI docs describ
 
 | Area | Difference |
 | --- | --- |
-| Model IDs | Native only. No `dall-e-3`, `tts-1`, `whisper-1` aliases |
+| Model IDs | deAPI IDs only. No `gpt-4o`, `dall-e-3`, `tts-1`, `whisper-1` aliases |
 | Model catalog | Plan-dependent — two accounts can see different lists |
-| Streaming | Not supported anywhere: `stream=true`, `partial_images`, `stream_format=sse` are rejected |
+| Streaming | Chat completions only. Everywhere else `stream=true`, `partial_images` and `stream_format=sse` are rejected |
+| Chat completions | `n` must be `1`; `logprobs` rejected; fields outside the model's `supported_parameters` rejected; no `Idempotency-Key`; extra `reasoning_content` field on reasoning models |
 | Image output | Always PNG without alpha; `output_format`, `output_compression`, `background=transparent` rejected |
 | Image edits | `mask` rejected — no inpainting model. `quality=hd` accepted although the spec restricts it to generations |
 | `n` (images) | 4 on generations, 2 on edits — OpenAI allows 10 |
@@ -1147,7 +1479,7 @@ A single list of everything that will not behave the way the OpenAI docs describ
 
 | Surface | Status |
 | --- | --- |
-| `POST /v1/chat/completions`, `/v1/responses` | Planned. Not an LLM endpoint here — it will dispatch to image / TTS / STT / vision models |
+| `POST /v1/responses` | Not implemented (`404 endpoint_not_implemented`). Use [`/v1/chat/completions`](#chat-completions-llms) |
 | `/v1/files`, `/v1/uploads` | Planned. Until then, `file_id` is rejected and you send bytes or URLs |
 | `POST /v1/audio/voices`, `/v1/audio/voice_consents` | Voice cloning — planned |
 | `POST /v1/audio/translations` | No translate mode on the backend |
@@ -1161,6 +1493,12 @@ deAPI also runs models with no OpenAI counterpart at all — image and video ups
 ---
 
 ## Recent changes
+
+### Added — chat completions with LLMs (November 2026)
+
+- **`POST /v1/chat/completions` is live**, with 13 LLMs: `deepseek-v4.1-flash`, `deepseek-v4.1-flash:economy`, `glm-5.3`, `glm-5.3-flash`, `gpt-6-luna`, `hy3`, `kimi-k3`, `qwen3.8-flash`, `qwen3.8-max`, `seed-2.0-lite`, `seed-2.0-mini`, `seed-2.0-pro` and `seed-2.1-turbo`. Streaming, tool calling, structured outputs, image input and `reasoning_effort` are supported. See [Chat completions](#chat-completions-llms).
+- **LLM entries in `GET /v1/models`** carry `context_length`, `architecture`, `top_provider`, `supported_parameters` and per-token `pricing`.
+- **Successful responses carry `X-RateLimit-*` headers**, and chat and embeddings responses carry `X-DeAPI-Cost`.
 
 ### Added — November 2026
 

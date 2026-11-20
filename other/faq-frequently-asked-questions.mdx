@@ -116,6 +116,10 @@ deAPI provides the following AI-powered services (v2 REST API):
 - **Transcription** (unified audio/video) — `/api/v2/audio/transcriptions`
 - **Text-to-Embedding** — `/api/v2/embeddings`
 - **Prompt Enhancement** — `/api/v2/prompts/enhancements`
+- **Video Description** — `/api/v2/videos/descriptions`
+- **Web Search & Web Contents** — `/api/v2/web/search`, `/api/v2/web/contents`
+
+Chat with large language models (13 LLMs, including Qwen, DeepSeek, GLM, Kimi and Seed) runs on the OpenAI-compatible API: `POST https://oai.deapi.ai/v1/chat/completions`. See [Chat completions](/openai-compatibility#chat-completions-llms).
 
 ---
 
@@ -133,7 +137,7 @@ Yes! deAPI works seamlessly with **n8n** and other workflow automation platforms
 
 #### 14. **Can I use deAPI with the OpenAI SDK?**
 
-Yes. deAPI exposes an **OpenAI-compatible** endpoint at `https://oai.deapi.ai/v1`. Set `base_url` (and your `api_key`) on the official OpenAI SDK and your existing code keeps working — only `model` needs to be a deAPI slug (e.g. `Flux1schnell`, `Kokoro`, `WhisperLargeV3Ct2`, `Bge_M3_FP16`). Supported endpoints: image generation, image edits, text-to-speech, transcription, embeddings, and video generation. Chat completions and inpainting are not in scope. See [OpenAI Compatibility](/openai-compatibility) for the full guide.
+Yes. deAPI exposes an **OpenAI-compatible** endpoint at `https://oai.deapi.ai/v1`. Set `base_url` (and your `api_key`) on the official OpenAI SDK and your existing code keeps working — only `model` needs to be a deAPI slug (e.g. `qwen3.8-flash`, `Flux1schnell`, `Kokoro`, `WhisperLargeV3Ct2`, `Bge_M3_FP16`). Supported endpoints: chat completions with 13 LLMs, image generation, image edits, text-to-speech, transcription, embeddings, and video generation. Inpainting and the Responses API are not in scope. See [OpenAI Compatibility](/openai-compatibility) for the full guide.
 
 ---
 
