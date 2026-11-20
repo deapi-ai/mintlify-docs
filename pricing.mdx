@@ -1,6 +1,6 @@
 ---
 title: "Pricing"
-description: "deAPI pay-as-you-go pricing: example rates for image, video, audio, transcription and embedding models, and how to get exact prices from the API."
+description: "deAPI pay-as-you-go pricing: example rates for LLMs, image, video, audio, transcription and embedding models, and how to get exact prices from the API."
 ---
 
 Example pricing is shown below for reference; exact, up-to-date rates are always available from the API.
@@ -34,6 +34,11 @@ Example pricing is shown below for reference; exact, up-to-date rates are always
 | Video Upscale | resolution × duration × scale | Use `/price` endpoint | `POST /api/v2/videos/upscales` |
 | Web Search | mode \+ number of results | 0.0048 USD (`quick`) / 0.0084 USD (`balanced`) per search, up to 10 results | `POST /api/v2/web/search` |
 | Web Contents | pages read × content types | 0.0012 USD per page per content type | `POST /api/v2/web/contents` |
+| Chat completions (LLMs) | input \+ output tokens | from 0.105 USD per 1M input and 0.42 USD per 1M output tokens (`seed-2.0-mini`) | `POST https://oai.deapi.ai/v1/chat/completions` |
+
+<Note>
+  **LLMs have no `/price` endpoint.** Their per-token prices are in `pricing` on each LLM entry of `GET https://oai.deapi.ai/v1/models` (USD per token, so multiply by 1,000,000 for the price per 1M tokens), and every chat response reports what it cost in `usage.cost` and the `X-DeAPI-Cost` header. Reasoning tokens are billed as output tokens. All 13 models and their prices: [Chat completions](/openai-compatibility#chat-completions-llms).
+</Note>
 
 ---
 

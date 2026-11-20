@@ -249,7 +249,7 @@ Sent whenever a job's status changes or progress is updated.
 | `progress` | string \| number | Percentage as a decimal string, e.g. `"45.50"`; may be `0` (number) before the job is picked up. Parse it as a float. |
 | `preview` | string \| null | Intermediate preview, when the model produces one (a base64-encoded PNG without a `data:` prefix). May be `null`. |
 | `result_url` | string \| null | Download URL, set only when `status` is `done`. |
-| `results_alt_formats` | object \| null | Alternative-format URLs for image results, set only when `status` is `done`. |
+| `results_alt_formats` | object \| null | JPG and WebP copies of an image result, set only when `status` is `done` and the request was sent with `alt_formats: true`. Otherwise `null`. |
 
 <Warning>
 The `result_url` is a signed URL that expires. Download promptly or use the job status endpoint to get a fresh URL.

@@ -6947,6 +6947,12 @@
                         "example": false,
                         "default": false
                     },
+                    "alt_formats": {
+                        "description": "When true, the result is also stored as JPG and WebP, returned in `results_alt_formats`. Off by default: the copies add about 3 s to every image. When false or omitted, only the original is stored and `results_alt_formats` is null.",
+                        "type": "boolean",
+                        "example": false,
+                        "default": false
+                    },
                     "webhook_url": {
                         "description": "Optional HTTPS URL to receive webhook notifications for job status changes (processing, completed, failed). Must be HTTPS. Max 2048 characters. A per-request URL is self-contained: it is delivered even when the account has no webhook configuration, or the account webhook is disabled. See the `webhooks` block at the top level of this document for the event payloads and the headers each delivery carries.",
                         "type": [
@@ -7302,6 +7308,12 @@
                         "type": "string",
                         "example": "Ben2"
                     },
+                    "alt_formats": {
+                        "description": "When true, the result is also stored as JPG and WebP, returned in `results_alt_formats`. Off by default: the copies add about 3 s to every image. When false or omitted, only the original is stored and `results_alt_formats` is null.",
+                        "type": "boolean",
+                        "example": false,
+                        "default": false
+                    },
                     "webhook_url": {
                         "description": "Optional HTTPS URL to receive webhook notifications for job status changes (processing, completed, failed). Must be HTTPS. Max 2048 characters. A per-request URL is self-contained: it is delivered even when the account has no webhook configuration, or the account webhook is disabled. See the `webhooks` block at the top level of this document for the event payloads and the headers each delivery carries.",
                         "type": [
@@ -7340,6 +7352,12 @@
                         "description": "The upscaling model to use",
                         "type": "string",
                         "example": "RealESRGAN_x4"
+                    },
+                    "alt_formats": {
+                        "description": "When true, the result is also stored as JPG and WebP, returned in `results_alt_formats`. Off by default: the copies add about 3 s to every image. When false or omitted, only the original is stored and `results_alt_formats` is null.",
+                        "type": "boolean",
+                        "example": false,
+                        "default": false
                     },
                     "webhook_url": {
                         "description": "Optional HTTPS URL to receive webhook notifications for job status changes (processing, completed, failed). Must be HTTPS. Max 2048 characters. A per-request URL is self-contained: it is delivered even when the account has no webhook configuration, or the account webhook is disabled. See the `webhooks` block at the top level of this document for the event payloads and the headers each delivery carries.",
@@ -7623,6 +7641,12 @@
                     },
                     "enhance_prompt": {
                         "description": "When true, the prompt is boosted by the inline prompt booster before generation (async pre-step). Requires a prompt-booster guide configured for the model; the boost fee is billed on the job. Rejected with 422 if no guide exists for the model or the account balance cannot cover the boost fee.",
+                        "type": "boolean",
+                        "example": false,
+                        "default": false
+                    },
+                    "alt_formats": {
+                        "description": "When true, the result is also stored as JPG and WebP, returned in `results_alt_formats`. Off by default: the copies add about 3 s to every image. When false or omitted, only the original is stored and `results_alt_formats` is null.",
                         "type": "boolean",
                         "example": false,
                         "default": false
@@ -9190,7 +9214,7 @@
                                 "example": "https://example.com/results/image.jpg"
                             },
                             "results_alt_formats": {
-                                "description": "Alternative format URLs for the result (jpg, webp). Only available for image-producing job types when status is done",
+                                "description": "JPG and WebP copies of the result. Only for image-producing job types, when status is done and the request was sent with `alt_formats: true`; null otherwise.",
                                 "properties": {
                                     "jpg": {
                                         "type": [

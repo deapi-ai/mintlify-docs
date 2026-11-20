@@ -132,7 +132,7 @@ All webhook requests include these headers:
     | `data.price.is_estimated` | boolean | `true` for models served by an external provider whose charge has not settled yet. The amount is then the estimate quoted at submission, and the settled charge can differ. Don't use estimated values for reconciliation. |
 
     <Note>
-      The webhook payload carries only `result_url`. Alternative renditions (`results_alt_formats`, e.g. `jpg` / `webp` for images) and inline results are available from `GET /api/v2/jobs/{request_id}`.
+      The webhook payload carries only `result_url`. Alternative renditions (`results_alt_formats`: `jpg` / `webp` copies of images, created only when the request sets `alt_formats: true`) and inline results are available from `GET /api/v2/jobs/{request_id}`.
     </Note>
   </Tab>
   <Tab title="job.failed">
