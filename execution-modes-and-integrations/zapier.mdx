@@ -20,7 +20,7 @@ Every action below was run against the live deAPI API with the same code the Zap
 | **Generate Speech** | Action | Turns text into an MP3 | Kokoro |
 | **Remove Background** | Action | Returns the image as a transparent PNG | Ben2 |
 | **Upscale Image** | Action | Returns the image at four times the width and height | RealESRGAN x4 |
-| **Extract Text From Image** | Action | Reads the text in an image (OCR) | Nanonets Ocr S F16 |
+| **Extract Text From Image** | Action | Reads the text in an image (OCR) | LightOnOCR-3-4B |
 | **Find Job** | Search | Gets the status and result of a deAPI job by its Request ID, and can wait for it to finish | n/a |
 
 The **Model** dropdown in each action lists the models your API key can use for that task. Options that depend on the model, such as size limits, steps, voices and timestamp levels, load after you pick one.
@@ -210,7 +210,7 @@ Prices from test runs, to give a sense of scale:
 | Transcribe Audio or Video | Whisper Large V3 CT2 | 19-second YouTube video | \$0.0052 |
 | Remove Background | Ben2 | 768 × 768 | \$0.0003 |
 | Upscale Image | RealESRGAN x4 | 768 × 768 | \$0.0010 |
-| Extract Text From Image | Nanonets Ocr S F16 | 900 × 400 | \$0.0035 |
+| Extract Text From Image | LightOnOCR-3-4B | 900 × 400 | \$0.0035 |
 
 deAPI bills these to your deAPI balance. The task limits of your Zapier plan apply separately. Current rates are on the [Pricing](/pricing) page.
 
