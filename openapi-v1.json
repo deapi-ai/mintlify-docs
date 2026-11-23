@@ -1223,7 +1223,7 @@
                                     "model": {
                                         "description": "The OCR model to use for text extraction",
                                         "type": "string",
-                                        "example": "Nanonets_Ocr_S_F16"
+                                        "example": "LightOnOcr_3_4B_Q8"
                                     },
                                     "language": {
                                         "description": "Language code for OCR processing (optional)",
@@ -1340,7 +1340,7 @@
                                             "model": {
                                                 "description": "The OCR model to use for text extraction. Available models can be retrieved via the GET /api/v1/client/models endpoint.",
                                                 "type": "string",
-                                                "example": "Nanonets_Ocr_S_F16"
+                                                "example": "LightOnOcr_3_4B_Q8"
                                             },
                                             "language": {
                                                 "description": "Language code for OCR processing (optional)",
@@ -1381,7 +1381,7 @@
                                             "model": {
                                                 "description": "The OCR model to use for text extraction. Available models can be retrieved via the GET /api/v1/client/models endpoint.",
                                                 "type": "string",
-                                                "example": "Nanonets_Ocr_S_F16"
+                                                "example": "LightOnOcr_3_4B_Q8"
                                             },
                                             "language": {
                                                 "description": "Language code for OCR processing (optional)",
@@ -3785,7 +3785,7 @@
                                     "model": {
                                         "description": "The model to use for music generation. Available models can be retrieved via the GET /api/v1/client/models endpoint.",
                                         "type": "string",
-                                        "example": "AceStep_1_5_Turbo"
+                                        "example": "AceStep_1_5_XL_Turbo_INT8"
                                     },
                                     "lyrics": {
                                         "description": "Required, and must not be empty. Lyrics for the music. Use \"[Instrumental]\" for instrumental tracks without vocals — omitting the field or sending an empty string returns 422 \"The lyrics field is required.\"",
@@ -3794,7 +3794,7 @@
                                         "example": "[Instrumental]"
                                     },
                                     "duration": {
-                                        "description": "Duration in seconds. The accepted range is **model-specific** - read `info.limits.min_duration` / `info.limits.max_duration` for your `model` from the [Model Selection](/api/v1/utilities/model-selection) endpoint; a value outside that range is rejected with `422`. The turbo models accept **10-300**, `AceStep_1_5_Base` **30-300**.",
+                                        "description": "Duration in seconds. The accepted range is **model-specific** - read `info.limits.min_duration` / `info.limits.max_duration` for your `model` from the [Model Selection](/api/v1/utilities/model-selection) endpoint; a value outside that range is rejected with `422`. `AceStep_1_5_XL_Turbo_INT8` accepts **10-300**, `AceStep_1_5_XL_Base_INT8` **30-300**.",
                                         "type": "number",
                                         "example": 30
                                     },
@@ -3829,12 +3829,12 @@
                                         "nullable": true
                                     },
                                     "inference_steps": {
-                                        "description": "Number of diffusion inference steps. The accepted range is **model-specific** - read `info.limits.min_steps` / `info.limits.max_steps` for your `model` from the [Model Selection](/api/v1/utilities/model-selection) endpoint; a value outside that range is rejected with `422`. The turbo models only accept **8**; `AceStep_1_5_Base` accepts **5-100**.",
+                                        "description": "Number of diffusion inference steps. The accepted range is **model-specific** - read `info.limits.min_steps` / `info.limits.max_steps` for your `model` from the [Model Selection](/api/v1/utilities/model-selection) endpoint; a value outside that range is rejected with `422`. `AceStep_1_5_XL_Turbo_INT8` only accepts **8**; `AceStep_1_5_XL_Base_INT8` accepts **5-100**.",
                                         "type": "integer",
                                         "example": 8
                                     },
                                     "guidance_scale": {
-                                        "description": "Classifier-free guidance scale. The accepted range is **model-specific** - read `info.limits.min_guidance` / `info.limits.max_guidance` for your `model` from the [Model Selection](/api/v1/utilities/model-selection) endpoint; a value outside that range is rejected with `422`. The turbo models (`AceStep_1_5_Turbo`, `AceStep_1_5_XL_Turbo_INT8`) only accept **1**; `AceStep_1_5_Base` accepts **3-20**.",
+                                        "description": "Classifier-free guidance scale. The accepted range is **model-specific** - read `info.limits.min_guidance` / `info.limits.max_guidance` for your `model` from the [Model Selection](/api/v1/utilities/model-selection) endpoint; a value outside that range is rejected with `422`. `AceStep_1_5_XL_Turbo_INT8` only accepts **1**; `AceStep_1_5_XL_Base_INT8` accepts **3-20**.",
                                         "type": "number",
                                         "example": 1
                                     },
@@ -3945,15 +3945,15 @@
                                     "model": {
                                         "description": "The model to use for music generation. Available models can be retrieved via the GET /api/v1/client/models endpoint.",
                                         "type": "string",
-                                        "example": "AceStep_1_5_Turbo"
+                                        "example": "AceStep_1_5_XL_Turbo_INT8"
                                     },
                                     "duration": {
-                                        "description": "Duration in seconds. The accepted range is **model-specific** - read `info.limits.min_duration` / `info.limits.max_duration` for your `model` from the [Model Selection](/api/v1/utilities/model-selection) endpoint; a value outside that range is rejected with `422`. The turbo models accept **10-300**, `AceStep_1_5_Base` **30-300**.",
+                                        "description": "Duration in seconds. The accepted range is **model-specific** - read `info.limits.min_duration` / `info.limits.max_duration` for your `model` from the [Model Selection](/api/v1/utilities/model-selection) endpoint; a value outside that range is rejected with `422`. `AceStep_1_5_XL_Turbo_INT8` accepts **10-300**, `AceStep_1_5_XL_Base_INT8` **30-300**.",
                                         "type": "number",
                                         "example": 30
                                     },
                                     "inference_steps": {
-                                        "description": "Number of diffusion inference steps. The accepted range is **model-specific** - read `info.limits.min_steps` / `info.limits.max_steps` for your `model` from the [Model Selection](/api/v1/utilities/model-selection) endpoint; a value outside that range is rejected with `422`. The turbo models only accept **8**; `AceStep_1_5_Base` accepts **5-100**.",
+                                        "description": "Number of diffusion inference steps. The accepted range is **model-specific** - read `info.limits.min_steps` / `info.limits.max_steps` for your `model` from the [Model Selection](/api/v1/utilities/model-selection) endpoint; a value outside that range is rejected with `422`. `AceStep_1_5_XL_Turbo_INT8` only accepts **8**; `AceStep_1_5_XL_Base_INT8` accepts **5-100**.",
                                         "type": "integer",
                                         "example": 8
                                     }

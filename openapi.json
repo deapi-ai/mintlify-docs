@@ -5754,7 +5754,7 @@
                             "model": {
                                 "description": "The OCR model to use for text extraction. Available models can be retrieved via the GET /api/v2/models endpoint.",
                                 "type": "string",
-                                "example": "Nanonets_Ocr_S_F16"
+                                "example": "LightOnOcr_3_4B_Q8"
                             },
                             "language": {
                                 "description": "Language code for OCR processing (optional)",
@@ -5800,7 +5800,7 @@
                             "model": {
                                 "description": "The OCR model to use for text extraction. Available models can be retrieved via the GET /api/v2/models endpoint.",
                                 "type": "string",
-                                "example": "Nanonets_Ocr_S_F16"
+                                "example": "LightOnOcr_3_4B_Q8"
                             },
                             "language": {
                                 "description": "Language code for OCR processing (optional)",
@@ -6497,7 +6497,7 @@
                     "model": {
                         "description": "The model to use for music generation. Available models can be retrieved via the GET /api/v2/models endpoint.",
                         "type": "string",
-                        "example": "AceStep_1_5_Turbo"
+                        "example": "AceStep_1_5_XL_Turbo_INT8"
                     },
                     "duration": {
                         "description": "Duration in seconds (10-600). The accepted range is model-specific — read `info.limits.min_duration`/`max_duration` for your `model` from `GET /api/v2/models`. Some models additionally cap duration per output format via `info.limits.max_duration_by_format`.",
@@ -7006,7 +7006,7 @@
                     "model": {
                         "description": "The OCR model to use for text extraction",
                         "type": "string",
-                        "example": "Nanonets_Ocr_S_F16"
+                        "example": "LightOnOcr_3_4B_Q8"
                     },
                     "language": {
                         "description": "Language code for OCR processing (optional)",
@@ -7695,7 +7695,7 @@
                     "model": {
                         "description": "The model to use for music generation. Available models can be retrieved via the GET /api/v2/models endpoint.",
                         "type": "string",
-                        "example": "AceStep_1_5_Turbo"
+                        "example": "AceStep_1_5_XL_Turbo_INT8"
                     },
                     "lyrics": {
                         "description": "Lyrics for the music. Use \"[Instrumental]\" for instrumental tracks without vocals.",
@@ -7745,7 +7745,7 @@
                         "example": 8
                     },
                     "guidance_scale": {
-                        "description": "Classifier-free guidance scale. The accepted range is model-specific — read `info.limits.min_guidance` / `max_guidance` for your `model` from `GET /api/v2/models`. Several models pin it to a single value (AceStep_1_5_Turbo accepts only 1), so a value outside that range is rejected with 422.",
+                        "description": "Classifier-free guidance scale. The accepted range is model-specific — read `info.limits.min_guidance` / `max_guidance` for your `model` from `GET /api/v2/models`. Several models pin it to a single value (AceStep_1_5_XL_Turbo_INT8 accepts only 1), so a value outside that range is rejected with 422.",
                         "type": "number",
                         "example": 1
                     },
