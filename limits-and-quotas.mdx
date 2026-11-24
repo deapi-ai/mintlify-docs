@@ -102,14 +102,8 @@ Premium accounts use the model-specific RPM and RPD limits below (in effect sinc
 | `/api/v2/images/generations` | `ZImageTurbo_INT8` | 20 | 6,100 |
 | `/api/v2/images/generations` | `Flux_2_Klein_4B_BF16` | 37 | 13,320 |
 | `/api/v2/images/generations` | `ZAnimeDistill_8Step_INT8` | 5 | 1,800 |
-| `/api/v2/images/generations` | `gpt-image-1.5` | 20 | 500 |
-| `/api/v2/images/generations` | `gpt-image-2` | 20 | 500 |
-| `/api/v2/images/generations` | `nano-banana-2` | 20 | 500 |
 | `/api/v2/images/edits` | `Flux_2_Klein_4B_BF16` | 41 | 14,760 |
 | `/api/v2/images/edits` | `QwenImageEdit_Plus_NF4` | 2 | 720 |
-| `/api/v2/images/edits` | `gpt-image-1.5` | 20 | 500 |
-| `/api/v2/images/edits` | `gpt-image-2` | 20 | 500 |
-| `/api/v2/images/edits` | `gpt-image-2.5` | 20 | 500 |
 | `/api/v2/images/ocr` | `LightOnOcr_3_4B_Q8` | 5 | 1,800 |
 | `/api/v2/images/background-removals` | `Ben2` | 16 | 5,760 |
 | `/api/v2/images/upscales` | `RealESRGAN_x4` | 24 | 8,640 |
@@ -144,6 +138,30 @@ Premium accounts use the model-specific RPM and RPD limits below (in effect sinc
 </Info>
 
 Video-description processing time depends on the source duration and preset. Read the rate-limit response headers for the limits effective on your account.
+
+#### Partner Models
+
+Partner model limits may change.
+
+| Model | Endpoint | RPM | RPD |
+| --- | --- | --- | --- |
+| `gpt-image-1.5` | `/api/v2/images/generations` | 20 | 500 |
+| `gpt-image-1.5` | `/api/v2/images/edits` | 20 | 500 |
+| `gpt-image-2` | `/api/v2/images/generations` | 17 | 500 |
+| `gpt-image-2` | `/api/v2/images/edits` | 17 | 500 |
+| `gpt-image-2.5` | `/api/v2/images/generations` | 11 | 500 |
+| `gpt-image-2.5` | `/api/v2/images/edits` | 11 | 500 |
+| `gpt-image-2.6` | `/api/v2/images/generations` | 33 | 1,000 |
+| `gpt-image-2.6` | `/api/v2/images/edits` | 16 | 1,000 |
+| `nano-banana-2` | `/api/v2/images/generations` | 20 | 500 |
+| `nano-banana-2.1` | `/api/v2/images/generations` | 18 | 1,000 |
+| `nano-banana-2.1` | `/api/v2/images/edits` | 14 | 1,000 |
+| `seedance-2.5` | `/api/v2/videos/generations` | 1 | 300 |
+| `seedance-2.5` | `/api/v2/videos/animations` | 1 | 300 |
+| `kling-4` | `/api/v2/videos/generations` | 4 | 300 |
+| `kling-4` | `/api/v2/videos/animations` | 3 | 300 |
+| `veo-3.1` | `/api/v2/videos/generations` | 3 | 250 |
+| `veo-3.1-fast` | `/api/v2/videos/generations` | 3 | 250 |
 
 ---
 
