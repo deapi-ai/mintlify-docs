@@ -1321,13 +1321,13 @@ The header is withheld when the delay is something your client can sensibly wait
 **Successful responses carry the counters too**, so you can slow down before you hit the limit. A `200` from `/v1/embeddings` returns the full set:
 
 ```http
-X-RateLimit-Limit: 190
-X-RateLimit-Remaining: 189
+X-RateLimit-Limit: 65
+X-RateLimit-Remaining: 64
 X-RateLimit-Reset: 1795167858
-X-RateLimit-Daily-Limit: 55000
-X-RateLimit-Daily-Remaining: 54992
+X-RateLimit-Daily-Limit: 23400
+X-RateLimit-Daily-Remaining: 23392
 X-RateLimit-Daily-Reset: 1795179249
-X-RateLimit-Policy: 190;w=60, 55000;w=86400
+X-RateLimit-Policy: 65;w=60, 23400;w=86400
 X-RateLimit-Source: model
 ```
 
