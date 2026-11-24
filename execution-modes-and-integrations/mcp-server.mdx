@@ -474,6 +474,44 @@ To use deAPI MCP in Claude Code, open a terminal and add the server in one of th
 
 ---
 
+#### nanobot
+
+<Tabs>
+  <Tab title="WebUI">
+    Open **Apps → MCP**, click **Add MCP server** and choose **Custom**. Fill in the server:
+
+    | Field | Value |
+    | --- | --- |
+    | **Server name** | `deapi` |
+    | **Transport** | **HTTP** |
+    | **URL** | `https://mcp.deapi.ai/mcp?source=nanobot` |
+    | **Authentication** | **Headers** |
+    | **Headers (JSON)** | `{"Authorization": "Bearer YOUR_API_KEY"}` |
+
+    Under **Advanced options**, raise **Tool timeout (seconds)** from 30 to `300`, so image and video jobs can finish. Click **Save MCP server**.
+  </Tab>
+  <Tab title="config.json">
+    ```json
+    {
+      "tools": {
+        "mcpServers": {
+          "deapi": {
+            "type": "streamableHttp",
+            "url": "https://mcp.deapi.ai/mcp?source=nanobot",
+            "headers": { "Authorization": "Bearer YOUR_API_KEY" },
+            "toolTimeout": 300
+          }
+        }
+      }
+    }
+    ```
+  </Tab>
+</Tabs>
+
+Replace `YOUR_API_KEY` with your actual deAPI key. nanobot registers the deAPI tools with an `mcp_deapi_` prefix, e.g. `mcp_deapi_text_to_image`. If the key is wrong, nanobot logs `401 Unauthorized` for the server and starts without its tools.
+
+---
+
 #### Any other MCP client
 
 Use the server URL `https://mcp.deapi.ai/mcp` with the Streamable HTTP transport (sometimes just called "HTTP"). A client that supports OAuth needs no setup: it registers itself and opens the deAPI sign-in window, where you paste your key. Otherwise send your key as `Authorization: Bearer <key>` or `X-API-Key: <key>`. A client with fixed OAuth credentials can use Client ID `deapi-mcp` with your API key as Client Secret.
