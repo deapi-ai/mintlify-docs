@@ -1,0 +1,99 @@
+---
+title: "RisuAI"
+description: "Generate character images and give characters a voice in RisuAI with deAPI, through RisuAI's OpenAI Compatible image provider and OpenAI-compatible text-to-speech."
+---
+
+[RisuAI](https://github.com/kwaroran/RisuAI) is a chat app for roleplay and character chats, on the web at risuai.xyz and as a desktop app. Its image generation and text-to-speech settings accept any OpenAI-compatible API, so you can point them at deAPI without a plugin.
+
+Both features were checked by sending deAPI the exact requests that RisuAI builds (main branch, November 2026).
+
+---
+
+### Prerequisites
+
+- RisuAI on the web or the desktop app
+- A deAPI API key from the [deAPI Dashboard](https://app.deapi.ai/settings/api-keys). See [API Keys](/api-keys).
+
+---
+
+### Image generation
+
+1. Open **Settings → Other Bots → Image Generation**.
+2. Set **Image Generation Provider** to **OpenAI Compatible**.
+3. Fill in the fields:
+
+| Field | Value |
+| --- | --- |
+| **API URL** | `https://oai.deapi.ai/v1/images/generations` (the full endpoint, not just `/v1`) |
+| **API Key** | Your deAPI key, e.g. `sk-dp-1234-AbCdEf...` |
+| **Model** | `ZImageTurbo_INT8`. Required: without a model, deAPI answers `Field 'model' is required.` |
+| **Image Size** | `512x512` or `1024x1024` |
+| **Quality** | `Auto` |
+
+To try it, open **Playground → Image Generation**, type a prompt and click **Generate**. In testing, a `512x512` image from `ZImageTurbo_INT8` took about 11 seconds and a `1024x1024` one 30 to 55 seconds.
+
+To show pictures in a chat, open the character's settings, go to **Character Display → Additional Character Screen** and choose **Image Generation**. RisuAI then writes a prompt from the chat with your auxiliary model and sends it to deAPI.
+
+**Image Size** offers five sizes. Not every model takes all of them:
+
+| Model | Sizes that work in RisuAI |
+| --- | --- |
+| `ZImageTurbo_INT8` | `512x512`, `1024x1024` |
+| `Flux1schnell` | `512x512`, `1024x1024`, `1024x1536`, `1536x1024` |
+| `Flux_2_Klein_4B_BF16` | All five, including `256x256` |
+| `ZAnimeDistill_8Step_INT8` | `512x512`, `1024x1024` |
+
+**Quality** maps to a step preset for each model. `Auto` uses the model's default. The OpenAI Compatible provider does not send RisuAI's negative prompt.
+
+---
+
+### Text-to-speech
+
+Voice is set per character.
+
+1. Open the character's settings and go to the **TTS** tab (the speaker icon).
+2. Set **Provider** to **OpenAI**.
+3. Turn on **Advanced (OpenAI-compatible endpoint)**.
+4. Fill in the fields:
+
+| Field | Value |
+| --- | --- |
+| **Base URL** | `https://oai.deapi.ai/v1` |
+| **API Key (overrides global)** | Your deAPI key |
+| **Model** | `Kokoro` |
+| **Voice** | A Kokoro voice, typed in, e.g. `af_nova` |
+| **Response Format** | `mp3` |
+
+Leave **Response Format** on `mp3`. `Kokoro` returns MP3 only, and any other format answers `format_not_supported`. In testing, a short line took about 7 seconds.
+
+<Tip>
+  Kokoro voices are tied to one language, set by the voice prefix: `af_` and `am_` are American English, `bf_` and `bm_` British English. The OpenAI names `alloy`, `echo`, `fable`, `onyx`, `nova` and `shimmer` also work and map to English voices. The full list is in [Text-to-speech](/openai-compatibility#text-to-speech).
+</Tip>
+
+---
+
+### Web version and your key
+
+On risuai.xyz, RisuAI sends API requests through its own proxy server, so your deAPI key passes through that server. The desktop app calls deAPI directly. If you would rather keep the key off the proxy, use the desktop app.
+
+---
+
+### Troubleshooting
+
+| Symptom | Cause and fix |
+| --- | --- |
+| `Field 'model' is required.` | **Model** is empty. Enter a deAPI model name, e.g. `ZImageTurbo_INT8`. |
+| `size_not_supported` | The **Image Size** is not on the model's list. The error message lists the sizes the model accepts. |
+| `model_not_found` | Model names are case-sensitive and there are no OpenAI aliases. Use `ZImageTurbo_INT8`, not `dall-e-3`. |
+| `invalid_api_key` | The key is wrong or was revoked. Copy it again from the [dashboard](https://app.deapi.ai/settings/api-keys). |
+| The image request goes to the wrong place | **API URL** must be the full endpoint, ending in `/images/generations`. |
+| TTS `format_not_supported` | Set **Response Format** back to `mp3`. |
+| TTS `This voice is not supported.` | The voice is not a `Kokoro` voice. Check the spelling, e.g. `af_nova`. |
+
+---
+
+### Next steps
+
+<Card icon="plug" href="/openai-compatibility" title="OpenAI Compatibility">
+  Every endpoint, model and field the OpenAI-compatible API supports
+</Card>

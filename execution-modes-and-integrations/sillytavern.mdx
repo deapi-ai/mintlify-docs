@@ -1,0 +1,102 @@
+---
+title: "SillyTavern"
+description: "Generate images in SillyTavern chats with the deAPI Images extension, and give characters a voice with deAPI text-to-speech through the OpenAI Compatible provider."
+---
+
+[SillyTavern](https://github.com/SillyTavern/SillyTavern) is a self-hosted chat interface for roleplay and character chats. deAPI adds two things to it:
+
+- **Images:** the open-source [deAPI Images extension](https://github.com/deapi-ai/SillyTavern-deAPI) generates pictures in a chat. SillyTavern's built-in OpenAI image source always calls api.openai.com, so the extension is needed.
+- **Voice:** SillyTavern's **OpenAI Compatible** text-to-speech provider works with deAPI as it is. No extension is needed.
+
+Both were checked by sending deAPI the exact requests that the extension and SillyTavern's TTS provider send.
+
+---
+
+### Prerequisites
+
+- A SillyTavern install
+- A deAPI API key from the [deAPI Dashboard](https://app.deapi.ai/settings/api-keys). See [API Keys](/api-keys).
+
+---
+
+### Image generation
+
+1. In SillyTavern, open **Extensions → Install extension** and paste:
+
+   ```text
+   https://github.com/deapi-ai/SillyTavern-deAPI
+   ```
+
+2. Open **Extensions → deAPI Images**.
+3. Paste your deAPI key into **API key** and click **Test key**.
+4. Pick a **Model** and a **Size**. The defaults, `ZImageTurbo_INT8` at `512 × 512`, work out of the box.
+
+To make a picture, type the command in the chat box:
+
+```text
+/deapi-image a castle at dusk, oil painting
+```
+
+The image is posted to the chat. You can also open the wand menu and choose **deAPI image**, which asks for a prompt and fills in the last message. The command returns the image URL, so it also works in STscript.
+
+| Model | Sizes | Notes |
+| --- | --- | --- |
+| `ZImageTurbo_INT8` | `512 × 512`, `768 × 768`, `1024 × 1024` | Default. A `512 × 512` image took about 11 seconds in testing |
+| `Flux1schnell` | The square sizes, plus `1024 × 1536` and `1536 × 1024` | |
+| `Flux_2_Klein_4B_BF16` | The square sizes, plus `1024 × 1536` and `1536 × 1024` | |
+| `ZAnimeDistill_8Step_INT8` | `512 × 512`, `768 × 768`, `1024 × 1024` | Anime style |
+
+**Prompt prefix** is added before every prompt, which is handy for a fixed style such as `anime style, soft light`.
+
+---
+
+### Text-to-speech
+
+1. Open **Extensions → TTS** and set the provider to **OpenAI Compatible**.
+2. Set **Provider Endpoint** to:
+
+   ```text
+   https://oai.deapi.ai/v1/audio/speech
+   ```
+
+3. Set **Model** to `Kokoro`.
+4. Set **Available Voices** to the voices you want to assign, e.g. `af_nova,af_sky,am_onyx,bm_fable`.
+5. Click the key button next to the endpoint, paste your deAPI key and save.
+6. Assign a voice to each character in the voice map below.
+
+SillyTavern sends the request from its server and asks for MP3, which is the format `Kokoro` returns. In testing, a short line took 5 to 10 seconds.
+
+<Tip>
+  Kokoro voices are tied to one language, set by the voice prefix: `af_` and `am_` are American English, `bf_` and `bm_` British English. Pick voices that match the language of your chats. The OpenAI names `alloy`, `echo`, `fable`, `onyx`, `nova` and `shimmer` also work and map to English voices. The full list is in [Text-to-speech](/openai-compatibility#text-to-speech).
+</Tip>
+
+---
+
+### Privacy
+
+The extension stores your key in your SillyTavern settings and sends it only to `oai.deapi.ai`. Its requests carry an `X-Deapi-Source: sillytavern` header, so deAPI can count traffic from the extension. Nothing about you or your chats is added. Generated images are saved with SillyTavern's user images, like those from the built-in Image Generation extension.
+
+---
+
+### Troubleshooting
+
+| Symptom | Cause and fix |
+| --- | --- |
+| **Test key** fails | The key is wrong or was revoked. Copy it again from the [dashboard](https://app.deapi.ai/settings/api-keys). |
+| `Size "1024x1536" is not supported by ZImageTurbo_INT8` | Portrait and landscape sizes work only on `Flux1schnell` and `Flux_2_Klein_4B_BF16`. Pick a square size or switch the model. |
+| TTS error `format_not_supported` | Something changed the audio format. `Kokoro` returns MP3 only. |
+| TTS error `speed_out_of_range` | `Kokoro` accepts speeds from 0.5 to 2.0. Move the speed slider back into that range. |
+| TTS error `This voice is not supported.` | The voice name is not a `Kokoro` voice. Check the spelling, e.g. `af_nova`. |
+
+---
+
+### Next steps
+
+<CardGroup cols={2}>
+  <Card icon="github" href="https://github.com/deapi-ai/SillyTavern-deAPI" title="deAPI Images extension">
+    Source code and issues
+  </Card>
+  <Card icon="plug" href="/openai-compatibility" title="OpenAI Compatibility">
+    Every endpoint, model and field the OpenAI-compatible API supports
+  </Card>
+</CardGroup>

@@ -1,0 +1,106 @@
+---
+title: "Marinara Engine"
+description: "Use deAPI for images and text-to-speech in Marinara Engine, through an OpenAI-compatible address."
+---
+
+[Marinara Engine](https://github.com/Pasta-Devs/Marinara-Engine) is a self-hosted app for roleplay, conversations and story games. It can draw backgrounds, illustrations, character portraits and selfies, and read messages aloud. Both work with deAPI through an OpenAI-compatible address, with no plugin.
+
+The steps below were checked against Marinara Engine's source (main branch, November 2026) by sending deAPI the exact requests Marinara builds.
+
+---
+
+### Prerequisites
+
+- A Marinara Engine install
+- A deAPI API key from the [deAPI Dashboard](https://app.deapi.ai/settings/api-keys). See [API Keys](/api-keys).
+
+Marinara sends every request from the computer that runs it, and stores the key there.
+
+---
+
+### Image generation
+
+1. Open **Connections** and click **Add account**.
+2. Choose **OpenAI-compatible address**.
+3. Enter the address and key, then click **Connect**:
+
+| Field | Value |
+| --- | --- |
+| **Address** | `https://oai.deapi.ai/v1` |
+| **API key** | Your deAPI key, e.g. `sk-dp-1234-AbCdEf...` |
+
+4. On the models step, switch to **Image** and star `Flux_2_Klein_4B_BF16`.
+5. In **Connections → Jobs**, set **Images** to that model.
+
+Marinara adds `/images/generations` to the address itself.
+
+#### Which model
+
+Marinara asks for a different size for each kind of picture: `1280x720` for backgrounds and game scenes, `896x1280` for illustrations, `896x1152` for selfies and `1024x1024` for portraits.
+
+| Model | Sizes | Use in Marinara |
+| --- | --- | --- |
+| `Flux_2_Klein_4B_BF16` | Any size from 256 to 1536 px per side, in steps of 16 | Recommended. Takes every default size. In testing, each picture took 6 to 18 seconds |
+| `ZImageTurbo_INT8` | `512x512`, `768x768`, `1024x1024` | Only with a fixed square size, see below |
+| `Flux1schnell` | The square sizes, plus `1024x1536` and `1536x1024` | Only with a fixed size |
+| `ZAnimeDistill_8Step_INT8` | `512x512`, `768x768`, `1024x1024` | Anime style, only with a fixed square size |
+
+To use a model with a fixed list of sizes, open that image model's settings and put this in **Custom Parameters**:
+
+```json
+{"size": "1024x1024"}
+```
+
+Marinara adds custom parameters to every request after its own fields, so every picture is then generated at that size. Without it, a background request answers `size_not_supported`.
+
+---
+
+### Text-to-speech
+
+1. Open **Connections**, click **Add account** and choose **Text to speech**.
+2. Turn on **Use text to speech**.
+3. Fill in the fields:
+
+| Field | Value |
+| --- | --- |
+| **Source** | **OpenAI** |
+| **Base URL** | `https://oai.deapi.ai/v1` |
+| **API key** | Your deAPI key |
+| **Model** | `Kokoro` |
+| **Voice** | **One voice for all**, then a Kokoro voice in **Shared voice**, typed in as a custom voice, e.g. `af_nova` |
+| **Audio format** | **MP3** |
+
+To give characters different voices, choose **Selected per character** instead and assign a voice to each one.
+
+deAPI does not list voices at `/audio/voices`, so Marinara shows OpenAI's voice names. All nine of them (`alloy`, `ash`, `coral`, `echo`, `fable`, `nova`, `onyx`, `sage`, `shimmer`) work on `Kokoro`. To use another voice, type its name, e.g. `af_bella` or `bm_george`. In testing, a short line took 5 to 10 seconds.
+
+<Warning>
+  Kokoro voice mixes such as `af_bella(0.5)+af_sarah(0.5)`, which Marinara suggests in the voice field, are not supported. deAPI answers `This voice is not supported.` Use one voice per character.
+</Warning>
+
+Keep **Audio format** on MP3: `Kokoro` returns MP3 only. Marinara's speed slider goes from 0.25 to 4, but `Kokoro` accepts 0.5 to 2.0 and answers `speed_out_of_range` outside it.
+
+<Tip>
+  Kokoro voices are tied to one language, set by the voice prefix: `af_` and `am_` are American English, `bf_` and `bm_` British English. The full list is in [Text-to-speech](/openai-compatibility#text-to-speech).
+</Tip>
+
+---
+
+### Troubleshooting
+
+| Symptom | Cause and fix |
+| --- | --- |
+| `size_not_supported` | The model does not take the size Marinara asked for. Switch to `Flux_2_Klein_4B_BF16`, or set a fixed size in **Custom Parameters**. |
+| `model_not_found` | Model names are case-sensitive and there are no OpenAI aliases. Use `Flux_2_Klein_4B_BF16`, not `dall-e-3`. |
+| The key is not accepted | Copy it again from the [dashboard](https://app.deapi.ai/settings/api-keys). deAPI answers `invalid_api_key` to a wrong or revoked key. |
+| TTS `This voice is not supported.` | The voice is not a `Kokoro` voice, or it is a voice mix. Use one voice name, e.g. `af_nova`. |
+| TTS `format_not_supported` | Set **Audio format** back to MP3. |
+| TTS `speed_out_of_range` | Move the speed slider back between 0.5 and 2.0. |
+
+---
+
+### Next steps
+
+<Card icon="plug" href="/openai-compatibility" title="OpenAI Compatibility">
+  Every endpoint, model and field the OpenAI-compatible API supports
+</Card>
